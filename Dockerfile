@@ -12,10 +12,10 @@ RUN npm ci
 
 FROM base AS dev
 ENV NODE_ENV=development
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# Không COPY node_modules vào image
+# Để docker-compose volume mount vào sau
 EXPOSE 3000
-CMD ["npm","run","dev","--","-H","0.0.0.0","-p","3000"]
+CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0", "-p", "3000"]
 
 FROM base AS prod
 ENV NODE_ENV=production
