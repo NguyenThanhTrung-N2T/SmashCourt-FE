@@ -3,6 +3,8 @@ type AuthSessionKeys = {
   tempToken: string;
   resetToken: string;
   accessToken: string;
+  registerFlashMessage: string;
+  postVerifyLoginHint: string;
 };
 
 const KEYS: AuthSessionKeys = {
@@ -10,6 +12,8 @@ const KEYS: AuthSessionKeys = {
   tempToken: "auth.tempToken",
   resetToken: "auth.resetToken",
   accessToken: "auth.accessToken",
+  registerFlashMessage: "auth.registerFlashMessage",
+  postVerifyLoginHint: "auth.postVerifyLoginHint",
 };
 
 function ensureBrowser() {
@@ -84,10 +88,34 @@ export function clearAccessToken() {
   removeItem(KEYS.accessToken);
 }
 
+/** Thông báo từ API sau đăng ký (OTP đã gửi) — hiển thị ở bước verify-email rồi xóa. */
+export function setRegisterFlashMessage(message: string) {
+  setItem(KEYS.registerFlashMessage, message);
+}
+
+export function consumeRegisterFlashMessage(): string | null {
+  const v = getItem(KEYS.registerFlashMessage);
+  if (v) removeItem(KEYS.registerFlashMessage);
+  return v;
+}
+
+/** Sau xác thực email thành công — hiển thị gợi ý ngắn ở trang đăng nhập (consume một lần). */
+export function setPostVerifyLoginHint(message: string) {
+  setItem(KEYS.postVerifyLoginHint, message);
+}
+
+export function consumePostVerifyLoginHint(): string | null {
+  const v = getItem(KEYS.postVerifyLoginHint);
+  if (v) removeItem(KEYS.postVerifyLoginHint);
+  return v;
+}
+
 export function clearAuthSession() {
   // Xóa tất cả các key trong một chỗ để dễ dàng xóa.
   clearEmail();
   clearTempToken();
   clearResetToken();
   clearAccessToken();
+  removeItem(KEYS.registerFlashMessage);
+  removeItem(KEYS.postVerifyLoginHint);
 }

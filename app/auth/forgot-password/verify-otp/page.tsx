@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { KeyRound } from "lucide-react";
 
 import {
   authForgotPasswordVerifyOtp,
@@ -12,40 +13,57 @@ import {
 import CountdownButton from "@/src/auth/components/CountdownButton";
 import OtpInput from "@/src/auth/components/OtpInput";
 import { OtpType } from "@/src/auth/constants";
-import { normalizeOtp, isValidOtp } from "@/src/auth/validators";
 import { getEmail, setResetToken } from "@/src/auth/session/sessionStore";
+import {
+  AUTH_GENERIC,
+  formatEmailShort,
+  logAuthClientError,
+} from "@/src/auth/utils/clientErrors";
+import { normalizeOtp, isValidOtp } from "@/src/auth/validators";
 
 export default function VerifyOtpPage() {
   const router = useRouter();
 
-  // Email và OTP code
   const [email, setEmailState] = useState<string | null>(null);
   const [otpCode, setOtpCode] = useState("");
 
-  // Trạng thái loading và error
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [resendError, setResendError] = useState<string | null>(null);
+  const [resendSuccess, setResendSuccess] = useState<string | null>(null);
+  const resendSuccessClearRef = useRef<number | null>(null);
+  const [entered, setEntered] = useState(false);
 
-  // Lấy email từ session
   useEffect(() => {
     try {
       setEmailState(getEmail() ?? null);
     } catch {
       setEmailState(null);
     }
+    const t = requestAnimationFrame(() => setEntered(true));
+    return () => {
+      cancelAnimationFrame(t);
+      if (resendSuccessClearRef.current)
+        clearTimeout(resendSuccessClearRef.current);
+    };
   }, []);
 
-  // Xác thực OTP
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!email) return;
     setSubmitError(null);
+    setResendSuccess(null);
+    if (resendSuccessClearRef.current) {
+      clearTimeout(resendSuccessClearRef.current);
+      resendSuccessClearRef.current = null;
+    }
 
     const normalized = normalizeOtp(otpCode);
     setOtpCode(normalized);
-    if (!isValidOtp(normalized))
-      return setSubmitError("Mã OTP phải có 6 chữ số.");
+    if (!isValidOtp(normalized)) {
+      setSubmitError("Vui lòng nhập đủ 6 chữ số.");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -60,39 +78,53 @@ export default function VerifyOtpPage() {
         return;
       }
 
-      setSubmitError(data.message ?? "Xác thực OTP thất bại.");
+      logAuthClientError("forgot-verify-otp-no-token", data);
+      setSubmitError(AUTH_GENERIC.verifyFailed);
     } catch (err) {
-      setSubmitError(
-        err instanceof Error ? err.message : "Xác thực OTP thất bại.",
-      );
+      logAuthClientError("forgot-verify-otp", err);
+      setSubmitError(AUTH_GENERIC.verifyFailed);
     } finally {
       setLoading(false);
     }
   }
 
-  // Gửi lại OTP
   async function onResend() {
     if (!email) return;
     setResendError(null);
+    setResendSuccess(null);
+    if (resendSuccessClearRef.current) {
+      clearTimeout(resendSuccessClearRef.current);
+      resendSuccessClearRef.current = null;
+    }
     try {
       await authResendOtp({ email, type: OtpType.FORGOT_PASSWORD });
+      setResendSuccess(AUTH_GENERIC.resendOtpSuccess);
+      resendSuccessClearRef.current = window.setTimeout(() => {
+        setResendSuccess(null);
+        resendSuccessClearRef.current = null;
+      }, 8000);
     } catch (err) {
-      setResendError(
-        err instanceof Error ? err.message : "Gửi lại mã thất bại.",
-      );
+      logAuthClientError("resend-forgot-otp", err);
+      setResendError(AUTH_GENERIC.resendFailed);
+      throw err;
     }
   }
 
   if (!email) {
     return (
-      <section>
-        <h2 className="text-2xl font-semibold">Xác thực OTP</h2>
-        <p className="mt-2 text-sm opacity-80">
-          Không tìm thấy email trong phiên. Vui lòng bắt đầu lại.
+      <section className="mx-auto max-w-md text-center">
+        <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+          Mã xác thực
+        </h2>
+        <p className="mt-3 text-base font-medium text-slate-600">
+          {AUTH_GENERIC.sessionInvalid}
         </p>
         <div className="mt-4">
-          <Link className="font-medium underline" href="/auth/forgot-password">
-            Đến trang Quên mật khẩu
+          <Link
+            href="/auth/forgot-password"
+            className="cursor-pointer font-bold text-emerald-600 underline-offset-2 hover:underline"
+          >
+            Quên mật khẩu
           </Link>
         </div>
       </section>
@@ -100,52 +132,100 @@ export default function VerifyOtpPage() {
   }
 
   return (
-    <section>
-      <h2 className="text-2xl font-semibold">Xác thực OTP</h2>
-      <p className="mt-2 text-sm opacity-80">
-        Nhập mã OTP 6 chữ số để đặt lại mật khẩu của bạn.
+    <section
+      className={`mx-auto max-w-md transition-all duration-500 ease-out motion-reduce:transition-none ${
+        entered
+          ? "translate-y-0 opacity-100"
+          : "translate-y-2 opacity-0 motion-reduce:translate-y-0"
+      }`}
+    >
+      <header className={`text-center ${entered ? "auth-animate-fade-up" : ""}`}>
+        <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+          Mã xác thực
+        </h2>
+      </header>
+
+      <div
+        className={`mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 ${entered ? "auth-animate-fade-up-delay" : ""}`}
+      >
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200/80">
+          <KeyRound className="h-5 w-5 text-emerald-600" aria-hidden />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Gửi tới
+          </p>
+          <p
+            className="truncate font-mono text-sm font-semibold text-slate-800"
+            title={email}
+          >
+            {formatEmailShort(email)}
+          </p>
+        </div>
+      </div>
+
+      <p
+        className={`mt-3 text-center text-sm font-medium text-slate-600 ${entered ? "auth-animate-fade-up-delay" : ""}`}
+      >
+        Nhập 6 chữ số trong email.
       </p>
 
-      <form className="mt-6 flex max-w-xl flex-col gap-4" onSubmit={onSubmit}>
-        <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium">Mã OTP</span>
+      <form className="mt-8 flex flex-col gap-6" onSubmit={onSubmit}>
+        <div
+          className={`flex justify-center ${entered ? "auth-animate-fade-up-delay-2" : ""}`}
+        >
           <OtpInput value={otpCode} onChange={setOtpCode} autoFocus />
         </div>
 
         {submitError ? (
-          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-800">
             {submitError}
           </div>
         ) : null}
 
         {resendError ? (
-          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-800">
             {resendError}
           </div>
         ) : null}
 
-        <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={loading}
-            className="h-10 flex-1 rounded-md bg-zinc-900 px-4 text-sm font-medium text-white disabled:opacity-60"
+        {resendSuccess ? (
+          <div
+            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-900"
+            role="status"
+            aria-live="polite"
           >
-            {loading ? "Đang xác thực..." : "Xác thực"}
-          </button>
+            {resendSuccess}
+          </div>
+        ) : null}
 
+        <button
+          type="submit"
+          disabled={loading}
+          className="h-12 w-full cursor-pointer rounded-xl bg-slate-900 text-sm font-bold text-white shadow-md transition-all duration-200 ease-out hover:bg-slate-800 hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:active:scale-100"
+        >
+          {loading ? "Đang xử lý..." : "Xác thực"}
+        </button>
+
+        <div className="flex flex-col items-center gap-3 border-t border-slate-200 pt-6">
           <CountdownButton
             onResend={onResend}
             seconds={60}
-            label="Gửi lại OTP"
+            initialCooldownSeconds={60}
+            label="Gửi lại mã"
+            resendLabel="Gửi lại sau"
+            variant="outline"
           />
         </div>
 
-        <div className="text-sm opacity-80">
-          Quay lại{" "}
-          <Link className="font-medium underline" href="/auth/forgot-password">
+        <p className="text-center text-sm font-medium text-slate-600">
+          <Link
+            href="/auth/forgot-password"
+            className="cursor-pointer font-bold text-emerald-600 underline-offset-2 hover:underline"
+          >
             Quên mật khẩu
           </Link>
-        </div>
+        </p>
       </form>
     </section>
   );

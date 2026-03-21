@@ -1,20 +1,41 @@
 type ApiErrorPayload = {
   message?: string;
+  detail?: string;
+  title?: string;
+  error?: string;
 };
+
+const GENERIC_CLIENT_ERROR_MESSAGE = "Yeu cau khong hop le. Vui long thu lai.";
+const GENERIC_SERVER_ERROR_MESSAGE =
+  "Da xay ra loi he thong, vui long thu lai sau.";
+
+export class AuthApiError extends Error {
+  status: number;
+  payload: ApiErrorPayload | null;
+
+  constructor(
+    message: string,
+    options: { status: number; payload: ApiErrorPayload | null },
+  ) {
+    super(message);
+    this.name = "AuthApiError";
+    this.status = options.status;
+    this.payload = options.payload;
+  }
+}
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 function assertApiBaseUrl() {
   if (!API_BASE_URL) {
     throw new Error(
-      "Missing NEXT_PUBLIC_API_BASE_URL. Vui lòng đặt nó trong môi trường của bạn.",
+      "Missing NEXT_PUBLIC_API_BASE_URL. Vui long dat no trong moi truong cua ban.",
     );
   }
 }
 
 function toUrl(path: string) {
   assertApiBaseUrl();
-  // Đảm bảo chúng ta không kết thúc với double slashes.
   const base = API_BASE_URL!.replace(/\/$/, "");
   const p = path.startsWith("/") ? path : `/${path}`;
   return `${base}${p}`;
@@ -22,10 +43,67 @@ function toUrl(path: string) {
 
 async function parseJsonSafe<T>(res: Response): Promise<T | null> {
   try {
-    return (await res.json()) as T;
+    return (await res.clone().json()) as T;
   } catch {
     return null;
   }
+}
+
+async function parseTextSafe(res: Response): Promise<string | null> {
+  try {
+    const text = (await res.clone().text()).trim();
+    return text || null;
+  } catch {
+    return null;
+  }
+}
+
+function isHtmlLike(text: string) {
+  const normalized = text.trim().toLowerCase();
+  return normalized.startsWith("<!doctype") || normalized.startsWith("<html");
+}
+
+async function parseErrorPayload<T extends ApiErrorPayload>(
+  res: Response,
+): Promise<T | null> {
+  const jsonPayload = await parseJsonSafe<T>(res);
+  if (jsonPayload) return jsonPayload;
+
+  const textPayload = await parseTextSafe(res);
+  if (!textPayload || isHtmlLike(textPayload)) {
+    return null;
+  }
+
+  return { message: textPayload } as T;
+}
+
+function extractErrorMessage(payload: ApiErrorPayload | null) {
+  if (!payload) return null;
+
+  const candidates = [
+    payload.message,
+    payload.detail,
+    payload.error,
+    payload.title,
+  ];
+
+  for (const candidate of candidates) {
+    const trimmed = candidate?.trim();
+    if (trimmed) return trimmed;
+  }
+
+  return null;
+}
+
+function resolveAuthErrorMessage(
+  status: number,
+  payload: ApiErrorPayload | null,
+) {
+  if (status >= 500) {
+    return GENERIC_SERVER_ERROR_MESSAGE;
+  }
+
+  return extractErrorMessage(payload) ?? GENERIC_CLIENT_ERROR_MESSAGE;
 }
 
 async function authFetch<T>(
@@ -52,20 +130,18 @@ async function authFetch<T>(
     credentials: "include",
   });
 
-  const payload = await parseJsonSafe<ApiErrorPayload & T>(res);
+  const payload = await parseErrorPayload<ApiErrorPayload & T>(res);
 
   if (!res.ok) {
-    const message =
-      payload && typeof payload === "object" && "message" in payload
-        ? (payload as ApiErrorPayload).message
-        : undefined;
-    throw new Error(message || `Yêu cầu thất bại với trạng thái ${res.status}`);
+    throw new AuthApiError(
+      resolveAuthErrorMessage(res.status, payload),
+      { status: res.status, payload },
+    );
   }
 
   return payload as T;
 }
 
-// Auth endpoints
 export type AuthRegisterBody = {
   email: string;
   password: string;
@@ -75,12 +151,12 @@ export type AuthRegisterBody = {
 
 export type AuthVerifyEmailBody = {
   email: string;
-  otpCode: string; // 6 chữ số
+  otpCode: string;
 };
 
 export type AuthResendOtpBody = {
   email: string;
-  type: number; // mapping số (xem constants.ts)
+  type: number;
 };
 
 export type AuthLoginBody = {

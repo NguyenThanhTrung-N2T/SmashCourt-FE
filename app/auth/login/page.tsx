@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
-import { Mail, Lock, LogIn } from "lucide-react";
+import { CheckCircle2, Mail, Lock, LogIn } from "lucide-react";
 
 import { authLogin } from "@/src/auth/api/authApi";
 import { getRedirectPathByRole } from "@/src/auth/constants";
 import {
+  consumePostVerifyLoginHint,
+  getEmail,
   setAccessToken,
   setEmail,
   setTempToken,
@@ -22,11 +24,20 @@ export default function LoginPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [verifyHint, setVerifyHint] = useState<string | null>(null);
 
   // Entrance animation state
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
+    try {
+      const hint = consumePostVerifyLoginHint();
+      if (hint) setVerifyHint(hint);
+      const saved = getEmail();
+      if (saved) setEmailState(saved);
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   async function onSubmit(e: FormEvent) {
@@ -74,6 +85,20 @@ export default function LoginPage() {
           Mừng bạn trở lại hệ thống quản lý SmashCourt!
         </p>
       </div>
+
+      {verifyHint ? (
+        <div
+          className="mb-6 flex gap-3 rounded-xl border-2 border-emerald-400 bg-emerald-50 p-4 text-left shadow-md shadow-emerald-500/10"
+          role="status"
+        >
+          <CheckCircle2
+            className="h-6 w-6 shrink-0 text-emerald-600"
+            strokeWidth={2.25}
+            aria-hidden
+          />
+          <p className="text-sm font-bold text-emerald-950">{verifyHint}</p>
+        </div>
+      ) : null}
 
       {error ? (
         <div className="mb-6 rounded-xl border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-800 font-bold shadow-sm">
