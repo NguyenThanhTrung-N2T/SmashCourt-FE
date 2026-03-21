@@ -4,23 +4,28 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { createPortal } from "react-dom";
-import { CheckCircle2, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 
 import {
   AuthApiError,
   authResendOtp,
   authVerifyEmail,
 } from "@/src/auth/api/authApi";
+import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
 import CountdownButton from "@/src/auth/components/CountdownButton";
 import OtpInput from "@/src/auth/components/OtpInput";
 import { OtpType } from "@/src/auth/constants";
 import {
   clearAuthSession,
+  clearRegisterVerifySession,
   consumeRegisterFlashMessage,
   getEmail,
+  getRegisterVerifySession,
   setEmail,
   setPostVerifyLoginHint,
+  setRegisterVerifySession,
+  startRegisterVerifySession,
+  type RegisterVerifySession,
 } from "@/src/auth/session/sessionStore";
 import {
   AUTH_GENERIC,
@@ -31,7 +36,9 @@ import { isValidOtp, normalizeOtp } from "@/src/auth/validators";
 
 const REDIRECT_MS = 2000;
 const RESET_REDIRECT_MS = 3500;
+const SUCCESS_MESSAGE_CLEAR_MS = 8000;
 const MAX_VERIFY_ATTEMPTS = 3;
+const MAX_RESEND_ATTEMPTS = 3;
 const VERIFY_SESSION_RESET_PATTERNS = [
   "otp da bi khoa",
   "otp khong hop le",
@@ -39,6 +46,11 @@ const VERIFY_SESSION_RESET_PATTERNS = [
   "yeu cau ma moi",
   "email da duoc xac thuc truoc do",
   "tai khoan khong ton tai",
+  "xac thuc that bai",
+  "dang ky lai",
+  "da gui otp qua so lan cho phep",
+  "da het luot gui lai otp",
+  "het luot gui lai",
 ] as const;
 const VERIFY_SESSION_RESET_STATUS_PATTERNS = [
   "lock",
@@ -72,41 +84,79 @@ function shouldResetVerifySession(status?: string, message?: string) {
 
 export default function VerifyEmailPage() {
   const router = useRouter();
+  const verifySessionRef = useRef<RegisterVerifySession | null>(null);
 
   const [email, setEmailState] = useState<string | null>(null);
   const [otpCode, setOtpCode] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [resendError, setResendError] = useState<string | null>(null);
   const [resendSuccess, setResendSuccess] = useState<string | null>(null);
-  const resendSuccessClearRef = useRef<number | null>(null);
-  const resetRedirectRef = useRef<number | null>(null);
-  const failedVerifyAttemptsRef = useRef(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [entered, setEntered] = useState(false);
   const [verified, setVerified] = useState(false);
   const [resettingSession, setResettingSession] = useState(false);
-  const [portalReady, setPortalReady] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [resendCount, setResendCount] = useState(0);
 
-  useEffect(() => {
-    try {
-      const storedEmail = getEmail();
-      setEmailState(storedEmail ?? null);
-      if (storedEmail) setEmail(storedEmail);
-      consumeRegisterFlashMessage();
-    } catch {
-      setEmailState(null);
+  const resendSuccessClearRef = useRef<number | null>(null);
+  const resetRedirectRef = useRef<number | null>(null);
+  const successRedirectRef = useRef<number | null>(null);
+
+  function clearResendSuccessLater() {
+    if (resendSuccessClearRef.current) {
+      clearTimeout(resendSuccessClearRef.current);
     }
-    setPortalReady(true);
-    const t = requestAnimationFrame(() => setEntered(true));
-    return () => {
-      cancelAnimationFrame(t);
-      setPortalReady(false);
-    };
-  }, []);
+    resendSuccessClearRef.current = window.setTimeout(() => {
+      setResendSuccess(null);
+      resendSuccessClearRef.current = null;
+    }, SUCCESS_MESSAGE_CLEAR_MS);
+  }
+
+  function syncVerifySession(nextSession: RegisterVerifySession | null) {
+    verifySessionRef.current = nextSession;
+
+    if (!nextSession) {
+      setFailedAttempts(0);
+      setResendCount(0);
+      clearRegisterVerifySession();
+      return;
+    }
+
+    setFailedAttempts(nextSession.failedAttempts);
+    setResendCount(nextSession.resendCount);
+    setRegisterVerifySession(nextSession);
+  }
+
+  function ensureVerifySession(currentEmail: string) {
+    const normalizedEmail = currentEmail.trim().toLowerCase();
+    const currentSession = verifySessionRef.current;
+
+    if (currentSession?.email === normalizedEmail) {
+      return currentSession;
+    }
+
+    const storedSession = getRegisterVerifySession();
+    if (storedSession?.email === normalizedEmail) {
+      syncVerifySession(storedSession);
+      return storedSession;
+    }
+
+    const freshSession = startRegisterVerifySession(normalizedEmail);
+    syncVerifySession(freshSession);
+    return freshSession;
+  }
+
+  function updateVerifySession(
+    updater: (session: RegisterVerifySession) => RegisterVerifySession,
+  ) {
+    if (!email) return null;
+    const nextSession = updater(ensureVerifySession(email));
+    syncVerifySession(nextSession);
+    return nextSession;
+  }
 
   function clearVerifySessionAndRestart(message?: string) {
-    failedVerifyAttemptsRef.current = 0;
+    syncVerifySession(null);
     clearAuthSession();
     setResettingSession(true);
     setOtpCode("");
@@ -116,6 +166,7 @@ export default function VerifyEmailPage() {
     );
     setResendError(null);
     setResendSuccess(null);
+
     if (resetRedirectRef.current) {
       clearTimeout(resetRedirectRef.current);
     }
@@ -125,10 +176,46 @@ export default function VerifyEmailPage() {
     }, RESET_REDIRECT_MS);
   }
 
+  useEffect(() => {
+    try {
+      const storedEmail = getEmail()?.trim().toLowerCase() ?? null;
+      setEmailState(storedEmail);
+
+      if (storedEmail) {
+        setEmail(storedEmail);
+
+        const storedSession = getRegisterVerifySession();
+        if (storedSession?.email === storedEmail) {
+          verifySessionRef.current = storedSession;
+          setFailedAttempts(storedSession.failedAttempts);
+          setResendCount(storedSession.resendCount);
+        } else {
+          const freshSession = startRegisterVerifySession(storedEmail);
+          verifySessionRef.current = freshSession;
+          setFailedAttempts(freshSession.failedAttempts);
+          setResendCount(freshSession.resendCount);
+        }
+      }
+
+      const flashMessage = consumeRegisterFlashMessage();
+      if (flashMessage) {
+        setResendSuccess(flashMessage);
+        clearResendSuccessLater();
+      }
+    } catch {
+      setEmailState(null);
+    }
+
+    const frameId = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!email || resettingSession) return;
+
     setSubmitError(null);
+    setResendError(null);
     setResendSuccess(null);
     if (resendSuccessClearRef.current) {
       clearTimeout(resendSuccessClearRef.current);
@@ -138,7 +225,8 @@ export default function VerifyEmailPage() {
     const normalized = normalizeOtp(otpCode);
     setOtpCode(normalized);
     if (!isValidOtp(normalized)) {
-      return setSubmitError("Vui lòng nhập đủ 6 chữ số.");
+      setSubmitError("Vui lòng nhập đủ 6 chữ số.");
+      return;
     }
 
     try {
@@ -146,12 +234,17 @@ export default function VerifyEmailPage() {
       const data = await authVerifyEmail({ email, otpCode: normalized });
 
       if (data.status && normalizeText(data.status) !== "success") {
-        failedVerifyAttemptsRef.current += 1;
+        const nextSession = updateVerifySession((currentSession) => ({
+          ...currentSession,
+          failedAttempts: currentSession.failedAttempts + 1,
+        }));
+
         logAuthClientError("verify-email-unexpected-status", data);
 
         if (
           shouldResetVerifySession(data.status, data.message) ||
-          failedVerifyAttemptsRef.current >= MAX_VERIFY_ATTEMPTS
+          (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
+            MAX_VERIFY_ATTEMPTS
         ) {
           clearVerifySessionAndRestart(
             data.message ??
@@ -164,24 +257,33 @@ export default function VerifyEmailPage() {
         return;
       }
 
-      setPostVerifyLoginHint(
-        "Email đã xác thực thành công. Bạn có thể đăng nhập.",
-      );
-      failedVerifyAttemptsRef.current = 0;
+      clearRegisterVerifySession();
+      verifySessionRef.current = null;
+      setFailedAttempts(0);
+      setResendCount(0);
+      setPostVerifyLoginHint("Email đã xác thực thành công. Bạn có thể đăng nhập.");
       setVerified(true);
-      window.setTimeout(() => {
+
+      if (successRedirectRef.current) {
+        clearTimeout(successRedirectRef.current);
+      }
+      successRedirectRef.current = window.setTimeout(() => {
         router.push("/auth/login");
       }, REDIRECT_MS);
     } catch (err) {
       logAuthClientError("verify-email", err);
 
       if (err instanceof AuthApiError) {
-        failedVerifyAttemptsRef.current += 1;
+        const nextSession = updateVerifySession((currentSession) => ({
+          ...currentSession,
+          failedAttempts: currentSession.failedAttempts + 1,
+        }));
 
         if (
           err.status === 404 ||
           shouldResetVerifySession(undefined, err.message) ||
-          failedVerifyAttemptsRef.current >= MAX_VERIFY_ATTEMPTS
+          (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
+            MAX_VERIFY_ATTEMPTS
         ) {
           clearVerifySessionAndRestart(
             err.message ||
@@ -202,23 +304,54 @@ export default function VerifyEmailPage() {
 
   async function onResend() {
     if (!email || resettingSession) return;
+
+    setSubmitError(null);
     setResendError(null);
     setResendSuccess(null);
     if (resendSuccessClearRef.current) {
       clearTimeout(resendSuccessClearRef.current);
       resendSuccessClearRef.current = null;
     }
+
+    const currentSession = ensureVerifySession(email);
+    if (currentSession.resendCount >= MAX_RESEND_ATTEMPTS) {
+      setResendError("Bạn đã dùng hết 3 lượt gửi lại OTP.");
+      throw new Error("resend-limit-reached");
+    }
+
     try {
       await authResendOtp({ email, type: OtpType.EMAIL_VERIFY });
-      failedVerifyAttemptsRef.current = 0;
-      setResendSuccess(AUTH_GENERIC.resendOtpSuccess);
-      resendSuccessClearRef.current = window.setTimeout(() => {
-        setResendSuccess(null);
-        resendSuccessClearRef.current = null;
-      }, 8000);
+      const nextSession = updateVerifySession((storedSession) => ({
+        ...storedSession,
+        failedAttempts: 0,
+        resendCount: storedSession.resendCount + 1,
+      }));
+
+      const remainingResends = Math.max(
+        0,
+        MAX_RESEND_ATTEMPTS - (nextSession?.resendCount ?? MAX_RESEND_ATTEMPTS),
+      );
+      const successMessage =
+        remainingResends > 0
+          ? `OTP đã được gửi lại, hiệu lực 5 phút. Còn ${remainingResends} lần gửi lại.`
+          : "OTP đã được gửi lại, hiệu lực 5 phút. Đây là lần gửi lại cuối cùng.";
+
+      setResendSuccess(successMessage);
+      clearResendSuccessLater();
     } catch (err) {
       logAuthClientError("resend-email-verify", err);
-      setResendError(AUTH_GENERIC.resendFailed);
+
+      if (err instanceof AuthApiError) {
+        if (shouldResetVerifySession(undefined, err.message)) {
+          clearVerifySessionAndRestart(err.message);
+          throw err;
+        }
+
+        setResendError(err.message || AUTH_GENERIC.resendFailed);
+        throw err;
+      }
+
+      setResendError((currentError) => currentError ?? AUTH_GENERIC.resendFailed);
       throw err;
     }
   }
@@ -230,6 +363,9 @@ export default function VerifyEmailPage() {
       }
       if (resetRedirectRef.current) {
         clearTimeout(resetRedirectRef.current);
+      }
+      if (successRedirectRef.current) {
+        clearTimeout(successRedirectRef.current);
       }
     };
   }, []);
@@ -258,6 +394,13 @@ export default function VerifyEmailPage() {
       </section>
     );
   }
+
+  const remainingVerifyAttempts = Math.max(
+    0,
+    MAX_VERIFY_ATTEMPTS - failedAttempts,
+  );
+  const remainingResends = Math.max(0, MAX_RESEND_ATTEMPTS - resendCount);
+  const resendLimitReached = remainingResends === 0;
 
   return (
     <section
@@ -324,6 +467,12 @@ export default function VerifyEmailPage() {
           />
         </div>
 
+        {failedAttempts > 0 && remainingVerifyAttempts > 0 ? (
+          <p className="text-center text-sm font-semibold text-red-600">
+            Bạn còn {remainingVerifyAttempts} lần nhập với mã hiện tại.
+          </p>
+        ) : null}
+
         {submitError ? (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-800">
             {submitError}
@@ -338,7 +487,7 @@ export default function VerifyEmailPage() {
 
         {resendSuccess ? (
           <div
-            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-900"
+            className="overflow-x-auto whitespace-nowrap rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-[13px] font-semibold text-emerald-900"
             role="status"
             aria-live="polite"
           >
@@ -359,62 +508,44 @@ export default function VerifyEmailPage() {
             onResend={onResend}
             seconds={60}
             initialCooldownSeconds={60}
-            label="Gửi lại mã"
+            label={resendLimitReached ? "Đã hết lượt gửi lại" : "Gửi lại mã"}
             resendLabel="Gửi lại sau"
             variant="outline"
-            disabled={verified || resettingSession}
+            className="min-h-9 border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-500 shadow-none hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+            disabled={verified || resettingSession || resendLimitReached}
           />
+          {remainingResends === 1 ? (
+            <p className="text-sm font-semibold text-amber-600">
+              Chỉ còn 1 lượt gửi lại OTP cuối cùng.
+            </p>
+          ) : null}
+          {resendLimitReached ? (
+            <p className="text-sm font-semibold text-red-600">
+              Bạn đã dùng hết 3 lượt gửi lại OTP.
+            </p>
+          ) : null}
         </div>
 
-        <p className="text-center text-sm font-medium text-slate-600">
+        <p className="pt-1 text-center text-sm font-medium text-slate-600">
           <Link
             href="/auth/login"
-            className="cursor-pointer font-bold text-emerald-600 underline-offset-2 transition-colors hover:text-emerald-700 hover:underline"
+            className="inline-flex min-h-14 items-center justify-center rounded-xl px-6 text-lg font-extrabold text-emerald-600 underline-offset-2 transition-colors hover:bg-emerald-50 hover:text-emerald-700 hover:underline"
           >
             Đăng nhập
           </Link>
         </p>
       </form>
 
-      {portalReady && (resettingSession || verified)
-        ? createPortal(
-            <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-center px-4 pt-5">
-              <div
-                className={`auth-animate-scale-in w-full max-w-sm rounded-2xl border bg-white/95 px-5 py-4 text-center shadow-xl backdrop-blur ${
-                  verified
-                    ? "border-emerald-200 shadow-emerald-500/10 ring-1 ring-emerald-100"
-                    : "border-red-200 shadow-red-500/10 ring-1 ring-red-100"
-                }`}
-                role="status"
-                aria-live="assertive"
-              >
-                <div
-                  className={`mx-auto flex h-11 w-11 items-center justify-center rounded-full ${
-                    verified
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  <CheckCircle2
-                    className="h-6 w-6"
-                    strokeWidth={2.25}
-                    aria-hidden
-                  />
-                </div>
-                <p
-                  className={`mt-3 text-sm font-semibold ${
-                    verified ? "text-emerald-700" : "text-red-700"
-                  }`}
-                >
-                  {verified
-                    ? "Đang chuyển đến trang đăng nhập..."
-                    : "Đang quay lại trang đăng ký..."}
-                </p>
-              </div>
-            </div>,
-            document.body,
-          )
-        : null}
+      <AuthStatusToast
+        visible={verified}
+        tone="success"
+        message="Đang chuyển đến trang đăng nhập..."
+      />
+      <AuthStatusToast
+        visible={resettingSession}
+        tone="danger"
+        message="Đang quay lại trang đăng ký..."
+      />
     </section>
   );
 }

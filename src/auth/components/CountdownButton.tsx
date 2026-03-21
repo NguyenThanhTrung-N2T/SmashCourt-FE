@@ -7,10 +7,8 @@ type Props = {
   disabled?: boolean;
   label?: string;
   resendLabel?: string;
+  className?: string;
   variant?: "solid" | "outline";
-  /**
-   * Đếm ngược ngay khi hiển thị — nút chỉ bật sau N giây (OTP vừa được gửi).
-   */
   initialCooldownSeconds?: number;
   onResend: () => void | Promise<void>;
 };
@@ -20,6 +18,7 @@ export default function CountdownButton({
   disabled,
   label = "Gửi lại OTP",
   resendLabel,
+  className,
   variant = "solid",
   initialCooldownSeconds = 0,
   onResend,
@@ -31,60 +30,56 @@ export default function CountdownButton({
   const isCooldown = remaining > 0;
   const buttonLabel = useMemo(() => {
     if (!isCooldown) return label;
-    const r = Math.max(0, remaining);
-    return `${resendLabel ?? "Chờ"} ${r}s`;
+    const safeRemaining = Math.max(0, remaining);
+    return `${resendLabel ?? "Chờ"} ${safeRemaining}s`;
   }, [isCooldown, label, remaining, resendLabel]);
 
   useEffect(() => {
     if (!isCooldown) return;
 
-    const id = window.setInterval(() => {
+    const timerId = window.setInterval(() => {
       setRemaining((prev) => {
         if (prev <= 1) return 0;
         return prev - 1;
       });
     }, 1000);
 
-    return () => window.clearInterval(id);
+    return () => window.clearInterval(timerId);
   }, [isCooldown]);
 
   async function handleClick() {
     if (disabled || isCooldown) return;
+
     try {
       await onResend();
       setRemaining(seconds);
     } catch {
-      // Không bật cooldown nếu gửi lại thất bại
+      // Keep the button available if resend failed.
     }
   }
 
-  const base =
+  const baseClassName =
     "min-h-10 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 ease-out motion-reduce:transition-none active:scale-[0.98] motion-reduce:active:scale-100 disabled:cursor-not-allowed";
-  const solid =
+  const solidClassName =
     "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white";
-  const outlineIdle =
-    "cursor-pointer border-2 border-slate-400 bg-white font-bold text-slate-900 shadow-sm " +
-    "hover:border-emerald-600 hover:bg-emerald-100 hover:text-emerald-950 hover:shadow-md " +
-    "dark:border-slate-500 dark:bg-slate-900 dark:text-slate-100 " +
-    "dark:hover:border-emerald-500 dark:hover:bg-emerald-950/50 dark:hover:text-emerald-100";
-  const outlineWait =
-    "cursor-not-allowed border-2 border-slate-200 bg-slate-50 text-slate-500 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-400";
+  const outlineIdleClassName =
+    "cursor-pointer border-2 border-slate-300 bg-white text-slate-600 shadow-sm hover:border-slate-400 hover:bg-slate-50 hover:text-slate-800";
+  const outlineDisabledClassName =
+    "cursor-not-allowed border-2 border-slate-200 bg-slate-50 text-slate-400";
 
-  const outlineClass =
+  const variantClassName =
     variant === "outline"
       ? isCooldown || disabled
-        ? outlineWait
-        : outlineIdle
-      : "";
-
-  const solidClass = variant === "solid" ? solid : "";
+        ? outlineDisabledClassName
+        : outlineIdleClassName
+      : solidClassName;
 
   return (
     <button
       type="button"
       disabled={disabled || isCooldown}
       onClick={handleClick}
-      className={`${base} ${variant === "outline" ? outlineClass : solidClass}`}
+      className={`${baseClassName} ${variantClassName} ${className ?? ""}`}
     >
       {buttonLabel}
     </button>

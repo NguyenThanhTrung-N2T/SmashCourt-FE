@@ -13,7 +13,7 @@ import { getRedirectPathByRole, OtpType } from "@/src/auth/constants";
 import {
   getEmail,
   getTempToken,
-  setAccessToken,
+  setAuthenticatedSession,
 } from "@/src/auth/session/sessionStore";
 import {
   AUTH_GENERIC,
@@ -103,7 +103,12 @@ export default function TwoFactorPage() {
       const data = await authLogin2fa({ tempToken, otpCode: normalized });
 
       if (data.status === "Success") {
-        if (data.accessToken) setAccessToken(data.accessToken);
+        if (data.accessToken && data.user) {
+          setAuthenticatedSession({
+            accessToken: data.accessToken,
+            user: data.user,
+          });
+        }
         const role = data.user?.role as string | undefined;
         router.push(getRedirectPathByRole(role));
         return;

@@ -11,6 +11,7 @@ import { isValidPassword } from "@/src/auth/validators";
 import {
   setEmail,
   setRegisterFlashMessage,
+  startRegisterVerifySession,
 } from "@/src/auth/session/sessionStore";
 
 export default function RegisterPage() {
@@ -59,6 +60,7 @@ export default function RegisterPage() {
         setRegisterFlashMessage(res.message);
       }
       setEmail(trimmedEmail);
+      startRegisterVerifySession(trimmedEmail);
       router.push("/auth/verify-email");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Đăng ký thất bại.");

@@ -3,8 +3,26 @@ type AuthSessionKeys = {
   tempToken: string;
   resetToken: string;
   accessToken: string;
+  authUser: string;
+  registerVerifyState: string;
   registerFlashMessage: string;
   postVerifyLoginHint: string;
+};
+
+export type AuthUserSession = {
+  id: string;
+  fullName: string;
+  email: string;
+  phone?: string | null;
+  avatarUrl?: string | null;
+  role: string;
+  status: string;
+};
+
+export type RegisterVerifySession = {
+  email: string;
+  failedAttempts: number;
+  resendCount: number;
 };
 
 const KEYS: AuthSessionKeys = {
@@ -12,6 +30,8 @@ const KEYS: AuthSessionKeys = {
   tempToken: "auth.tempToken",
   resetToken: "auth.resetToken",
   accessToken: "auth.accessToken",
+  authUser: "auth.user",
+  registerVerifyState: "auth.registerVerifyState",
   registerFlashMessage: "auth.registerFlashMessage",
   postVerifyLoginHint: "auth.postVerifyLoginHint",
 };
@@ -88,34 +108,92 @@ export function clearAccessToken() {
   removeItem(KEYS.accessToken);
 }
 
-/** Thông báo từ API sau đăng ký (OTP đã gửi) — hiển thị ở bước verify-email rồi xóa. */
+export function setAuthUser(user: AuthUserSession) {
+  setItem(KEYS.authUser, JSON.stringify(user));
+}
+
+export function getAuthUser(): AuthUserSession | null {
+  const raw = getItem(KEYS.authUser);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as AuthUserSession;
+  } catch {
+    removeItem(KEYS.authUser);
+    return null;
+  }
+}
+
+export function clearAuthUser() {
+  removeItem(KEYS.authUser);
+}
+
+export function setAuthenticatedSession(input: {
+  accessToken: string;
+  user: AuthUserSession;
+}) {
+  setAccessToken(input.accessToken);
+  setAuthUser(input.user);
+  setEmail(input.user.email);
+}
+
+export function setRegisterVerifySession(session: RegisterVerifySession) {
+  setItem(KEYS.registerVerifyState, JSON.stringify(session));
+}
+
+export function getRegisterVerifySession(): RegisterVerifySession | null {
+  const raw = getItem(KEYS.registerVerifyState);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as RegisterVerifySession;
+  } catch {
+    removeItem(KEYS.registerVerifyState);
+    return null;
+  }
+}
+
+export function startRegisterVerifySession(email: string) {
+  const session: RegisterVerifySession = {
+    email: email.trim().toLowerCase(),
+    failedAttempts: 0,
+    resendCount: 0,
+  };
+  setRegisterVerifySession(session);
+  return session;
+}
+
+export function clearRegisterVerifySession() {
+  removeItem(KEYS.registerVerifyState);
+}
+
 export function setRegisterFlashMessage(message: string) {
   setItem(KEYS.registerFlashMessage, message);
 }
 
 export function consumeRegisterFlashMessage(): string | null {
-  const v = getItem(KEYS.registerFlashMessage);
-  if (v) removeItem(KEYS.registerFlashMessage);
-  return v;
+  const value = getItem(KEYS.registerFlashMessage);
+  if (value) removeItem(KEYS.registerFlashMessage);
+  return value;
 }
 
-/** Sau xác thực email thành công — hiển thị gợi ý ngắn ở trang đăng nhập (consume một lần). */
 export function setPostVerifyLoginHint(message: string) {
   setItem(KEYS.postVerifyLoginHint, message);
 }
 
 export function consumePostVerifyLoginHint(): string | null {
-  const v = getItem(KEYS.postVerifyLoginHint);
-  if (v) removeItem(KEYS.postVerifyLoginHint);
-  return v;
+  const value = getItem(KEYS.postVerifyLoginHint);
+  if (value) removeItem(KEYS.postVerifyLoginHint);
+  return value;
 }
 
 export function clearAuthSession() {
-  // Xóa tất cả các key trong một chỗ để dễ dàng xóa.
   clearEmail();
   clearTempToken();
   clearResetToken();
   clearAccessToken();
+  clearAuthUser();
+  clearRegisterVerifySession();
   removeItem(KEYS.registerFlashMessage);
   removeItem(KEYS.postVerifyLoginHint);
 }

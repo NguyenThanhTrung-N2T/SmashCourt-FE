@@ -1,3 +1,9 @@
+import {
+  clearAuthSession,
+  getAccessToken,
+  setAccessToken,
+} from "@/src/auth/session/sessionStore";
+
 type ApiErrorPayload = {
   message?: string;
   detail?: string;
@@ -109,24 +115,22 @@ function resolveAuthErrorMessage(
 async function authFetch<T>(
   path: string,
   options: {
-    method: "GET" | "POST";
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     body?: unknown;
+    headers?: HeadersInit;
   },
 ): Promise<T> {
   const url = toUrl(path);
+  const headers = new Headers(options.headers);
+
+  if (options.method !== "GET" && options.body !== undefined) {
+    headers.set("Content-Type", "application/json");
+  }
 
   const res = await fetch(url, {
     method: options.method,
-    headers:
-      options.method === "POST"
-        ? {
-            "Content-Type": "application/json",
-          }
-        : undefined,
-    body:
-      options.method === "POST" && options.body !== undefined
-        ? JSON.stringify(options.body)
-        : undefined,
+    headers,
+    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
     credentials: "include",
   });
 
@@ -140,6 +144,60 @@ async function authFetch<T>(
   }
 
   return payload as T;
+}
+
+function buildExpiredSessionError() {
+  return new AuthApiError("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.", {
+    status: 401,
+    payload: null,
+  });
+}
+
+export async function authProtectedFetch<T>(
+  path: string,
+  options: {
+    method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+    body?: unknown;
+    headers?: HeadersInit;
+  } = {},
+) {
+  const currentAccessToken = getAccessToken();
+  if (!currentAccessToken) {
+    throw buildExpiredSessionError();
+  }
+
+  const request = (accessToken: string) =>
+    authFetch<T>(path, {
+      method: options.method ?? "GET",
+      body: options.body,
+      headers: (() => {
+        const headers = new Headers(options.headers);
+        headers.set("Authorization", `Bearer ${accessToken}`);
+        return headers;
+      })(),
+    });
+
+  try {
+    return await request(currentAccessToken);
+  } catch (err) {
+    if (!(err instanceof AuthApiError) || err.status !== 401) {
+      throw err;
+    }
+
+    try {
+      const refreshData = await authRefresh();
+      setAccessToken(refreshData.accessToken);
+      return await request(refreshData.accessToken);
+    } catch (refreshErr) {
+      clearAuthSession();
+
+      if (refreshErr instanceof AuthApiError) {
+        throw refreshErr;
+      }
+
+      throw buildExpiredSessionError();
+    }
+  }
 }
 
 export type AuthRegisterBody = {
@@ -162,6 +220,16 @@ export type AuthResendOtpBody = {
 export type AuthLoginBody = {
   email: string;
   password: string;
+};
+
+export type AuthUserInfo = {
+  id: string;
+  fullName: string;
+  email: string;
+  phone?: string | null;
+  avatarUrl?: string | null;
+  role: string;
+  status: string;
 };
 
 export type AuthLogin2faBody = {
@@ -210,7 +278,7 @@ export async function authLogin(body: AuthLoginBody) {
     status: string;
     tempToken?: string;
     accessToken?: string;
-    user?: { role: string; [k: string]: unknown };
+    user?: AuthUserInfo;
     message?: string;
   }>(`/api/auth/login`, { method: "POST", body });
 }
@@ -219,9 +287,21 @@ export async function authLogin2fa(body: AuthLogin2faBody) {
   return authFetch<{
     status: string;
     accessToken?: string;
-    user?: { role: string; [k: string]: unknown };
+    user?: AuthUserInfo;
     message?: string;
   }>(`/api/auth/login/2fa`, { method: "POST", body });
+}
+
+export async function authRefresh() {
+  return authFetch<{ accessToken: string }>(`/api/auth/refresh`, {
+    method: "POST",
+  });
+}
+
+export async function authLogout() {
+  return authFetch<{ message?: string }>(`/api/auth/logout`, {
+    method: "POST",
+  });
 }
 
 export async function authForgotPassword(body: AuthForgotPasswordBody) {
@@ -264,7 +344,7 @@ export async function authGoogleCallback(body: AuthGoogleCallbackBody) {
   return authFetch<{
     status: string;
     accessToken?: string;
-    user?: { role: string; [k: string]: unknown };
+    user?: AuthUserInfo;
     message?: string;
   }>(`/api/auth/google/callback`, { method: "POST", body });
 }
