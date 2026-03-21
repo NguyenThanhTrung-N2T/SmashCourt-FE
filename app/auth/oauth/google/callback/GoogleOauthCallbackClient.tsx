@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -89,8 +89,9 @@ export default function GoogleOauthCallbackClient() {
       <AuthStatusToast
         visible={redirecting}
         tone="success"
-        message="Đăng nhập thành công. Đang chuyển hướng..."
+        message="Đăng nhập thành công"
       />
     </section>
   );
 }
+

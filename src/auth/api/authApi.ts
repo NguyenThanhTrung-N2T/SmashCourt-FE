@@ -15,6 +15,8 @@ const GENERIC_CLIENT_ERROR_MESSAGE = "Yeu cau khong hop le. Vui long thu lai.";
 const GENERIC_SERVER_ERROR_MESSAGE =
   "Da xay ra loi he thong, vui long thu lai sau.";
 
+let refreshPromise: Promise<string> | null = null;
+
 export class AuthApiError extends Error {
   status: number;
   payload: ApiErrorPayload | null;
@@ -147,10 +149,29 @@ async function authFetch<T>(
 }
 
 function buildExpiredSessionError() {
-  return new AuthApiError("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.", {
+  return new AuthApiError("Phien dang nhap da het han, vui long dang nhap lai.", {
     status: 401,
     payload: null,
   });
+}
+
+async function refreshAccessToken() {
+  if (!refreshPromise) {
+    refreshPromise = authRefresh()
+      .then((data) => {
+        setAccessToken(data.accessToken);
+        return data.accessToken;
+      })
+      .catch((err) => {
+        clearAuthSession();
+        throw err;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
 }
 
 export async function authProtectedFetch<T>(
@@ -161,11 +182,6 @@ export async function authProtectedFetch<T>(
     headers?: HeadersInit;
   } = {},
 ) {
-  const currentAccessToken = getAccessToken();
-  if (!currentAccessToken) {
-    throw buildExpiredSessionError();
-  }
-
   const request = (accessToken: string) =>
     authFetch<T>(path, {
       method: options.method ?? "GET",
@@ -177,6 +193,19 @@ export async function authProtectedFetch<T>(
       })(),
     });
 
+  let currentAccessToken = getAccessToken();
+
+  if (!currentAccessToken) {
+    try {
+      currentAccessToken = await refreshAccessToken();
+    } catch (err) {
+      if (err instanceof AuthApiError) {
+        throw err;
+      }
+      throw buildExpiredSessionError();
+    }
+  }
+
   try {
     return await request(currentAccessToken);
   } catch (err) {
@@ -185,12 +214,9 @@ export async function authProtectedFetch<T>(
     }
 
     try {
-      const refreshData = await authRefresh();
-      setAccessToken(refreshData.accessToken);
-      return await request(refreshData.accessToken);
+      const refreshedAccessToken = await refreshAccessToken();
+      return await request(refreshedAccessToken);
     } catch (refreshErr) {
-      clearAuthSession();
-
       if (refreshErr instanceof AuthApiError) {
         throw refreshErr;
       }

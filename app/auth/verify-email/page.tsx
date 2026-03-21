@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -261,6 +261,9 @@ export default function VerifyEmailPage() {
       verifySessionRef.current = null;
       setFailedAttempts(0);
       setResendCount(0);
+      setSubmitError(null);
+      setResendError(null);
+      setResendSuccess(null);
       setPostVerifyLoginHint("Email đã xác thực thành công. Bạn có thể đăng nhập.");
       setVerified(true);
 
@@ -539,13 +542,15 @@ export default function VerifyEmailPage() {
       <AuthStatusToast
         visible={verified}
         tone="success"
-        message="Đang chuyển đến trang đăng nhập..."
+        message="Xác thực email thành công"
       />
       <AuthStatusToast
         visible={resettingSession}
         tone="danger"
-        message="Đang quay lại trang đăng ký..."
+        message="Phiên xác thực đã hết hiệu lực"
       />
     </section>
   );
 }
+
+

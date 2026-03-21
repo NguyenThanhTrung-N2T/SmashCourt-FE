@@ -19,32 +19,39 @@ export default function AuthStatusToast({
   const isSuccess = tone === "success";
 
   return createPortal(
-    <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-center px-4 pt-5">
+    <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-center px-4 pt-5 sm:pt-6">
       <div
-        className={`auth-animate-scale-in w-full max-w-sm rounded-2xl border bg-white/95 px-5 py-4 text-center shadow-xl backdrop-blur ${
+        className={`auth-animate-scale-in w-full max-w-lg rounded-3xl border bg-white/98 px-6 py-5 text-center shadow-2xl backdrop-blur ${
           isSuccess
-            ? "border-emerald-200 shadow-emerald-500/10 ring-1 ring-emerald-100"
-            : "border-red-200 shadow-red-500/10 ring-1 ring-red-100"
+            ? "border-emerald-200 shadow-emerald-500/15 ring-1 ring-emerald-100"
+            : "border-red-200 shadow-red-500/15 ring-1 ring-red-100"
         }`}
         role="status"
         aria-live="assertive"
       >
         <div
-          className={`mx-auto flex h-11 w-11 items-center justify-center rounded-full ${
+          className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${
             isSuccess
               ? "bg-emerald-100 text-emerald-700"
               : "bg-red-100 text-red-700"
           }`}
         >
           {isSuccess ? (
-            <CheckCircle2 className="h-6 w-6" strokeWidth={2.25} aria-hidden />
+            <CheckCircle2 className="h-7 w-7" strokeWidth={2.3} aria-hidden />
           ) : (
-            <AlertTriangle className="h-6 w-6" strokeWidth={2.25} aria-hidden />
+            <AlertTriangle className="h-7 w-7" strokeWidth={2.3} aria-hidden />
           )}
         </div>
         <p
-          className={`mt-3 text-sm font-semibold ${
-            isSuccess ? "text-emerald-700" : "text-red-700"
+          className={`mt-3 text-xs font-extrabold tracking-[0.22em] ${
+            isSuccess ? "text-emerald-600" : "text-red-600"
+          }`}
+        >
+          {isSuccess ? "Thông báo thành công" : "Thông báo hệ thống"}
+        </p>
+        <p
+          className={`mt-2 text-base font-extrabold leading-6 sm:text-lg ${
+            isSuccess ? "text-emerald-800" : "text-red-800"
           }`}
         >
           {message}

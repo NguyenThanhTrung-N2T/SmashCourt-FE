@@ -2,10 +2,13 @@ type AuthSessionKeys = {
   email: string;
   tempToken: string;
   resetToken: string;
-  accessToken: string;
   authUser: string;
+  persistedAuthUser: string;
+  authSyncEvent: string;
   registerVerifyState: string;
+  twoFactorVerifyState: string;
   registerFlashMessage: string;
+  forgotPasswordFlashMessage: string;
   postVerifyLoginHint: string;
 };
 
@@ -25,23 +28,38 @@ export type RegisterVerifySession = {
   resendCount: number;
 };
 
+export type TwoFactorVerifySession = {
+  email: string;
+  tempToken: string;
+  failedAttempts: number;
+  resendCount: number;
+  startedAt: number;
+};
+
 const KEYS: AuthSessionKeys = {
   email: "auth.email",
   tempToken: "auth.tempToken",
   resetToken: "auth.resetToken",
-  accessToken: "auth.accessToken",
   authUser: "auth.user",
+  persistedAuthUser: "auth.persistedUser",
+  authSyncEvent: "auth.syncEvent",
   registerVerifyState: "auth.registerVerifyState",
+  twoFactorVerifyState: "auth.twoFactorVerifyState",
   registerFlashMessage: "auth.registerFlashMessage",
+  forgotPasswordFlashMessage: "auth.forgotPasswordFlashMessage",
   postVerifyLoginHint: "auth.postVerifyLoginHint",
 };
+
+export const AUTH_SYNC_EVENT_KEY = KEYS.authSyncEvent;
+
+let accessTokenMemory: string | null = null;
 
 function ensureBrowser() {
   if (typeof window === "undefined") {
     throw new Error("sessionStore can only be used in the browser.");
   }
-  if (!window.sessionStorage) {
-    throw new Error("sessionStorage is not available in this environment.");
+  if (!window.sessionStorage || !window.localStorage) {
+    throw new Error("Browser storage is not available in this environment.");
   }
 }
 
@@ -50,14 +68,29 @@ function getItem(key: string) {
   return window.sessionStorage.getItem(key);
 }
 
+function getPersistentItem(key: string) {
+  ensureBrowser();
+  return window.localStorage.getItem(key);
+}
+
 function setItem(key: string, value: string) {
   ensureBrowser();
   window.sessionStorage.setItem(key, value);
 }
 
+function setPersistentItem(key: string, value: string) {
+  ensureBrowser();
+  window.localStorage.setItem(key, value);
+}
+
 function removeItem(key: string) {
   ensureBrowser();
   window.sessionStorage.removeItem(key);
+}
+
+function removePersistentItem(key: string) {
+  ensureBrowser();
+  window.localStorage.removeItem(key);
 }
 
 export function setEmail(email: string) {
@@ -96,36 +129,42 @@ export function clearResetToken() {
   removeItem(KEYS.resetToken);
 }
 
-export function setAccessToken(accessToken: string) {
-  setItem(KEYS.accessToken, accessToken);
+export function setAccessToken(accessToken: string | null) {
+  accessTokenMemory = accessToken;
 }
 
 export function getAccessToken() {
-  return getItem(KEYS.accessToken);
+  return accessTokenMemory;
 }
 
 export function clearAccessToken() {
-  removeItem(KEYS.accessToken);
+  accessTokenMemory = null;
 }
 
 export function setAuthUser(user: AuthUserSession) {
-  setItem(KEYS.authUser, JSON.stringify(user));
+  const serialized = JSON.stringify(user);
+  setItem(KEYS.authUser, serialized);
+  setPersistentItem(KEYS.persistedAuthUser, serialized);
 }
 
 export function getAuthUser(): AuthUserSession | null {
-  const raw = getItem(KEYS.authUser);
+  const raw = getItem(KEYS.authUser) ?? getPersistentItem(KEYS.persistedAuthUser);
   if (!raw) return null;
 
   try {
-    return JSON.parse(raw) as AuthUserSession;
+    const parsed = JSON.parse(raw) as AuthUserSession;
+    setItem(KEYS.authUser, raw);
+    return parsed;
   } catch {
     removeItem(KEYS.authUser);
+    removePersistentItem(KEYS.persistedAuthUser);
     return null;
   }
 }
 
 export function clearAuthUser() {
   removeItem(KEYS.authUser);
+  removePersistentItem(KEYS.persistedAuthUser);
 }
 
 export function setAuthenticatedSession(input: {
@@ -167,6 +206,38 @@ export function clearRegisterVerifySession() {
   removeItem(KEYS.registerVerifyState);
 }
 
+export function setTwoFactorVerifySession(session: TwoFactorVerifySession) {
+  setItem(KEYS.twoFactorVerifyState, JSON.stringify(session));
+}
+
+export function getTwoFactorVerifySession(): TwoFactorVerifySession | null {
+  const raw = getItem(KEYS.twoFactorVerifyState);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as TwoFactorVerifySession;
+  } catch {
+    removeItem(KEYS.twoFactorVerifyState);
+    return null;
+  }
+}
+
+export function startTwoFactorVerifySession(email: string, tempToken: string) {
+  const session: TwoFactorVerifySession = {
+    email: email.trim().toLowerCase(),
+    tempToken,
+    failedAttempts: 0,
+    resendCount: 0,
+    startedAt: Date.now(),
+  };
+  setTwoFactorVerifySession(session);
+  return session;
+}
+
+export function clearTwoFactorVerifySession() {
+  removeItem(KEYS.twoFactorVerifyState);
+}
+
 export function setRegisterFlashMessage(message: string) {
   setItem(KEYS.registerFlashMessage, message);
 }
@@ -174,6 +245,16 @@ export function setRegisterFlashMessage(message: string) {
 export function consumeRegisterFlashMessage(): string | null {
   const value = getItem(KEYS.registerFlashMessage);
   if (value) removeItem(KEYS.registerFlashMessage);
+  return value;
+}
+
+export function setForgotPasswordFlashMessage(message: string) {
+  setItem(KEYS.forgotPasswordFlashMessage, message);
+}
+
+export function consumeForgotPasswordFlashMessage(): string | null {
+  const value = getItem(KEYS.forgotPasswordFlashMessage);
+  if (value) removeItem(KEYS.forgotPasswordFlashMessage);
   return value;
 }
 
@@ -187,6 +268,14 @@ export function consumePostVerifyLoginHint(): string | null {
   return value;
 }
 
+export function broadcastLogoutSync() {
+  ensureBrowser();
+  window.localStorage.setItem(
+    KEYS.authSyncEvent,
+    JSON.stringify({ type: "logout", at: Date.now() }),
+  );
+}
+
 export function clearAuthSession() {
   clearEmail();
   clearTempToken();
@@ -194,6 +283,8 @@ export function clearAuthSession() {
   clearAccessToken();
   clearAuthUser();
   clearRegisterVerifySession();
+  clearTwoFactorVerifySession();
   removeItem(KEYS.registerFlashMessage);
+  removeItem(KEYS.forgotPasswordFlashMessage);
   removeItem(KEYS.postVerifyLoginHint);
 }

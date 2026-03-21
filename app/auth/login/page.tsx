@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,7 @@ import {
   setEmail,
   setAuthenticatedSession,
   setTempToken,
+  startTwoFactorVerifySession,
 } from "@/src/auth/session/sessionStore";
 
 const REDIRECT_MS = 2000;
@@ -91,6 +92,7 @@ export default function LoginPage() {
         }
         setEmail(trimmedEmail);
         setTempToken(data.tempToken);
+        startTwoFactorVerifySession(trimmedEmail, data.tempToken);
         router.push("/auth/2fa");
         return;
       }
@@ -165,7 +167,9 @@ export default function LoginPage() {
       ) : null}
 
       {error ? (
-        <div className="mb-6 rounded-xl border-l-4 border-red-500 bg-red-50 p-4 text-sm font-bold text-red-800 shadow-sm">
+        <div
+          className="mb-6 overflow-x-auto whitespace-nowrap rounded-xl border-l-4 border-red-500 bg-red-50 p-4 text-sm font-bold text-red-800 shadow-sm"
+        >
           {error}
         </div>
       ) : null}
@@ -257,11 +261,11 @@ export default function LoginPage() {
           </span>
         </button>
 
-        <p className="mt-8 text-center text-sm font-medium text-slate-600">
+        <p className="mt-8 text-center text-base font-medium text-slate-600">
           Chưa có tài khoản nội bộ?{" "}
           <Link
             href="/auth/register"
-            className="font-bold text-emerald-600 transition-colors hover:text-emerald-500 hover:underline"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl px-4 text-lg font-extrabold text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-500 hover:underline"
           >
             Đăng ký ngay
           </Link>
@@ -276,3 +280,4 @@ export default function LoginPage() {
     </section>
   );
 }
+

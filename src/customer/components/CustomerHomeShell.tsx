@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+﻿/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -18,6 +18,7 @@ import {
 import { authLogout, authRefresh } from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
 import {
+  broadcastLogoutSync,
   clearAuthSession,
   setAccessToken,
   type AuthUserSession,
@@ -110,6 +111,7 @@ export default function CustomerHomeShell({
       return;
     }
 
+    broadcastLogoutSync();
     clearAuthSession();
     setRedirecting(true);
     window.setTimeout(() => {
@@ -329,11 +331,12 @@ export default function CustomerHomeShell({
       <AuthStatusToast
         visible={redirecting}
         tone="success"
-        message="Đăng xuất thành công. Đang quay lại trang đăng nhập..."
+        message="Đăng xuất thành công"
       />
     </div>
   );
 }
+
 
 
 
