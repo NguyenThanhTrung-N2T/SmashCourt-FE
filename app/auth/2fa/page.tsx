@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { Shield } from "lucide-react";
+import { AlertCircle, Shield } from "lucide-react";
 
 import { AuthApiError, authLogin2fa } from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
@@ -44,20 +44,27 @@ const TWO_FACTOR_RESET_PATTERNS = [
 ] as const;
 
 const TEXT = {
-  pageTitle: "\u0058\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0032 \u0062\u01b0\u1edb\u0063",
-  codeTitle: "\u004d\u00e3 \u0078\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0032 \u0062\u01b0\u1edb\u0063",
+  pageTitle:
+    "\u0058\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0032 \u0062\u01b0\u1edb\u0063",
+  codeTitle:
+    "\u004d\u00e3 \u0078\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0032 \u0062\u01b0\u1edb\u0063",
   sentTo: "\u0047\u1eedi \u0074\u1edbi",
-  prompt: "\u004e\u0068\u1ead\u0070 \u0036 \u0063\u0068\u1eef \u0073\u1ed1 \u0074\u0072\u006f\u006e\u0067 \u0065\u006d\u0061\u0069\u006c \u0111\u1ec3 \u0068\u006f\u00e0\u006e \u0074\u1ea5\u0074 \u0111\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070\u002e",
+  prompt:
+    "\u004e\u0068\u1ead\u0070 \u0036 \u0063\u0068\u1eef \u0073\u1ed1 \u0074\u0072\u006f\u006e\u0067 \u0065\u006d\u0061\u0069\u006c \u0111\u1ec3 \u0068\u006f\u00e0\u006e \u0074\u1ea5\u0074 \u0111\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070\u002e",
   loginLabel: "\u0110\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070",
   submitLabel: "\u0058\u00e1\u0063 \u0074\u0068\u1ef1\u0063",
-  loadingLabel: "\u0110\u0061\u006e\u0067 \u0078\u1eed \u006c\u00fd\u002e\u002e\u002e",
-  successToast: "\u0110\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070 \u0074\u0068\u00e0\u006e\u0068 \u0063\u00f4\u006e\u0067",
-  resetToast: "\u0050\u0068\u0069\u00ea\u006e \u0078\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0111\u00e3 \u0068\u1ebf\u0074 \u0068\u0069\u1ec7\u0075 \u006c\u1ef1\u0063",
+  loadingLabel:
+    "\u0110\u0061\u006e\u0067 \u0078\u1eed \u006c\u00fd\u002e\u002e\u002e",
+  successToast:
+    "\u0110\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070 \u0074\u0068\u00e0\u006e\u0068 \u0063\u00f4\u006e\u0067",
+  resetToast:
+    "\u0050\u0068\u0069\u00ea\u006e \u0078\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0111\u00e3 \u0068\u1ebf\u0074 \u0068\u0069\u1ec7\u0075 \u006c\u1ef1\u0063",
   sessionExpired:
     "\u0050\u0068\u0069\u00ea\u006e \u0078\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0032 \u0062\u01b0\u1edb\u0063 \u0111\u00e3 \u0068\u1ebf\u0074 \u0068\u0069\u1ec7\u0075 \u006c\u1ef1\u0063\u002e \u0042\u1ea1\u006e \u0073\u1ebd \u0111\u01b0\u1ee3\u0063 \u0111\u01b0\u0061 \u0076\u1ec1 \u0074\u0072\u0061\u006e\u0067 \u0111\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070 \u0073\u0061\u0075 \u00ed\u0074 \u0067\u0069\u00e2\u0079\u002e",
   sessionExpiredShort:
     "\u0050\u0068\u0069\u00ea\u006e \u0078\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0032 \u0062\u01b0\u1edb\u0063 \u0111\u00e3 \u0068\u1ebf\u0074 \u0068\u0069\u1ec7\u0075 \u006c\u1ef1\u0063\u002c \u0076\u0075\u0069 \u006c\u00f2\u006e\u0067 \u0111\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070 \u006c\u1ea1\u0069\u002e",
-  invalidOtp: "\u0056\u0075\u0069 \u006c\u00f2\u006e\u0067 \u006e\u0068\u1ead\u0070 \u0111\u1ee7 \u0036 \u0063\u0068\u1eef \u0073\u1ed1\u002e",
+  invalidOtp:
+    "\u0056\u0075\u0069 \u006c\u00f2\u006e\u0067 \u006e\u0068\u1ead\u0070 \u0111\u1ee7 \u0036 \u0063\u0068\u1eef \u0073\u1ed1\u002e",
 } as const;
 
 function normalizeText(value: string | null | undefined) {
@@ -107,7 +114,10 @@ export default function TwoFactorPage() {
     setTwoFactorVerifySession(nextSession);
   }
 
-  function ensureTwoFactorSession(currentEmail: string, currentTempToken: string) {
+  function ensureTwoFactorSession(
+    currentEmail: string,
+    currentTempToken: string,
+  ) {
     const normalizedEmail = currentEmail.trim().toLowerCase();
     const currentSession = verifySessionRef.current;
 
@@ -265,7 +275,9 @@ export default function TwoFactorPage() {
         (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
           MAX_VERIFY_ATTEMPTS
       ) {
-        clearTwoFactorChallengeAndRestart(data.message ?? TEXT.sessionExpiredShort);
+        clearTwoFactorChallengeAndRestart(
+          data.message ?? TEXT.sessionExpiredShort,
+        );
         return;
       }
 
@@ -284,7 +296,9 @@ export default function TwoFactorPage() {
           (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
             MAX_VERIFY_ATTEMPTS
         ) {
-          clearTwoFactorChallengeAndRestart(err.message || TEXT.sessionExpiredShort);
+          clearTwoFactorChallengeAndRestart(
+            err.message || TEXT.sessionExpiredShort,
+          );
           return;
         }
 
@@ -333,7 +347,9 @@ export default function TwoFactorPage() {
           : "translate-y-2 opacity-0 motion-reduce:translate-y-0"
       }`}
     >
-      <header className={`text-center ${entered ? "auth-animate-fade-up" : ""}`}>
+      <header
+        className={`text-center ${entered ? "auth-animate-fade-up" : ""}`}
+      >
         <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
           {TEXT.codeTitle}
         </h2>
@@ -383,14 +399,20 @@ export default function TwoFactorPage() {
         </div>
 
         {failedAttempts > 0 && remainingVerifyAttempts > 0 ? (
-          <p className="text-center text-sm font-semibold text-red-600">
+          <p className="text-center text-sm font-semibold text-red-600 animate-in fade-in duration-200">
             {buildAttemptsLeftMessage(remainingVerifyAttempts)}
           </p>
         ) : null}
 
         {submitError ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-800">
-            {submitError}
+          <div
+            className="flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4 animate-in fade-in duration-200"
+            role="alert"
+          >
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+            <p className="flex-1 text-left text-sm font-bold leading-relaxed text-red-800">
+              {submitError}
+            </p>
           </div>
         ) : null}
 

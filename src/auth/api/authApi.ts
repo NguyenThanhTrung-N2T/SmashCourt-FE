@@ -2,6 +2,7 @@ import {
   clearAuthSession,
   getAccessToken,
   setAccessToken,
+  getAuthUser,
 } from "@/src/auth/session/sessionStore";
 
 type ApiErrorPayload = {
@@ -139,20 +140,23 @@ async function authFetch<T>(
   const payload = await parseErrorPayload<ApiErrorPayload & T>(res);
 
   if (!res.ok) {
-    throw new AuthApiError(
-      resolveAuthErrorMessage(res.status, payload),
-      { status: res.status, payload },
-    );
+    throw new AuthApiError(resolveAuthErrorMessage(res.status, payload), {
+      status: res.status,
+      payload,
+    });
   }
 
   return payload as T;
 }
 
 function buildExpiredSessionError() {
-  return new AuthApiError("Phien dang nhap da het han, vui long dang nhap lai.", {
-    status: 401,
-    payload: null,
-  });
+  return new AuthApiError(
+    "Phien dang nhap da het han, vui long dang nhap lai.",
+    {
+      status: 401,
+      payload: null,
+    },
+  );
 }
 
 async function refreshAccessToken() {
@@ -196,6 +200,13 @@ export async function authProtectedFetch<T>(
   let currentAccessToken = getAccessToken();
 
   if (!currentAccessToken) {
+    // Kiểm tra xem user đã login hay chưa
+    const user = getAuthUser();
+    if (!user) {
+      // Chưa login bao giờ, không cố refresh
+      throw buildExpiredSessionError();
+    }
+
     try {
       currentAccessToken = await refreshAccessToken();
     } catch (err) {
@@ -217,6 +228,7 @@ export async function authProtectedFetch<T>(
       const refreshedAccessToken = await refreshAccessToken();
       return await request(refreshedAccessToken);
     } catch (refreshErr) {
+      clearAuthSession();
       if (refreshErr instanceof AuthApiError) {
         throw refreshErr;
       }

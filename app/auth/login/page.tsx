@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { CheckCircle2, Lock, LogIn, Mail } from "lucide-react";
+import { AlertCircle, CheckCircle2, Lock, LogIn, Mail } from "lucide-react";
 
 import { authGoogleUrl, authLogin } from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
@@ -19,6 +19,25 @@ import {
 } from "@/src/auth/session/sessionStore";
 
 const REDIRECT_MS = 2000;
+
+function normalizeText(value: string | null | undefined) {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function isAccountLockedError(message?: string) {
+  const normalized = normalizeText(message);
+  const lockedPatterns = [
+    "tam khoa",
+    "khoa",
+    "locked",
+    "lock",
+    "tai khoan da bi khoa",
+  ];
+  return lockedPatterns.some((pattern) => normalized.includes(pattern));
+}
 
 function GoogleMark() {
   return (
@@ -42,8 +61,20 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lockedAccountError, setLockedAccountError] = useState<string | null>(
+    null,
+  );
   const [verifyHint, setVerifyHint] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (lockedAccountError) {
+      const timer = window.setTimeout(() => {
+        setLockedAccountError(null);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [lockedAccountError]);
 
   useEffect(() => {
     setMounted(true);
@@ -77,6 +108,7 @@ export default function LoginPage() {
     e.preventDefault();
     if (redirecting || googleLoading) return;
     setError(null);
+    setLockedAccountError(null);
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail) return setError("Vui lòng nhập email.");
@@ -109,9 +141,20 @@ export default function LoginPage() {
         return;
       }
 
-      setError(data.message ?? "Đăng nhập thất bại.");
+      const errorMessage = data.message ?? "Đăng nhập thất bại.";
+      if (isAccountLockedError(errorMessage)) {
+        setLockedAccountError(errorMessage);
+      } else {
+        setError(errorMessage);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Đăng nhập thất bại.");
+      const errorMessage =
+        err instanceof Error ? err.message : "Đăng nhập thất bại.";
+      if (isAccountLockedError(errorMessage)) {
+        setLockedAccountError(errorMessage);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -120,6 +163,7 @@ export default function LoginPage() {
   async function onGoogleLogin() {
     if (loading || redirecting || googleLoading) return;
     setError(null);
+    setLockedAccountError(null);
 
     try {
       setGoogleLoading(true);
@@ -127,11 +171,15 @@ export default function LoginPage() {
       window.location.assign(data.url);
     } catch (err) {
       setGoogleLoading(false);
-      setError(
+      const errorMessage =
         err instanceof Error
           ? err.message
-          : "Không thể kết nối đăng nhập Google.",
-      );
+          : "Không thể kết nối đăng nhập Google.";
+      if (isAccountLockedError(errorMessage)) {
+        setLockedAccountError(errorMessage);
+      } else {
+        setError(errorMessage);
+      }
     }
   }
 
@@ -167,18 +215,17 @@ export default function LoginPage() {
       ) : null}
 
       {error ? (
-        <div
-          className="mb-6 overflow-x-auto whitespace-nowrap rounded-xl border-l-4 border-red-500 bg-red-50 p-4 text-sm font-bold text-red-800 shadow-sm"
-        >
-          {error}
+        <div className="mb-6 flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4 shadow-sm">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+          <p className="flex-1 text-sm font-bold leading-relaxed text-red-800">
+            {error}
+          </p>
         </div>
       ) : null}
 
       <form className="flex flex-col gap-6" onSubmit={onSubmit}>
         <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-900">
-            Email đăng nhập
-          </label>
+          <label className="text-sm font-bold text-slate-900">Email</label>
           <div className="group relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-emerald-600">
               <Mail className="h-5 w-5" />
@@ -277,7 +324,11 @@ export default function LoginPage() {
         tone="success"
         message="Đăng nhập thành công"
       />
+      <AuthStatusToast
+        visible={!!lockedAccountError}
+        tone="danger"
+        message={lockedAccountError ?? ""}
+      />
     </section>
   );
 }
-

@@ -44,6 +44,12 @@ export default function HomeGateClient() {
         return;
       }
 
+      // Nếu chưa login bao giờ (không user), không cố refresh
+      if (!currentSession.authUser) {
+        setBootstrapping(false);
+        return;
+      }
+
       try {
         const data = await authRefresh();
         if (!active) return;

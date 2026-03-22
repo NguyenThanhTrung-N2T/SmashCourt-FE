@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
-import { Mail, Lock, User, Phone, UserPlus } from "lucide-react";
+import { AlertCircle, Mail, Lock, User, Phone, UserPlus } from "lucide-react";
 
 import { authRegister } from "@/src/auth/api/authApi";
 import { isValidPassword } from "@/src/auth/validators";
+import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
 import {
   setEmail,
   setRegisterFlashMessage,
@@ -24,15 +25,26 @@ export default function RegisterPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toastError, setToastError] = useState<string | null>(null);
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (toastError) {
+      const timer = window.setTimeout(() => {
+        setToastError(null);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [toastError]);
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setToastError(null);
 
     const trimmedEmail = email.trim();
     const trimmedFullName = fullName.trim();
@@ -63,7 +75,25 @@ export default function RegisterPage() {
       startRegisterVerifySession(trimmedEmail);
       router.push("/auth/verify-email");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Đăng ký thất bại.");
+      const errorMessage =
+        err instanceof Error ? err.message : "Đăng ký thất bại.";
+
+      // Kiểm tra xem có phải lỗi "Email đã đăng ký bằng mật khẩu" - bao gồm cả với và không dấu
+      const normalizedError = errorMessage
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+      if (
+        normalizedError.includes("da dang ky bang mat khau") ||
+        normalizedError.includes("dang nhap bang email") ||
+        errorMessage.includes("đã đăng ký") ||
+        errorMessage.includes("mật khẩu")
+      ) {
+        setToastError(errorMessage);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -85,8 +115,11 @@ export default function RegisterPage() {
       </div>
 
       {error ? (
-        <div className="mb-6 rounded-xl border-l-4 border-red-500 bg-red-50 p-4 text-sm font-bold text-red-800 shadow-sm">
-          {error}
+        <div className="mb-6 flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4 shadow-sm">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+          <p className="flex-1 text-sm font-bold leading-relaxed text-red-800">
+            {error}
+          </p>
         </div>
       ) : null}
 
@@ -179,16 +212,22 @@ export default function RegisterPage() {
           )}
         </button>
 
-        <p className="mt-8 text-center text-sm font-medium text-slate-600">
+        <p className="mt-8 text-center text-base font-medium text-slate-600">
           Đã có mã hội viên?{" "}
           <Link
             href="/auth/login"
-            className="cursor-pointer font-bold text-emerald-600 transition-colors hover:text-emerald-500 hover:underline"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl px-4 text-lg font-extrabold text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-500 hover:underline"
           >
             Đăng nhập hệ thống
           </Link>
         </p>
       </form>
+
+      <AuthStatusToast
+        visible={toastError !== null}
+        tone="danger"
+        message={toastError ?? ""}
+      />
     </section>
   );
 }

@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Shield, CheckCircle2, AlertCircle } from "lucide-react";
 
 import { authGoogleCallback } from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
@@ -20,7 +21,23 @@ export default function GoogleOauthCallbackClient() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [toastError, setToastError] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (showToast) {
+      const timer = window.setTimeout(() => {
+        setShowToast(false);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,12 +72,34 @@ export default function GoogleOauthCallbackClient() {
           return;
         }
 
-        setError(data.message ?? "Đăng nhập Google thất bại.");
+        const errorMessage = data.message ?? "Đăng nhập Google thất bại.";
+        const normalized = errorMessage.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (
+          normalized.includes("da dang ky bang mat khau") ||
+          normalized.includes("dang nhap bang email") ||
+          errorMessage.includes("đã đăng ký") ||
+          errorMessage.includes("mật khẩu")
+        ) {
+          setToastError(errorMessage);
+          setShowToast(true);
+        } else {
+          setError(errorMessage);
+        }
       } catch (err) {
         if (cancelled) return;
-        setError(
-          err instanceof Error ? err.message : "Đăng nhập Google thất bại.",
-        );
+        const errorMessage = err instanceof Error ? err.message : "Đăng nhập Google thất bại.";
+        const normalized = errorMessage.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (
+          normalized.includes("da dang ky bang mat khau") ||
+          normalized.includes("dang nhap bang email") ||
+          errorMessage.includes("đã đăng ký") ||
+          errorMessage.includes("mật khẩu")
+        ) {
+          setToastError(errorMessage);
+          setShowToast(true);
+        } else {
+          setError(errorMessage);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -76,14 +115,82 @@ export default function GoogleOauthCallbackClient() {
   }, [code, router, state]);
 
   return (
-    <section>
-      <h2 className="text-2xl font-semibold">Đăng nhập với Google</h2>
-      {loading ? (
-        <p className="mt-2 text-sm opacity-80">Đang kết nối với Google...</p>
-      ) : error ? (
-        <p className="mt-2 text-sm text-red-700">{error}</p>
+    <section
+      className={`mx-auto max-w-md transition-all duration-500 ease-out motion-reduce:transition-none ${
+        mounted ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+      }`}
+    >
+      <div className="mb-10 text-center">
+        <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">
+          Đăng nhập với Google
+        </h2>
+        {loading && !error && !toastError && (
+          <p className="mt-4 text-lg font-bold text-emerald-600 animate-pulse">
+            Hoàn tất quá trình xác thực...
+          </p>
+        )}
+      </div>
+
+      {loading && !error && !toastError ? (
+        <div className="flex flex-col items-center gap-6">
+          <div className="flex h-16 w-16 animate-pulse items-center justify-center rounded-full bg-emerald-100">
+            <Shield className="h-8 w-8 text-emerald-600" />
+          </div>
+
+          <div className="w-full space-y-3 text-center">
+            <p className="text-sm font-semibold text-slate-600">
+              Đang kết nối với Google
+            </p>
+            <div className="flex justify-center gap-1">
+              <div className="h-2 w-2 animate-bounce rounded-full bg-emerald-600" />
+              <div className="h-2 w-2 animate-bounce rounded-full bg-emerald-600 animation-delay-100" />
+              <div className="h-2 w-2 animate-bounce rounded-full bg-emerald-600 animation-delay-200" />
+            </div>
+          </div>
+
+          <div className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <p className="text-xs font-medium text-slate-500">
+              ℹ️ Vui lòng không đóng trang này trong khi xác thực thông tin của
+              bạn
+            </p>
+          </div>
+        </div>
+      ) : error || toastError ? (
+        <div className="space-y-4">
+          {error && (
+            <div className="flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4">
+              <AlertCircle className="h-6 w-6 shrink-0 text-red-600" />
+              <div className="flex-1">
+                <p className="text-sm font-bold text-red-800">{error}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3 text-center">
+            <p className="mt-2 text-sm font-medium text-slate-600">
+              {toastError ? "Tài khoản đã được đăng ký bằng phương thức khác. Vui lòng đăng nhập lại." : "Có vấn đề xảy ra? Vui lòng thử lại."}
+            </p>
+            <a
+              href="/auth/login"
+              className="mt-4 inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-base font-extrabold text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-500 hover:shadow-xl hover:shadow-emerald-500/40"
+            >
+              ← Quay lại đăng nhập
+            </a>
+          </div>
+        </div>
       ) : (
-        <p className="mt-2 text-sm opacity-80">Đang hoàn tất đăng nhập...</p>
+        <div className="flex flex-col items-center gap-6">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+          </div>
+
+          <div className="w-full text-center">
+            <p className="text-sm font-semibold text-slate-600">
+              Đăng nhập thành công!
+            </p>
+            <p className="mt-2 text-xs text-slate-500">Đang chuyển hướng...</p>
+          </div>
+        </div>
       )}
 
       <AuthStatusToast
@@ -91,7 +198,11 @@ export default function GoogleOauthCallbackClient() {
         tone="success"
         message="Đăng nhập thành công"
       />
+      <AuthStatusToast
+        visible={showToast}
+        tone="danger"
+        message={toastError ?? ""}
+      />
     </section>
   );
 }
-

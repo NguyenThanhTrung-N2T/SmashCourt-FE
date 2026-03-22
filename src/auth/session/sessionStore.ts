@@ -7,6 +7,7 @@ type AuthSessionKeys = {
   authSyncEvent: string;
   registerVerifyState: string;
   twoFactorVerifyState: string;
+  forgotPasswordVerifyState: string;
   registerFlashMessage: string;
   forgotPasswordFlashMessage: string;
   postVerifyLoginHint: string;
@@ -23,6 +24,12 @@ export type AuthUserSession = {
 };
 
 export type RegisterVerifySession = {
+  email: string;
+  failedAttempts: number;
+  resendCount: number;
+};
+
+export type ForgotPasswordVerifySession = {
   email: string;
   failedAttempts: number;
   resendCount: number;
@@ -45,6 +52,7 @@ const KEYS: AuthSessionKeys = {
   authSyncEvent: "auth.syncEvent",
   registerVerifyState: "auth.registerVerifyState",
   twoFactorVerifyState: "auth.twoFactorVerifyState",
+  forgotPasswordVerifyState: "auth.forgotPasswordVerifyState",
   registerFlashMessage: "auth.registerFlashMessage",
   forgotPasswordFlashMessage: "auth.forgotPasswordFlashMessage",
   postVerifyLoginHint: "auth.postVerifyLoginHint",
@@ -176,6 +184,36 @@ export function setAuthenticatedSession(input: {
   setEmail(input.user.email);
 }
 
+export function setForgotPasswordVerifySession(session: ForgotPasswordVerifySession) {
+  setItem(KEYS.forgotPasswordVerifyState, JSON.stringify(session));
+}
+
+export function getForgotPasswordVerifySession(): ForgotPasswordVerifySession | null {
+  const raw = getItem(KEYS.forgotPasswordVerifyState);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as ForgotPasswordVerifySession;
+  } catch {
+    removeItem(KEYS.forgotPasswordVerifyState);
+    return null;
+  }
+}
+
+export function startForgotPasswordVerifySession(email: string) {
+  const session: ForgotPasswordVerifySession = {
+    email: email.trim().toLowerCase(),
+    failedAttempts: 0,
+    resendCount: 0,
+  };
+  setForgotPasswordVerifySession(session);
+  return session;
+}
+
+export function clearForgotPasswordVerifySession() {
+  removeItem(KEYS.forgotPasswordVerifyState);
+}
+
 export function setRegisterVerifySession(session: RegisterVerifySession) {
   setItem(KEYS.registerVerifyState, JSON.stringify(session));
 }
@@ -284,6 +322,7 @@ export function clearAuthSession() {
   clearAuthUser();
   clearRegisterVerifySession();
   clearTwoFactorVerifySession();
+  clearForgotPasswordVerifySession();
   removeItem(KEYS.registerFlashMessage);
   removeItem(KEYS.forgotPasswordFlashMessage);
   removeItem(KEYS.postVerifyLoginHint);

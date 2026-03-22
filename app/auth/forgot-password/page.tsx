@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Mail, Send } from "lucide-react";
+import { AlertCircle, Mail, Send } from "lucide-react";
 
 import { authForgotPassword } from "@/src/auth/api/authApi";
+import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
 import {
   setEmail,
   setForgotPasswordFlashMessage,
@@ -17,7 +18,17 @@ export default function ForgotPasswordPage() {
   const [email, setEmailState] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toastError, setToastError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (toastError) {
+      const timer = window.setTimeout(() => {
+        setToastError(null);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [toastError]);
 
   useEffect(() => {
     setMounted(true);
@@ -42,7 +53,7 @@ export default function ForgotPasswordPage() {
       );
       router.push("/auth/forgot-password/verify-otp");
     } catch (err) {
-      setError(
+      setToastError(
         err instanceof Error ? err.message : "Gửi yêu cầu khôi phục thất bại.",
       );
     } finally {
@@ -66,8 +77,11 @@ export default function ForgotPasswordPage() {
       </div>
 
       {error ? (
-        <div className="mb-6 rounded-xl border-l-4 border-red-500 bg-red-50 p-4 text-sm font-bold text-red-800 shadow-sm">
-          {error}
+        <div className="mb-6 flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4 shadow-sm">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+          <p className="flex-1 text-sm font-bold leading-relaxed text-red-800">
+            {error}
+          </p>
         </div>
       ) : null}
 
@@ -116,6 +130,12 @@ export default function ForgotPasswordPage() {
           </Link>
         </p>
       </form>
+
+      <AuthStatusToast
+        visible={!!toastError}
+        tone="danger"
+        message={toastError ?? ""}
+      />
     </section>
   );
 }
