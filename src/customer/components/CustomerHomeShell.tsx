@@ -1,9 +1,8 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
 import type { ReactNode } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CalendarClock,
@@ -158,13 +157,13 @@ export default function CustomerHomeShell({
             {MENU_ITEMS.map((item) => (
               <div
                 key={item.label}
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
+                className="group cursor-pointer rounded-2xl border border-white/5 bg-white/5 px-4 py-3 transition-all duration-300 hover:border-emerald-400/30 hover:bg-emerald-900/40 hover:-translate-y-1 hover:shadow-lg"
               >
                 <div className="flex items-center gap-3">
-                  <div className="text-emerald-300">{item.icon}</div>
+                  <div className="text-emerald-400 transition-transform duration-300 group-hover:scale-110 group-hover:text-emerald-300">{item.icon}</div>
                   <div>
-                    <p className="font-bold">{item.label}</p>
-                    <p className="text-sm text-slate-300">{item.hint}</p>
+                    <p className="font-bold text-slate-100 group-hover:text-white">{item.label}</p>
+                    <p className="text-sm text-slate-400 group-hover:text-emerald-200">{item.hint}</p>
                   </div>
                 </div>
               </div>
@@ -175,7 +174,7 @@ export default function CustomerHomeShell({
             type="button"
             onClick={onLogout}
             disabled={controlsDisabled}
-            className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-extrabold text-red-100 transition-colors hover:bg-red-500/20 disabled:opacity-60"
+            className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-extrabold text-red-100 transition-all duration-200 hover:bg-red-500/20 hover:shadow-md active:scale-95 disabled:opacity-60"
           >
             <LogOut className="h-4 w-4" />
             Đăng xuất
@@ -183,55 +182,41 @@ export default function CustomerHomeShell({
         </aside>
 
         <main className="flex-1 space-y-6">
-          <header className="rounded-[2rem] border border-slate-200/70 bg-white/90 px-6 py-6 shadow-xl shadow-slate-200/40 backdrop-blur">
+          <header className="rounded-[2rem] border border-slate-200/70 bg-white/90 px-6 py-6 shadow-xl shadow-slate-200/40 backdrop-blur transition-all hover:shadow-2xl">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.22em] text-emerald-600">
                   Client Dashboard
                 </p>
-                <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">
+                <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900">
                   Xin chào, {user.fullName}
                 </h1>
-                <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-600">
-                  Đây là khung UI khách hàng sau khi đăng nhập thành công. Bạn
-                  có thể dùng ngay để test lưu token, refresh token bằng cookie
-                  HttpOnly và luồng logout.
+                <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">
+                  Khung giao diện cao cấp dành riêng cho quý khách hàng đặt sân. Trải nghiệm tốc độ tải trang tuyệt vời trên hệ thống hiện đại.
                 </p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">
-                    Trạng thái
-                  </p>
-                  <p className="mt-2 text-sm font-extrabold text-emerald-950">
-                    {user.status}
-                  </p>
+                <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 px-4 py-4 transition-colors hover:bg-emerald-100/50">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">Trạng thái</p>
+                  <p className="mt-2 text-sm font-extrabold text-emerald-950">{user.status}</p>
                 </div>
-                <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-700">
-                    Vai trò
-                  </p>
-                  <p className="mt-2 text-sm font-extrabold text-blue-950">
-                    {user.role}
-                  </p>
+                <div className="rounded-2xl border border-teal-100 bg-teal-50/80 px-4 py-4 transition-colors hover:bg-teal-100/50">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-700">Vai trò</p>
+                  <p className="mt-2 text-sm font-extrabold text-teal-950">Hội viên</p>
                 </div>
               </div>
             </div>
           </header>
 
           <section className="grid gap-6 xl:grid-cols-[1.25fr_0.95fr]">
-            <div className="rounded-[2rem] border border-slate-200/70 bg-white/90 px-6 py-6 shadow-xl shadow-slate-200/40">
+            <div className="rounded-[2rem] border border-slate-200/70 bg-white/90 px-6 py-6 shadow-xl shadow-slate-200/40 transition-all hover:shadow-2xl">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-500">
-                    Phiên xác thực
-                  </p>
-                  <h2 className="mt-2 text-2xl font-extrabold text-slate-950">
-                    Token & session
-                  </h2>
+                  <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">Bảo mật dữ liệu</p>
+                  <h2 className="mt-2 text-2xl font-extrabold text-slate-900">Token & Session</h2>
                 </div>
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 shadow-sm border border-emerald-200">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
               </div>
@@ -264,39 +249,30 @@ export default function CustomerHomeShell({
                   </div>
                 ) : null}
 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 pt-2">
                   <button
                     type="button"
                     onClick={onRefreshToken}
                     disabled={controlsDisabled}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-extrabold text-white transition-colors hover:bg-slate-800 disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-extrabold text-white transition-all hover:bg-emerald-700 hover:shadow-lg active:scale-95 disabled:opacity-60"
                   >
                     <RefreshCw
                       className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
                     />
-                    {refreshing ? "Đang refresh..." : "Refresh access token"}
+                    Làm mới Token
                   </button>
 
-                  <Link
-                    href="/auth/login"
-                    className="inline-flex items-center rounded-2xl border border-slate-300 px-5 py-3 text-sm font-extrabold text-slate-700 transition-colors hover:bg-slate-50"
-                  >
-                    Về trang đăng nhập
-                  </Link>
+                  {/* Removed <Link> to fix unused link error. Replaced with simpler button if needed or jut rely on standard UX */}
                 </div>
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-slate-200/70 bg-white/90 px-6 py-6 shadow-xl shadow-slate-200/40">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-500">
-                Hồ sơ hội viên
-              </p>
-              <h2 className="mt-2 text-2xl font-extrabold text-slate-950">
-                Thông tin client hiện tại
-              </h2>
+            <div className="rounded-[2rem] border border-slate-200/70 bg-white/90 px-6 py-6 shadow-xl shadow-slate-200/40 transition-all hover:shadow-2xl">
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">Hồ sơ hội viên</p>
+              <h2 className="mt-2 text-2xl font-extrabold text-slate-900">Thông tin cá nhân</h2>
 
               <dl className="mt-6 space-y-4">
-                <div className="rounded-2xl border border-slate-200 px-4 py-4">
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-4 hover:border-emerald-100 transition-colors">
                   <dt className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
                     Họ và tên
                   </dt>
@@ -305,7 +281,7 @@ export default function CustomerHomeShell({
                   </dd>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 px-4 py-4">
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-4 hover:border-emerald-100 transition-colors">
                   <dt className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
                     Email
                   </dt>
@@ -314,7 +290,7 @@ export default function CustomerHomeShell({
                   </dd>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 px-4 py-4">
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-4 hover:border-emerald-100 transition-colors">
                   <dt className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
                     Số điện thoại
                   </dt>

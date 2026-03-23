@@ -12,6 +12,8 @@ import {
   type AuthUserSession,
 } from "@/src/auth/session/sessionStore";
 import CustomerHomeShell from "./CustomerHomeShell";
+import OwnerHomeShell from "@/src/owner/components/OwnerHomeShell";
+import WorkspaceHomeShell from "@/src/employee/components/WorkspaceHomeShell";
 
 function readSession() {
   try {
@@ -104,8 +106,17 @@ export default function HomeGateClient() {
     return null;
   }
 
-  if (accessToken && authUser && authUser.role.toUpperCase() === "CUSTOMER") {
-    return <CustomerHomeShell accessToken={accessToken} user={authUser} />;
+  if (accessToken && authUser) {
+    const role = authUser.role.toUpperCase();
+    if (role === "OWNER") {
+      return <OwnerHomeShell accessToken={accessToken} user={authUser} />;
+    }
+    if (role === "BRANCH_MANAGER" || role === "BRANCH-MANAGER" || role === "STAFF") {
+      return <WorkspaceHomeShell accessToken={accessToken} user={authUser} />;
+    }
+    if (role === "CUSTOMER") {
+      return <CustomerHomeShell accessToken={accessToken} user={authUser} />;
+    }
   }
 
   return <GuestLanding />;
