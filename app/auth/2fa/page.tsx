@@ -81,10 +81,6 @@ function shouldResetTwoFactorSession(message?: string) {
   );
 }
 
-function buildAttemptsLeftMessage(remainingVerifyAttempts: number) {
-  return `\u0042\u1ea1\u006e \u0063\u00f2\u006e ${remainingVerifyAttempts} \u006c\u1ea7\u006e \u006e\u0068\u1ead\u0070 \u0076\u1edb\u0069 \u006d\u00e3 \u0068\u0069\u1ec7\u006e \u0074\u1ea1\u0069\u002e`;
-}
-
 export default function TwoFactorPage() {
   const router = useRouter();
   const verifySessionRef = useRef<TwoFactorVerifySession | null>(null);
@@ -99,18 +95,15 @@ export default function TwoFactorPage() {
   const [redirecting, setRedirecting] = useState(false);
   const [resettingSession, setResettingSession] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [failedAttempts, setFailedAttempts] = useState(0);
 
   function syncTwoFactorSession(nextSession: TwoFactorVerifySession | null) {
     verifySessionRef.current = nextSession;
 
     if (!nextSession) {
-      setFailedAttempts(0);
       clearTwoFactorVerifySession();
       return;
     }
 
-    setFailedAttempts(nextSession.failedAttempts);
     setTwoFactorVerifySession(nextSession);
   }
 
@@ -190,14 +183,12 @@ export default function TwoFactorPage() {
           storedSession.tempToken === storedTempToken
         ) {
           verifySessionRef.current = storedSession;
-          setFailedAttempts(storedSession.failedAttempts);
         } else {
           const freshSession = startTwoFactorVerifySession(
             storedEmail,
             storedTempToken,
           );
           verifySessionRef.current = freshSession;
-          setFailedAttempts(freshSession.failedAttempts);
         }
       }
     } catch {
@@ -333,10 +324,6 @@ export default function TwoFactorPage() {
     );
   }
 
-  const remainingVerifyAttempts = Math.max(
-    0,
-    MAX_VERIFY_ATTEMPTS - failedAttempts,
-  );
   const controlsDisabled = loading || redirecting || resettingSession;
 
   return (
@@ -397,12 +384,6 @@ export default function TwoFactorPage() {
             disabled={controlsDisabled}
           />
         </div>
-
-        {failedAttempts > 0 && remainingVerifyAttempts > 0 ? (
-          <p className="text-center text-sm font-semibold text-red-600 animate-in fade-in duration-200">
-            {buildAttemptsLeftMessage(remainingVerifyAttempts)}
-          </p>
-        ) : null}
 
         {submitError ? (
           <div

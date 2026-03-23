@@ -146,7 +146,9 @@ export default function VerifyOtpPage() {
   }
 
   function updateVerifySession(
-    updater: (session: ForgotPasswordVerifySession) => ForgotPasswordVerifySession,
+    updater: (
+      session: ForgotPasswordVerifySession,
+    ) => ForgotPasswordVerifySession,
   ) {
     if (!email) return null;
     const nextSession = updater(ensureVerifySession(email));
@@ -160,7 +162,10 @@ export default function VerifyOtpPage() {
     setResettingSession(true);
     setOtpCode("");
     setSubmitError(null);
-    setToastError(message ?? "Phiên xác thực chờ OTP đã hết hiệu lực. Bạn sẽ được đưa về trang trước sau ít giây.");
+    setToastError(
+      message ??
+        "Phiên xác thực chờ OTP đã hết hiệu lực. Bạn sẽ được đưa về trang trước sau ít giây.",
+    );
     setResendError(null);
     setResendSuccess(null);
 
@@ -228,7 +233,10 @@ export default function VerifyOtpPage() {
 
     try {
       setLoading(true);
-      const data = await authForgotPasswordVerifyOtp({ email, otpCode: normalized });
+      const data = await authForgotPasswordVerifyOtp({
+        email,
+        otpCode: normalized,
+      });
 
       if (!data.resetToken) {
         const nextSession = updateVerifySession((currentSession) => ({
@@ -264,7 +272,7 @@ export default function VerifyOtpPage() {
         setResendError(null);
         setResendSuccess(null);
         setVerified(true);
-        
+
         if (successRedirectRef.current) {
           clearTimeout(successRedirectRef.current);
         }
@@ -273,10 +281,9 @@ export default function VerifyOtpPage() {
         }, REDIRECT_MS);
         return;
       }
-      
+
       logAuthClientError("forgot-verify-otp-no-token", data);
       setSubmitError(AUTH_GENERIC.verifyFailed);
-
     } catch (err) {
       logAuthClientError("forgot-verify-otp", err);
 
@@ -357,7 +364,9 @@ export default function VerifyOtpPage() {
         throw err;
       }
 
-      setResendError((currentError) => currentError ?? AUTH_GENERIC.resendFailed);
+      setResendError(
+        (currentError) => currentError ?? AUTH_GENERIC.resendFailed,
+      );
       throw err;
     }
   }
