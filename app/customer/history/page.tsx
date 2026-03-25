@@ -7,25 +7,23 @@ import { getAccessToken, getAuthUser } from "@/src/auth/session/sessionStore";
 
 export default function BookingHistoryPage() {
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
-
-  useEffect(() => {
+  const [sessionOk] = useState(() => {
     try {
       const accessToken = getAccessToken();
       const authUser = getAuthUser();
-
-      if (!accessToken || !authUser) {
-        router.push("/auth/login");
-        return;
-      }
-
-      setIsChecking(false);
+      return Boolean(accessToken && authUser);
     } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    if (!sessionOk) {
       router.push("/auth/login");
     }
-  }, [router]);
+  }, [router, sessionOk]);
 
-  if (isChecking) {
+  if (!sessionOk) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50/40">
         <div className="text-center">

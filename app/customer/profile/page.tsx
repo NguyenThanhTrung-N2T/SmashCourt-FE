@@ -7,27 +7,24 @@ import { getAccessToken, getAuthUser, type AuthUserSession } from "@/src/auth/se
 
 export default function UserProfilePage() {
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
-  const [user, setUser] = useState<AuthUserSession | null>(null);
-
-  useEffect(() => {
+  const [user] = useState<AuthUserSession | null>(() => {
     try {
       const accessToken = getAccessToken();
       const authUser = getAuthUser();
-
-      if (!accessToken || !authUser) {
-        router.push("/auth/login");
-        return;
-      }
-
-      setUser(authUser);
-      setIsChecking(false);
+      if (!accessToken || !authUser) return null;
+      return authUser;
     } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    if (!user) {
       router.push("/auth/login");
     }
-  }, [router]);
+  }, [router, user]);
 
-  if (isChecking || !user) {
+  if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50/40">
         <div className="text-center">

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Award,
   Calendar,
@@ -44,7 +44,6 @@ function getRankInfo(points: number) {
 
 export default function UserProfile({ user }: UserProfileProps) {
   const router = useRouter();
-  const [isEditing, setIsEditing] = useState(false);
   const currentPoints = 1250;
   const { current, next } = getRankInfo(currentPoints);
 
@@ -87,10 +86,13 @@ export default function UserProfile({ user }: UserProfileProps) {
             <div className="flex flex-col items-center sm:flex-row sm:items-end sm:gap-6">
               <div className="-mt-16 relative">
                 {user.avatarUrl ? (
-                  <img
+                  <Image
                     src={user.avatarUrl}
                     alt="Avatar"
+                    width={128}
+                    height={128}
                     className="h-32 w-32 rounded-3xl border-4 border-white bg-slate-100 object-cover shadow-xl"
+                    priority
                   />
                 ) : (
                   <div className="flex h-32 w-32 items-center justify-center rounded-3xl border-4 border-white bg-gradient-to-br from-emerald-500 to-teal-500 text-4xl font-black text-white shadow-xl">
