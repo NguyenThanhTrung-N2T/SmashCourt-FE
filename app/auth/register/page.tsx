@@ -2,18 +2,36 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { AlertCircle, Mail, Lock, User, Phone, UserPlus } from "lucide-react";
+import { AlertCircle, Lock, Mail, Phone, User, UserPlus } from "lucide-react";
 
-import { authRegister } from "@/src/auth/api/authApi";
-import { isValidPassword } from "@/src/auth/validators";
+import {
+  authRegister,
+  getAuthFieldError,
+  hasAuthErrorCode,
+} from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
 import {
   setEmail,
   setRegisterFlashMessage,
   startRegisterVerifySession,
 } from "@/src/auth/session/sessionStore";
+import { isValidPassword } from "@/src/auth/validators";
+
+function isAlternativeLoginMethodError(message?: string) {
+  const normalized = (message ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  return (
+    normalized.includes("da dang ky bang google") ||
+    normalized.includes("dang nhap bang google") ||
+    normalized.includes("da dang ky bang mat khau") ||
+    normalized.includes("dang nhap bang email")
+  );
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -26,19 +44,20 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toastError, setToastError] = useState<string | null>(null);
-
   const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (toastError) {
-      const timer = window.setTimeout(() => {
-        setToastError(null);
-      }, 3500);
-      return () => clearTimeout(timer);
-    }
+    if (!toastError) return;
+
+    const timer = window.setTimeout(() => {
+      setToastError(null);
+    }, 3500);
+
+    return () => clearTimeout(timer);
   }, [toastError]);
 
   async function onSubmit(e: FormEvent) {
@@ -50,45 +69,43 @@ export default function RegisterPage() {
     const trimmedFullName = fullName.trim();
     const trimmedPhone = phone.trim();
 
-    if (!trimmedEmail) return setError("Vui lòng nhập email.");
-    if (!trimmedFullName) return setError("Vui lòng nhập họ và tên.");
-    if (!password) return setError("Vui lòng nhập mật khẩu.");
+    if (!trimmedEmail) return setError("Vui lÃ²ng nháº­p email.");
+    if (!trimmedFullName) return setError("Vui lÃ²ng nháº­p há» vÃ  tÃªn.");
+    if (!password) return setError("Vui lÃ²ng nháº­p máº­t kháº©u.");
+
     if (!isValidPassword(password)) {
       return setError(
-        "Mật khẩu phải có ít nhất 8 ký tự, gồm 1 chữ hoa, 1 số và 1 ký tự đặc biệt.",
+        "Máº­t kháº©u pháº£i cÃ³ Ã­t nháº¥t 8 kÃ½ tá»±, gá»“m 1 chá»¯ hoa, 1 sá»‘ vÃ  1 kÃ½ tá»± Ä‘áº·c biá»‡t.",
       );
     }
 
     try {
       setLoading(true);
-      const res = await authRegister({
+      const response = await authRegister({
         email: trimmedEmail,
         password,
         fullName: trimmedFullName,
         phone: trimmedPhone || undefined,
       });
 
-      if (res?.message) {
-        setRegisterFlashMessage(res.message);
+      if (response.message) {
+        setRegisterFlashMessage(response.message);
       }
+
       setEmail(trimmedEmail);
       startRegisterVerifySession(trimmedEmail);
       router.push("/auth/verify-email");
     } catch (err) {
+      const fieldError =
+        getAuthFieldError(err, ["email", "fullName", "phone", "password"]) ??
+        null;
       const errorMessage =
-        err instanceof Error ? err.message : "Đăng ký thất bại.";
-
-      // Kiểm tra xem có phải lỗi "Email đã đăng ký bằng mật khẩu" - bao gồm cả với và không dấu
-      const normalizedError = errorMessage
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
+        fieldError ??
+        (err instanceof Error ? err.message : "ÄÄƒng kÃ½ tháº¥t báº¡i.");
 
       if (
-        normalizedError.includes("da dang ky bang mat khau") ||
-        normalizedError.includes("dang nhap bang email") ||
-        errorMessage.includes("đã đăng ký") ||
-        errorMessage.includes("mật khẩu")
+        hasAuthErrorCode(err, "CONFLICT") &&
+        isAlternativeLoginMethodError(errorMessage)
       ) {
         setToastError(errorMessage);
       } else {
@@ -101,16 +118,16 @@ export default function RegisterPage() {
 
   return (
     <section
-      className={`w-full transform transition-all duration-700 ease-out motion-reduce:transition-none motion-reduce:transform-none ${
+      className={`w-full transform transition-all duration-700 ease-out motion-reduce:transform-none motion-reduce:transition-none ${
         mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
       }`}
     >
       <div className="mb-10 text-center">
         <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">
-          Mở tài khoản
+          Má»Ÿ tÃ i khoáº£n
         </h2>
         <p className="mt-3 text-base font-medium text-slate-600">
-          Dành cho hội viên trực thuộc hệ thống chi nhánh.
+          DÃ nh cho há»™i viÃªn trá»±c thuá»™c há»‡ thá»‘ng chi nhÃ¡nh.
         </p>
       </div>
 
@@ -126,7 +143,7 @@ export default function RegisterPage() {
       <form className="flex flex-col gap-6" onSubmit={onSubmit}>
         <div className="space-y-2">
           <label className="text-sm font-bold text-slate-900">
-            Email cá nhân
+            Email cÃ¡ nhÃ¢n
           </label>
           <div className="group relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-emerald-600">
@@ -145,14 +162,14 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-900">Họ và tên</label>
+          <label className="text-sm font-bold text-slate-900">Há» vÃ  tÃªn</label>
           <div className="group relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-emerald-600">
               <User className="h-5 w-5" />
             </div>
             <input
               className="block w-full rounded-xl border-2 border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 font-medium text-slate-900 outline-none transition-all duration-200 ease-out placeholder:font-normal placeholder:text-slate-400 hover:border-emerald-300 hover:shadow-md focus:bg-white focus:border-emerald-500 focus:shadow-lg focus:ring-4 focus:ring-emerald-500/10 focus:duration-150 motion-reduce:transition-none"
-              placeholder="Nguyễn Văn A"
+              placeholder="Nguyá»…n VÄƒn A"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               autoComplete="name"
@@ -163,7 +180,7 @@ export default function RegisterPage() {
 
         <div className="space-y-2">
           <label className="text-sm font-bold text-slate-900">
-            Số điện thoại{" "}
+            Sá»‘ Ä‘iá»‡n thoáº¡i{" "}
           </label>
           <div className="group relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-emerald-600">
@@ -181,14 +198,14 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-900">Mật khẩu</label>
+          <label className="text-sm font-bold text-slate-900">Máº­t kháº©u</label>
           <div className="group relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-emerald-600">
               <Lock className="h-5 w-5" />
             </div>
             <input
               className="block w-full rounded-xl border-2 border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 font-medium text-slate-900 outline-none transition-all duration-200 ease-out placeholder:font-normal placeholder:text-slate-400 hover:border-emerald-300 hover:shadow-md focus:bg-white focus:border-emerald-500 focus:shadow-lg focus:ring-4 focus:ring-emerald-500/10 focus:duration-150 motion-reduce:transition-none"
-              placeholder="••••••••"
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
@@ -204,21 +221,21 @@ export default function RegisterPage() {
           className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-4 text-base font-extrabold text-white shadow-lg shadow-slate-900/20 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/30 active:translate-y-0 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 motion-reduce:hover:translate-y-0 motion-reduce:active:scale-100"
         >
           {loading ? (
-            "Đang xử lý..."
+            "Äang xá»­ lÃ½..."
           ) : (
             <>
-              Tạo tài khoản ngay <UserPlus className="h-5 w-5" />
+              Táº¡o tÃ i khoáº£n ngay <UserPlus className="h-5 w-5" />
             </>
           )}
         </button>
 
         <p className="mt-8 text-center text-base font-medium text-slate-600">
-          Đã có mã hội viên?{" "}
+          ÄÃ£ cÃ³ mÃ£ há»™i viÃªn?{" "}
           <Link
             href="/auth/login"
             className="inline-flex min-h-12 items-center justify-center rounded-xl px-4 text-lg font-extrabold text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-500 hover:underline"
           >
-            Đăng nhập hệ thống
+            ÄÄƒng nháº­p há»‡ thá»‘ng
           </Link>
         </p>
       </form>

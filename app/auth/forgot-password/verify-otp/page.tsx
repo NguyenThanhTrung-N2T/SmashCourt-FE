@@ -10,6 +10,8 @@ import {
   AuthApiError,
   authForgotPasswordVerifyOtp,
   authResendOtp,
+  getAuthFieldError,
+  hasAuthErrorCode,
 } from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
 import CountdownButton from "@/src/auth/components/CountdownButton";
@@ -64,7 +66,28 @@ function normalizeText(value: string | null | undefined) {
     .toLowerCase();
 }
 
-function shouldResetVerifySession(status?: string, message?: string) {
+function shouldResetVerifySession(
+  input?:
+    | {
+        status?: string;
+        code?: string;
+        message?: string;
+      }
+    | AuthApiError
+    | null,
+) {
+  if (
+    hasAuthErrorCode(input, ["OTP_LIMIT_EXCEEDED", "NOT_FOUND", "TOKEN_INVALID"])
+  ) {
+    return true;
+  }
+
+  const status =
+    input instanceof AuthApiError
+      ? input.code ?? undefined
+      : input?.code ?? input?.status;
+  const message = input instanceof AuthApiError ? input.message : input?.message;
+
   const normalizedStatus = normalizeText(status);
   if (
     VERIFY_SESSION_RESET_STATUS_PATTERNS.some((pattern) =>
@@ -247,7 +270,7 @@ export default function VerifyOtpPage() {
         logAuthClientError("forgot-verify-otp-no-token", data);
 
         if (
-          shouldResetVerifySession(undefined, data.message) ||
+          shouldResetVerifySession(data) ||
           (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
             MAX_VERIFY_ATTEMPTS
         ) {
@@ -294,7 +317,7 @@ export default function VerifyOtpPage() {
         }));
 
         if (
-          shouldResetVerifySession(undefined, err.message) ||
+          shouldResetVerifySession(err) ||
           (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
             MAX_VERIFY_ATTEMPTS
         ) {
@@ -304,8 +327,11 @@ export default function VerifyOtpPage() {
           );
           return;
         }
-
-        setSubmitError(err.message || AUTH_GENERIC.verifyFailed);
+        setSubmitError(
+          getAuthFieldError(err, "otpCode") ??
+            err.message ??
+            AUTH_GENERIC.verifyFailed,
+        );
         return;
       }
 
@@ -355,12 +381,16 @@ export default function VerifyOtpPage() {
       logAuthClientError("resend-forgot-otp", err);
 
       if (err instanceof AuthApiError) {
-        if (shouldResetVerifySession(undefined, err.message)) {
+        if (shouldResetVerifySession(err)) {
           clearVerifySessionAndRestart(err.message);
           throw err;
         }
 
-        setResendError(err.message || AUTH_GENERIC.resendFailed);
+        setResendError(
+          getAuthFieldError(err, ["email", "otpCode"]) ??
+            err.message ??
+            AUTH_GENERIC.resendFailed,
+        );
         throw err;
       }
 

@@ -1,15 +1,32 @@
 import {
   clearAuthSession,
   getAccessToken,
-  setAccessToken,
   getAuthUser,
+  setAccessToken,
 } from "@/src/auth/session/sessionStore";
 
-type ApiErrorPayload = {
-  message?: string;
+type ApiValidationErrors = Record<string, string[]>;
+
+type ApiEnvelope<T> = {
+  success?: boolean;
+  code?: string;
+  message?: string | null;
+  data?: T | null;
+  errors?: ApiValidationErrors | null;
+};
+
+type ApiErrorPayload = ApiEnvelope<unknown> & {
   detail?: string;
   title?: string;
   error?: string;
+};
+
+type AuthApiSuccess<T> = {
+  success: boolean | null;
+  code: string | null;
+  message: string | null;
+  data: T | null;
+  errors: ApiValidationErrors | null;
 };
 
 const GENERIC_CLIENT_ERROR_MESSAGE = "Yeu cau khong hop le. Vui long thu lai.";
@@ -20,15 +37,24 @@ let refreshPromise: Promise<string> | null = null;
 
 export class AuthApiError extends Error {
   status: number;
+  code: string | null;
+  errors: ApiValidationErrors | null;
   payload: ApiErrorPayload | null;
 
   constructor(
     message: string,
-    options: { status: number; payload: ApiErrorPayload | null },
+    options: {
+      status: number;
+      code?: string | null;
+      errors?: ApiValidationErrors | null;
+      payload: ApiErrorPayload | null;
+    },
   ) {
     super(message);
     this.name = "AuthApiError";
     this.status = options.status;
+    this.code = options.code ?? null;
+    this.errors = options.errors ?? null;
     this.payload = options.payload;
   }
 }
@@ -72,9 +98,21 @@ function isHtmlLike(text: string) {
   return normalized.startsWith("<!doctype") || normalized.startsWith("<html");
 }
 
-async function parseErrorPayload<T extends ApiErrorPayload>(
-  res: Response,
-): Promise<T | null> {
+function isObjectLike(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isApiEnvelope<T>(value: unknown): value is ApiEnvelope<T> {
+  return (
+    isObjectLike(value) &&
+    ("success" in value ||
+      "code" in value ||
+      "data" in value ||
+      "errors" in value)
+  );
+}
+
+async function parsePayload<T>(res: Response): Promise<T | null> {
   const jsonPayload = await parseJsonSafe<T>(res);
   if (jsonPayload) return jsonPayload;
 
@@ -86,8 +124,59 @@ async function parseErrorPayload<T extends ApiErrorPayload>(
   return { message: textPayload } as T;
 }
 
+function toTrimmedString(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function extractValidationErrors(
+  payload: ApiErrorPayload | null,
+): ApiValidationErrors | null {
+  if (!payload || !isObjectLike(payload.errors)) {
+    return null;
+  }
+
+  const entries = Object.entries(payload.errors).flatMap(([field, messages]) => {
+    if (!Array.isArray(messages)) {
+      return [];
+    }
+
+    const normalizedMessages = messages
+      .filter((message): message is string => typeof message === "string")
+      .map((message) => message.trim())
+      .filter(Boolean);
+
+    return normalizedMessages.length > 0 ? [[field, normalizedMessages]] : [];
+  });
+
+  return entries.length > 0 ? Object.fromEntries(entries) : null;
+}
+
+function extractFirstValidationMessage(errors: ApiValidationErrors | null) {
+  if (!errors) return null;
+
+  for (const messages of Object.values(errors)) {
+    const firstMessage = messages.find((message) => message.trim());
+    if (firstMessage) {
+      return firstMessage.trim();
+    }
+  }
+
+  return null;
+}
+
+function extractErrorCode(payload: ApiErrorPayload | null) {
+  return toTrimmedString(payload?.code);
+}
+
 function extractErrorMessage(payload: ApiErrorPayload | null) {
   if (!payload) return null;
+
+  const validationMessage = extractFirstValidationMessage(
+    extractValidationErrors(payload),
+  );
+  if (validationMessage) {
+    return validationMessage;
+  }
 
   const candidates = [
     payload.message,
@@ -115,6 +204,49 @@ function resolveAuthErrorMessage(
   return extractErrorMessage(payload) ?? GENERIC_CLIENT_ERROR_MESSAGE;
 }
 
+function normalizeSuccessPayload<T>(
+  payload: T | ApiEnvelope<T> | null,
+): AuthApiSuccess<T> {
+  if (isApiEnvelope<T>(payload)) {
+    return {
+      success: typeof payload.success === "boolean" ? payload.success : null,
+      code: toTrimmedString(payload.code),
+      message: toTrimmedString(payload.message),
+      data: (payload.data ?? null) as T | null,
+      errors: extractValidationErrors(payload as ApiErrorPayload),
+    };
+  }
+
+  return {
+    success: null,
+    code: null,
+    message: null,
+    data: payload,
+    errors: null,
+  };
+}
+
+function requireData<T>(response: AuthApiSuccess<T>, fallbackMessage: string) {
+  if (response.data === null || response.data === undefined) {
+    throw new AuthApiError(fallbackMessage, {
+      status: 500,
+      payload: null,
+    });
+  }
+
+  return response.data;
+}
+
+function withResponseMeta<T extends object>(response: AuthApiSuccess<T>) {
+  const data = requireData(response, "Phan hoi API khong hop le. Vui long thu lai.");
+
+  return {
+    ...data,
+    message: response.message ?? undefined,
+    code: response.code ?? undefined,
+  };
+}
+
 async function authFetch<T>(
   path: string,
   options: {
@@ -122,7 +254,7 @@ async function authFetch<T>(
     body?: unknown;
     headers?: HeadersInit;
   },
-): Promise<T> {
+): Promise<AuthApiSuccess<T>> {
   const url = toUrl(path);
   const headers = new Headers(options.headers);
 
@@ -137,16 +269,19 @@ async function authFetch<T>(
     credentials: "include",
   });
 
-  const payload = await parseErrorPayload<ApiErrorPayload & T>(res);
+  const payload = await parsePayload<ApiErrorPayload & T>(res);
+  const normalizedErrorPayload = payload as ApiErrorPayload | null;
 
   if (!res.ok) {
-    throw new AuthApiError(resolveAuthErrorMessage(res.status, payload), {
+    throw new AuthApiError(resolveAuthErrorMessage(res.status, normalizedErrorPayload), {
       status: res.status,
-      payload,
+      code: extractErrorCode(normalizedErrorPayload),
+      errors: extractValidationErrors(normalizedErrorPayload),
+      payload: normalizedErrorPayload,
     });
   }
 
-  return payload as T;
+  return normalizeSuccessPayload(payload as T | ApiEnvelope<T> | null);
 }
 
 function buildExpiredSessionError() {
@@ -157,6 +292,61 @@ function buildExpiredSessionError() {
       payload: null,
     },
   );
+}
+
+function normalizeFieldKey(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+export function hasAuthErrorCode(
+  error: unknown,
+  expectedCode: string | readonly string[],
+) {
+  if (!(error instanceof AuthApiError) || !error.code) {
+    return false;
+  }
+
+  const expectedCodes = Array.isArray(expectedCode)
+    ? expectedCode
+    : [expectedCode];
+
+  return expectedCodes.some((code) => code === error.code);
+}
+
+export function getAuthFieldError(
+  error: unknown,
+  fieldNames: string | readonly string[],
+) {
+  if (!(error instanceof AuthApiError)) {
+    return null;
+  }
+
+  const fieldErrors = error.errors;
+  if (!fieldErrors) {
+    return null;
+  }
+
+  const normalizedFieldNames = new Set(
+    (Array.isArray(fieldNames) ? fieldNames : [fieldNames]).map(normalizeFieldKey),
+  );
+
+  for (const [field, messages] of Object.entries(fieldErrors)) {
+    const candidates = [field, field.split(".").at(-1) ?? field];
+    const isMatch = candidates.some((candidate) =>
+      normalizedFieldNames.has(normalizeFieldKey(candidate)),
+    );
+
+    if (!isMatch) {
+      continue;
+    }
+
+    const firstMessage = messages.find((message) => message.trim());
+    if (firstMessage) {
+      return firstMessage.trim();
+    }
+  }
+
+  return extractFirstValidationMessage(fieldErrors);
 }
 
 async function refreshAccessToken() {
@@ -200,10 +390,8 @@ export async function authProtectedFetch<T>(
   let currentAccessToken = getAccessToken();
 
   if (!currentAccessToken) {
-    // Kiểm tra xem user đã login hay chưa
     const user = getAuthUser();
     if (!user) {
-      // Chưa login bao giờ, không cố refresh
       throw buildExpiredSessionError();
     }
 
@@ -291,86 +479,126 @@ export type AuthForgotPasswordResetBody = {
 };
 
 export async function authRegister(body: AuthRegisterBody) {
-  return authFetch<{ message?: string }>(`/api/auth/register`, {
+  const response = await authFetch<null>(`/api/auth/register`, {
     method: "POST",
     body,
   });
+
+  return {
+    message: response.message ?? undefined,
+    code: response.code ?? undefined,
+  };
 }
 
 export async function authVerifyEmail(body: AuthVerifyEmailBody) {
-  return authFetch<{ status?: string; message?: string }>(
-    `/api/auth/verify-email`,
-    { method: "POST", body },
-  );
-}
-
-export async function authResendOtp(body: AuthResendOtpBody) {
-  return authFetch<{ message?: string }>(`/api/auth/resend-otp`, {
+  const response = await authFetch<null>(`/api/auth/verify-email`, {
     method: "POST",
     body,
   });
+
+  return {
+    status: response.code ?? (response.success ? "SUCCESS" : undefined),
+    message: response.message ?? undefined,
+    code: response.code ?? undefined,
+  };
+}
+
+export async function authResendOtp(body: AuthResendOtpBody) {
+  const response = await authFetch<null>(`/api/auth/resend-otp`, {
+    method: "POST",
+    body,
+  });
+
+  return {
+    message: response.message ?? undefined,
+    code: response.code ?? undefined,
+  };
 }
 
 export async function authLogin(body: AuthLoginBody) {
-  return authFetch<{
+  const response = await authFetch<{
     status: string;
     tempToken?: string;
     accessToken?: string;
     user?: AuthUserInfo;
-    message?: string;
   }>(`/api/auth/login`, { method: "POST", body });
+
+  return withResponseMeta(response);
 }
 
 export async function authLogin2fa(body: AuthLogin2faBody) {
-  return authFetch<{
+  const response = await authFetch<{
     status: string;
     accessToken?: string;
     user?: AuthUserInfo;
-    message?: string;
   }>(`/api/auth/login/2fa`, { method: "POST", body });
+
+  return withResponseMeta(response);
 }
 
 export async function authRefresh() {
-  return authFetch<{ accessToken: string }>(`/api/auth/refresh`, {
+  const response = await authFetch<{ accessToken: string }>(`/api/auth/refresh`, {
     method: "POST",
   });
+
+  return withResponseMeta(response);
 }
 
 export async function authLogout() {
-  return authFetch<{ message?: string }>(`/api/auth/logout`, {
+  const response = await authFetch<null>(`/api/auth/logout`, {
     method: "POST",
   });
+
+  return {
+    message: response.message ?? undefined,
+    code: response.code ?? undefined,
+  };
 }
 
 export async function authForgotPassword(body: AuthForgotPasswordBody) {
-  return authFetch<{ message?: string }>(`/api/auth/forgot-password`, {
+  const response = await authFetch<null>(`/api/auth/forgot-password`, {
     method: "POST",
     body,
   });
+
+  return {
+    message: response.message ?? undefined,
+    code: response.code ?? undefined,
+  };
 }
 
 export async function authForgotPasswordVerifyOtp(
   body: AuthForgotPasswordVerifyOtpBody,
 ) {
-  return authFetch<{ message?: string; resetToken?: string }>(
+  const response = await authFetch<{ resetToken?: string }>(
     `/api/auth/forgot-password/verify-otp`,
     { method: "POST", body },
   );
+
+  return withResponseMeta(response);
 }
 
 export async function authForgotPasswordReset(
   body: AuthForgotPasswordResetBody,
 ) {
-  return authFetch<{ message?: string; status?: string }>(
-    `/api/auth/forgot-password/reset`,
-    { method: "POST", body },
-  );
+  const response = await authFetch<null>(`/api/auth/forgot-password/reset`, {
+    method: "POST",
+    body,
+  });
+
+  return {
+    message: response.message ?? undefined,
+    status: response.code ?? (response.success ? "SUCCESS" : undefined),
+    code: response.code ?? undefined,
+  };
 }
 
 export async function authGoogleUrl() {
-  return authFetch<{ url: string }>(`/api/auth/google/url`, {
+  const response = await authFetch<{ url: string }>(`/api/auth/google/url`, {
     method: "GET",
   });
+
+  return withResponseMeta(response);
 }
 
 export type AuthGoogleCallbackBody = {
@@ -379,10 +607,11 @@ export type AuthGoogleCallbackBody = {
 };
 
 export async function authGoogleCallback(body: AuthGoogleCallbackBody) {
-  return authFetch<{
+  const response = await authFetch<{
     status: string;
     accessToken?: string;
     user?: AuthUserInfo;
-    message?: string;
   }>(`/api/auth/google/callback`, { method: "POST", body });
+
+  return withResponseMeta(response);
 }

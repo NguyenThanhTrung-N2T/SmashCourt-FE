@@ -96,7 +96,6 @@ export default function WorkspaceHomeShell({
   user,
 }: WorkspaceHomeShellProps) {
   const router = useRouter();
-  const [currentAccessToken, setCurrentAccessToken] = useState(accessToken);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -117,7 +116,6 @@ export default function WorkspaceHomeShell({
       setRefreshing(true);
       const data = await authRefresh();
       setAccessToken(data.accessToken);
-      setCurrentAccessToken(data.accessToken);
       setMessage("Phiên làm việc đã được gia hạn bảo mật.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Đã có lỗi mạng.");
@@ -147,6 +145,7 @@ export default function WorkspaceHomeShell({
   }
 
   const initials = getInitials(user.fullName);
+  const hasAccessToken = accessToken.trim().length > 0;
   const controlsDisabled = refreshing || loggingOut || redirecting;
 
   // Theme definition
@@ -453,7 +452,7 @@ export default function WorkspaceHomeShell({
               <div className="mt-6 pt-6 border-t-2 border-slate-200">
                 <button 
                   onClick={onRefreshToken} 
-                  disabled={controlsDisabled} 
+                  disabled={controlsDisabled || !hasAccessToken} 
                   className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r ${themeColors.gradient} px-6 py-3.5 text-sm font-extrabold text-white shadow-xl shadow-${themeColors.primary}-500/30 transition-all hover:shadow-2xl hover:-translate-y-1 active:scale-95 disabled:opacity-60`}
                 >
                   <RefreshCw className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`} />

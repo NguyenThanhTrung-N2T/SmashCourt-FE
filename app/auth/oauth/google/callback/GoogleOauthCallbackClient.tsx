@@ -2,14 +2,36 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Shield, CheckCircle2, AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Shield } from "lucide-react";
 
-import { authGoogleCallback } from "@/src/auth/api/authApi";
+import {
+  AuthApiError,
+  authGoogleCallback,
+  hasAuthErrorCode,
+} from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
 import { getRedirectPathByRole } from "@/src/auth/constants";
 import { setAuthenticatedSession } from "@/src/auth/session/sessionStore";
 
 const REDIRECT_MS = 2000;
+
+function isAlternativeLoginMethodError(input: unknown, message?: string) {
+  if (!hasAuthErrorCode(input, ["CONFLICT", "BAD_REQUEST"])) {
+    return false;
+  }
+
+  const normalized = (message ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  return (
+    normalized.includes("da dang ky bang mat khau") ||
+    normalized.includes("dang nhap bang email") ||
+    normalized.includes("da dang ky bang google") ||
+    normalized.includes("dang nhap bang google")
+  );
+}
 
 export default function GoogleOauthCallbackClient() {
   const router = useRouter();
@@ -27,12 +49,13 @@ export default function GoogleOauthCallbackClient() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (showToast) {
-      const timer = window.setTimeout(() => {
-        setShowToast(false);
-      }, 3500);
-      return () => clearTimeout(timer);
-    }
+    if (!showToast) return;
+
+    const timer = window.setTimeout(() => {
+      setShowToast(false);
+    }, 3500);
+
+    return () => clearTimeout(timer);
   }, [showToast]);
 
   useEffect(() => {
@@ -54,6 +77,7 @@ export default function GoogleOauthCallbackClient() {
 
       try {
         const data = await authGoogleCallback({ code, state });
+
         if (data.status === "Success") {
           if (data.accessToken && data.user) {
             setAuthenticatedSession({
@@ -61,6 +85,7 @@ export default function GoogleOauthCallbackClient() {
               user: data.user,
             });
           }
+
           const role = data.user?.role as string | undefined;
 
           if (!cancelled) {
@@ -73,13 +98,7 @@ export default function GoogleOauthCallbackClient() {
         }
 
         const errorMessage = data.message ?? "Đăng nhập Google thất bại.";
-        const normalized = errorMessage.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        if (
-          normalized.includes("da dang ky bang mat khau") ||
-          normalized.includes("dang nhap bang email") ||
-          errorMessage.includes("đã đăng ký") ||
-          errorMessage.includes("mật khẩu")
-        ) {
+        if (isAlternativeLoginMethodError(data, errorMessage)) {
           setToastError(errorMessage);
           setShowToast(true);
         } else {
@@ -87,25 +106,29 @@ export default function GoogleOauthCallbackClient() {
         }
       } catch (err) {
         if (cancelled) return;
-        const errorMessage = err instanceof Error ? err.message : "Đăng nhập Google thất bại.";
-        const normalized = errorMessage.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        if (
-          normalized.includes("da dang ky bang mat khau") ||
-          normalized.includes("dang nhap bang email") ||
-          errorMessage.includes("đã đăng ký") ||
-          errorMessage.includes("mật khẩu")
-        ) {
+
+        const errorMessage =
+          err instanceof AuthApiError
+            ? err.message
+            : err instanceof Error
+              ? err.message
+              : "Đăng nhập Google thất bại.";
+
+        if (isAlternativeLoginMethodError(err, errorMessage)) {
           setToastError(errorMessage);
           setShowToast(true);
         } else {
           setError(errorMessage);
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     void run();
+
     return () => {
       cancelled = true;
       if (redirectTimeoutRef.current) {
@@ -124,11 +147,11 @@ export default function GoogleOauthCallbackClient() {
         <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">
           Đăng nhập với Google
         </h2>
-        {loading && !error && !toastError && (
-          <p className="mt-4 text-lg font-bold text-emerald-600 animate-pulse">
+        {loading && !error && !toastError ? (
+          <p className="mt-4 animate-pulse text-lg font-bold text-emerald-600">
             Hoàn tất quá trình xác thực...
           </p>
-        )}
+        ) : null}
       </div>
 
       {loading && !error && !toastError ? (
@@ -143,32 +166,33 @@ export default function GoogleOauthCallbackClient() {
             </p>
             <div className="flex justify-center gap-1">
               <div className="h-2 w-2 animate-bounce rounded-full bg-emerald-600" />
-              <div className="h-2 w-2 animate-bounce rounded-full bg-emerald-600 animation-delay-100" />
-              <div className="h-2 w-2 animate-bounce rounded-full bg-emerald-600 animation-delay-200" />
+              <div className="animation-delay-100 h-2 w-2 animate-bounce rounded-full bg-emerald-600" />
+              <div className="animation-delay-200 h-2 w-2 animate-bounce rounded-full bg-emerald-600" />
             </div>
           </div>
 
           <div className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <p className="text-xs font-medium text-slate-500">
-              ℹ️ Vui lòng không đóng trang này trong khi xác thực thông tin của
-              bạn
+              Vui lòng không đóng trang này trong khi xác thực thông tin của bạn
             </p>
           </div>
         </div>
       ) : error || toastError ? (
         <div className="space-y-4">
-          {error && (
+          {error ? (
             <div className="flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4">
               <AlertCircle className="h-6 w-6 shrink-0 text-red-600" />
               <div className="flex-1">
                 <p className="text-sm font-bold text-red-800">{error}</p>
               </div>
             </div>
-          )}
+          ) : null}
 
           <div className="space-y-3 text-center">
             <p className="mt-2 text-sm font-medium text-slate-600">
-              {toastError ? "Tài khoản đã được đăng ký bằng phương thức khác. Vui lòng đăng nhập lại." : "Có vấn đề xảy ra? Vui lòng thử lại."}
+              {toastError
+                ? "Tài khoản đã được đăng ký bằng phương thức khác. Vui lòng đăng nhập lại."
+                : "Có vấn đề xảy ra. Vui lòng thử lại."}
             </p>
             <a
               href="/auth/login"

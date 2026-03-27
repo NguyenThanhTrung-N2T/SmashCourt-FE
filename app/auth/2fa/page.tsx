@@ -6,7 +6,12 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { AlertCircle, Shield } from "lucide-react";
 
-import { AuthApiError, authLogin2fa } from "@/src/auth/api/authApi";
+import {
+  AuthApiError,
+  authLogin2fa,
+  getAuthFieldError,
+  hasAuthErrorCode,
+} from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
 import OtpInput from "@/src/auth/components/OtpInput";
 import { getRedirectPathByRole } from "@/src/auth/constants";
@@ -74,7 +79,25 @@ function normalizeText(value: string | null | undefined) {
     .toLowerCase();
 }
 
-function shouldResetTwoFactorSession(message?: string) {
+function shouldResetTwoFactorSession(input?: unknown) {
+  if (
+    hasAuthErrorCode(input, [
+      "TOKEN_INVALID",
+      "OTP_LIMIT_EXCEEDED",
+      "ACCOUNT_LOCKED",
+      "UNAUTHORIZED",
+      "FORBIDDEN",
+    ])
+  ) {
+    return true;
+  }
+
+  const message =
+    typeof input === "string"
+      ? input
+      : input instanceof Error
+        ? input.message
+        : undefined;
   const normalizedMessage = normalizeText(message);
   return TWO_FACTOR_RESET_PATTERNS.some((pattern) =>
     normalizedMessage.includes(pattern),
@@ -283,7 +306,7 @@ export default function TwoFactorPage() {
         }));
 
         if (
-          shouldResetTwoFactorSession(err.message) ||
+          shouldResetTwoFactorSession(err) ||
           (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
             MAX_VERIFY_ATTEMPTS
         ) {
@@ -292,8 +315,11 @@ export default function TwoFactorPage() {
           );
           return;
         }
-
-        setSubmitError(err.message || AUTH_GENERIC.twoFaFailed);
+        setSubmitError(
+          getAuthFieldError(err, "otpCode") ??
+            err.message ??
+            AUTH_GENERIC.twoFaFailed,
+        );
         return;
       }
 

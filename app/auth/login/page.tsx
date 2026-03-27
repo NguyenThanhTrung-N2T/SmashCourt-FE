@@ -6,7 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { AlertCircle, CheckCircle2, Lock, LogIn, Mail } from "lucide-react";
 
-import { authGoogleUrl, authLogin } from "@/src/auth/api/authApi";
+import {
+  authGoogleUrl,
+  authLogin,
+  hasAuthErrorCode,
+} from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
 import { getRedirectPathByRole } from "@/src/auth/constants";
 import {
@@ -27,7 +31,17 @@ function normalizeText(value: string | null | undefined) {
     .toLowerCase();
 }
 
-function isAccountLockedError(message?: string) {
+function isAccountLockedError(input: unknown) {
+  if (hasAuthErrorCode(input, "ACCOUNT_LOCKED")) {
+    return true;
+  }
+
+  const message =
+    typeof input === "string"
+      ? input
+      : input instanceof Error
+        ? input.message
+        : undefined;
   const normalized = normalizeText(message);
   const lockedPatterns = [
     "tam khoa",
@@ -150,7 +164,7 @@ export default function LoginPage() {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Đăng nhập thất bại.";
-      if (isAccountLockedError(errorMessage)) {
+      if (isAccountLockedError(err)) {
         setLockedAccountError(errorMessage);
       } else {
         setError(errorMessage);
@@ -175,7 +189,7 @@ export default function LoginPage() {
         err instanceof Error
           ? err.message
           : "Không thể kết nối đăng nhập Google.";
-      if (isAccountLockedError(errorMessage)) {
+      if (isAccountLockedError(err)) {
         setLockedAccountError(errorMessage);
       } else {
         setError(errorMessage);

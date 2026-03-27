@@ -6,7 +6,10 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { AlertCircle, Mail, Send } from "lucide-react";
 
-import { authForgotPassword } from "@/src/auth/api/authApi";
+import {
+  authForgotPassword,
+  getAuthFieldError,
+} from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
 import {
   setEmail,
@@ -22,12 +25,13 @@ export default function ForgotPasswordPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (toastError) {
-      const timer = window.setTimeout(() => {
-        setToastError(null);
-      }, 3500);
-      return () => clearTimeout(timer);
-    }
+    if (!toastError) return;
+
+    const timer = window.setTimeout(() => {
+      setToastError(null);
+    }, 3500);
+
+    return () => clearTimeout(timer);
   }, [toastError]);
 
   useEffect(() => {
@@ -40,7 +44,7 @@ export default function ForgotPasswordPage() {
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail) {
-      setError("Vui lòng nhập email.");
+      setError("Vui lÃ²ng nháº­p email.");
       return;
     }
 
@@ -49,12 +53,17 @@ export default function ForgotPasswordPage() {
       const data = await authForgotPassword({ email: trimmedEmail });
       setEmail(trimmedEmail);
       setForgotPasswordFlashMessage(
-        data.message ?? "Nếu email tồn tại, mã OTP sẽ được gửi tới hộp thư của bạn.",
+        data.message ??
+          "Náº¿u email tá»“n táº¡i, mÃ£ OTP sáº½ Ä‘Æ°á»£c gá»­i tá»›i há»™p thÆ° cá»§a báº¡n.",
       );
       router.push("/auth/forgot-password/verify-otp");
     } catch (err) {
+      const fieldError = getAuthFieldError(err, "email");
       setToastError(
-        err instanceof Error ? err.message : "Gửi yêu cầu khôi phục thất bại.",
+        fieldError ??
+          (err instanceof Error
+            ? err.message
+            : "Gá»­i yÃªu cáº§u khÃ´i phá»¥c tháº¥t báº¡i."),
       );
     } finally {
       setLoading(false);
@@ -69,10 +78,10 @@ export default function ForgotPasswordPage() {
     >
       <div className="mb-10 text-center">
         <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">
-          Quên mật khẩu
+          QuÃªn máº­t kháº©u
         </h2>
         <p className="mt-3 text-base font-medium text-slate-600">
-          Nhập email của bạn để nhận mã OTP khôi phục.
+          Nháº­p email cá»§a báº¡n Ä‘á»ƒ nháº­n mÃ£ OTP khÃ´i phá»¥c.
         </p>
       </div>
 
@@ -88,7 +97,7 @@ export default function ForgotPasswordPage() {
       <form className="flex flex-col gap-6" onSubmit={onSubmit}>
         <div className="space-y-2">
           <label className="text-sm font-bold text-slate-900">
-            Email cá nhân
+            Email cÃ¡ nhÃ¢n
           </label>
           <div className="group relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-emerald-600">
@@ -113,10 +122,10 @@ export default function ForgotPasswordPage() {
           className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-4 text-base font-extrabold text-white shadow-lg shadow-slate-900/20 transition-all duration-300 hover:-translate-y-1 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-60"
         >
           {loading ? (
-            "Đang xử lý..."
+            "Äang xá»­ lÃ½..."
           ) : (
             <>
-              Gửi mã OTP ngay <Send className="h-5 w-5" />
+              Gá»­i mÃ£ OTP ngay <Send className="h-5 w-5" />
             </>
           )}
         </button>
@@ -126,7 +135,7 @@ export default function ForgotPasswordPage() {
             href="/auth/login"
             className="inline-flex min-h-12 items-center justify-center rounded-xl px-5 text-base font-bold text-emerald-600 underline-offset-2 transition-colors hover:bg-emerald-50 hover:text-emerald-700 hover:underline"
           >
-            Quay lại trang đăng nhập
+            Quay láº¡i trang Ä‘Äƒng nháº­p
           </Link>
         </p>
       </form>
