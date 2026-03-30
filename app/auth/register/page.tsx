@@ -69,13 +69,13 @@ export default function RegisterPage() {
     const trimmedFullName = fullName.trim();
     const trimmedPhone = phone.trim();
 
-    if (!trimmedEmail) return setError("Vui lÃ²ng nháº­p email.");
-    if (!trimmedFullName) return setError("Vui lÃ²ng nháº­p há» vÃ  tÃªn.");
-    if (!password) return setError("Vui lÃ²ng nháº­p máº­t kháº©u.");
+    if (!trimmedEmail) return setError("Vui lòng nhập email.");
+    if (!trimmedFullName) return setError("Vui lòng nhập họ và tên.");
+    if (!password) return setError("Vui lòng nhập mật khẩu.");
 
     if (!isValidPassword(password)) {
       return setError(
-        "Máº­t kháº©u pháº£i cÃ³ Ã­t nháº¥t 8 kÃ½ tá»±, gá»“m 1 chá»¯ hoa, 1 sá»‘ vÃ  1 kÃ½ tá»± Ä‘áº·c biá»‡t.",
+        "Mật khẩu phải có ít nhất 8 ký tự, gồm 1 chữ hoa, 1 số và 1 ký tự đặc biệt.",
       );
     }
 
@@ -101,7 +101,7 @@ export default function RegisterPage() {
         null;
       const errorMessage =
         fieldError ??
-        (err instanceof Error ? err.message : "ÄÄƒng kÃ½ tháº¥t báº¡i.");
+        (err instanceof Error ? err.message : "Đăng ký thất bại.");
 
       if (
         hasAuthErrorCode(err, "CONFLICT") &&
@@ -124,10 +124,10 @@ export default function RegisterPage() {
     >
       <div className="mb-10 text-center">
         <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">
-          Má»Ÿ tÃ i khoáº£n
+          Mở tài khoản
         </h2>
         <p className="mt-3 text-base font-medium text-slate-600">
-          DÃ nh cho há»™i viÃªn trá»±c thuá»™c há»‡ thá»‘ng chi nhÃ¡nh.
+          Dành cho hội viên trực thuộc hệ thống chi nhánh.
         </p>
       </div>
 
@@ -143,7 +143,7 @@ export default function RegisterPage() {
       <form className="flex flex-col gap-6" onSubmit={onSubmit}>
         <div className="space-y-2">
           <label className="text-sm font-bold text-slate-900">
-            Email cÃ¡ nhÃ¢n
+            Email cá nhân
           </label>
           <div className="group relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-emerald-600">
@@ -162,14 +162,14 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-900">Há» vÃ  tÃªn</label>
+          <label className="text-sm font-bold text-slate-900">Họ và tên</label>
           <div className="group relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-emerald-600">
               <User className="h-5 w-5" />
             </div>
             <input
               className="block w-full rounded-xl border-2 border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 font-medium text-slate-900 outline-none transition-all duration-200 ease-out placeholder:font-normal placeholder:text-slate-400 hover:border-emerald-300 hover:shadow-md focus:bg-white focus:border-emerald-500 focus:shadow-lg focus:ring-4 focus:ring-emerald-500/10 focus:duration-150 motion-reduce:transition-none"
-              placeholder="Nguyá»…n VÄƒn A"
+              placeholder="Nguyễn Văn A"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               autoComplete="name"
@@ -180,7 +180,7 @@ export default function RegisterPage() {
 
         <div className="space-y-2">
           <label className="text-sm font-bold text-slate-900">
-            Sá»‘ Ä‘iá»‡n thoáº¡i{" "}
+            Số điện thoại{" "}
           </label>
           <div className="group relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-emerald-600">
@@ -198,14 +198,14 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-900">Máº­t kháº©u</label>
+          <label className="text-sm font-bold text-slate-900">Mật khẩu</label>
           <div className="group relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-emerald-600">
               <Lock className="h-5 w-5" />
             </div>
             <input
               className="block w-full rounded-xl border-2 border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 font-medium text-slate-900 outline-none transition-all duration-200 ease-out placeholder:font-normal placeholder:text-slate-400 hover:border-emerald-300 hover:shadow-md focus:bg-white focus:border-emerald-500 focus:shadow-lg focus:ring-4 focus:ring-emerald-500/10 focus:duration-150 motion-reduce:transition-none"
-              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
@@ -221,21 +221,21 @@ export default function RegisterPage() {
           className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-4 text-base font-extrabold text-white shadow-lg shadow-slate-900/20 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/30 active:translate-y-0 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 motion-reduce:hover:translate-y-0 motion-reduce:active:scale-100"
         >
           {loading ? (
-            "Äang xá»­ lÃ½..."
+            "Đang xử lý..."
           ) : (
             <>
-              Táº¡o tÃ i khoáº£n ngay <UserPlus className="h-5 w-5" />
+              Tạo tài khoản ngay <UserPlus className="h-5 w-5" />
             </>
           )}
         </button>
 
         <p className="mt-8 text-center text-base font-medium text-slate-600">
-          ÄÃ£ cÃ³ mÃ£ há»™i viÃªn?{" "}
+          Đã có mã hội viên?{" "}
           <Link
             href="/auth/login"
             className="inline-flex min-h-12 items-center justify-center rounded-xl px-4 text-lg font-extrabold text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-500 hover:underline"
           >
-            ÄÄƒng nháº­p há»‡ thá»‘ng
+            Đăng nhập hệ thống
           </Link>
         </p>
       </form>

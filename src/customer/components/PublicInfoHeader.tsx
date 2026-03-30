@@ -24,7 +24,12 @@ type TabConfig = {
 const TABS: TabConfig[] = [
   { id: "home", href: "/", label: "Trang chủ", icon: Home },
   { id: "about", href: "/about", label: "Giới thiệu", icon: BookOpenText },
-  { id: "cancellation-policy", href: "/cancellation-policy", label: "Chính sách", icon: TimerReset },
+  {
+    id: "cancellation-policy",
+    href: "/cancellation-policy",
+    label: "Chính sách",
+    icon: TimerReset,
+  },
 ];
 
 export default function PublicInfoHeader() {
@@ -39,7 +44,8 @@ export default function PublicInfoHeader() {
 
   const activeTab = useMemo<TabId>(() => {
     if (pathname === "/") return "home";
-    if (pathname.startsWith("/cancellation-policy")) return "cancellation-policy";
+    if (pathname.startsWith("/cancellation-policy"))
+      return "cancellation-policy";
     return "about";
   }, [pathname]);
 
@@ -68,24 +74,30 @@ export default function PublicInfoHeader() {
       <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
         <div className="rounded-[2rem] border border-white/70 bg-white/82 px-4 py-3 shadow-[0_20px_60px_-28px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:px-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <Link href="/" className="inline-flex items-center gap-3 text-slate-950 transition-colors hover:text-emerald-600">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-3 text-slate-950 transition-colors hover:text-emerald-600"
+            >
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30">
                 <Activity className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-lg font-black tracking-tight">SmashCourt</p>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Quản lý và đặt sân
-                </p>
               </div>
             </Link>
 
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
               <div className="flex justify-center lg:justify-start">
-                <div ref={containerRef} className="relative inline-flex rounded-full border border-slate-200 bg-slate-100/90 p-1 shadow-inner">
+                <div
+                  ref={containerRef}
+                  className="relative inline-flex rounded-full border border-slate-200 bg-slate-100/90 p-1 shadow-inner"
+                >
                   <div
                     className="absolute bottom-1 top-1 rounded-full bg-slate-950 shadow-lg transition-all duration-300 ease-out"
-                    style={{ width: `${indicatorStyle.width}px`, transform: `translateX(${indicatorStyle.left}px)` }}
+                    style={{
+                      width: `${indicatorStyle.width}px`,
+                      transform: `translateX(${indicatorStyle.left}px)`,
+                    }}
                   />
                   {TABS.map((tab) => {
                     const Icon = tab.icon;
@@ -113,10 +125,16 @@ export default function PublicInfoHeader() {
                   <PhoneCall className="h-4 w-4" />
                   1900 9999
                 </div>
-                <Link href="/auth/login" className="text-sm font-bold text-slate-700 transition-colors hover:text-emerald-600 sm:text-base">
+                <Link
+                  href="/auth/login"
+                  className="text-sm font-bold text-slate-700 transition-colors hover:text-emerald-600 sm:text-base"
+                >
                   Đăng nhập
                 </Link>
-                <Link href="/auth/register" className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-2.5 text-sm font-extrabold text-white transition-all hover:-translate-y-0.5 hover:bg-emerald-600">
+                <Link
+                  href="/auth/register"
+                  className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-2.5 text-sm font-extrabold text-white transition-all hover:-translate-y-0.5 hover:bg-emerald-600"
+                >
                   Bắt đầu ngay
                   <ArrowRight className="h-4 w-4" />
                 </Link>

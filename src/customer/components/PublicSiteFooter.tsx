@@ -14,13 +14,10 @@ export default function PublicSiteFooter() {
             <div>
               <p className="text-lg font-black tracking-tight">SmashCourt</p>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Booking and operations
+                Quản lý & Đặt sân Cầu lông Trực tuyến
               </p>
             </div>
           </div>
-          <p className="mt-5 text-sm leading-7 text-slate-400 sm:text-base">
-            Ba trang public được tách gọn để khách hàng xem đúng thông tin ở đúng nơi: Trang chủ, Giới thiệu và Chính sách hủy.
-          </p>
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-6">
@@ -28,13 +25,22 @@ export default function PublicSiteFooter() {
             <PhoneCall className="h-4 w-4" />
             1900 9999
           </div>
-          <Link href="/about" className="text-sm font-bold text-slate-300 transition-colors hover:text-white">
+          <Link
+            href="/about"
+            className="text-sm font-bold text-slate-300 transition-colors hover:text-white"
+          >
             Giới thiệu
           </Link>
-          <Link href="/cancellation-policy" className="text-sm font-bold text-slate-300 transition-colors hover:text-white">
+          <Link
+            href="/cancellation-policy"
+            className="text-sm font-bold text-slate-300 transition-colors hover:text-white"
+          >
             Chính sách hủy
           </Link>
-          <Link href="/auth/register" className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-extrabold text-white transition-all hover:-translate-y-0.5 hover:bg-emerald-400">
+          <Link
+            href="/auth/register"
+            className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-extrabold text-white transition-all hover:-translate-y-0.5 hover:bg-emerald-400"
+          >
             Tạo tài khoản
             <ArrowRight className="h-4 w-4" />
           </Link>
