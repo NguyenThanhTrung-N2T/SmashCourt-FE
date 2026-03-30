@@ -15,10 +15,12 @@ import {
   ShieldCheck,
   Sparkles,
   Store,
+  Trophy,
   UserPlus,
   Users,
   XCircle,
 } from "lucide-react";
+import LoyaltyTierPanel from "@/src/owner/components/LoyaltyTierPanel";
 
 import { authLogout } from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
@@ -56,9 +58,14 @@ const MENU_ITEMS: MenuItem[] = [
     hint: "Quản lý Manager & Staff",
   },
   {
+    label: "Hạng Thành viên",
+    icon: <Trophy className="h-5 w-5" />,
+    hint: "Điểm thưởng & Tỷ lệ giảm giá",
+  },
+  {
     label: "Cài đặt Hệ thống",
     icon: <Settings className="h-5 w-5" />,
-    hint: "Chính sách hủy, Hạng thành viên",
+    hint: "Chính sách hủy, cấu hình hệ thống",
   },
 ];
 
@@ -290,6 +297,9 @@ export default function OwnerHomeShell({
             </div>
           </div>
         );
+
+      case "Hạng Thành viên":
+        return <LoyaltyTierPanel />;
 
       case "Cài đặt Hệ thống":
         return (

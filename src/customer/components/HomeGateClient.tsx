@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import GuestLanding from "@/app/GuestLanding";
 import { AuthApiError, authRefresh } from "@/src/auth/api/authApi";
@@ -12,7 +13,6 @@ import {
   type AuthUserSession,
 } from "@/src/auth/session/sessionStore";
 import CustomerHomeShell from "./CustomerHomeShell";
-import OwnerHomeShell from "@/src/owner/components/OwnerHomeShell";
 import WorkspaceHomeShell from "@/src/employee/components/WorkspaceHomeShell";
 
 function readSession() {
@@ -27,6 +27,19 @@ function readSession() {
       authUser: null,
     };
   }
+}
+
+/** Redirect OWNER to /owner (avoids calling router.push during render) */
+function OwnerRedirect() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/owner");
+  }, [router]);
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-950">
+      <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
+    </div>
+  );
 }
 
 export default function HomeGateClient() {
@@ -109,7 +122,7 @@ export default function HomeGateClient() {
   if (accessToken && authUser) {
     const role = authUser.role.toUpperCase();
     if (role === "OWNER") {
-      return <OwnerHomeShell accessToken={accessToken} user={authUser} />;
+      return <OwnerRedirect />;
     }
     if (role === "BRANCH_MANAGER" || role === "BRANCH-MANAGER" || role === "STAFF") {
       return <WorkspaceHomeShell accessToken={accessToken} user={authUser} />;
