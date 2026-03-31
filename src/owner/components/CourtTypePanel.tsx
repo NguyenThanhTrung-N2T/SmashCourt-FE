@@ -95,36 +95,70 @@ export default function CourtTypePanel() {
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
-      <div className="rounded-[2rem] border border-white/40 bg-white/80 px-8 py-8 shadow-2xl backdrop-blur-xl">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-700 w-fit">
-              <Grid3x3 className="h-3 w-3" />
-              Court Type
+      <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-8 text-white shadow-xl shadow-slate-900/10">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-indigo-500/20 blur-[60px]" />
+        <div className="pointer-events-none absolute -left-10 -bottom-10 h-64 w-64 rounded-full bg-violet-500/10 blur-[50px]" />
+
+        <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center w-full">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-indigo-300">
+              <Grid3x3 className="h-3.5 w-3.5" /> Quản trị
             </div>
-            <h1 className="mt-3 text-3xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-indigo-800 to-violet-800 bg-clip-text text-transparent">
-              Quản lý Loại sân
+            <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl text-white">
+              Quản lý{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">
+                Loại sân
+              </span>
             </h1>
-            <p className="mt-1 text-sm font-medium text-slate-500 max-w-2xl">
+            <p className="mt-2 text-sm text-slate-400 max-w-md">
               Tạo và quản lý các loại sân cầu lông. Loại sân sẽ được sử dụng khi tạo sân tại các chi nhánh.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={load}
-              disabled={loading}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-all hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 active:scale-95 disabled:opacity-60"
+
+          <div className="hidden shrink-0 sm:flex items-center justify-center pr-4">
+            <div
+              className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-indigo-500/10 border border-white/10 shadow-[0_0_30px_rgba(99,102,241,0.15)] animate-pulse"
+              style={{ animationDuration: "3s" }}
             >
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            </button>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
-            >
-              <Plus className="h-4 w-4" />
-              Tạo loại sân
-            </button>
+              <div
+                className="absolute inset-2 rounded-3xl border border-indigo-500/20 border-dashed animate-spin"
+                style={{ animationDuration: "15s" }}
+              />
+              <Grid3x3 className="relative h-10 w-10 text-indigo-400" />
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* Action Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-bold tracking-tight text-slate-800">
+            Danh sách loại sân
+          </h2>
+          <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
+            {courtTypes.length} loại
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={load}
+            disabled={loading}
+            className="inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            Làm mới
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex h-9 items-center gap-2 rounded-xl bg-indigo-50 px-4 text-xs font-bold text-indigo-700 border border-indigo-100 shadow-sm hover:bg-indigo-100 transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Tạo loại sân
+          </button>
         </div>
       </div>
 
@@ -177,27 +211,6 @@ export default function CourtTypePanel() {
       {/* Table */}
       {!loading && !error && courtTypes.length > 0 && (
         <div className="overflow-hidden rounded-2xl border-2 border-slate-100 bg-white shadow-xl shadow-slate-200/50">
-          <div className="bg-gradient-to-r from-slate-50 via-indigo-50 to-violet-50 px-6 py-4 border-b-2 border-slate-100">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg">
-                  <Grid3x3 className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-900">Danh sách loại sân</p>
-                  <p className="text-xs text-slate-500">Tổng số: <span className="font-bold text-indigo-600">{courtTypes.length}</span> loại</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                  <span className="text-xs font-bold text-emerald-700">
-                    {courtTypes.filter(ct => isActive(ct.status)).length} hoạt động
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
           <table className="w-full text-left">
             <thead className="bg-gradient-to-r from-slate-50 to-indigo-50/50 border-b-2 border-slate-100">
               <tr>

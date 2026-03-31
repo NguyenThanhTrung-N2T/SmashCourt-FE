@@ -1,5 +1,7 @@
 "use client";
 
+// Updated: 2026-04-01 - Redesigned header to match CourtTypePanel and CancellationPolicyManager
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
@@ -685,6 +687,8 @@ function TierCard({ tier, index, onViewDetail, onEdit }: TierCardProps) {
 // ─── Main Panel ───────────────────────────────────────────────────────────────
 
 export default function LoyaltyTierPanel() {
+  console.log("🎯 LoyaltyTierPanel rendered - NEW VERSION with dark header");
+  
   const [tiers, setTiers] = useState<LoyaltyTierDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -737,47 +741,72 @@ export default function LoyaltyTierPanel() {
   return (
     <>
       {/* Panel card */}
-      <div
-        className="rounded-[2.5rem] border-2 border-white/30 bg-white/80 px-10 py-10 shadow-2xl shadow-slate-900/10 backdrop-blur-xl transition-all hover:shadow-3xl animate-slide-up"
-        style={{ animationDelay: "0.3s" }}
-      >
+      <div className="space-y-6 animate-slide-up">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 mb-8">
-          <div className="flex-1">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-black uppercase tracking-widest text-amber-700">
-              <Trophy className="h-3.5 w-3.5" />
-              Loyalty Tier
+        <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-8 text-white shadow-xl shadow-slate-900/10">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-amber-500/20 blur-[60px]" />
+          <div className="pointer-events-none absolute -left-10 -bottom-10 h-64 w-64 rounded-full bg-yellow-500/10 blur-[50px]" />
+
+          <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center w-full">
+            <div>
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-300">
+                <Trophy className="h-3.5 w-3.5" /> Quản trị
+              </div>
+              <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl text-white">
+                Quản lý{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400">
+                  Hạng thành viên
+                </span>
+              </h1>
+              <p className="mt-2 text-sm text-slate-400 max-w-md">
+                Xem và điều chỉnh điểm tối thiểu & tỷ lệ giảm giá cho từng hạng. Hệ thống tự động xếp loại khách hàng theo điểm tích lũy.
+              </p>
             </div>
-            <h2 className="mt-4 text-2xl font-extrabold bg-gradient-to-r from-slate-900 to-amber-600 bg-clip-text text-transparent lg:text-3xl">
-              Quản lý Hạng thành viên
+
+            <div className="hidden shrink-0 sm:flex items-center justify-center pr-4">
+              <div
+                className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-amber-500/10 border border-white/10 shadow-[0_0_30px_rgba(251,191,36,0.15)] animate-pulse"
+                style={{ animationDuration: "3s" }}
+              >
+                <div
+                  className="absolute inset-2 rounded-3xl border border-amber-500/20 border-dashed animate-spin"
+                  style={{ animationDuration: "15s" }}
+                />
+                <Trophy className="relative h-10 w-10 text-amber-400" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Action Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold tracking-tight text-slate-800">
+              Danh sách hạng thành viên
             </h2>
-            <p className="mt-3 text-sm font-medium text-slate-600 lg:text-base">
-              Xem và điều chỉnh điểm tối thiểu & tỷ lệ giảm giá cho từng hạng.
-              Hệ thống tự động xếp loại khách hàng theo điểm tích lũy.
-            </p>
+            <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
+              {tiers.length} hạng
+            </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
+              type="button"
               id="refresh-tiers-btn"
               onClick={load}
               disabled={loading}
-              className="flex h-12 w-12 items-center justify-center rounded-2xl border-2 border-slate-200 bg-white text-slate-600 shadow-sm transition-all hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 hover:-translate-y-0.5 hover:shadow-md active:scale-95 disabled:opacity-60"
+              className="inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50"
               aria-label="Tải lại"
             >
-              <RefreshCw
-                className={`h-5 w-5 ${loading ? "animate-spin" : ""}`}
-              />
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+              Làm mới
             </button>
-            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-400 to-yellow-500 text-white shadow-xl shadow-amber-500/30">
-              <Trophy className="h-8 w-8" />
-            </div>
           </div>
         </div>
 
         {/* Summary bar */}
         {!loading && !error && tiers.length > 0 && (
-          <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {tiers.map((tier) => {
               const theme = getTierTheme(tier.name);
               const TierIcon = theme.icon;
@@ -789,7 +818,7 @@ export default function LoyaltyTierPanel() {
                   <div
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${theme.gradient} text-white shadow-sm`}
                   >
-                    <TierIcon className="h-4.5 w-4.5 h-5 w-5" />
+                    <TierIcon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
                     <p className={`text-xs font-extrabold truncate ${theme.textAccent}`}>

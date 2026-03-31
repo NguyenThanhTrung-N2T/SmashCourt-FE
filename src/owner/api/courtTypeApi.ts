@@ -41,11 +41,17 @@ export async function fetchAllCourtTypes(): Promise<CourtTypeDto[]> {
   if (Array.isArray(data)) return data;
   
   // If data is an object with an array property, extract it
-  if (typeof data === 'object' && 'items' in data && Array.isArray(data.items)) {
-    return data.items as CourtTypeDto[];
+  if (typeof data === 'object' && 'items' in data) {
+    const dataWithItems = data as { items: unknown };
+    if (Array.isArray(dataWithItems.items)) {
+      return dataWithItems.items as CourtTypeDto[];
+    }
   }
-  if (typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
-    return data.data as CourtTypeDto[];
+  if (typeof data === 'object' && 'data' in data) {
+    const dataWithData = data as { data: unknown };
+    if (Array.isArray(dataWithData.data)) {
+      return dataWithData.data as CourtTypeDto[];
+    }
   }
   
   return [];

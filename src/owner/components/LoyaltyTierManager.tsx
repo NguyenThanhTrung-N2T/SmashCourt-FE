@@ -126,25 +126,67 @@ function TopStatsHeader({
 
   return (
     <>
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            Cấu hình Hạng thành viên
-          </h1>
-          <p className="mt-1 text-sm font-medium text-slate-500">
-            Thiết lập ngưỡng điểm xét hạng & tỷ lệ ưu đãi cho hệ thống
-          </p>
+      {/* Dark Header */}
+      <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-8 text-white shadow-xl shadow-slate-900/10 mb-6">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-amber-500/20 blur-[60px]" />
+        <div className="pointer-events-none absolute -left-10 -bottom-10 h-64 w-64 rounded-full bg-yellow-500/10 blur-[50px]" />
+
+        <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center w-full">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-300">
+              <Trophy className="h-3.5 w-3.5" /> Quản trị
+            </div>
+            <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl text-white">
+              Quản lý{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400">
+                Hạng thành viên
+              </span>
+            </h1>
+            <p className="mt-2 text-sm text-slate-400 max-w-md">
+              Thiết lập ngưỡng điểm xét hạng & tỷ lệ ưu đãi cho hệ thống. Hệ thống tự động xếp loại khách hàng theo điểm tích lũy.
+            </p>
+          </div>
+
+          <div className="hidden shrink-0 sm:flex items-center justify-center pr-4">
+            <div
+              className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-amber-500/10 border border-white/10 shadow-[0_0_30px_rgba(251,191,36,0.15)] animate-pulse"
+              style={{ animationDuration: "3s" }}
+            >
+              <div
+                className="absolute inset-2 rounded-3xl border border-amber-500/20 border-dashed animate-spin"
+                style={{ animationDuration: "15s" }}
+              />
+              <Trophy className="relative h-10 w-10 text-amber-400" />
+            </div>
+          </div>
         </div>
-        <button
-          onClick={onRefresh}
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-rose-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          Làm mới
-        </button>
+      </section>
+
+      {/* Action Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-bold tracking-tight text-slate-800">
+            Cấu hình hạng thành viên
+          </h2>
+          <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
+            {tiers.length} hạng
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={loading}
+            className="inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            Làm mới
+          </button>
+        </div>
       </div>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         {[
           { icon: Trophy, color: "text-amber-500", bg: "bg-amber-100", val: loading ? "–" : tiers.length, label: "Tổng số hạng" },
