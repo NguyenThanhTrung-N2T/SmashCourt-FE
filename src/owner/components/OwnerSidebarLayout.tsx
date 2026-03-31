@@ -7,6 +7,7 @@ import { type ReactNode, useState } from "react";
 import {
   BarChart2,
   Building2,
+  Grid3x3,
   LogOut,
   Settings,
   ShieldCheck,
@@ -50,6 +51,12 @@ const NAV_ITEMS: NavItem[] = [
     href: "/owner/staff",
     icon: Users,
     hint: "Manager & Staff",
+  },
+  {
+    label: "Loại sân",
+    href: "/owner/court-types",
+    icon: Grid3x3,
+    hint: "Quản lý các loại sân",
   },
   {
     label: "Hạng thành viên",
@@ -177,37 +184,37 @@ export default function OwnerSidebarLayout({ user, children }: Props) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`group flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-all duration-150 ${
+                    className={`group flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-all duration-200 ${
                       active
-                        ? "bg-indigo-600/30 border border-indigo-500/30"
-                        : "border border-transparent hover:bg-white/5"
+                        ? "bg-indigo-600/30 border border-indigo-500/30 shadow-lg shadow-indigo-500/20 scale-[1.02]"
+                        : "border border-transparent hover:bg-white/5 hover:scale-[1.02] hover:shadow-md"
                     }`}
                   >
                     <div
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-150 ${
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${
                         active
-                          ? "bg-indigo-500 text-white"
-                          : "bg-white/5 text-slate-400 group-hover:bg-white/10 group-hover:text-slate-200"
+                          ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/50 scale-110"
+                          : "bg-white/5 text-slate-400 group-hover:bg-gradient-to-br group-hover:from-indigo-400 group-hover:to-violet-500 group-hover:text-white group-hover:scale-110 group-hover:rotate-3"
                       }`}
                     >
                       <Icon style={{ height: "1rem", width: "1rem" }} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`text-sm truncate ${
+                        className={`text-sm truncate transition-colors ${
                           active
                             ? "font-semibold text-white"
-                            : "text-slate-300 group-hover:text-white"
+                            : "text-slate-300 group-hover:text-white group-hover:font-semibold"
                         }`}
                       >
                         {item.label}
                       </p>
-                      <p className="text-[11px] text-slate-500 truncate">
+                      <p className="text-[11px] text-slate-500 truncate group-hover:text-slate-400 transition-colors">
                         {item.hint}
                       </p>
                     </div>
                     {active && (
-                      <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400" />
+                      <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400 animate-pulse" />
                     )}
                   </Link>
                 );

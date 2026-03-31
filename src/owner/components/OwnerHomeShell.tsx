@@ -9,6 +9,7 @@ import {
   Building2,
   CheckCircle2,
   ClipboardList,
+  Grid3x3,
   LogOut,
   MailPlus,
   Settings,
@@ -21,6 +22,7 @@ import {
   XCircle,
 } from "lucide-react";
 import LoyaltyTierPanel from "@/src/owner/components/LoyaltyTierPanel";
+import CourtTypePanel from "@/src/owner/components/CourtTypePanel";
 
 import { authLogout } from "@/src/auth/api/authApi";
 import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
@@ -56,6 +58,11 @@ const MENU_ITEMS: MenuItem[] = [
     label: "Tài khoản Nhân sự",
     icon: <Users className="h-5 w-5" />,
     hint: "Quản lý Manager & Staff",
+  },
+  {
+    label: "Quản lý Loại sân",
+    icon: <Grid3x3 className="h-5 w-5" />,
+    hint: "Tạo và quản lý các loại sân",
   },
   {
     label: "Hạng Thành viên",
@@ -300,6 +307,9 @@ export default function OwnerHomeShell({
 
       case "Hạng Thành viên":
         return <LoyaltyTierPanel />;
+
+      case "Quản lý Loại sân":
+        return <CourtTypePanel />;
 
       case "Cài đặt Hệ thống":
         return (
