@@ -89,8 +89,7 @@ export default function CancellationPolicyPage() {
               <li className="flex items-start gap-3 rounded-xl bg-white/40 p-3 transition-colors hover:bg-white/60">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
                 <span>
-                  Tiền hoàn sẽ được chuyển về phương thức thanh toán ban đầu
-                  hoặc ví SmashCourt trong vòng 3-5 ngày làm việc.
+                  Tiền hoàn sẽ được nhận tại chi nhánh bạn đã đặt sân trước đó
                 </span>
               </li>
               <li className="flex items-start gap-3 rounded-xl bg-white/40 p-3 transition-colors hover:bg-white/60">

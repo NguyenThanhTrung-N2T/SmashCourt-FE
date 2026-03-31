@@ -58,6 +58,12 @@ const NAV_ITEMS: NavItem[] = [
     hint: "Điểm thưởng & Giảm giá",
   },
   {
+    label: "Chính sách",
+    href: "/owner/policy",
+    icon: ShieldCheck,
+    hint: "Quản lý chính sách hủy & hoàn tiền",
+  },
+  {
     label: "Cài đặt",
     href: "/owner/settings",
     icon: Settings,
@@ -111,11 +117,14 @@ export default function OwnerSidebarLayout({ user, children }: Props) {
   const disabled = loggingOut || redirecting;
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-indigo-50/30 to-violet-50/40">
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-violet-50/40">
       {/* BG orbs */}
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-0 h-[480px] rounded-b-[3rem] bg-gradient-to-br from-slate-900 via-indigo-900 to-violet-900" />
       <div className="pointer-events-none absolute left-10 top-16 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl animate-float" />
-      <div className="pointer-events-none absolute right-20 top-40 h-96 w-96 rounded-full bg-violet-500/10 blur-3xl animate-float" style={{ animationDelay: "1s" }} />
+      <div
+        className="pointer-events-none absolute right-20 top-40 h-96 w-96 rounded-full bg-violet-500/10 blur-3xl animate-float"
+        style={{ animationDelay: "1s" }}
+      />
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[1600px] gap-8 px-6 py-8 lg:px-10">
         {/* ── Sidebar ── */}
@@ -135,7 +144,9 @@ export default function OwnerSidebarLayout({ user, children }: Props) {
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-white">{user.fullName}</p>
+                <p className="truncate text-sm font-semibold text-white">
+                  {user.fullName}
+                </p>
                 <p className="truncate text-xs text-indigo-300">{user.email}</p>
                 <div className="mt-1 inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
                   <ShieldCheck className="h-2.5 w-2.5" />
@@ -148,7 +159,9 @@ export default function OwnerSidebarLayout({ user, children }: Props) {
             <div className="mt-4 rounded-lg border border-indigo-400/20 bg-indigo-500/10 px-3 py-2.5">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-3 w-3 text-indigo-400" />
-                <p className="text-xs font-semibold text-indigo-300">Quản trị viên cấp cao</p>
+                <p className="text-xs font-semibold text-indigo-300">
+                  Quản trị viên cấp cao
+                </p>
               </div>
               <p className="mt-1 text-xs leading-4 text-slate-400">
                 Toàn quyền kiểm soát SmashCourt.
@@ -180,14 +193,22 @@ export default function OwnerSidebarLayout({ user, children }: Props) {
                       <Icon style={{ height: "1rem", width: "1rem" }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm truncate ${
-                        active ? "font-semibold text-white" : "text-slate-300 group-hover:text-white"
-                      }`}>
+                      <p
+                        className={`text-sm truncate ${
+                          active
+                            ? "font-semibold text-white"
+                            : "text-slate-300 group-hover:text-white"
+                        }`}
+                      >
                         {item.label}
                       </p>
-                      <p className="text-[11px] text-slate-500 truncate">{item.hint}</p>
+                      <p className="text-[11px] text-slate-500 truncate">
+                        {item.hint}
+                      </p>
                     </div>
-                    {active && <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400" />}
+                    {active && (
+                      <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400" />
+                    )}
                   </Link>
                 );
               })}
@@ -207,10 +228,14 @@ export default function OwnerSidebarLayout({ user, children }: Props) {
         </aside>
 
         {/* ── Main content ── */}
-        <main className="flex-1 min-w-0">{children}</main>
+        <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
       </div>
 
-      <AuthStatusToast visible={redirecting} tone="success" message="Đăng xuất thành công" />
+      <AuthStatusToast
+        visible={redirecting}
+        tone="success"
+        message="Đăng xuất thành công"
+      />
     </div>
   );
 }
