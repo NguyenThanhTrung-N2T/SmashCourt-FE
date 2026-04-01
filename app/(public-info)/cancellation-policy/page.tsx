@@ -1,11 +1,11 @@
-﻿import {
+import {
   CalendarClock,
   ShieldCheck,
   TimerReset,
   AlertCircle,
 } from "lucide-react";
 
-import CancellationPolicyPreview from "@/src/customer/components/CancellationPolicyPreview";
+import CancellationPolicyPreview from "@/src/modules/policy/components/CancellationPolicyPreview";
 
 export const metadata = {
   title: "Chính sách hủy | SmashCourt",

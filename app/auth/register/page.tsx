@@ -10,14 +10,14 @@ import {
   authRegister,
   getAuthFieldError,
   hasAuthErrorCode,
-} from "@/src/auth/api/authApi";
-import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
+} from "@/src/api/auth.api";
+import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
 import {
   setEmail,
   setRegisterFlashMessage,
   startRegisterVerifySession,
-} from "@/src/auth/session/sessionStore";
-import { isValidPassword } from "@/src/auth/validators";
+} from "@/src/modules/auth/session/sessionStore";
+import { isValidPassword } from "@/src/modules/auth/validators";
 
 function isAlternativeLoginMethodError(message?: string) {
   const normalized = (message ?? "")

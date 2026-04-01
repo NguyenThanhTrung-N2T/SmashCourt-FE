@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import BookingHistory from "@/src/customer/components/BookingHistory";
-import { getAccessToken, getAuthUser } from "@/src/auth/session/sessionStore";
+import BookingHistory from "@/src/domains/customer/components/BookingHistory";
+import { getAccessToken, getAuthUser } from "@/src/modules/auth/session/sessionStore";
 
 export default function BookingHistoryPage() {
   const router = useRouter();

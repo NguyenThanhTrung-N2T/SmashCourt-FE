@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import UserProfile from "@/src/customer/components/UserProfile";
-import { getAccessToken, getAuthUser, type AuthUserSession } from "@/src/auth/session/sessionStore";
+import UserProfile from "@/src/domains/customer/components/UserProfile";
+import { getAccessToken, getAuthUser, type AuthUserSession } from "@/src/modules/auth/session/sessionStore";
 
 export default function UserProfilePage() {
   const router = useRouter();

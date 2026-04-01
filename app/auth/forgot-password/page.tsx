@@ -9,12 +9,12 @@ import { AlertCircle, Mail, Send } from "lucide-react";
 import {
   authForgotPassword,
   getAuthFieldError,
-} from "@/src/auth/api/authApi";
-import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
+} from "@/src/api/auth.api";
+import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
 import {
   setEmail,
   setForgotPasswordFlashMessage,
-} from "@/src/auth/session/sessionStore";
+} from "@/src/modules/auth/session/sessionStore";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();

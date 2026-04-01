@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,11 +12,11 @@ import {
   authVerifyEmail,
   getAuthFieldError,
   hasAuthErrorCode,
-} from "@/src/auth/api/authApi";
-import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
-import CountdownButton from "@/src/auth/components/CountdownButton";
-import OtpInput from "@/src/auth/components/OtpInput";
-import { OtpType } from "@/src/auth/constants";
+} from "@/src/api/auth.api";
+import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
+import CountdownButton from "@/src/modules/auth/components/CountdownButton";
+import OtpInput from "@/src/modules/auth/components/OtpInput";
+import { OtpType } from "@/src/modules/auth/constants";
 import {
   clearAuthSession,
   clearRegisterVerifySession,
@@ -28,13 +28,13 @@ import {
   setRegisterVerifySession,
   startRegisterVerifySession,
   type RegisterVerifySession,
-} from "@/src/auth/session/sessionStore";
+} from "@/src/modules/auth/session/sessionStore";
 import {
   AUTH_GENERIC,
   formatEmailShort,
   logAuthClientError,
-} from "@/src/auth/utils/clientErrors";
-import { isValidOtp, normalizeOtp } from "@/src/auth/validators";
+} from "@/src/modules/auth/utils/clientErrors";
+import { isValidOtp, normalizeOtp } from "@/src/modules/auth/validators";
 
 const REDIRECT_MS = 2000;
 const RESET_REDIRECT_MS = 3500;

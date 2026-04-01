@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import AuthSessionSync from "@/src/auth/components/AuthSessionSync";
+import AuthSessionSync from "@/src/modules/auth/components/AuthSessionSync";
 import "./globals.css";
 
 const interSans = Inter({

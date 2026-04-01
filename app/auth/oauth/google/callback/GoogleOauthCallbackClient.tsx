@@ -8,10 +8,10 @@ import {
   AuthApiError,
   authGoogleCallback,
   hasAuthErrorCode,
-} from "@/src/auth/api/authApi";
-import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
-import { getRedirectPathByRole } from "@/src/auth/constants";
-import { setAuthenticatedSession } from "@/src/auth/session/sessionStore";
+} from "@/src/api/auth.api";
+import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
+import { getRedirectPathByRole } from "@/src/modules/auth/constants";
+import { setAuthenticatedSession } from "@/src/modules/auth/session/sessionStore";
 
 const REDIRECT_MS = 2000;
 

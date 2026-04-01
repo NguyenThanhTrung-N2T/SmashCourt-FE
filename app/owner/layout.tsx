@@ -7,15 +7,15 @@ import type { ReactNode } from "react";
 import {
   AuthApiError,
   authRefresh,
-} from "@/src/auth/api/authApi";
+} from "@/src/api/auth.api";
 import {
   clearAuthSession,
   getAccessToken,
   getAuthUser,
   setAccessToken,
   type AuthUserSession,
-} from "@/src/auth/session/sessionStore";
-import OwnerSidebarLayout from "@/src/owner/components/OwnerSidebarLayout";
+} from "@/src/modules/auth/session/sessionStore";
+import OwnerSidebarLayout from "@/src/domains/owner/components/OwnerSidebarLayout";
 
 export default function OwnerLayout({ children }: { children: ReactNode }) {
   const router = useRouter();

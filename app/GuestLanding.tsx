@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import {
@@ -20,9 +20,9 @@ import {
   MapPin,
 } from "lucide-react";
 
-import PublicInfoHeader from "@/src/customer/components/PublicInfoHeader";
-import PublicSiteFooter from "@/src/customer/components/PublicSiteFooter";
-import ChatbotWidget from "@/src/customer/components/ChatbotWidget";
+import PublicInfoHeader from "@/src/domains/customer/components/PublicInfoHeader";
+import PublicSiteFooter from "@/src/domains/customer/components/PublicSiteFooter";
+import ChatbotWidget from "@/src/domains/customer/components/ChatbotWidget";
 
 const FEATURES = [
   {

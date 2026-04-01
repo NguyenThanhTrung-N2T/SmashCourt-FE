@@ -9,14 +9,14 @@ import { KeyRound, Lock } from "lucide-react";
 import {
   authForgotPasswordReset,
   getAuthFieldError,
-} from "@/src/auth/api/authApi";
-import AuthStatusToast from "@/src/auth/components/AuthStatusToast";
+} from "@/src/api/auth.api";
+import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
 import {
   clearEmail,
   clearResetToken,
   getResetToken,
-} from "@/src/auth/session/sessionStore";
-import { isValidPassword } from "@/src/auth/validators";
+} from "@/src/modules/auth/session/sessionStore";
+import { isValidPassword } from "@/src/modules/auth/validators";
 
 const REDIRECT_MS = 2000;
 
