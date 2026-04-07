@@ -4,15 +4,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
 import {
-  BarChart2,
-  Building2,
-  Grid3x3,
   LogOut,
-  Settings,
   ShieldCheck,
   Sparkles,
-  Trophy,
-  Users,
 } from "lucide-react";
 
 import { authLogout } from "@/src/api/auth.api";
@@ -22,60 +16,8 @@ import {
   clearAuthSession,
   type AuthUserSession,
 } from "@/src/modules/auth/session/sessionStore";
-
-type NavItem = {
-  label: string;
-  href: string;
-  icon: React.ElementType;
-  hint: string;
-  exact?: boolean;
-};
-
-const NAV_ITEMS: NavItem[] = [
-  {
-    label: "Tổng quan",
-    href: "/owner",
-    exact: true,
-    icon: BarChart2,
-    hint: "KPI & Báo cáo kinh doanh",
-  },
-  {
-    label: "Chi nhánh",
-    href: "/owner/branches",
-    icon: Building2,
-    hint: "Điều phối các cơ sở",
-  },
-  {
-    label: "Nhân sự",
-    href: "/owner/staff",
-    icon: Users,
-    hint: "Manager & Staff",
-  },
-  {
-    label: "Loại sân",
-    href: "/owner/court-types",
-    icon: Grid3x3,
-    hint: "Quản lý các loại sân",
-  },
-  {
-    label: "Hạng thành viên",
-    href: "/owner/loyalty",
-    icon: Trophy,
-    hint: "Điểm thưởng & Giảm giá",
-  },
-  {
-    label: "Chính sách",
-    href: "/owner/policy",
-    icon: ShieldCheck,
-    hint: "Quản lý chính sách hủy & hoàn tiền",
-  },
-  {
-    label: "Cài đặt",
-    href: "/owner/settings",
-    icon: Settings,
-    hint: "Cấu hình hệ thống",
-  },
-];
+import { NavItem } from "@/src/shared/types/navigation.types";
+import { OWNER_NAV } from "../navigation/owner.navigation";
 
 function getInitials(fullName: string) {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -181,7 +123,7 @@ export default function OwnerSidebarLayout({ user, children }: Props) {
 
             {/* Nav */}
             <nav className="mt-2 flex-1 space-y-1 overflow-y-auto pr-2 scrollbar-none">
-              {NAV_ITEMS.map((item) => {
+              {OWNER_NAV.map((item) => {
                 const active = isActive(item);
                 const Icon = item.icon;
                 return (

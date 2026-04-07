@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   AlertTriangle,
   Award,
@@ -27,6 +27,7 @@ import {
 } from "@/src/api/loyalty-tier.api";
 import type { LoyaltyTier } from "@/src/shared/types/loyalty-tier.types";
 import { AuthApiError } from "@/src/api/auth.api";
+import { useToast } from "@/src/shared/hooks/useToast";
 
 // ─── Tier config & Identity ───────────────────────────────────────────────────
 type TierCfg = {
@@ -121,20 +122,6 @@ function getTierCfg(name: string): TierCfg {
     formBg: "bg-slate-50/50",
     inputFocus: "focus:border-slate-500 focus:ring-slate-100",
   }
-}
-
-// ─── Toast ────────────────────────────────────────────────────────────────────
-
-type Toast = { visible: boolean; tone: "success" | "error"; message: string };
-function useToast() {
-  const [toast, setToast] = useState<Toast>({ visible: false, tone: "success", message: "" });
-  const t = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const show = useCallback((tone: "success" | "error", message: string) => {
-    if (t.current) clearTimeout(t.current);
-    setToast({ visible: true, tone, message });
-    t.current = setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3500);
-  }, []);
-  return { toast, show };
 }
 
 // ─── Top Stats Header ─────────────────────────────────────────────────────────
@@ -528,7 +515,7 @@ export default function LoyaltyTierManager() {
   const selectedTier = tiers.find((t) => t.id === selectedId) ?? null;
 
   return (
-    <div className="flex-1 h-[calc(100vh-4rem)] p-8 overflow-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full w-full">
+    <div className="w-full">
 
       {/* 1. Header Card */}
       <TopStatsHeader tiers={tiers} loading={loading} onRefresh={load} />

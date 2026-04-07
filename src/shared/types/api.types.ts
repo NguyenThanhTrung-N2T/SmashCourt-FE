@@ -20,3 +20,13 @@ export type AuthApiSuccess<T> = {
   data: T | null;
   errors: ApiValidationErrors | null;
 };
+
+export interface PaginatedData<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}

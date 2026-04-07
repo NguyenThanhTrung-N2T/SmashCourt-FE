@@ -32,42 +32,16 @@ import type {
   CancelPolicy,
   SaveCancelPolicyRequest,
 } from "@/src/shared/types/cancel-policy.types";
+import { useToast } from "@/src/shared/hooks/useToast";
 
 // ─────────────────────────────────────────────────────────
 // TYPINGS & UTILS
 // ─────────────────────────────────────────────────────────
 
-type ToastState = {
-  visible: boolean;
-  tone: "success" | "error";
-  message: string;
-};
-
 type EditableCancelPolicy = CancelPolicy & {
   clientId: string;
   isNew: boolean;
 };
-
-function useToast() {
-  const [toast, setToast] = useState<ToastState>({
-    visible: false,
-    tone: "success",
-    message: "",
-  });
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function show(tone: ToastState["tone"], message: string) {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    setToast({ visible: true, tone, message });
-    timerRef.current = setTimeout(() => {
-      setToast((prev) => ({ ...prev, visible: false }));
-    }, 3200);
-  }
-
-  return { toast, show };
-}
 
 function toEditablePolicy(policy: CancelPolicy): EditableCancelPolicy {
   return {

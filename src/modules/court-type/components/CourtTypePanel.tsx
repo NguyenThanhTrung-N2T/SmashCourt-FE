@@ -26,6 +26,7 @@ import type {
   UpdateCourtTypeRequest,
 } from "@/src/shared/types/court-type.types";
 import { AuthApiError } from "@/src/api/auth.api";
+import { useToast } from "@/src/shared/hooks/useToast";
 
 // Helper to check if court type is active
 function isActive(status: string | number): boolean {
@@ -37,22 +38,6 @@ function isActive(status: string | number): boolean {
     return status === 0; // ACTIVE = 0 in enum
   }
   return false;
-}
-
-// Toast hook
-function useToast() {
-  const [toast, setToast] = useState<{
-    visible: boolean;
-    tone: "success" | "error";
-    message: string;
-  }>({ visible: false, tone: "success", message: "" });
-
-  const show = useCallback((tone: "success" | "error", message: string) => {
-    setToast({ visible: true, tone, message });
-    setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3500);
-  }, []);
-
-  return { toast, show };
 }
 
 export default function CourtTypePanel() {
