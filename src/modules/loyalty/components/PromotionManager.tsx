@@ -15,7 +15,7 @@ import {
   Sparkles,
   Tag,
   Trash2,
-  X,
+  XCircle,
   Zap,
 } from "lucide-react";
 
@@ -35,6 +35,16 @@ import type {
 import { AuthApiError } from "@/src/api/auth.api";
 import { useToast } from "@/src/shared/hooks/useToast";
 
+import { Button } from "@/src/shared/components/ui/Button";
+import { Input } from "@/src/shared/components/ui/Input";
+import { Alert } from "@/src/shared/components/ui/Alert";
+import { Modal } from "@/src/shared/components/ui/Modal";
+import { Flex } from "@/src/shared/components/layout/Flex";
+import { Stack } from "@/src/shared/components/layout/Stack";
+import { Grid } from "@/src/shared/components/layout/Grid";
+import { Badge } from "@/src/shared/components/ui/Badge";
+import { CreatePromotionModal } from "./modals/CreatePromotionModal";
+
 // ─── Status config ────────────────────────────────────────────────────────────
 
 type StatusCfg = {
@@ -42,6 +52,7 @@ type StatusCfg = {
   bg: string;
   text: string;
   dot: string;
+  variant: "success" | "warning" | "danger" | "neutral" | "primary";
 };
 
 function getStatusCfg(status: PromotionStatus): StatusCfg {
@@ -52,6 +63,7 @@ function getStatusCfg(status: PromotionStatus): StatusCfg {
         bg: "bg-emerald-100",
         text: "text-emerald-800",
         dot: "bg-emerald-500",
+        variant: "success",
       };
     case PromotionStatus.INACTIVE:
       return {
@@ -59,6 +71,7 @@ function getStatusCfg(status: PromotionStatus): StatusCfg {
         bg: "bg-amber-100",
         text: "text-amber-800",
         dot: "bg-amber-500",
+        variant: "warning",
       };
     case PromotionStatus.DELETED:
       return {
@@ -66,6 +79,7 @@ function getStatusCfg(status: PromotionStatus): StatusCfg {
         bg: "bg-red-100",
         text: "text-red-800",
         dot: "bg-red-500",
+        variant: "danger",
       };
   }
 }
@@ -152,39 +166,40 @@ function PromotionStatsHeader({
       </section>
 
       {/* Action Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-2">
+      <Flex justify="between" align="center" wrap="wrap" className="mb-6">
+        <Flex align="center" spacing="sm">
           <h2 className="text-xl font-bold tracking-tight text-slate-800">
             Danh sách khuyến mãi
           </h2>
           <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
             {promotions.length} chương trình
           </span>
-        </div>
+        </Flex>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
+        <Flex align="center" spacing="sm">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onRefresh}
             disabled={loading}
-            className="inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50"
+            leftIcon={<RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             Làm mới
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            className="bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white shadow-md shadow-fuchsia-500/20 hover:shadow-lg hover:shadow-fuchsia-500/30 hover:-translate-y-0.5 transition-all outline-none border-none"
             onClick={onCreateNew}
-            className="inline-flex h-9 items-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-violet-600 px-4 text-xs font-bold text-white shadow-md shadow-fuchsia-500/20 hover:shadow-lg hover:shadow-fuchsia-500/30 hover:-translate-y-0.5 transition-all"
+            leftIcon={<Plus className="h-3.5 w-3.5" />}
           >
-            <Plus className="h-3.5 w-3.5" />
             Tạo khuyến mãi
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Flex>
+      </Flex>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <Grid cols={3} spacing="md" className="mb-8">
         {[
           {
             icon: Tag,
@@ -208,9 +223,10 @@ function PromotionStatsHeader({
             label: "Giảm giá cao nhất",
           },
         ].map((s, i) => (
-          <div
+          <Stack
+            spacing="md"
             key={i}
-            className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition-colors"
+            className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition-colors"
           >
             <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${s.bg}`}>
               <s.icon className={`h-5 w-5 ${s.color}`} />
@@ -221,9 +237,9 @@ function PromotionStatsHeader({
                 {s.label}
               </p>
             </div>
-          </div>
+          </Stack>
         ))}
-      </div>
+      </Grid>
     </>
   );
 }
@@ -254,15 +270,14 @@ function PromotionListCard({
       <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-5">
         <h2 className="text-base font-bold text-slate-800">Chương trình</h2>
         <p className="text-xs text-slate-500">Chọn để xem chi tiết & chỉnh sửa</p>
-        {/* Search */}
-        <div className="relative mt-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-          <input
+        <div className="mt-3">
+          <Input
+            leftIcon={<Search className="h-3.5 w-3.5" />}
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Tìm khuyến mãi..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs text-slate-700 outline-none focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-100 transition-all"
+            className="py-2 text-xs focus:border-fuchsia-400 focus:ring-fuchsia-100"
           />
         </div>
       </div>
@@ -308,15 +323,12 @@ function PromotionListCard({
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  <span className="inline-flex items-center gap-1 rounded-md bg-indigo-100/80 px-2 py-0.5 text-[11px] font-bold text-indigo-800">
-                    <PercentIcon className="h-2.5 w-2.5" /> {Number(promo.discountRate)}%
-                  </span>
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold ${statusCfg.bg} ${statusCfg.text}`}
-                  >
-                    <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
+                  <Badge variant="primary" size="sm" icon={<PercentIcon className="h-2.5 w-2.5" />}>
+                    {Number(promo.discountRate)}%
+                  </Badge>
+                  <Badge variant={statusCfg.variant} size="sm" dot>
                     {statusCfg.label}
-                  </span>
+                  </Badge>
                 </div>
               </div>
             </button>
@@ -444,12 +456,9 @@ function PromotionDetailPanel({
         </div>
         {/* Status Badge */}
         <div className="absolute top-4 right-6">
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ${statusCfg.bg} ${statusCfg.text}`}
-          >
-            <span className={`h-2 w-2 rounded-full ${statusCfg.dot}`} />
+          <Badge variant={statusCfg.variant} dot>
             {statusCfg.label}
-          </span>
+          </Badge>
         </div>
       </div>
 
@@ -459,8 +468,8 @@ function PromotionDetailPanel({
         </h2>
 
         {/* Info Highlights */}
-        <div className="mt-6 grid grid-cols-3 gap-4">
-          <div className="flex items-center gap-4 rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
+        <Grid cols={3} className="mt-6" spacing="md">
+          <Flex align="center" spacing="md" className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-200 text-indigo-700">
               <PercentIcon className="h-6 w-6" />
             </div>
@@ -468,8 +477,8 @@ function PromotionDetailPanel({
               <p className="text-xs font-bold uppercase tracking-wider text-indigo-500">Tỷ lệ giảm</p>
               <p className="text-xl font-black text-indigo-800">{Number(promotion.discountRate)}%</p>
             </div>
-          </div>
-          <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+          </Flex>
+          <Flex align="center" spacing="md" className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
               <Calendar className="h-6 w-6" />
             </div>
@@ -477,8 +486,8 @@ function PromotionDetailPanel({
               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Bắt đầu</p>
               <p className="text-lg font-black text-slate-800">{formatDate(promotion.startDate)}</p>
             </div>
-          </div>
-          <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+          </Flex>
+          <Flex align="center" spacing="md" className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
               <Calendar className="h-6 w-6" />
             </div>
@@ -486,37 +495,34 @@ function PromotionDetailPanel({
               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Kết thúc</p>
               <p className="text-lg font-black text-slate-800">{formatDate(promotion.endDate)}</p>
             </div>
-          </div>
-        </div>
+          </Flex>
+        </Grid>
 
         {/* Edit Form */}
         <div className="mt-8 rounded-3xl border border-slate-100 bg-fuchsia-50/30 p-6">
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <Flex justify="between" align="center" className="mb-6">
+            <Flex align="center" spacing="sm">
               <Edit3 className="h-5 w-5 text-slate-600" />
               <h3 className="text-base font-bold text-slate-800">Chỉnh sửa khuyến mãi</h3>
-            </div>
+            </Flex>
             {isDirty && (
-              <span className="animate-pulse rounded-full bg-amber-200 px-3 py-1 text-xs font-black text-amber-800">
+              <Badge variant="warning" className="animate-pulse">
                 CHƯA LƯU
-              </span>
+              </Badge>
             )}
-          </div>
+          </Flex>
 
           {errors.general && (
-            <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
-              <p className="text-sm font-semibold text-red-700">{errors.general}</p>
-            </div>
+            <Alert variant="error" className="mb-6 py-2">
+              {errors.general}
+            </Alert>
           )}
 
-          <div className="grid grid-cols-2 gap-6">
+          <Grid cols={2} spacing="lg">
             {/* Name */}
             <div className="col-span-2">
-              <label className="mb-2 block text-sm font-bold text-slate-700">
-                Tên chương trình
-              </label>
-              <input
+              <Input
+                label="Tên chương trình *"
                 type="text"
                 value={name}
                 onChange={(e) => {
@@ -524,14 +530,10 @@ function PromotionDetailPanel({
                   setErrors((p) => ({ ...p, name: undefined }));
                 }}
                 placeholder="VD: Khuyến mãi hè 2026"
-                className={`w-full rounded-xl border-2 px-4 py-3 text-base font-bold text-slate-800 shadow-sm outline-none transition-all ${errors.name
-                  ? "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-100"
-                  : "border-slate-200 bg-white focus:border-fuchsia-500 focus:ring-fuchsia-100"
-                  }`}
+                error={errors.name}
+                className="text-base focus:border-fuchsia-500 focus:ring-fuchsia-100"
               />
-              {errors.name ? (
-                <p className="mt-2 text-xs font-bold text-red-500">{errors.name}</p>
-              ) : (
+              {!errors.name && (
                 <p className="mt-2 text-xs font-medium text-slate-500">
                   Tên hiển thị cho khách hàng khi chọn khuyến mãi lúc đặt sân.
                 </p>
@@ -540,32 +542,22 @@ function PromotionDetailPanel({
 
             {/* Discount Rate */}
             <div>
-              <label className="mb-2 block text-sm font-bold text-slate-700">
-                Tỷ lệ giảm giá (%)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min={0.01}
-                  max={100}
-                  step={0.01}
-                  value={discountRate}
-                  onChange={(e) => {
-                    setDiscountRate(e.target.value);
-                    setErrors((p) => ({ ...p, discountRate: undefined }));
-                  }}
-                  className={`w-full rounded-xl border-2 px-4 py-3 pr-12 text-base font-bold text-slate-800 shadow-sm outline-none transition-all ${errors.discountRate
-                    ? "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-100"
-                    : "border-slate-200 bg-white focus:border-fuchsia-500 focus:ring-fuchsia-100"
-                    }`}
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
-                  %
-                </span>
-              </div>
-              {errors.discountRate ? (
-                <p className="mt-2 text-xs font-bold text-red-500">{errors.discountRate}</p>
-              ) : (
+              <Input
+                label="Tỷ lệ giảm giá (%) *"
+                type="number"
+                min={0.01}
+                max={100}
+                step={0.01}
+                value={discountRate}
+                onChange={(e) => {
+                  setDiscountRate(e.target.value);
+                  setErrors((p) => ({ ...p, discountRate: undefined }));
+                }}
+                error={errors.discountRate}
+                rightIcon={<span className="text-sm font-bold text-slate-400">%</span>}
+                className="text-base focus:border-fuchsia-500 focus:ring-fuchsia-100"
+              />
+              {!errors.discountRate && (
                 <p className="mt-2 text-xs font-medium text-slate-500 leading-relaxed">
                   Từ 0.01% đến 100%.
                 </p>
@@ -577,32 +569,23 @@ function PromotionDetailPanel({
 
             {/* Start Date */}
             <div>
-              <label className="mb-2 block text-sm font-bold text-slate-700">
-                Ngày bắt đầu
-              </label>
-              <input
+              <Input
+                label="Ngày bắt đầu *"
                 type="date"
                 value={startDate}
                 onChange={(e) => {
                   setStartDate(e.target.value);
                   setErrors((p) => ({ ...p, startDate: undefined, endDate: undefined }));
                 }}
-                className={`w-full rounded-xl border-2 px-4 py-3 text-base font-bold text-slate-800 shadow-sm outline-none transition-all ${errors.startDate
-                  ? "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-100"
-                  : "border-slate-200 bg-white focus:border-fuchsia-500 focus:ring-fuchsia-100"
-                  }`}
+                error={errors.startDate}
+                className="text-base focus:border-fuchsia-500 focus:ring-fuchsia-100"
               />
-              {errors.startDate && (
-                <p className="mt-2 text-xs font-bold text-red-500">{errors.startDate}</p>
-              )}
             </div>
 
             {/* End Date */}
             <div>
-              <label className="mb-2 block text-sm font-bold text-slate-700">
-                Ngày kết thúc
-              </label>
-              <input
+              <Input
+                label="Ngày kết thúc *"
                 type="date"
                 min={startDate}
                 value={endDate}
@@ -610,27 +593,24 @@ function PromotionDetailPanel({
                   setEndDate(e.target.value);
                   setErrors((p) => ({ ...p, endDate: undefined }));
                 }}
-                className={`w-full rounded-xl border-2 px-4 py-3 text-base font-bold text-slate-800 shadow-sm outline-none transition-all ${errors.endDate
-                  ? "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-100"
-                  : "border-slate-200 bg-white focus:border-fuchsia-500 focus:ring-fuchsia-100"
-                  }`}
+                error={errors.endDate}
+                className="text-base focus:border-fuchsia-500 focus:ring-fuchsia-100"
               />
-              {errors.endDate ? (
-                <p className="mt-2 text-xs font-bold text-red-500">{errors.endDate}</p>
-              ) : (
+              {!errors.endDate && (
                 <p className="mt-2 text-xs font-medium text-slate-500">
                   Phải bằng hoặc sau ngày bắt đầu.
                 </p>
               )}
             </div>
-          </div>
+          </Grid>
         </div>
       </div>
 
       {/* Floating Action Footer */}
-      <div className="shrink-0 border-t border-slate-100 bg-slate-50/80 px-8 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
+      <Flex className="shrink-0 border-t border-slate-100 bg-slate-50/80 px-8 py-5" justify="between" align="center">
+        <Flex align="center" spacing="sm">
+          <Button
+            variant="ghost"
             onClick={() => {
               setName(promotion.name);
               setDiscountRate(String(promotion.discountRate));
@@ -639,294 +619,73 @@ function PromotionDetailPanel({
               setErrors({});
             }}
             disabled={!isDirty || saving}
-            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 transition-all hover:bg-slate-200 hover:text-slate-800 disabled:opacity-30 disabled:hover:bg-transparent"
+            leftIcon={<RefreshCw className="h-4 w-4" />}
           >
-            <RefreshCw className="h-4 w-4" /> Reset
-          </button>
+            Reset
+          </Button>
           {/* Delete Button */}
-          <button
+          <Button
+            variant="dangerSoft"
             onClick={() => setShowDeleteConfirm(true)}
             disabled={deleting || saving}
-            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-red-500 transition-all hover:bg-red-50 hover:text-red-700 disabled:opacity-30"
+            leftIcon={<Trash2 className="h-4 w-4" />}
           >
-            <Trash2 className="h-4 w-4" /> Xóa
-          </button>
-        </div>
+            Xóa
+          </Button>
+        </Flex>
 
-        <button
+        <Button
+          variant="primary"
+          className="bg-fuchsia-600 hover:bg-fuchsia-700 active:bg-fuchsia-800 outline-none border-none shadow-lg text-white font-black"
           onClick={handleSave}
           disabled={saving || !isDirty}
-          className="inline-flex items-center gap-2 rounded-xl px-8 py-3.5 text-sm font-black text-white shadow-lg transition-all bg-fuchsia-600 hover:bg-fuchsia-700 active:bg-fuchsia-800 disabled:opacity-50 disabled:shadow-none hover:-translate-y-0.5 active:translate-y-0"
+          isLoading={saving}
+          leftIcon={<CheckCircle2 className="h-5 w-5" />}
         >
-          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />}
           Lưu thay đổi
-        </button>
-      </div>
+        </Button>
+      </Flex>
 
       {/* Delete Confirmation Overlay */}
       {showDeleteConfirm && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-[2rem]">
-          <div className="mx-4 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-800">Xác nhận xóa</h3>
-                <p className="text-sm text-slate-500">Thao tác này không thể hoàn tác</p>
-              </div>
-            </div>
-            <p className="mb-6 text-sm text-slate-600">
+        <Modal
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          title="Xác nhận xóa"
+          subtitle="THAO TÁC NÀY KHÔNG THỂ HOÀN TÁC"
+          icon={<AlertTriangle className="h-6 w-6" />}
+          maxWidth="md"
+        >
+          <div className="p-6">
+            <Alert variant="warning" className="mb-6">
               Bạn có chắc muốn xóa chương trình <strong>&quot;{promotion.name}&quot;</strong>? Khuyến mãi sẽ bị ẩn khỏi hệ thống. Booking cũ vẫn giữ nguyên.
-            </p>
-            <div className="flex items-center justify-end gap-3">
-              <button
+            </Alert>
+            <Flex justify="end" align="center" spacing="md">
+              <Button
+                variant="ghost"
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
-                className="rounded-xl px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 transition-colors"
               >
                 Hủy bỏ
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-red-700 transition-all disabled:opacity-50"
+                isLoading={deleting}
+                leftIcon={<Trash2 className="h-4 w-4" />}
               >
-                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                 Xóa khuyến mãi
-              </button>
-            </div>
+              </Button>
+            </Flex>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );
 }
 
-// ─── Create Promotion Modal ───────────────────────────────────────────────────
 
-function CreatePromotionModal({
-  onCreated,
-  onClose,
-  showToast,
-}: {
-  onCreated: (p: Promotion) => void;
-  onClose: () => void;
-  showToast: (tone: "success" | "error", msg: string) => void;
-}) {
-  const today = getTodayStr();
-  const [name, setName] = useState("");
-  const [discountRate, setDiscountRate] = useState("");
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState<{
-    name?: string;
-    discountRate?: string;
-    startDate?: string;
-    endDate?: string;
-    general?: string;
-  }>({});
-
-  function validate() {
-    const e: typeof errors = {};
-    if (!name.trim()) e.name = "Tên khuyến mãi không được để trống";
-    else if (name.trim().length > 255) e.name = "Tên khuyến mãi tối đa 255 ký tự";
-
-    const d = Number(discountRate);
-    if (!discountRate.trim() || isNaN(d) || d < 0.01 || d > 100)
-      e.discountRate = "Tỷ lệ giảm giá phải từ 0.01 đến 100";
-
-    if (!startDate) e.startDate = "Ngày bắt đầu không được để trống";
-    if (!endDate) e.endDate = "Ngày kết thúc không được để trống";
-    if (startDate && endDate && startDate > endDate)
-      e.endDate = "Ngày kết thúc phải sau hoặc bằng ngày bắt đầu";
-
-    return e;
-  }
-
-  async function handleCreate() {
-    const e = validate();
-    if (Object.keys(e).length) {
-      setErrors(e);
-      return;
-    }
-    setErrors({});
-    setSaving(true);
-    try {
-      const dto: SavePromotionRequest = {
-        name: name.trim(),
-        discountRate: Number(discountRate),
-        startDate,
-        endDate,
-      };
-      const created = await createPromotion(dto);
-      onCreated(created);
-      showToast("success", `Tạo "${created.name}" thành công`);
-      onClose();
-    } catch (err) {
-      const msg = err instanceof AuthApiError ? err.message : "Đã có lỗi xảy ra, không thể tạo khuyến mãi.";
-      setErrors({ general: msg });
-      showToast("error", msg);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="mx-4 w-full max-w-xl animate-in fade-in zoom-in-95 duration-200 rounded-3xl border border-slate-200 bg-white shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-8 py-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500 to-violet-600">
-              <Plus className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-slate-800">Tạo khuyến mãi mới</h3>
-              <p className="text-xs text-slate-500">Nhập thông tin chương trình khuyến mãi</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            disabled={saving}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="px-8 py-6">
-          {errors.general && (
-            <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
-              <p className="text-sm font-semibold text-red-700">{errors.general}</p>
-            </div>
-          )}
-
-          <div className="space-y-5">
-            {/* Name */}
-            <div>
-              <label className="mb-2 block text-sm font-bold text-slate-700">
-                Tên chương trình <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  setErrors((p) => ({ ...p, name: undefined }));
-                }}
-                placeholder="VD: Khuyến mãi hè 2026"
-                className={`w-full rounded-xl border-2 px-4 py-3 text-base font-bold text-slate-800 shadow-sm outline-none transition-all ${errors.name
-                  ? "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-100"
-                  : "border-slate-200 bg-white focus:border-fuchsia-500 focus:ring-fuchsia-100"
-                  }`}
-              />
-              {errors.name && <p className="mt-2 text-xs font-bold text-red-500">{errors.name}</p>}
-            </div>
-
-            {/* Discount Rate */}
-            <div>
-              <label className="mb-2 block text-sm font-bold text-slate-700">
-                Tỷ lệ giảm giá (%) <span className="text-red-400">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min={0.01}
-                  max={100}
-                  step={0.01}
-                  value={discountRate}
-                  onChange={(e) => {
-                    setDiscountRate(e.target.value);
-                    setErrors((p) => ({ ...p, discountRate: undefined }));
-                  }}
-                  placeholder="VD: 15"
-                  className={`w-full rounded-xl border-2 px-4 py-3 pr-12 text-base font-bold text-slate-800 shadow-sm outline-none transition-all ${errors.discountRate
-                    ? "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-100"
-                    : "border-slate-200 bg-white focus:border-fuchsia-500 focus:ring-fuchsia-100"
-                    }`}
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
-                  %
-                </span>
-              </div>
-              {errors.discountRate && (
-                <p className="mt-2 text-xs font-bold text-red-500">{errors.discountRate}</p>
-              )}
-            </div>
-
-            {/* Dates */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-700">
-                  Ngày bắt đầu <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => {
-                    setStartDate(e.target.value);
-                    setErrors((p) => ({ ...p, startDate: undefined, endDate: undefined }));
-                  }}
-                  className={`w-full rounded-xl border-2 px-4 py-3 text-base font-bold text-slate-800 shadow-sm outline-none transition-all ${errors.startDate
-                    ? "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-100"
-                    : "border-slate-200 bg-white focus:border-fuchsia-500 focus:ring-fuchsia-100"
-                    }`}
-                />
-                {errors.startDate && (
-                  <p className="mt-2 text-xs font-bold text-red-500">{errors.startDate}</p>
-                )}
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-700">
-                  Ngày kết thúc <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="date"
-                  min={startDate}
-                  value={endDate}
-                  onChange={(e) => {
-                    setEndDate(e.target.value);
-                    setErrors((p) => ({ ...p, endDate: undefined }));
-                  }}
-                  className={`w-full rounded-xl border-2 px-4 py-3 text-base font-bold text-slate-800 shadow-sm outline-none transition-all ${errors.endDate
-                    ? "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-100"
-                    : "border-slate-200 bg-white focus:border-fuchsia-500 focus:ring-fuchsia-100"
-                    }`}
-                />
-                {errors.endDate && (
-                  <p className="mt-2 text-xs font-bold text-red-500">{errors.endDate}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-slate-100 px-8 py-5">
-          <button
-            onClick={onClose}
-            disabled={saving}
-            className="rounded-xl px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 transition-colors"
-          >
-            Hủy bỏ
-          </button>
-          <button
-            onClick={handleCreate}
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-violet-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-fuchsia-500/20 hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50"
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-            Tạo khuyến mãi
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -1014,29 +773,31 @@ export default function PromotionManager() {
 
       {/* States */}
       {loading && (
-        <div className="my-20 flex flex-col items-center gap-4 w-full">
+        <Stack align="center" justify="center" spacing="md" className="my-20 w-full">
           <Loader2 className="h-8 w-8 animate-spin text-fuchsia-500" />
           <p className="font-semibold text-slate-500">Đang đồng bộ dữ liệu khuyến mãi...</p>
-        </div>
+        </Stack>
       )}
 
       {!loading && loadError && (
-        <div className="my-10 flex flex-col items-center rounded-[2rem] border-2 border-red-200 bg-red-50 p-12 text-center shadow-sm w-full">
+        <Alert variant="error" className="my-10 py-12 flex flex-col items-center text-center">
           <AlertTriangle className="mb-4 h-12 w-12 text-red-400" />
           <h3 className="text-xl font-bold text-red-800">Lỗi đồng bộ dữ liệu</h3>
           <p className="mt-2 text-red-600">{loadError}</p>
-          <button
+          <Button
             onClick={load}
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-red-600 px-6 py-3 font-bold text-white shadow-md hover:bg-red-700"
+            variant="danger"
+            className="mt-6"
+            leftIcon={<RefreshCw className="h-5 w-5" />}
           >
-            <RefreshCw className="h-5 w-5" /> Thử lại
-          </button>
-        </div>
+            Thử lại
+          </Button>
+        </Alert>
       )}
 
       {/* Empty State */}
       {!loading && !loadError && promotions.length === 0 && (
-        <div className="my-10 flex flex-col items-center rounded-[2rem] border-2 border-dashed border-slate-300 bg-slate-50 p-16 text-center w-full">
+        <Stack align="center" className="my-10 rounded-[2rem] border-2 border-dashed border-slate-300 bg-slate-50 p-16 text-center w-full">
           <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-fuchsia-100 mb-4">
             <Megaphone className="h-10 w-10 text-fuchsia-500" />
           </div>
@@ -1044,19 +805,20 @@ export default function PromotionManager() {
           <p className="mt-2 text-sm text-slate-500 max-w-sm">
             Tạo chương trình khuyến mãi đầu tiên để khách hàng có thể tận hưởng ưu đãi khi đặt sân.
           </p>
-          <button
+          <Button
             onClick={() => setShowCreateModal(true)}
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-violet-600 px-6 py-3 font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
+            variant="primary"
+            className="mt-6 bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 outline-none border-none"
+            leftIcon={<Plus className="h-5 w-5" />}
           >
-            <Plus className="h-5 w-5" />
             Tạo khuyến mãi đầu tiên
-          </button>
-        </div>
+          </Button>
+        </Stack>
       )}
 
       {/* Content Layout */}
       {!loading && !loadError && promotions.length > 0 && (
-        <div className="grid grid-cols-5 gap-6 w-full">
+        <Grid cols={5} spacing="lg" className="w-full">
           {/* Left: List */}
           <div className="col-span-2">
             <PromotionListCard
@@ -1081,17 +843,15 @@ export default function PromotionManager() {
                 showToast={showToast}
               />
             ) : (
-              <div className="flex h-full items-center justify-center rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
-                <div>
-                  <Tag className="mx-auto h-12 w-12 text-slate-300" />
-                  <p className="mt-3 font-semibold text-slate-400">
-                    Chọn một khuyến mãi để xem chi tiết
-                  </p>
-                </div>
-              </div>
+              <Stack align="center" justify="center" className="h-full rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
+                <Tag className="mx-auto h-12 w-12 text-slate-300" />
+                <p className="mt-3 font-semibold text-slate-400">
+                  Chọn một khuyến mãi để xem chi tiết
+                </p>
+              </Stack>
             )}
           </div>
-        </div>
+        </Grid>
       )}
 
       {/* Create Modal */}
@@ -1104,26 +864,28 @@ export default function PromotionManager() {
       )}
 
       {/* Global Toast */}
-      <div
-        className={`fixed bottom-8 right-8 z-50 transition-all duration-300 ${toast.visible
-          ? "translate-y-0 opacity-100"
-          : "translate-y-4 opacity-0 pointer-events-none"
-          }`}
-      >
-        <div
-          className={`flex items-center gap-3 rounded-2xl border-2 bg-white px-5 py-4 shadow-2xl ${toast.tone === "success" ? "border-emerald-300" : "border-red-300"
+      {toast.visible && (
+        <div className="fixed bottom-8 right-8 z-[100] transition-all duration-300 animate-slide-up">
+          <div
+            className={`flex items-center gap-3 rounded-2xl border-2 bg-white px-5 py-3.5 shadow-xl ${
+              toast.tone === "success" ? "border-emerald-200" : "border-red-200"
             }`}
-        >
-          {toast.tone === "success" ? (
-            <CheckCircle2 className="h-6 w-6 text-emerald-500" />
-          ) : (
-            <AlertTriangle className="h-6 w-6 text-red-500" />
-          )}
-          <p className={`font-bold ${toast.tone === "success" ? "text-emerald-800" : "text-red-800"}`}>
-            {toast.message}
-          </p>
+          >
+            {toast.tone === "success" ? (
+              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+            ) : (
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+            )}
+            <p
+              className={`text-sm font-bold ${
+                toast.tone === "success" ? "text-emerald-800" : "text-red-800"
+              }`}
+            >
+              {toast.message}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

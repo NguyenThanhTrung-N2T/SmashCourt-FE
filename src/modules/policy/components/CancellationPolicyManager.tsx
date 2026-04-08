@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -13,7 +13,6 @@ import {
   Sparkles,
   Trash2,
   Undo2,
-  X,
 } from "lucide-react";
 
 import { AuthApiError } from "@/src/api/auth.api";
@@ -33,6 +32,15 @@ import type {
   SaveCancelPolicyRequest,
 } from "@/src/shared/types/cancel-policy.types";
 import { useToast } from "@/src/shared/hooks/useToast";
+
+import { Button } from "@/src/shared/components/ui/Button";
+import { Input } from "@/src/shared/components/ui/Input";
+import { Alert } from "@/src/shared/components/ui/Alert";
+import { Modal } from "@/src/shared/components/ui/Modal";
+import { Flex } from "@/src/shared/components/layout/Flex";
+import { Grid } from "@/src/shared/components/layout/Grid";
+import { Badge } from "@/src/shared/components/ui/Badge";
+import { CreateCancelPolicyModal, type CreateCancelPolicyPayload } from "./modals/CreateCancelPolicyModal";
 
 // ─────────────────────────────────────────────────────────
 // TYPINGS & UTILS
@@ -141,6 +149,7 @@ function getRefundColor(percent: number) {
       bg: "bg-emerald-50",
       border: "border-emerald-200",
       icon: "text-emerald-600 bg-emerald-100",
+      badgeVariant: "success" as const,
     };
   }
   if (percent >= 40) {
@@ -150,6 +159,7 @@ function getRefundColor(percent: number) {
       bg: "bg-amber-50",
       border: "border-amber-200",
       icon: "text-amber-600 bg-amber-100",
+      badgeVariant: "warning" as const,
     };
   }
   return {
@@ -158,6 +168,7 @@ function getRefundColor(percent: number) {
     bg: "bg-rose-50",
     border: "border-rose-200",
     icon: "text-rose-600 bg-rose-100",
+    badgeVariant: "danger" as const,
   };
 }
 
@@ -197,25 +208,22 @@ function PolicyEditorRow({
       />
 
       <div className="flex flex-1 flex-col p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <Flex justify="between" align="center" className="mb-4">
+          <Flex align="center" spacing="md">
             <div
               className={`flex h-10 w-10 items-center justify-center rounded-xl ${color.icon}`}
             >
               <Clock3 className="h-5 w-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <Flex align="center" spacing="sm">
                 <h3 className="text-lg font-bold text-slate-900">
                   {formatPolicyHours(policy.hoursBefore)}
                 </h3>
                 {policy.isNew && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-600 border border-indigo-100">
-                    <Sparkles className="h-3 w-3" />
-                    Mới
-                  </span>
+                  <Badge variant="primary" size="sm" icon={<Sparkles className="h-3 w-3" />}>Mới</Badge>
                 )}
-              </div>
+              </Flex>
               <p className="mt-0.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
                 {getPolicyRangeLabel(
                   allPolicies,
@@ -225,7 +233,7 @@ function PolicyEditorRow({
                 )}
               </p>
             </div>
-          </div>
+          </Flex>
 
           <button
             type="button"
@@ -236,73 +244,59 @@ function PolicyEditorRow({
           >
             <Trash2 className="h-4 w-4" />
           </button>
-        </div>
+        </Flex>
 
         <div className="mt-2 grid grid-cols-1 items-start gap-6 sm:grid-cols-12 lg:grid-cols-12">
           <div className="col-span-1 sm:col-span-4 lg:col-span-2 xl:col-span-2">
-            <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Hủy trước
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                min={0}
-                max={720}
-                step={1}
-                value={policy.hoursBefore}
-                onChange={(event) =>
-                  onChange(
-                    policy.clientId,
-                    "hoursBefore",
-                    Number(event.target.value),
-                  )
-                }
-                className="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-base font-extrabold text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100/50"
-              />
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
-                giờ
-              </span>
-            </div>
+            <Input
+              label="Hủy trước"
+              type="number"
+              min={0}
+              max={720}
+              step={1}
+              value={policy.hoursBefore}
+              onChange={(event) =>
+                onChange(
+                  policy.clientId,
+                  "hoursBefore",
+                  Number(event.target.value),
+                )
+              }
+              rightIcon={<span className="text-sm font-bold text-slate-400">giờ</span>}
+              className="text-base font-extrabold shadow-sm focus:border-indigo-500 focus:ring-indigo-100"
+            />
           </div>
 
           <div className="col-span-1 sm:col-span-4 lg:col-span-2 xl:col-span-2">
-            <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Hoàn tiền
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                min={0}
-                max={100}
-                step={0.01}
-                value={policy.refundPercent}
-                onChange={(event) =>
-                  onChange(
-                    policy.clientId,
-                    "refundPercent",
-                    Number(event.target.value),
-                  )
-                }
-                className={`w-full rounded-2xl border-2 border-slate-200 px-4 py-3 text-base font-extrabold outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100/50 ${color.bg} ${color.text}`}
-              />
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-extrabold opacity-50">
-                %
-              </span>
-            </div>
+            <Input
+              label="Hoàn tiền"
+              type="number"
+              min={0}
+              max={100}
+              step={0.01}
+              value={policy.refundPercent}
+              onChange={(event) =>
+                onChange(
+                  policy.clientId,
+                  "refundPercent",
+                  Number(event.target.value),
+                )
+              }
+              rightIcon={<span className="text-sm font-extrabold opacity-50">%</span>}
+              className={`text-base font-extrabold shadow-sm focus:border-indigo-500 focus:ring-indigo-100 ${color.text} ${color.bg}`}
+            />
           </div>
 
           <div className="col-span-1 sm:col-span-12 lg:col-span-8 xl:col-span-8">
-            <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Ghi chú
-            </label>
-            <input
+            <Input
+              label="Ghi chú"
               type="text"
               value={policy.description ?? ""}
               onChange={(event) =>
                 onChange(policy.clientId, "description", event.target.value)
               }
               placeholder="VD: Không áp dụng hoàn tiền dịp Lễ Tết..."
-              className="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100/50"
+              className="text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-100"
             />
           </div>
         </div>
@@ -316,22 +310,13 @@ function PolicyEditorRow({
 // ─────────────────────────────────────────────────────────
 
 export default function CancellationPolicyManager() {
-  const [savedPolicies, setSavedPolicies] = useState<EditableCancelPolicy[]>(
-    [],
-  );
-  const [draftPolicies, setDraftPolicies] = useState<EditableCancelPolicy[]>(
-    [],
-  );
+  const [savedPolicies, setSavedPolicies] = useState<EditableCancelPolicy[]>([]);
+  const [draftPolicies, setDraftPolicies] = useState<EditableCancelPolicy[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newPolicyCounter, setNewPolicyCounter] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addForm, setAddForm] = useState({
-    hoursBefore: 0,
-    refundPercent: 0,
-    description: "",
-  });
   const { toast, show } = useToast();
 
   const isDirty = useMemo(
@@ -360,15 +345,10 @@ export default function CancellationPolicyManager() {
   }, [loadPolicies]);
 
   function handleOpenAddModal() {
-    setAddForm({
-      hoursBefore: getNextAvailableHours(draftPolicies),
-      refundPercent: 0,
-      description: "",
-    });
     setShowAddModal(true);
   }
 
-  function handleConfirmAdd() {
+  function handleConfirmAdd(payload: CreateCancelPolicyPayload) {
     const nextId = `temp-${newPolicyCounter}`;
     setNewPolicyCounter((prev) => prev + 1);
 
@@ -379,16 +359,16 @@ export default function CancellationPolicyManager() {
           id: nextId,
           clientId: nextId,
           isNew: true,
-          hoursBefore: addForm.hoursBefore,
-          refundPercent: addForm.refundPercent,
-          description: addForm.description,
+          hoursBefore: payload.hoursBefore,
+          refundPercent: payload.refundPercent,
+          description: payload.description,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
       ]),
     );
     setShowAddModal(false);
-    show("success", "Đã thêm mốc chính sách vào danh sách chờ.");
+    show("success", `Đã thêm mốc ${payload.hoursBefore} giờ vào danh sách chờ.`);
   }
 
   function handleChange(
@@ -506,291 +486,181 @@ export default function CancellationPolicyManager() {
   }
 
   return (
-    <div className="flex-1 h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden w-full text-slate-900 antialiased selection:bg-indigo-500 selection:text-white pb-20 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full">
-      <div className="p-4 sm:p-8 space-y-6 animate-slide-up mx-auto max-w-[1700px]">
-        {/* Minimal Hero Section */}
-        <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-8 text-white shadow-xl shadow-slate-900/10">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-indigo-500/20 blur-[60px]" />
-          <div className="pointer-events-none absolute -left-10 -bottom-10 h-64 w-64 rounded-full bg-emerald-500/10 blur-[50px]" />
+    <div className="space-y-6 animate-slide-up w-full text-slate-900 pb-20">
+      {/* Minimal Hero Section */}
+      <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-8 text-white shadow-xl shadow-slate-900/10">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-indigo-500/20 blur-[60px]" />
+        <div className="pointer-events-none absolute -left-10 -bottom-10 h-64 w-64 rounded-full bg-emerald-500/10 blur-[50px]" />
 
-          <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center w-full">
-            <div>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-indigo-300">
-                <ShieldCheck className="h-3.5 w-3.5" /> Quản trị
-              </div>
-              <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl text-white">
-                Chính sách{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">
-                  Hủy sân
-                </span>
-              </h1>
-              <p className="mt-2 text-sm text-slate-400 max-w-md">
-                Điều chỉnh các mốc hoàn tiền linh hoạt. Đảm bảo trải nghiệm minh
-                bạch cho toàn hệ thống.
-              </p>
+        <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center w-full">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-indigo-300">
+              <ShieldCheck className="h-3.5 w-3.5" /> Quản trị
             </div>
-
-            <div className="hidden shrink-0 sm:flex items-center justify-center pr-4">
-              <div
-                className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-indigo-500/10 border border-white/10 shadow-[0_0_30px_rgba(99,102,241,0.15)] animate-pulse"
-                style={{ animationDuration: "3s" }}
-              >
-                <div
-                  className="absolute inset-2 rounded-3xl border border-indigo-500/20 border-dashed animate-spin"
-                  style={{ animationDuration: "15s" }}
-                />
-                <ShieldCheck className="relative h-10 w-10 text-indigo-400 shadow-indigo-500/50" />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Compact Action Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mt-2 mb-2">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold tracking-tight text-slate-800">
-              Danh sách thiết lập
-            </h2>
-            <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
-              {draftPolicies.length} mốc
-            </span>
-            {isDirty && (
-              <span className="inline-flex items-center gap-1.5 ml-2 rounded-full bg-amber-50 px-3 py-1 text-[11px] font-bold text-amber-700 border border-amber-200 shadow-sm animate-pulse">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-                Chưa lưu
+            <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl text-white">
+              Chính sách{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">
+                Hủy sân
               </span>
-            )}
+            </h1>
+            <p className="mt-2 text-sm text-slate-400 max-w-md">
+              Điều chỉnh các mốc hoàn tiền linh hoạt. Đảm bảo trải nghiệm minh
+              bạch cho toàn hệ thống.
+            </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            {isDirty && (
-              <button
-                onClick={handleReset}
-                className="inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 transition-colors"
-              >
-                <Undo2 className="h-3.5 w-3.5" />
-                Hoàn tác
-              </button>
-            )}
-            <button
-              onClick={() => void loadPolicies()}
-              disabled={loading || saving}
-              className="inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50"
+          <div className="hidden shrink-0 sm:flex items-center justify-center pr-4">
+            <div
+              className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-indigo-500/10 border border-white/10 shadow-[0_0_30px_rgba(99,102,241,0.15)] animate-pulse"
+              style={{ animationDuration: "3s" }}
             >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
+              <div
+                className="absolute inset-2 rounded-3xl border border-indigo-500/20 border-dashed animate-spin"
+                style={{ animationDuration: "15s" }}
               />
-              Làm mới
-            </button>
-            <button
-              onClick={handleOpenAddModal}
-              disabled={loading || saving}
-              className="inline-flex h-9 items-center gap-2 rounded-xl bg-indigo-50 px-4 text-xs font-bold text-indigo-700 border border-indigo-100 shadow-sm hover:bg-indigo-100 transition-colors disabled:opacity-50"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Thêm chính sách
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!isDirty || saving || loading}
-              className="inline-flex h-9 items-center gap-2 rounded-xl bg-slate-900 px-5 text-xs font-bold text-white shadow-md hover:bg-slate-800 hover:shadow-lg transition-all disabled:opacity-50 disabled:pointer-events-none"
-            >
-              {saving ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Save className="h-3.5 w-3.5" />
-              )}
-              Lưu thay đổi
-            </button>
+              <ShieldCheck className="relative h-10 w-10 text-indigo-400 shadow-indigo-500/50" />
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* List Content */}
-        {loading ? (
-          <div className="space-y-4 pt-2">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-32 w-full animate-pulse rounded-2xl bg-slate-100 border border-slate-200"
-              />
-            ))}
-          </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center rounded-3xl border border-red-200 bg-red-50 py-12 px-6 text-center mt-4">
-            <AlertTriangle className="h-10 w-10 text-red-500 mb-3" />
-            <p className="font-bold text-red-800">Lỗi kết nối</p>
-            <p className="mt-1 text-sm text-red-600 max-w-sm">{error}</p>
-          </div>
-        ) : draftPolicies.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 py-16 text-center mt-4 transition hover:border-indigo-300">
-            <ShieldCheck className="h-10 w-10 text-slate-300 mb-4" />
-            <p className="text-sm font-bold text-slate-600">
-              Chưa có chính sách nào được thiết lập
-            </p>
-            <button
-              onClick={handleOpenAddModal}
-              className="mt-4 rounded-xl bg-white px-5 py-2 text-sm font-bold text-indigo-600 shadow-sm border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 transition-colors"
+      {/* Compact Action Bar */}
+      <Flex justify="between" align="center" wrap="wrap" className="mt-2 mb-2">
+        <Flex align="center" spacing="sm">
+          <h2 className="text-xl font-bold tracking-tight text-slate-800">
+            Danh sách thiết lập
+          </h2>
+          <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
+            {draftPolicies.length} mốc
+          </span>
+          {isDirty && (
+            <Badge variant="warning" dot className="ml-2 animate-pulse">
+              Chưa lưu
+            </Badge>
+          )}
+        </Flex>
+
+        <Flex align="center" spacing="sm">
+          {isDirty && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              leftIcon={<Undo2 className="h-3.5 w-3.5" />}
             >
-              Tạo mốc đầu tiên
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4 pt-2">
-            {draftPolicies.map((policy, index) => (
-              <PolicyEditorRow
-                key={policy.clientId}
-                policy={policy}
-                allPolicies={draftPolicies}
-                onChange={handleChange}
-                onRemove={handleRemove}
-                disableRemove={draftPolicies.length <= 1}
-                index={index}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+              Hoàn tác
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void loadPolicies()}
+            disabled={loading || saving}
+            leftIcon={<RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
+          >
+            Làm mới
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 shadow-sm"
+            onClick={handleOpenAddModal}
+            disabled={loading || saving}
+            leftIcon={<Plus className="h-3.5 w-3.5" />}
+          >
+            Thêm chính sách
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            className="bg-slate-900 text-white hover:bg-slate-800 shadow-md"
+            onClick={handleSave}
+            disabled={!isDirty || saving || loading}
+            isLoading={saving}
+            leftIcon={<Save className="h-3.5 w-3.5" />}
+          >
+            Lưu thay đổi
+          </Button>
+        </Flex>
+      </Flex>
 
-      {/* Add Policy Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    Thêm Mốc Hủy mới
-                  </h3>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Cấu hình chính sách hoàn tiền
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-2 gap-5">
-                <div>
-                  <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    Hủy trước (thời gian)
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min={0}
-                      max={720}
-                      step={1}
-                      value={addForm.hoursBefore}
-                      onChange={(e) =>
-                        setAddForm({
-                          ...addForm,
-                          hoursBefore: Number(e.target.value),
-                        })
-                      }
-                      className="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3.5 text-base font-extrabold text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100/50"
-                    />
-                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
-                      giờ
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    Hoàn tiền theo tỷ lệ
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      step={0.01}
-                      value={addForm.refundPercent}
-                      onChange={(e) =>
-                        setAddForm({
-                          ...addForm,
-                          refundPercent: Number(e.target.value),
-                        })
-                      }
-                      className="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3.5 text-base font-extrabold text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100/50"
-                    />
-                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400 opacity-50">
-                      %
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  Ghi chú bổ sung (hiển thị cho khách)
-                </label>
-                <input
-                  type="text"
-                  value={addForm.description}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, description: e.target.value })
-                  }
-                  placeholder="VD: Không áp dụng hoàn tiền dịp Lễ Tết..."
-                  className="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3.5 text-base font-medium text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100/50"
-                />
-              </div>
-            </div>
-
-            <div className="border-t border-slate-100 bg-slate-50/50 px-6 py-4 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="rounded-xl px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-colors"
-              >
-                Hủy bỏ
-              </button>
-              <button
-                onClick={handleConfirmAdd}
-                className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-700 hover:shadow-lg transition-all"
-              >
-                Xác nhận Thêm
-              </button>
-            </div>
-          </div>
+      {/* List Content */}
+      {loading ? (
+        <div className="space-y-4 pt-2">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-32 w-full animate-pulse rounded-2xl bg-slate-100 border border-slate-200"
+            />
+          ))}
+        </div>
+      ) : error ? (
+        <Alert variant="error" className="mt-4 py-8 flex flex-col items-center text-center">
+          <AlertTriangle className="h-10 w-10 text-red-500 mb-3" />
+          <p className="font-bold text-red-800">Lỗi kết nối</p>
+          <p className="mt-1 text-sm text-red-600 max-w-sm">{error}</p>
+        </Alert>
+      ) : draftPolicies.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 py-16 text-center mt-4 transition hover:border-indigo-300">
+          <ShieldCheck className="h-10 w-10 text-slate-300 mb-4" />
+          <p className="text-sm font-bold text-slate-600">
+            Chưa có chính sách nào được thiết lập
+          </p>
+          <Button
+            variant="outline"
+            className="mt-4 text-indigo-600 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50"
+            onClick={handleOpenAddModal}
+          >
+            Tạo mốc đầu tiên
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-4 pt-2">
+          {draftPolicies.map((policy, index) => (
+            <PolicyEditorRow
+              key={policy.clientId}
+              policy={policy}
+              allPolicies={draftPolicies}
+              onChange={handleChange}
+              onRemove={handleRemove}
+              disableRemove={draftPolicies.length <= 1}
+              index={index}
+            />
+          ))}
         </div>
       )}
 
+      {/* Add Policy Modal */}
+      {showAddModal && (
+        <CreateCancelPolicyModal
+          onClose={() => setShowAddModal(false)}
+          onConfirm={handleConfirmAdd}
+        />
+      )}
+
       {/* Global Toast */}
-      <div
-        className={`fixed bottom-8 right-8 z-[100] transition-all duration-300 ${
-          toast.visible
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-4 opacity-0"
-        }`}
-      >
-        <div
-          className={`flex items-center gap-3 rounded-2xl border-2 bg-white px-5 py-3.5 shadow-xl ${
-            toast.tone === "success" ? "border-emerald-200" : "border-red-200"
-          }`}
-        >
-          {toast.tone === "success" ? (
-            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-          ) : (
-            <AlertTriangle className="h-5 w-5 text-red-500" />
-          )}
-          <p
-            className={`text-sm font-bold ${
-              toast.tone === "success" ? "text-emerald-800" : "text-red-800"
+      {toast.visible && (
+        <div className="fixed bottom-8 right-8 z-[100] transition-all duration-300 animate-slide-up">
+          <div
+            className={`flex items-center gap-3 rounded-2xl border-2 bg-white px-5 py-3.5 shadow-xl ${
+              toast.tone === "success" ? "border-emerald-200" : "border-red-200"
             }`}
           >
-            {toast.message}
-          </p>
+            {toast.tone === "success" ? (
+              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+            ) : (
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+            )}
+            <p
+              className={`text-sm font-bold ${
+                toast.tone === "success" ? "text-emerald-800" : "text-red-800"
+              }`}
+            >
+              {toast.message}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

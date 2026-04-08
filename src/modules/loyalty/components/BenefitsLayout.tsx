@@ -64,23 +64,20 @@ export default function BenefitsLayout({ children }: { children: ReactNode }) {
               <Link
                 key={tab.id}
                 href={tab.href}
-                className={`relative inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all duration-200 ${
-                  isActive
+                className={`relative inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all duration-200 ${isActive
                     ? `bg-white ${tab.activeText} shadow-md shadow-slate-200/50`
                     : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
-                }`}
+                  }`}
               >
                 <div
-                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200 ${
-                    isActive
+                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200 ${isActive
                       ? `bg-gradient-to-br ${tab.gradient} shadow-sm`
                       : "bg-slate-200/80"
-                  }`}
+                    }`}
                 >
                   <Icon
-                    className={`h-3.5 w-3.5 transition-colors ${
-                      isActive ? "text-white" : "text-slate-500"
-                    }`}
+                    className={`h-3.5 w-3.5 transition-colors ${isActive ? "text-white" : "text-slate-500"
+                      }`}
                   />
                 </div>
                 {tab.label}

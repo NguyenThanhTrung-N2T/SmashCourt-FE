@@ -37,13 +37,13 @@ export const OWNER_NAV: NavItem[] = [
         label: "Ưu đãi",
         href: "/owner/benefits",
         icon: Gift,
-        hint: "Loyalty & Khuyến mãi",
+        hint: "Hạng thành viên & Khuyến mãi",
     },
     {
         label: "Chính sách",
         href: "/owner/policy",
         icon: ShieldCheck,
-        hint: "Quản lý chính sách hủy & hoàn tiền",
+        hint: "Chính sách hủy & hoàn tiền",
     },
     {
         label: "Cài đặt",

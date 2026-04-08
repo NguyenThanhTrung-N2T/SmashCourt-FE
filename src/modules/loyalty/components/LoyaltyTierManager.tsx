@@ -9,7 +9,6 @@ import {
   Edit3,
   Gem,
   Layers,
-  Loader2,
   Medal,
   PercentIcon,
   RefreshCw,
@@ -19,6 +18,7 @@ import {
   Trophy,
   Users,
   Zap,
+  Loader2
 } from "lucide-react";
 
 import {
@@ -28,6 +28,12 @@ import {
 import type { LoyaltyTier } from "@/src/shared/types/loyalty-tier.types";
 import { AuthApiError } from "@/src/api/auth.api";
 import { useToast } from "@/src/shared/hooks/useToast";
+
+import { Button } from "@/src/shared/components/ui/Button";
+import { Input } from "@/src/shared/components/ui/Input";
+import { Alert } from "@/src/shared/components/ui/Alert";
+import { Flex } from "@/src/shared/components/layout/Flex";
+import { Grid } from "@/src/shared/components/layout/Grid";
 
 // ─── Tier config & Identity ───────────────────────────────────────────────────
 type TierCfg = {
@@ -50,7 +56,7 @@ function getTierCfg(name: string): TierCfg {
       gradient: "from-violet-500 to-fuchsia-600",
       gradientText: "from-violet-600 to-fuchsia-700",
       icon: Gem,
-      saveBg: "bg-violet-600 hover:bg-violet-700 active:bg-violet-800",
+      saveBg: "bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white",
       pillBg: "bg-violet-100/90",
       pillText: "text-violet-900",
       cardBorder: "border-violet-400",
@@ -63,7 +69,7 @@ function getTierCfg(name: string): TierCfg {
       gradient: "from-cyan-300 to-sky-400",
       gradientText: "from-cyan-500 to-sky-600",
       icon: Sparkles,
-      saveBg: "bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700",
+      saveBg: "bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white",
       pillBg: "bg-cyan-100/90",
       pillText: "text-cyan-900",
       cardBorder: "border-cyan-300",
@@ -76,7 +82,7 @@ function getTierCfg(name: string): TierCfg {
       gradient: "from-yellow-400 to-amber-500",
       gradientText: "from-yellow-600 to-amber-700",
       icon: Crown,
-      saveBg: "bg-amber-500 hover:bg-amber-600 active:bg-amber-700",
+      saveBg: "bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white",
       pillBg: "bg-amber-100/90",
       pillText: "text-amber-900",
       cardBorder: "border-amber-400",
@@ -89,7 +95,7 @@ function getTierCfg(name: string): TierCfg {
       gradient: "from-zinc-400 to-zinc-600",
       gradientText: "from-zinc-600 to-zinc-800",
       icon: Medal,
-      saveBg: "bg-slate-600 hover:bg-slate-700 active:bg-slate-800",
+      saveBg: "bg-slate-600 hover:bg-slate-700 active:bg-slate-800 text-white",
       pillBg: "bg-slate-200/90",
       pillText: "text-slate-800",
       cardBorder: "border-slate-400",
@@ -102,7 +108,7 @@ function getTierCfg(name: string): TierCfg {
       gradient: "from-amber-600 to-amber-800",
       gradientText: "from-amber-700 to-amber-900",
       icon: Award,
-      saveBg: "bg-orange-600 hover:bg-orange-700 active:bg-orange-800",
+      saveBg: "bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white",
       pillBg: "bg-orange-100/90",
       pillText: "text-orange-900",
       cardBorder: "border-orange-400",
@@ -114,7 +120,7 @@ function getTierCfg(name: string): TierCfg {
     gradient: "from-slate-400 to-slate-600",
     gradientText: "from-slate-600 to-slate-800",
     icon: Layers,
-    saveBg: "bg-slate-600 hover:bg-slate-700 active:bg-slate-800",
+    saveBg: "bg-slate-600 hover:bg-slate-700 active:bg-slate-800 text-white",
     pillBg: "bg-slate-200/90",
     pillText: "text-slate-800",
     cardBorder: "border-slate-300",
@@ -177,31 +183,31 @@ function TopStatsHeader({
       </section>
 
       {/* Action Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-2">
+      <Flex justify="between" align="center" wrap="wrap" className="mb-6">
+        <Flex align="center" spacing="sm">
           <h2 className="text-xl font-bold tracking-tight text-slate-800">
             Cấu hình hạng thành viên
           </h2>
           <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
             {tiers.length} hạng
           </span>
-        </div>
+        </Flex>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
+        <Flex align="center" spacing="sm">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onRefresh}
             disabled={loading}
-            className="inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50"
+            leftIcon={<RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             Làm mới
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Flex>
+      </Flex>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <Grid cols={4} spacing="md" className="mb-8">
         {[
           { icon: Trophy, color: "text-amber-500", bg: "bg-amber-100", val: loading ? "–" : tiers.length, label: "Tổng số hạng" },
           { icon: PercentIcon, color: "text-emerald-500", bg: "bg-emerald-100", val: loading ? "–" : `${maxDiscount}%`, label: "Giảm giá tối đa" },
@@ -218,7 +224,7 @@ function TopStatsHeader({
             </div>
           </div>
         ))}
-      </div>
+      </Grid>
     </>
   );
 }
@@ -340,7 +346,6 @@ function DetailPanel({
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
-
       {/* ── Visual Banner ── */}
       <div className={`relative h-28 w-full bg-gradient-to-r ${cfg.gradient}`}>
         <div className="absolute -bottom-10 left-8">
@@ -358,8 +363,8 @@ function DetailPanel({
         </h2>
 
         {/* Info Highlights */}
-        <div className="mt-6 grid grid-cols-2 gap-4">
-          <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+        <Grid cols={2} spacing="md" className="mt-6">
+          <Flex align="center" spacing="md" className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
               <Zap className="h-6 w-6" />
             </div>
@@ -367,8 +372,8 @@ function DetailPanel({
               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Điểm tối thiểu</p>
               <p className="text-xl font-black text-slate-800">{tier.minPoints.toLocaleString("vi-VN")}</p>
             </div>
-          </div>
-          <div className="flex items-center gap-4 rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+          </Flex>
+          <Flex align="center" spacing="md" className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-200 text-emerald-700">
               <PercentIcon className="h-6 w-6" />
             </div>
@@ -376,103 +381,93 @@ function DetailPanel({
               <p className="text-xs font-bold uppercase tracking-wider text-emerald-600/70">Tỷ lệ giảm giá</p>
               <p className="text-xl font-black text-emerald-700">{Number(tier.discountRate)}%</p>
             </div>
-          </div>
-        </div>
+          </Flex>
+        </Grid>
 
         {/* Edit Form Area */}
         <div className={`mt-8 rounded-3xl border border-slate-100 ${cfg.formBg} p-6`}>
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <Flex align="center" justify="between" className="mb-6">
+            <Flex align="center" spacing="sm">
               <Edit3 className="h-5 w-5 text-slate-600" />
               <h3 className="text-base font-bold text-slate-800">Cấu hình điều kiện hạng</h3>
-            </div>
+            </Flex>
             {isDirty && (
               <span className="animate-pulse rounded-full bg-amber-200 px-3 py-1 text-xs font-black text-amber-800">
                 CHƯA LƯU
               </span>
             )}
-          </div>
+          </Flex>
 
           {errors.general && (
-            <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
-              <p className="text-sm font-semibold text-red-700">{errors.general}</p>
-            </div>
+            <Alert variant="error" className="mb-6">
+              {errors.general}
+            </Alert>
           )}
 
-          <div className="grid grid-cols-2 gap-6">
+          <Grid cols={2} spacing="lg">
             {/* Field 1 */}
             <div>
-              <label className="mb-2 block text-sm font-bold text-slate-700">
-                Điểm tích lũy tối thiểu
-              </label>
-              <div className="relative">
-                <input
-                  id={`min-pts-${tier.id}`}
-                  type="number"
-                  min={0}
-                  value={minPoints}
-                  onChange={(e) => { setMinPoints(e.target.value); setErrors((p) => ({ ...p, minPoints: undefined })); }}
-                  className={`w-full rounded-xl border-2 px-4 py-3 pr-12 text-base font-bold text-slate-800 shadow-sm outline-none transition-all ${errors.minPoints ? "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-100" : `border-slate-200 bg-white ${cfg.inputFocus}`
-                    }`}
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Pts</span>
-              </div>
-              {errors.minPoints ? (
-                <p className="mt-2 text-xs font-bold text-red-500">{errors.minPoints}</p>
-              ) : (
+              <Input
+                id={`min-pts-${tier.id}`}
+                type="number"
+                min={0}
+                value={minPoints}
+                onChange={(e) => { setMinPoints(e.target.value); setErrors((p) => ({ ...p, minPoints: undefined })); }}
+                error={errors.minPoints}
+                className={`text-base shadow-sm ${cfg.inputFocus}`}
+                rightIcon={<span className="text-sm font-bold text-slate-400">Pts</span>}
+                label="Điểm tích lũy tối thiểu"
+              />
+              {!errors.minPoints && (
                 <p className="mt-2 text-xs font-medium text-slate-500 leading-relaxed">Người dùng sẽ tự động nâng lên hạng này khi đạt số điểm tích lũy trên.</p>
               )}
             </div>
 
             {/* Field 2 */}
             <div>
-              <label className="mb-2 block text-sm font-bold text-slate-700">
-                Tỷ lệ chiết khấu (%)
-              </label>
-              <div className="relative">
-                <input
-                  id={`disc-${tier.id}`}
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={0.1}
-                  value={discountRate}
-                  onChange={(e) => { setDiscountRate(e.target.value); setErrors((p) => ({ ...p, discountRate: undefined })); }}
-                  className={`w-full rounded-xl border-2 px-4 py-3 pr-12 text-base font-bold text-slate-800 shadow-sm outline-none transition-all ${errors.discountRate ? "border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-100" : `border-slate-200 bg-white ${cfg.inputFocus}`
-                    }`}
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">%</span>
-              </div>
-              {errors.discountRate ? (
-                <p className="mt-2 text-xs font-bold text-red-500">{errors.discountRate}</p>
-              ) : (
+              <Input
+                id={`disc-${tier.id}`}
+                type="number"
+                min={0}
+                max={100}
+                step={0.1}
+                value={discountRate}
+                onChange={(e) => { setDiscountRate(e.target.value); setErrors((p) => ({ ...p, discountRate: undefined })); }}
+                error={errors.discountRate}
+                className={`text-base shadow-sm ${cfg.inputFocus}`}
+                rightIcon={<span className="text-sm font-bold text-slate-400">%</span>}
+                label="Tỷ lệ chiết khấu (%)"
+              />
+              {!errors.discountRate && (
                 <p className="mt-2 text-xs font-medium text-slate-500 leading-relaxed">Mức giảm giá sẽ được tự động áp dụng vào tổng hóa đơn khi đặt sân.</p>
               )}
             </div>
-          </div>
+          </Grid>
         </div>
       </div>
 
       {/* Floating Action Footer */}
-      <div className="shrink-0 border-t border-slate-100 bg-slate-50/80 px-8 py-5 flex items-center justify-between">
-        <button
+      <Flex align="center" justify="between" className="shrink-0 border-t border-slate-100 bg-slate-50/80 px-8 py-5">
+        <Button
+          variant="ghost"
           onClick={() => { setMinPoints(String(tier.minPoints)); setDiscountRate(String(tier.discountRate)); setErrors({}); }}
           disabled={!isDirty || saving}
-          className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 transition-all hover:bg-slate-200 hover:text-slate-800 disabled:opacity-30 disabled:hover:bg-transparent"
+          leftIcon={<RotateCcw className="h-4 w-4" />}
         >
-          <RotateCcw className="h-4 w-4" /> Reset
-        </button>
+          Reset
+        </Button>
 
-        <button
+        <Button
+          variant="primary"
           onClick={handleSave}
           disabled={saving || !isDirty}
-          className={`inline-flex items-center gap-2 rounded-xl px-8 py-3.5 text-sm font-black text-white shadow-lg transition-all ${cfg.saveBg} disabled:opacity-50 disabled:shadow-none disabled:hover:bg-opacity-100 hover:-translate-y-0.5 active:translate-y-0`}
+          isLoading={saving}
+          className={cfg.saveBg}
+          leftIcon={<Save className="h-5 w-5" />}
         >
-          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
           Lưu cấu hình
-        </button>
-      </div>
+        </Button>
+      </Flex>
     </div>
   );
 }
@@ -516,16 +511,15 @@ export default function LoyaltyTierManager() {
 
   return (
     <div className="w-full">
-
       {/* 1. Header Card */}
       <TopStatsHeader tiers={tiers} loading={loading} onRefresh={load} />
 
       {/* States */}
       {loading && (
-        <div className="my-20 flex flex-col items-center gap-4 w-full">
+        <Flex justify="center" align="center" spacing="md" className="my-20 flex-col">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
           <p className="font-semibold text-slate-500">Đang đồng bộ dữ liệu hạng...</p>
-        </div>
+        </Flex>
       )}
 
       {!loading && loadError && (
@@ -533,16 +527,15 @@ export default function LoyaltyTierManager() {
           <AlertTriangle className="mb-4 h-12 w-12 text-red-400" />
           <h3 className="text-xl font-bold text-red-800">Lỗi đồng bộ dữ liệu</h3>
           <p className="mt-2 text-red-600">{loadError}</p>
-          <button onClick={load} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-red-600 px-6 py-3 font-bold text-white shadow-md hover:bg-red-700">
-            <RefreshCw className="h-5 w-5" /> Thử lại
-          </button>
+          <Button variant="danger" onClick={load} className="mt-6" leftIcon={<RefreshCw className="h-5 w-5" />}>
+            Thử lại
+          </Button>
         </div>
       )}
 
       {/* 2. Content Layout */}
       {!loading && !loadError && tiers.length > 0 && selectedTier && (
         <div className="grid grid-cols-5 gap-6 w-full">
-
           {/* Left: List Card */}
           <div className="col-span-2">
             <TierListCard
@@ -550,7 +543,6 @@ export default function LoyaltyTierManager() {
               selectedId={selectedId}
               onSelect={(id) => {
                 if (id !== selectedId) setSelectedId(id);
-                // Nếu bấm lại ID cũ, không làm gì cả
               }}
             />
           </div>
