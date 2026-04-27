@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, Lock, LogIn, Mail } from "lucide-react";
 
 import {
@@ -12,7 +11,6 @@ import {
   hasAuthErrorCode,
 } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
-import { getRedirectPathByRole } from "@/src/modules/auth/constants";
 import {
   consumePostVerifyLoginHint,
   getEmail,
@@ -21,8 +19,10 @@ import {
   setTempToken,
   startTwoFactorVerifySession,
 } from "@/src/modules/auth/session/sessionStore";
-
-const REDIRECT_MS = 2000;
+import { useAuthRedirect } from "@/src/modules/auth/hooks/useAuthRedirect";
+import { useAuthErrors } from "@/src/modules/auth/hooks/useAuthError";
+import { useAuthErrorLogger } from "@/src/modules/auth/hooks/useAuthError";
+import type { AuthFormEvent } from "@/src/modules/auth/types/forms";
 
 function normalizeText(value: string | null | undefined) {
   return (value ?? "")
@@ -66,29 +66,26 @@ function GoogleMark() {
 
 export default function LoginPage() {
   const router = useRouter();
-  const redirectTimeoutRef = useRef<number | null>(null);
 
   const [email, setEmailState] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lockedAccountError, setLockedAccountError] = useState<string | null>(
-    null,
-  );
   const [verifyHint, setVerifyHint] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    if (lockedAccountError) {
-      const timer = window.setTimeout(() => {
-        setLockedAccountError(null);
-      }, 3500);
-      return () => clearTimeout(timer);
-    }
-  }, [lockedAccountError]);
+  // Use new hooks for error handling and redirects
+  const { errors, showError, clearAllErrors } = useAuthErrors({
+    types: ["form", "locked"],
+    autoDismiss: { locked: true },
+    dismissDelay: { locked: 3500 },
+  });
+
+  const { scheduleRedirectByRole, isRedirecting } = useAuthRedirect({
+    delay: 2000,
+  });
+
+  const logError = useAuthErrorLogger("login");
 
   useEffect(() => {
     setMounted(true);
@@ -100,33 +97,22 @@ export default function LoginPage() {
     } catch {
       /* ignore */
     }
-
-    return () => {
-      if (redirectTimeoutRef.current) {
-        clearTimeout(redirectTimeoutRef.current);
-      }
-    };
   }, []);
 
-  function scheduleRedirect(path: string) {
-    setRedirecting(true);
-    if (redirectTimeoutRef.current) {
-      clearTimeout(redirectTimeoutRef.current);
-    }
-    redirectTimeoutRef.current = window.setTimeout(() => {
-      router.push(path);
-    }, REDIRECT_MS);
-  }
-
-  async function onSubmit(e: FormEvent) {
+  async function onSubmit(e: AuthFormEvent) {
     e.preventDefault();
-    if (redirecting || googleLoading) return;
-    setError(null);
-    setLockedAccountError(null);
+    if (isRedirecting || googleLoading) return;
+    clearAllErrors();
 
     const trimmedEmail = email.trim();
-    if (!trimmedEmail) return setError("Vui lòng nhập email.");
-    if (!password) return setError("Vui lòng nhập mật khẩu.");
+    if (!trimmedEmail) {
+      showError("form", new Error("Vui lòng nhập email."), "login");
+      return;
+    }
+    if (!password) {
+      showError("form", new Error("Vui lòng nhập mật khẩu."), "login");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -134,7 +120,8 @@ export default function LoginPage() {
 
       if (data.status === "2fa_required") {
         if (!data.tempToken) {
-          return setError("Thiếu mã 2FA. Vui lòng thử lại.");
+          showError("form", new Error("Thiếu mã 2FA. Vui lòng thử lại."), "login");
+          return;
         }
         setEmail(trimmedEmail);
         setTempToken(data.tempToken);
@@ -150,24 +137,22 @@ export default function LoginPage() {
             user: data.user,
           });
         }
-        const role = data.user?.role as string | undefined;
-        scheduleRedirect(getRedirectPathByRole(role));
+        scheduleRedirectByRole(data.user?.role);
         return;
       }
 
       const errorMessage = data.message ?? "Đăng nhập thất bại.";
       if (isAccountLockedError(errorMessage)) {
-        setLockedAccountError(errorMessage);
+        showError("locked", new Error(errorMessage), "login");
       } else {
-        setError(errorMessage);
+        showError("form", new Error(errorMessage), "login");
       }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Đăng nhập thất bại.";
+      logError(err);
       if (isAccountLockedError(err)) {
-        setLockedAccountError(errorMessage);
+        showError("locked", err, "login");
       } else {
-        setError(errorMessage);
+        showError("form", err, "login");
       }
     } finally {
       setLoading(false);
@@ -175,9 +160,8 @@ export default function LoginPage() {
   }
 
   async function onGoogleLogin() {
-    if (loading || redirecting || googleLoading) return;
-    setError(null);
-    setLockedAccountError(null);
+    if (loading || isRedirecting || googleLoading) return;
+    clearAllErrors();
 
     try {
       setGoogleLoading(true);
@@ -185,19 +169,16 @@ export default function LoginPage() {
       window.location.assign(data.url);
     } catch (err) {
       setGoogleLoading(false);
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Không thể kết nối đăng nhập Google.";
+      logError(err);
       if (isAccountLockedError(err)) {
-        setLockedAccountError(errorMessage);
+        showError("locked", err, "oauth");
       } else {
-        setError(errorMessage);
+        showError("form", err, "oauth");
       }
     }
   }
 
-  const controlsDisabled = loading || googleLoading || redirecting;
+  const controlsDisabled = loading || googleLoading || isRedirecting;
 
   return (
     <section
@@ -228,11 +209,11 @@ export default function LoginPage() {
         </div>
       ) : null}
 
-      {error ? (
+      {errors.form ? (
         <div className="mb-6 flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4 shadow-sm">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
           <p className="flex-1 text-sm font-bold leading-relaxed text-red-800">
-            {error}
+            {errors.form}
           </p>
         </div>
       ) : null}
@@ -334,14 +315,14 @@ export default function LoginPage() {
       </form>
 
       <AuthStatusToast
-        visible={redirecting}
+        visible={isRedirecting}
         tone="success"
         message="Đăng nhập thành công"
       />
       <AuthStatusToast
-        visible={!!lockedAccountError}
+        visible={!!errors.locked}
         tone="danger"
-        message={lockedAccountError ?? ""}
+        message={errors.locked ?? ""}
       />
     </section>
   );

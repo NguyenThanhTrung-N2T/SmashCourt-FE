@@ -3,13 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
 import { AlertCircle, Lock, Mail, Phone, User, UserPlus } from "lucide-react";
 
 import {
   authRegister,
-  getAuthFieldError,
-  hasAuthErrorCode,
 } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
 import {
@@ -18,6 +15,10 @@ import {
   startRegisterVerifySession,
 } from "@/src/modules/auth/session/sessionStore";
 import { isValidPassword } from "@/src/modules/auth/validators";
+import { useAuthErrors } from "@/src/modules/auth/hooks/useAuthError";
+import { useAuthErrorLogger } from "@/src/modules/auth/hooks/useAuthError";
+import type { AuthFormEvent } from "@/src/modules/auth/types/forms";
+import { hasAuthErrorCode, getAuthFieldError } from "@/src/api/auth.api";
 
 function isAlternativeLoginMethodError(message?: string) {
   const normalized = (message ?? "")
@@ -40,43 +41,50 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [toastError, setToastError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  // Use new hooks for error handling
+  const { errors, showError, clearAllErrors } = useAuthErrors({
+    types: ["form", "toast"],
+    autoDismiss: { toast: true },
+    dismissDelay: { toast: 3500 },
+  });
+
+  const logError = useAuthErrorLogger("register");
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!toastError) return;
-
-    const timer = window.setTimeout(() => {
-      setToastError(null);
-    }, 3500);
-
-    return () => clearTimeout(timer);
-  }, [toastError]);
-
-  async function onSubmit(e: FormEvent) {
+  async function onSubmit(e: AuthFormEvent) {
     e.preventDefault();
-    setError(null);
-    setToastError(null);
+    clearAllErrors();
 
     const trimmedEmail = email.trim();
     const trimmedFullName = fullName.trim();
     const trimmedPhone = phone.trim();
 
-    if (!trimmedEmail) return setError("Vui lòng nhập email.");
-    if (!trimmedFullName) return setError("Vui lòng nhập họ và tên.");
-    if (!password) return setError("Vui lòng nhập mật khẩu.");
+    if (!trimmedEmail) {
+      showError("form", new Error("Vui lòng nhập email."), "register");
+      return;
+    }
+    if (!trimmedFullName) {
+      showError("form", new Error("Vui lòng nhập họ và tên."), "register");
+      return;
+    }
+    if (!password) {
+      showError("form", new Error("Vui lòng nhập mật khẩu."), "register");
+      return;
+    }
 
     if (!isValidPassword(password)) {
-      return setError(
-        "Mật khẩu phải có ít nhất 8 ký tự, gồm 1 chữ hoa, 1 số và 1 ký tự đặc biệt.",
+      showError(
+        "form",
+        new Error("Mật khẩu phải có ít nhất 8 ký tự, gồm 1 chữ hoa, 1 số và 1 ký tự đặc biệt."),
+        "register"
       );
+      return;
     }
 
     try {
@@ -96,6 +104,7 @@ export default function RegisterPage() {
       startRegisterVerifySession(trimmedEmail);
       router.push("/auth/verify-email");
     } catch (err) {
+      logError(err);
       const fieldError =
         getAuthFieldError(err, ["email", "fullName", "phone", "password"]) ??
         null;
@@ -107,9 +116,9 @@ export default function RegisterPage() {
         hasAuthErrorCode(err, "CONFLICT") &&
         isAlternativeLoginMethodError(errorMessage)
       ) {
-        setToastError(errorMessage);
+        showError("toast", new Error(errorMessage), "register");
       } else {
-        setError(errorMessage);
+        showError("form", new Error(errorMessage), "register");
       }
     } finally {
       setLoading(false);
@@ -131,11 +140,11 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      {error ? (
+      {errors.form ? (
         <div className="mb-6 flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4 shadow-sm">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
           <p className="flex-1 text-sm font-bold leading-relaxed text-red-800">
-            {error}
+            {errors.form}
           </p>
         </div>
       ) : null}
@@ -241,9 +250,9 @@ export default function RegisterPage() {
       </form>
 
       <AuthStatusToast
-        visible={toastError !== null}
+        visible={!!errors.toast}
         tone="danger"
-        message={toastError ?? ""}
+        message={errors.toast ?? ""}
       />
     </section>
   );

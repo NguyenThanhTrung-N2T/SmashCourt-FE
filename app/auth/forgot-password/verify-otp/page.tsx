@@ -2,17 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { KeyRound } from "lucide-react";
 
-import {
-  AuthApiError,
-  authForgotPasswordVerifyOtp,
-  authResendOtp,
-  getAuthFieldError,
-  hasAuthErrorCode,
-} from "@/src/api/auth.api";
+import { hasAuthErrorCode } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
 import CountdownButton from "@/src/modules/auth/components/CountdownButton";
 import OtpInput from "@/src/modules/auth/components/OtpInput";
@@ -23,179 +16,119 @@ import {
   consumeForgotPasswordFlashMessage,
   getEmail,
   getForgotPasswordVerifySession,
-  setEmail,
-  setForgotPasswordVerifySession,
-  startForgotPasswordVerifySession,
   setResetToken,
-  type ForgotPasswordVerifySession,
 } from "@/src/modules/auth/session/sessionStore";
-import {
-  AUTH_GENERIC,
-  formatEmailShort,
-  logAuthClientError,
-} from "@/src/modules/auth/utils/clientErrors";
-import { isValidOtp, normalizeOtp } from "@/src/modules/auth/validators";
+import { formatEmailShort } from "@/src/modules/auth/utils/clientErrors";
+import { useOtpVerification } from "@/src/modules/auth/hooks/useOtpVerification";
+import { useAuthRedirect } from "@/src/modules/auth/hooks/useAuthRedirect";
+import { useAuthErrors } from "@/src/modules/auth/hooks/useAuthError";
+import type { AuthFormEvent } from "@/src/modules/auth/types/forms";
 
-const REDIRECT_MS = 2000;
 const RESET_REDIRECT_MS = 3500;
-const SUCCESS_MESSAGE_CLEAR_MS = 8000;
 const MAX_VERIFY_ATTEMPTS = 3;
 const MAX_RESEND_ATTEMPTS = 3;
-const VERIFY_SESSION_RESET_PATTERNS = [
-  "otp da bi khoa",
-  "da het han",
-  "yeu cau ma moi",
-  "email da duoc xac thuc truoc do",
-  "tai khoan khong ton tai",
-  "dang ky lai",
-  "da gui otp qua so lan cho phep",
-  "da het luot gui lai otp",
-  "het luot gui lai",
-] as const;
-const VERIFY_SESSION_RESET_STATUS_PATTERNS = [
-  "lock",
-  "locked",
-  "invalid",
-  "expired",
-] as const;
 
-function normalizeText(value: string | null | undefined) {
-  return (value ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
-function shouldResetVerifySession(
-  input?:
-    | {
-        status?: string;
-        code?: string;
-        message?: string;
-      }
-    | AuthApiError
-    | null,
-) {
-  if (
-    hasAuthErrorCode(input, ["OTP_LIMIT_EXCEEDED", "NOT_FOUND", "TOKEN_INVALID"])
-  ) {
-    return true;
-  }
-
-  const status =
-    input instanceof AuthApiError
-      ? input.code ?? undefined
-      : input?.code ?? input?.status;
-  const message = input instanceof AuthApiError ? input.message : input?.message;
-
-  const normalizedStatus = normalizeText(status);
-  if (
-    VERIFY_SESSION_RESET_STATUS_PATTERNS.some((pattern) =>
-      normalizedStatus.includes(pattern),
-    )
-  ) {
-    return true;
-  }
-
-  const normalizedMessage = normalizeText(message);
-  return VERIFY_SESSION_RESET_PATTERNS.some((pattern) =>
-    normalizedMessage.includes(pattern),
-  );
+function shouldResetVerifySession(input?: unknown) {
+  return hasAuthErrorCode(input, [
+    "OTP_LIMIT_EXCEEDED",
+    "NOT_FOUND",
+    "TOKEN_INVALID",
+  ]);
 }
 
 export default function VerifyOtpPage() {
   const router = useRouter();
-  const verifySessionRef = useRef<ForgotPasswordVerifySession | null>(null);
-
   const [email, setEmailState] = useState<string | null>(null);
-  const [otpCode, setOtpCode] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [resendError, setResendError] = useState<string | null>(null);
-  const [resendSuccess, setResendSuccess] = useState<string | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [entered, setEntered] = useState(false);
   const [verified, setVerified] = useState(false);
   const [resettingSession, setResettingSession] = useState(false);
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [resendCount, setResendCount] = useState(0);
-  const [toastError, setToastError] = useState<string | null>(null);
 
-  const resendSuccessClearRef = useRef<number | null>(null);
-  const resetRedirectRef = useRef<number | null>(null);
-  const successRedirectRef = useRef<number | null>(null);
+  // Use new hooks
+  const { errors, showError, clearAllErrors } = useAuthErrors({
+    types: ["submit", "resend", "success", "toast"],
+    autoDismiss: { success: true, toast: false },
+    dismissDelay: { success: 8000 },
+  });
 
-  function clearResendSuccessLater() {
-    if (resendSuccessClearRef.current) {
-      clearTimeout(resendSuccessClearRef.current);
-    }
-    resendSuccessClearRef.current = window.setTimeout(() => {
-      setResendSuccess(null);
-      resendSuccessClearRef.current = null;
-    }, SUCCESS_MESSAGE_CLEAR_MS);
-  }
+  const { scheduleRedirect } = useAuthRedirect({
+    delay: 2000,
+  });
 
-  function syncVerifySession(nextSession: ForgotPasswordVerifySession | null) {
-    verifySessionRef.current = nextSession;
-
-    if (!nextSession) {
-      setFailedAttempts(0);
-      setResendCount(0);
-      clearForgotPasswordVerifySession();
-      return;
-    }
-
-    setFailedAttempts(nextSession.failedAttempts);
-    setResendCount(nextSession.resendCount);
-    setForgotPasswordVerifySession(nextSession);
-  }
-
-  function ensureVerifySession(currentEmail: string) {
-    const normalizedEmail = currentEmail.trim().toLowerCase();
-    const currentSession = verifySessionRef.current;
-
-    if (currentSession?.email === normalizedEmail) {
-      return currentSession;
-    }
-
+  // Load initial session state
+  const [initialState] = useState(() => {
     const storedSession = getForgotPasswordVerifySession();
-    if (storedSession?.email === normalizedEmail) {
-      syncVerifySession(storedSession);
-      return storedSession;
-    }
+    return {
+      failedAttempts: storedSession?.failedAttempts ?? 0,
+      resendCount: storedSession?.resendCount ?? 0,
+    };
+  });
 
-    const freshSession = startForgotPasswordVerifySession(normalizedEmail);
-    syncVerifySession(freshSession);
-    return freshSession;
-  }
-
-  function updateVerifySession(
-    updater: (
-      session: ForgotPasswordVerifySession,
-    ) => ForgotPasswordVerifySession,
-  ) {
-    if (!email) return null;
-    const nextSession = updater(ensureVerifySession(email));
-    syncVerifySession(nextSession);
-    return nextSession;
-  }
+  const {
+    otpCode,
+    setOtpCode,
+    verify,
+    resend,
+    remainingAttempts,
+    remainingResends,
+    isVerifying,
+    isResending,
+    isValidFormat,
+  } = useOtpVerification({
+    email: email ?? "",
+    type: OtpType.FORGOT_PASSWORD,
+    maxAttempts: MAX_VERIFY_ATTEMPTS,
+    maxResends: MAX_RESEND_ATTEMPTS,
+    initialFailedAttempts: initialState.failedAttempts,
+    initialResendCount: initialState.resendCount,
+    onSuccess: (data: any) => {
+      if (data?.resetToken) {
+        setResetToken(data.resetToken);
+        clearForgotPasswordVerifySession();
+        clearAllErrors();
+        setVerified(true);
+        scheduleRedirect("/auth/reset-password");
+      }
+    },
+    onError: (err) => {
+      if (shouldResetVerifySession(err)) {
+        clearVerifySessionAndRestart(
+          err instanceof Error ? err.message : "Phiên xác thực đã hết hiệu lực."
+        );
+      } else {
+        showError("submit", err, "verify-otp");
+      }
+    },
+    onResendSuccess: (message) => {
+      clearAllErrors();
+      showError("success", new Error(message ?? "OTP đã được gửi lại"), "verify-otp");
+    },
+    onResendError: (err) => {
+      if (shouldResetVerifySession(err)) {
+        clearVerifySessionAndRestart(
+          err instanceof Error ? err.message : "Phiên xác thực đã hết hiệu lực."
+        );
+      } else {
+        showError("resend", err, "verify-otp");
+      }
+    },
+  });
 
   function clearVerifySessionAndRestart(message?: string) {
-    syncVerifySession(null);
+    clearForgotPasswordVerifySession();
     clearAuthSession();
     setResettingSession(true);
     setOtpCode("");
-    setSubmitError(null);
-    setToastError(
-      message ??
-        "Phiên xác thực chờ OTP đã hết hiệu lực. Bạn sẽ được đưa về trang trước sau ít giây.",
+    clearAllErrors();
+    showError(
+      "toast",
+      new Error(
+        message ??
+          "Phiên xác thực chờ OTP đã hết hiệu lực. Bạn sẽ được đưa về trang trước sau ít giây."
+      ),
+      "verify-otp"
     );
-    setResendError(null);
-    setResendSuccess(null);
 
-    if (resetRedirectRef.current) {
-      clearTimeout(resetRedirectRef.current);
-    }
-    resetRedirectRef.current = window.setTimeout(() => {
+    setTimeout(() => {
       setEmailState(null);
       router.replace("/auth/forgot-password");
     }, RESET_REDIRECT_MS);
@@ -206,26 +139,9 @@ export default function VerifyOtpPage() {
       const storedEmail = getEmail()?.trim().toLowerCase() ?? null;
       setEmailState(storedEmail);
 
-      if (storedEmail) {
-        setEmail(storedEmail);
-
-        const storedSession = getForgotPasswordVerifySession();
-        if (storedSession?.email === storedEmail) {
-          verifySessionRef.current = storedSession;
-          setFailedAttempts(storedSession.failedAttempts);
-          setResendCount(storedSession.resendCount);
-        } else {
-          const freshSession = startForgotPasswordVerifySession(storedEmail);
-          verifySessionRef.current = freshSession;
-          setFailedAttempts(freshSession.failedAttempts);
-          setResendCount(freshSession.resendCount);
-        }
-      }
-
       const flashMessage = consumeForgotPasswordFlashMessage();
       if (flashMessage) {
-        setResendSuccess(flashMessage);
-        clearResendSuccessLater();
+        showError("success", new Error(flashMessage), "verify-otp");
       }
     } catch {
       setEmailState(null);
@@ -235,185 +151,25 @@ export default function VerifyOtpPage() {
     return () => cancelAnimationFrame(frameId);
   }, []);
 
-  async function onSubmit(e: FormEvent) {
+  async function onSubmit(e: AuthFormEvent) {
     e.preventDefault();
     if (!email || resettingSession || verified) return;
 
-    setSubmitError(null);
-    setResendError(null);
-    setResendSuccess(null);
-    if (resendSuccessClearRef.current) {
-      clearTimeout(resendSuccessClearRef.current);
-      resendSuccessClearRef.current = null;
-    }
+    clearAllErrors();
 
-    const normalized = normalizeOtp(otpCode);
-    setOtpCode(normalized);
-    if (!isValidOtp(normalized)) {
-      setSubmitError("Vui lòng nhập đủ 6 chữ số.");
+    if (!isValidFormat) {
+      showError("submit", new Error("Vui lòng nhập đủ 6 chữ số."), "verify-otp");
       return;
     }
 
-    try {
-      setLoading(true);
-      const data = await authForgotPasswordVerifyOtp({
-        email,
-        otpCode: normalized,
-      });
-
-      if (!data.resetToken) {
-        const nextSession = updateVerifySession((currentSession) => ({
-          ...currentSession,
-          failedAttempts: currentSession.failedAttempts + 1,
-        }));
-
-        logAuthClientError("forgot-verify-otp-no-token", data);
-
-        if (
-          shouldResetVerifySession(data) ||
-          (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
-            MAX_VERIFY_ATTEMPTS
-        ) {
-          clearVerifySessionAndRestart(
-            data.message ??
-              "Mã OTP không còn hợp lệ. Bạn sẽ được đưa về trang trước sau ít giây.",
-          );
-          return;
-        }
-
-        setSubmitError(data.message ?? AUTH_GENERIC.verifyFailed);
-        return;
-      }
-
-      if (data.resetToken) {
-        setResetToken(data.resetToken);
-        clearForgotPasswordVerifySession();
-        verifySessionRef.current = null;
-        setFailedAttempts(0);
-        setResendCount(0);
-        setSubmitError(null);
-        setResendError(null);
-        setResendSuccess(null);
-        setVerified(true);
-
-        if (successRedirectRef.current) {
-          clearTimeout(successRedirectRef.current);
-        }
-        successRedirectRef.current = window.setTimeout(() => {
-          router.push("/auth/reset-password");
-        }, REDIRECT_MS);
-        return;
-      }
-
-      logAuthClientError("forgot-verify-otp-no-token", data);
-      setSubmitError(AUTH_GENERIC.verifyFailed);
-    } catch (err) {
-      logAuthClientError("forgot-verify-otp", err);
-
-      if (err instanceof AuthApiError) {
-        const nextSession = updateVerifySession((currentSession) => ({
-          ...currentSession,
-          failedAttempts: currentSession.failedAttempts + 1,
-        }));
-
-        if (
-          shouldResetVerifySession(err) ||
-          (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
-            MAX_VERIFY_ATTEMPTS
-        ) {
-          clearVerifySessionAndRestart(
-            err.message ||
-              "Phiên xác thực đã hết hiệu lực. Bạn sẽ được đưa về trang trước sau ít giây.",
-          );
-          return;
-        }
-        setSubmitError(
-          getAuthFieldError(err, "otpCode") ??
-            err.message ??
-            AUTH_GENERIC.verifyFailed,
-        );
-        return;
-      }
-
-      setSubmitError(AUTH_GENERIC.verifyFailed);
-    } finally {
-      setLoading(false);
-    }
+    await verify();
   }
 
   async function onResend() {
     if (!email || resettingSession || verified) return;
-
-    setSubmitError(null);
-    setResendError(null);
-    setResendSuccess(null);
-    if (resendSuccessClearRef.current) {
-      clearTimeout(resendSuccessClearRef.current);
-      resendSuccessClearRef.current = null;
-    }
-
-    const currentSession = ensureVerifySession(email);
-    if (currentSession.resendCount >= MAX_RESEND_ATTEMPTS) {
-      setResendError("Bạn đã dùng hết lượt gửi lại OTP.");
-      throw new Error("resend-limit-reached");
-    }
-
-    try {
-      await authResendOtp({ email, type: OtpType.FORGOT_PASSWORD });
-      const nextSession = updateVerifySession((storedSession) => ({
-        ...storedSession,
-        failedAttempts: 0,
-        resendCount: storedSession.resendCount + 1,
-      }));
-
-      const remainingResends = Math.max(
-        0,
-        MAX_RESEND_ATTEMPTS - (nextSession?.resendCount ?? MAX_RESEND_ATTEMPTS),
-      );
-      const successMessage =
-        remainingResends > 0
-          ? `Mã OTP khôi phục đã được gửi lại, hiệu lực 5 phút. Còn ${remainingResends} lần gửi lại.`
-          : "Mã OTP khôi phục đã được gửi lại, hiệu lực 5 phút. Đây là lần gửi lại cuối cùng.";
-
-      setResendSuccess(successMessage);
-      clearResendSuccessLater();
-    } catch (err) {
-      logAuthClientError("resend-forgot-otp", err);
-
-      if (err instanceof AuthApiError) {
-        if (shouldResetVerifySession(err)) {
-          clearVerifySessionAndRestart(err.message);
-          throw err;
-        }
-
-        setResendError(
-          getAuthFieldError(err, ["email", "otpCode"]) ??
-            err.message ??
-            AUTH_GENERIC.resendFailed,
-        );
-        throw err;
-      }
-
-      setResendError(
-        (currentError) => currentError ?? AUTH_GENERIC.resendFailed,
-      );
-      throw err;
-    }
+    clearAllErrors();
+    await resend();
   }
-
-  useEffect(() => {
-    return () => {
-      if (resendSuccessClearRef.current) {
-        clearTimeout(resendSuccessClearRef.current);
-      }
-      if (resetRedirectRef.current) {
-        clearTimeout(resetRedirectRef.current);
-      }
-      if (successRedirectRef.current) {
-        clearTimeout(successRedirectRef.current);
-      }
-    };
-  }, []);
 
   if (!email) {
     return (
@@ -426,7 +182,7 @@ export default function VerifyOtpPage() {
           Mã xác thực
         </h2>
         <p className="mt-3 text-base font-medium text-slate-600">
-          {AUTH_GENERIC.sessionInvalid}
+          Phiên không hợp lệ. Vui lòng thực hiện lại từ đầu.
         </p>
         <div className="mt-4">
           <Link
@@ -440,11 +196,6 @@ export default function VerifyOtpPage() {
     );
   }
 
-  const remainingVerifyAttempts = Math.max(
-    0,
-    MAX_VERIFY_ATTEMPTS - failedAttempts,
-  );
-  const remainingResends = Math.max(0, MAX_RESEND_ATTEMPTS - resendCount);
   const resendLimitReached = remainingResends === 0;
 
   return (
@@ -512,40 +263,40 @@ export default function VerifyOtpPage() {
           />
         </div>
 
-        {failedAttempts > 0 && remainingVerifyAttempts > 0 ? (
+        {remainingAttempts > 0 && remainingAttempts < MAX_VERIFY_ATTEMPTS ? (
           <p className="text-center text-sm font-semibold text-red-600">
-            Bạn còn {remainingVerifyAttempts} lần nhập với mã hiện tại.
+            Bạn còn {remainingAttempts} lần nhập với mã hiện tại.
           </p>
         ) : null}
 
-        {submitError ? (
+        {errors.submit ? (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-800">
-            {submitError}
+            {errors.submit}
           </div>
         ) : null}
 
-        {resendError ? (
+        {errors.resend ? (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-800">
-            {resendError}
+            {errors.resend}
           </div>
         ) : null}
 
-        {resendSuccess ? (
+        {errors.success ? (
           <div
             className="overflow-x-auto whitespace-nowrap rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-[13px] font-semibold text-emerald-900"
             role="status"
             aria-live="polite"
           >
-            {resendSuccess}
+            {errors.success}
           </div>
         ) : null}
 
         <button
           type="submit"
-          disabled={loading || verified || resettingSession}
+          disabled={isVerifying || verified || resettingSession}
           className="h-12 w-full cursor-pointer rounded-xl bg-slate-900 text-sm font-bold text-white shadow-md transition-all duration-200 ease-out hover:bg-slate-800 hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:active:scale-100"
         >
-          {loading ? "Đang xử lý..." : "Xác thực"}
+          {isVerifying ? "Đang xử lý..." : "Xác thực"}
         </button>
 
         <div className="flex flex-col items-center gap-3 border-t border-slate-200 pt-6">
@@ -557,7 +308,7 @@ export default function VerifyOtpPage() {
             resendLabel="Gửi lại sau"
             variant="outline"
             className="min-h-9 border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-500 shadow-none hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
-            disabled={verified || resettingSession || resendLimitReached}
+            disabled={verified || resettingSession || resendLimitReached || isResending}
           />
           {remainingResends === 1 ? (
             <p className="text-sm font-semibold text-amber-600">
@@ -587,9 +338,9 @@ export default function VerifyOtpPage() {
         message="Xác thực thành công"
       />
       <AuthStatusToast
-        visible={resettingSession}
+        visible={!!errors.toast}
         tone="danger"
-        message={toastError ?? ""}
+        message={errors.toast ?? ""}
       />
     </section>
   );

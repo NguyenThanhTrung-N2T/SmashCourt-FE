@@ -2,19 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, Shield } from "lucide-react";
 
 import {
-  AuthApiError,
   authLogin2fa,
-  getAuthFieldError,
   hasAuthErrorCode,
 } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
 import OtpInput from "@/src/modules/auth/components/OtpInput";
-import { getRedirectPathByRole } from "@/src/modules/auth/constants";
 import {
   clearEmail,
   clearTempToken,
@@ -23,169 +19,79 @@ import {
   getTempToken,
   getTwoFactorVerifySession,
   setAuthenticatedSession,
-  setTwoFactorVerifySession,
   startTwoFactorVerifySession,
   type TwoFactorVerifySession,
 } from "@/src/modules/auth/session/sessionStore";
-import {
-  AUTH_GENERIC,
-  formatEmailShort,
-  logAuthClientError,
-} from "@/src/modules/auth/utils/clientErrors";
+import { formatEmailShort } from "@/src/modules/auth/utils/clientErrors";
 import { isValidOtp, normalizeOtp } from "@/src/modules/auth/validators";
+import { useAuthRedirect } from "@/src/modules/auth/hooks/useAuthRedirect";
+import { useAuthError } from "@/src/modules/auth/hooks/useAuthError";
+import { useAuthErrorLogger } from "@/src/modules/auth/hooks/useAuthError";
+import type { AuthFormEvent } from "@/src/modules/auth/types/forms";
 
-const REDIRECT_MS = 1800;
 const RESET_REDIRECT_MS = 3500;
 const MAX_VERIFY_ATTEMPTS = 3;
 const TEMP_TOKEN_TTL_MS = 5 * 60 * 1000;
-const TWO_FACTOR_RESET_PATTERNS = [
-  "phien xac thuc khong hop le hoac da het han",
-  "otp khong hop le hoac da het han",
-  "otp da bi khoa do nhap sai qua 3 lan",
-  "vui long dang nhap lai",
-  "tai khoan khong ton tai",
-  "tai khoan tam khoa",
-  "tai khoan cua ban da bi khoa",
-] as const;
 
 const TEXT = {
-  pageTitle:
-    "\u0058\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0032 \u0062\u01b0\u1edb\u0063",
-  codeTitle:
-    "\u004d\u00e3 \u0078\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0032 \u0062\u01b0\u1edb\u0063",
-  sentTo: "\u0047\u1eedi \u0074\u1edbi",
-  prompt:
-    "\u004e\u0068\u1ead\u0070 \u0036 \u0063\u0068\u1eef \u0073\u1ed1 \u0074\u0072\u006f\u006e\u0067 \u0065\u006d\u0061\u0069\u006c \u0111\u1ec3 \u0068\u006f\u00e0\u006e \u0074\u1ea5\u0074 \u0111\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070\u002e",
-  loginLabel: "\u0110\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070",
-  submitLabel: "\u0058\u00e1\u0063 \u0074\u0068\u1ef1\u0063",
-  loadingLabel:
-    "\u0110\u0061\u006e\u0067 \u0078\u1eed \u006c\u00fd\u002e\u002e\u002e",
-  successToast:
-    "\u0110\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070 \u0074\u0068\u00e0\u006e\u0068 \u0063\u00f4\u006e\u0067",
-  resetToast:
-    "\u0050\u0068\u0069\u00ea\u006e \u0078\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0111\u00e3 \u0068\u1ebf\u0074 \u0068\u0069\u1ec7\u0075 \u006c\u1ef1\u0063",
+  pageTitle: "Xác thực 2 bước",
+  codeTitle: "Mã xác thực 2 bước",
+  sentTo: "Gửi tới",
+  prompt: "Nhập 6 chữ số trong email để hoàn tất đăng nhập.",
+  loginLabel: "Đăng nhập",
+  submitLabel: "Xác thực",
+  loadingLabel: "Đang xử lý...",
+  successToast: "Đăng nhập thành công",
+  resetToast: "Phiên xác thực đã hết hiệu lực",
   sessionExpired:
-    "\u0050\u0068\u0069\u00ea\u006e \u0078\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0032 \u0062\u01b0\u1edb\u0063 \u0111\u00e3 \u0068\u1ebf\u0074 \u0068\u0069\u1ec7\u0075 \u006c\u1ef1\u0063\u002e \u0042\u1ea1\u006e \u0073\u1ebd \u0111\u01b0\u1ee3\u0063 \u0111\u01b0\u0061 \u0076\u1ec1 \u0074\u0072\u0061\u006e\u0067 \u0111\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070 \u0073\u0061\u0075 \u00ed\u0074 \u0067\u0069\u00e2\u0079\u002e",
+    "Phiên xác thực 2 bước đã hết hiệu lực. Bạn sẽ được đưa về trang đăng nhập sau ít giây.",
   sessionExpiredShort:
-    "\u0050\u0068\u0069\u00ea\u006e \u0078\u00e1\u0063 \u0074\u0068\u1ef1\u0063 \u0032 \u0062\u01b0\u1edb\u0063 \u0111\u00e3 \u0068\u1ebf\u0074 \u0068\u0069\u1ec7\u0075 \u006c\u1ef1\u0063\u002c \u0076\u0075\u0069 \u006c\u00f2\u006e\u0067 \u0111\u0103\u006e\u0067 \u006e\u0068\u1ead\u0070 \u006c\u1ea1\u0069\u002e",
-  invalidOtp:
-    "\u0056\u0075\u0069 \u006c\u00f2\u006e\u0067 \u006e\u0068\u1ead\u0070 \u0111\u1ee7 \u0036 \u0063\u0068\u1eef \u0073\u1ed1\u002e",
+    "Phiên xác thực 2 bước đã hết hiệu lực, vui lòng đăng nhập lại.",
+  invalidOtp: "Vui lòng nhập đủ 6 chữ số.",
+  sessionInvalid: "Phiên không hợp lệ. Vui lòng thực hiện lại từ đầu.",
 } as const;
 
-function normalizeText(value: string | null | undefined) {
-  return (value ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
 function shouldResetTwoFactorSession(input?: unknown) {
-  if (
-    hasAuthErrorCode(input, [
-      "TOKEN_INVALID",
-      "OTP_LIMIT_EXCEEDED",
-      "ACCOUNT_LOCKED",
-      "UNAUTHORIZED",
-      "FORBIDDEN",
-    ])
-  ) {
-    return true;
-  }
-
-  const message =
-    typeof input === "string"
-      ? input
-      : input instanceof Error
-        ? input.message
-        : undefined;
-  const normalizedMessage = normalizeText(message);
-  return TWO_FACTOR_RESET_PATTERNS.some((pattern) =>
-    normalizedMessage.includes(pattern),
-  );
+  return hasAuthErrorCode(input, [
+    "TOKEN_INVALID",
+    "OTP_LIMIT_EXCEEDED",
+    "ACCOUNT_LOCKED",
+    "UNAUTHORIZED",
+    "FORBIDDEN",
+  ]);
 }
 
 export default function TwoFactorPage() {
   const router = useRouter();
-  const verifySessionRef = useRef<TwoFactorVerifySession | null>(null);
-  const redirectTimeoutRef = useRef<number | null>(null);
-  const resetRedirectRef = useRef<number | null>(null);
-
   const [tempToken, setTempTokenState] = useState<string | null>(null);
   const [mailHint, setMailHint] = useState<string | null>(null);
   const [otpCode, setOtpCode] = useState("");
   const [entered, setEntered] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
   const [resettingSession, setResettingSession] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [failedAttempts, setFailedAttempts] = useState(0);
 
-  function syncTwoFactorSession(nextSession: TwoFactorVerifySession | null) {
-    verifySessionRef.current = nextSession;
-
-    if (!nextSession) {
-      clearTwoFactorVerifySession();
-      return;
-    }
-
-    setTwoFactorVerifySession(nextSession);
-  }
-
-  function ensureTwoFactorSession(
-    currentEmail: string,
-    currentTempToken: string,
-  ) {
-    const normalizedEmail = currentEmail.trim().toLowerCase();
-    const currentSession = verifySessionRef.current;
-
-    if (
-      currentSession?.email === normalizedEmail &&
-      currentSession.tempToken === currentTempToken
-    ) {
-      return currentSession;
-    }
-
-    const storedSession = getTwoFactorVerifySession();
-    if (
-      storedSession?.email === normalizedEmail &&
-      storedSession.tempToken === currentTempToken
-    ) {
-      syncTwoFactorSession(storedSession);
-      return storedSession;
-    }
-
-    const freshSession = startTwoFactorVerifySession(
-      normalizedEmail,
-      currentTempToken,
-    );
-    syncTwoFactorSession(freshSession);
-    return freshSession;
-  }
-
-  function updateTwoFactorSession(
-    updater: (session: TwoFactorVerifySession) => TwoFactorVerifySession,
-  ) {
-    if (!mailHint || !tempToken) return null;
-    const nextSession = updater(ensureTwoFactorSession(mailHint, tempToken));
-    syncTwoFactorSession(nextSession);
-    return nextSession;
-  }
+  // Use new hooks
+  const { error, showError, clearError } = useAuthError();
+  const { scheduleRedirectByRole, isRedirecting } = useAuthRedirect({
+    delay: 1800,
+  });
+  const logError = useAuthErrorLogger("login-2fa");
 
   function isTempTokenExpired(session: TwoFactorVerifySession) {
     return Date.now() - session.startedAt >= TEMP_TOKEN_TTL_MS;
   }
 
   function clearTwoFactorChallengeAndRestart(message?: string) {
-    syncTwoFactorSession(null);
+    clearTwoFactorVerifySession();
     clearTempToken();
     setTempTokenState(null);
     setResettingSession(true);
     setOtpCode("");
-    setSubmitError(message ?? TEXT.sessionExpired);
+    clearError();
+    showError(new Error(message ?? TEXT.sessionExpired), "2fa");
 
-    if (resetRedirectRef.current) {
-      clearTimeout(resetRedirectRef.current);
-    }
-    resetRedirectRef.current = window.setTimeout(() => {
+    setTimeout(() => {
       clearEmail();
       setMailHint(null);
       router.replace("/auth/login");
@@ -205,13 +111,9 @@ export default function TwoFactorPage() {
           storedSession?.email === storedEmail &&
           storedSession.tempToken === storedTempToken
         ) {
-          verifySessionRef.current = storedSession;
+          setFailedAttempts(storedSession.failedAttempts);
         } else {
-          const freshSession = startTwoFactorVerifySession(
-            storedEmail,
-            storedTempToken,
-          );
-          verifySessionRef.current = freshSession;
+          startTwoFactorVerifySession(storedEmail, storedTempToken);
         }
       }
     } catch {
@@ -220,42 +122,24 @@ export default function TwoFactorPage() {
     }
 
     const frameId = requestAnimationFrame(() => setEntered(true));
-    return () => {
-      cancelAnimationFrame(frameId);
-      if (redirectTimeoutRef.current) {
-        clearTimeout(redirectTimeoutRef.current);
-      }
-      if (resetRedirectRef.current) {
-        clearTimeout(resetRedirectRef.current);
-      }
-    };
+    return () => cancelAnimationFrame(frameId);
   }, []);
 
-  function scheduleRedirect(path: string) {
-    setRedirecting(true);
-    if (redirectTimeoutRef.current) {
-      clearTimeout(redirectTimeoutRef.current);
-    }
-    redirectTimeoutRef.current = window.setTimeout(() => {
-      router.push(path);
-    }, REDIRECT_MS);
-  }
-
-  async function onSubmit(e: FormEvent) {
+  async function onSubmit(e: AuthFormEvent) {
     e.preventDefault();
     if (!tempToken || !mailHint || resettingSession) return;
 
-    setSubmitError(null);
+    clearError();
 
     const normalized = normalizeOtp(otpCode);
     setOtpCode(normalized);
     if (!isValidOtp(normalized)) {
-      setSubmitError(TEXT.invalidOtp);
+      showError(new Error(TEXT.invalidOtp), "2fa");
       return;
     }
 
-    const currentSession = ensureTwoFactorSession(mailHint, tempToken);
-    if (isTempTokenExpired(currentSession)) {
+    const currentSession = getTwoFactorVerifySession();
+    if (currentSession && isTempTokenExpired(currentSession)) {
       clearTwoFactorChallengeAndRestart(TEXT.sessionExpiredShort);
       return;
     }
@@ -273,57 +157,39 @@ export default function TwoFactorPage() {
         }
         clearTwoFactorVerifySession();
         clearTempToken();
-        scheduleRedirect(getRedirectPathByRole(data.user?.role));
+        scheduleRedirectByRole(data.user?.role);
         return;
       }
 
-      const nextSession = updateTwoFactorSession((storedSession) => ({
-        ...storedSession,
-        failedAttempts: storedSession.failedAttempts + 1,
-      }));
-
-      logAuthClientError("login-2fa-unexpected-status", data);
+      setFailedAttempts((prev) => prev + 1);
+      logError(data);
 
       if (
         shouldResetTwoFactorSession(data.message) ||
-        (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
-          MAX_VERIFY_ATTEMPTS
+        failedAttempts + 1 >= MAX_VERIFY_ATTEMPTS
       ) {
         clearTwoFactorChallengeAndRestart(
-          data.message ?? TEXT.sessionExpiredShort,
+          data.message ?? TEXT.sessionExpiredShort
         );
         return;
       }
 
-      setSubmitError(data.message ?? AUTH_GENERIC.twoFaFailed);
+      showError(new Error(data.message ?? "Xác thực 2FA thất bại"), "2fa");
     } catch (err) {
-      logAuthClientError("login-2fa", err);
+      logError(err);
+      setFailedAttempts((prev) => prev + 1);
 
-      if (err instanceof AuthApiError) {
-        const nextSession = updateTwoFactorSession((storedSession) => ({
-          ...storedSession,
-          failedAttempts: storedSession.failedAttempts + 1,
-        }));
-
-        if (
-          shouldResetTwoFactorSession(err) ||
-          (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
-            MAX_VERIFY_ATTEMPTS
-        ) {
-          clearTwoFactorChallengeAndRestart(
-            err.message || TEXT.sessionExpiredShort,
-          );
-          return;
-        }
-        setSubmitError(
-          getAuthFieldError(err, "otpCode") ??
-            err.message ??
-            AUTH_GENERIC.twoFaFailed,
+      if (
+        shouldResetTwoFactorSession(err) ||
+        failedAttempts + 1 >= MAX_VERIFY_ATTEMPTS
+      ) {
+        clearTwoFactorChallengeAndRestart(
+          err instanceof Error ? err.message : TEXT.sessionExpiredShort
         );
         return;
       }
 
-      setSubmitError(AUTH_GENERIC.twoFaFailed);
+      showError(err, "2fa");
     } finally {
       setLoading(false);
     }
@@ -336,7 +202,7 @@ export default function TwoFactorPage() {
           {TEXT.pageTitle}
         </h2>
         <p className="mt-3 text-base font-medium text-slate-600">
-          {AUTH_GENERIC.sessionInvalid}
+          {TEXT.sessionInvalid}
         </p>
         <div className="mt-4">
           <Link
@@ -350,7 +216,7 @@ export default function TwoFactorPage() {
     );
   }
 
-  const controlsDisabled = loading || redirecting || resettingSession;
+  const controlsDisabled = loading || isRedirecting || resettingSession;
 
   return (
     <section
@@ -411,14 +277,14 @@ export default function TwoFactorPage() {
           />
         </div>
 
-        {submitError ? (
+        {error ? (
           <div
             className="flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4 animate-in fade-in duration-200"
             role="alert"
           >
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
             <p className="flex-1 text-left text-sm font-bold leading-relaxed text-red-800">
-              {submitError}
+              {error}
             </p>
           </div>
         ) : null}
@@ -442,7 +308,7 @@ export default function TwoFactorPage() {
       </form>
 
       <AuthStatusToast
-        visible={redirecting}
+        visible={isRedirecting}
         tone="success"
         message={TEXT.successToast}
       />

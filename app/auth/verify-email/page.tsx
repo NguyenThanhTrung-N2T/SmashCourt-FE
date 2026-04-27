@@ -2,17 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { Mail } from "lucide-react";
 
-import {
-  AuthApiError,
-  authResendOtp,
-  authVerifyEmail,
-  getAuthFieldError,
-  hasAuthErrorCode,
-} from "@/src/api/auth.api";
+import { hasAuthErrorCode } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
 import CountdownButton from "@/src/modules/auth/components/CountdownButton";
 import OtpInput from "@/src/modules/auth/components/OtpInput";
@@ -23,177 +16,117 @@ import {
   consumeRegisterFlashMessage,
   getEmail,
   getRegisterVerifySession,
-  setEmail,
   setPostVerifyLoginHint,
-  setRegisterVerifySession,
-  startRegisterVerifySession,
-  type RegisterVerifySession,
 } from "@/src/modules/auth/session/sessionStore";
-import {
-  AUTH_GENERIC,
-  formatEmailShort,
-  logAuthClientError,
-} from "@/src/modules/auth/utils/clientErrors";
-import { isValidOtp, normalizeOtp } from "@/src/modules/auth/validators";
+import { formatEmailShort } from "@/src/modules/auth/utils/clientErrors";
+import { useOtpVerification } from "@/src/modules/auth/hooks/useOtpVerification";
+import { useAuthRedirect } from "@/src/modules/auth/hooks/useAuthRedirect";
+import { useAuthErrors } from "@/src/modules/auth/hooks/useAuthError";
+import type { AuthFormEvent } from "@/src/modules/auth/types/forms";
 
-const REDIRECT_MS = 2000;
 const RESET_REDIRECT_MS = 3500;
-const SUCCESS_MESSAGE_CLEAR_MS = 8000;
 const MAX_VERIFY_ATTEMPTS = 3;
 const MAX_RESEND_ATTEMPTS = 3;
-const VERIFY_SESSION_RESET_PATTERNS = [
-  "otp da bi khoa",
-  "otp khong hop le",
-  "da het han",
-  "yeu cau ma moi",
-  "email da duoc xac thuc truoc do",
-  "tai khoan khong ton tai",
-  "xac thuc that bai",
-  "dang ky lai",
-  "da gui otp qua so lan cho phep",
-  "da het luot gui lai otp",
-  "het luot gui lai",
-] as const;
-const VERIFY_SESSION_RESET_STATUS_PATTERNS = [
-  "lock",
-  "locked",
-  "invalid",
-  "expired",
-] as const;
 
-function normalizeText(value: string | null | undefined) {
-  return (value ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
-function shouldResetVerifySession(
-  input?:
-    | {
-        status?: string;
-        code?: string;
-        message?: string;
-      }
-    | AuthApiError
-    | null,
-) {
-  if (
-    hasAuthErrorCode(input, ["OTP_LIMIT_EXCEEDED", "NOT_FOUND", "TOKEN_INVALID"])
-  ) {
-    return true;
-  }
-
-  const status =
-    input instanceof AuthApiError
-      ? input.code ?? undefined
-      : input?.code ?? input?.status;
-  const message = input instanceof AuthApiError ? input.message : input?.message;
-
-  const normalizedStatus = normalizeText(status);
-  if (
-    VERIFY_SESSION_RESET_STATUS_PATTERNS.some((pattern) =>
-      normalizedStatus.includes(pattern),
-    )
-  ) {
-    return true;
-  }
-
-  const normalizedMessage = normalizeText(message);
-  return VERIFY_SESSION_RESET_PATTERNS.some((pattern) =>
-    normalizedMessage.includes(pattern),
-  );
+function shouldResetVerifySession(input?: unknown) {
+  return hasAuthErrorCode(input, [
+    "OTP_LIMIT_EXCEEDED",
+    "NOT_FOUND",
+    "TOKEN_INVALID",
+  ]);
 }
 
 export default function VerifyEmailPage() {
   const router = useRouter();
-  const verifySessionRef = useRef<RegisterVerifySession | null>(null);
-
   const [email, setEmailState] = useState<string | null>(null);
-  const [otpCode, setOtpCode] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [resendError, setResendError] = useState<string | null>(null);
-  const [resendSuccess, setResendSuccess] = useState<string | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [entered, setEntered] = useState(false);
   const [verified, setVerified] = useState(false);
   const [resettingSession, setResettingSession] = useState(false);
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [resendCount, setResendCount] = useState(0);
 
-  const resendSuccessClearRef = useRef<number | null>(null);
-  const resetRedirectRef = useRef<number | null>(null);
-  const successRedirectRef = useRef<number | null>(null);
+  // Use new hooks
+  const { errors, showError, clearAllErrors } = useAuthErrors({
+    types: ["submit", "resend", "success"],
+    autoDismiss: { success: true },
+    dismissDelay: { success: 8000 },
+  });
 
-  function clearResendSuccessLater() {
-    if (resendSuccessClearRef.current) {
-      clearTimeout(resendSuccessClearRef.current);
-    }
-    resendSuccessClearRef.current = window.setTimeout(() => {
-      setResendSuccess(null);
-      resendSuccessClearRef.current = null;
-    }, SUCCESS_MESSAGE_CLEAR_MS);
-  }
+  const { scheduleRedirect } = useAuthRedirect({
+    delay: 2000,
+  });
 
-  function syncVerifySession(nextSession: RegisterVerifySession | null) {
-    verifySessionRef.current = nextSession;
-
-    if (!nextSession) {
-      setFailedAttempts(0);
-      setResendCount(0);
-      clearRegisterVerifySession();
-      return;
-    }
-
-    setFailedAttempts(nextSession.failedAttempts);
-    setResendCount(nextSession.resendCount);
-    setRegisterVerifySession(nextSession);
-  }
-
-  function ensureVerifySession(currentEmail: string) {
-    const normalizedEmail = currentEmail.trim().toLowerCase();
-    const currentSession = verifySessionRef.current;
-
-    if (currentSession?.email === normalizedEmail) {
-      return currentSession;
-    }
-
+  // Load initial session state
+  const [initialState] = useState(() => {
     const storedSession = getRegisterVerifySession();
-    if (storedSession?.email === normalizedEmail) {
-      syncVerifySession(storedSession);
-      return storedSession;
-    }
+    return {
+      failedAttempts: storedSession?.failedAttempts ?? 0,
+      resendCount: storedSession?.resendCount ?? 0,
+    };
+  });
 
-    const freshSession = startRegisterVerifySession(normalizedEmail);
-    syncVerifySession(freshSession);
-    return freshSession;
-  }
-
-  function updateVerifySession(
-    updater: (session: RegisterVerifySession) => RegisterVerifySession,
-  ) {
-    if (!email) return null;
-    const nextSession = updater(ensureVerifySession(email));
-    syncVerifySession(nextSession);
-    return nextSession;
-  }
+  const {
+    otpCode,
+    setOtpCode,
+    verify,
+    resend,
+    remainingAttempts,
+    remainingResends,
+    isVerifying,
+    isResending,
+    isValidFormat,
+  } = useOtpVerification({
+    email: email ?? "",
+    type: OtpType.EMAIL_VERIFY,
+    maxAttempts: MAX_VERIFY_ATTEMPTS,
+    maxResends: MAX_RESEND_ATTEMPTS,
+    initialFailedAttempts: initialState.failedAttempts,
+    initialResendCount: initialState.resendCount,
+    onSuccess: () => {
+      clearRegisterVerifySession();
+      clearAllErrors();
+      setPostVerifyLoginHint("Email đã xác thực thành công. Bạn có thể đăng nhập.");
+      setVerified(true);
+      scheduleRedirect("/auth/login");
+    },
+    onError: (err) => {
+      if (shouldResetVerifySession(err)) {
+        clearVerifySessionAndRestart(
+          err instanceof Error ? err.message : "Phiên xác thực đã hết hiệu lực."
+        );
+      } else {
+        showError("submit", err, "verify-email");
+      }
+    },
+    onResendSuccess: (message) => {
+      clearAllErrors();
+      showError("success", new Error(message ?? "OTP đã được gửi lại"), "verify-email");
+    },
+    onResendError: (err) => {
+      if (shouldResetVerifySession(err)) {
+        clearVerifySessionAndRestart(
+          err instanceof Error ? err.message : "Phiên xác thực đã hết hiệu lực."
+        );
+      } else {
+        showError("resend", err, "verify-email");
+      }
+    },
+  });
 
   function clearVerifySessionAndRestart(message?: string) {
-    syncVerifySession(null);
+    clearRegisterVerifySession();
     clearAuthSession();
     setResettingSession(true);
     setOtpCode("");
-    setSubmitError(
-      message ??
-        "Phiên xác thực đã hết hiệu lực. Bạn sẽ được đưa về trang đăng ký sau ít giây.",
+    clearAllErrors();
+    showError(
+      "submit",
+      new Error(
+        message ??
+          "Phiên xác thực đã hết hiệu lực. Bạn sẽ được đưa về trang đăng ký sau ít giây."
+      ),
+      "verify-email"
     );
-    setResendError(null);
-    setResendSuccess(null);
 
-    if (resetRedirectRef.current) {
-      clearTimeout(resetRedirectRef.current);
-    }
-    resetRedirectRef.current = window.setTimeout(() => {
+    setTimeout(() => {
       setEmailState(null);
       router.replace("/auth/register");
     }, RESET_REDIRECT_MS);
@@ -204,26 +137,9 @@ export default function VerifyEmailPage() {
       const storedEmail = getEmail()?.trim().toLowerCase() ?? null;
       setEmailState(storedEmail);
 
-      if (storedEmail) {
-        setEmail(storedEmail);
-
-        const storedSession = getRegisterVerifySession();
-        if (storedSession?.email === storedEmail) {
-          verifySessionRef.current = storedSession;
-          setFailedAttempts(storedSession.failedAttempts);
-          setResendCount(storedSession.resendCount);
-        } else {
-          const freshSession = startRegisterVerifySession(storedEmail);
-          verifySessionRef.current = freshSession;
-          setFailedAttempts(freshSession.failedAttempts);
-          setResendCount(freshSession.resendCount);
-        }
-      }
-
       const flashMessage = consumeRegisterFlashMessage();
       if (flashMessage) {
-        setResendSuccess(flashMessage);
-        clearResendSuccessLater();
+        showError("success", new Error(flashMessage), "verify-email");
       }
     } catch {
       setEmailState(null);
@@ -233,175 +149,25 @@ export default function VerifyEmailPage() {
     return () => cancelAnimationFrame(frameId);
   }, []);
 
-  async function onSubmit(e: FormEvent) {
+  async function onSubmit(e: AuthFormEvent) {
     e.preventDefault();
     if (!email || resettingSession) return;
 
-    setSubmitError(null);
-    setResendError(null);
-    setResendSuccess(null);
-    if (resendSuccessClearRef.current) {
-      clearTimeout(resendSuccessClearRef.current);
-      resendSuccessClearRef.current = null;
-    }
+    clearAllErrors();
 
-    const normalized = normalizeOtp(otpCode);
-    setOtpCode(normalized);
-    if (!isValidOtp(normalized)) {
-      setSubmitError("Vui lòng nhập đủ 6 chữ số.");
+    if (!isValidFormat) {
+      showError("submit", new Error("Vui lòng nhập đủ 6 chữ số."), "verify-email");
       return;
     }
 
-    try {
-      setLoading(true);
-      const data = await authVerifyEmail({ email, otpCode: normalized });
-
-      if (data.status && normalizeText(data.status) !== "success") {
-        const nextSession = updateVerifySession((currentSession) => ({
-          ...currentSession,
-          failedAttempts: currentSession.failedAttempts + 1,
-        }));
-
-        logAuthClientError("verify-email-unexpected-status", data);
-
-        if (
-          shouldResetVerifySession(data) ||
-          (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
-            MAX_VERIFY_ATTEMPTS
-        ) {
-          clearVerifySessionAndRestart(
-            data.message ??
-              "Mã OTP không còn hợp lệ. Bạn sẽ được đưa về trang đăng ký sau ít giây.",
-          );
-          return;
-        }
-
-        setSubmitError(data.message ?? AUTH_GENERIC.verifyFailed);
-        return;
-      }
-
-      clearRegisterVerifySession();
-      verifySessionRef.current = null;
-      setFailedAttempts(0);
-      setResendCount(0);
-      setSubmitError(null);
-      setResendError(null);
-      setResendSuccess(null);
-      setPostVerifyLoginHint("Email đã xác thực thành công. Bạn có thể đăng nhập.");
-      setVerified(true);
-
-      if (successRedirectRef.current) {
-        clearTimeout(successRedirectRef.current);
-      }
-      successRedirectRef.current = window.setTimeout(() => {
-        router.push("/auth/login");
-      }, REDIRECT_MS);
-    } catch (err) {
-      logAuthClientError("verify-email", err);
-
-      if (err instanceof AuthApiError) {
-        const nextSession = updateVerifySession((currentSession) => ({
-          ...currentSession,
-          failedAttempts: currentSession.failedAttempts + 1,
-        }));
-
-        if (
-          err.status === 404 ||
-          shouldResetVerifySession(err) ||
-          (nextSession?.failedAttempts ?? MAX_VERIFY_ATTEMPTS) >=
-            MAX_VERIFY_ATTEMPTS
-        ) {
-          clearVerifySessionAndRestart(
-            err.message ||
-              "Phiên xác thực đã hết hiệu lực. Bạn sẽ được đưa về trang đăng ký sau ít giây.",
-          );
-          return;
-        }
-        setSubmitError(
-          getAuthFieldError(err, "otpCode") ??
-            err.message ??
-            AUTH_GENERIC.verifyFailed,
-        );
-        return;
-      }
-
-      setSubmitError(AUTH_GENERIC.verifyFailed);
-    } finally {
-      setLoading(false);
-    }
+    await verify();
   }
 
   async function onResend() {
     if (!email || resettingSession) return;
-
-    setSubmitError(null);
-    setResendError(null);
-    setResendSuccess(null);
-    if (resendSuccessClearRef.current) {
-      clearTimeout(resendSuccessClearRef.current);
-      resendSuccessClearRef.current = null;
-    }
-
-    const currentSession = ensureVerifySession(email);
-    if (currentSession.resendCount >= MAX_RESEND_ATTEMPTS) {
-      setResendError("Bạn đã dùng hết 3 lượt gửi lại OTP.");
-      throw new Error("resend-limit-reached");
-    }
-
-    try {
-      await authResendOtp({ email, type: OtpType.EMAIL_VERIFY });
-      const nextSession = updateVerifySession((storedSession) => ({
-        ...storedSession,
-        failedAttempts: 0,
-        resendCount: storedSession.resendCount + 1,
-      }));
-
-      const remainingResends = Math.max(
-        0,
-        MAX_RESEND_ATTEMPTS - (nextSession?.resendCount ?? MAX_RESEND_ATTEMPTS),
-      );
-      const successMessage =
-        remainingResends > 0
-          ? `OTP đã được gửi lại, hiệu lực 5 phút. Còn ${remainingResends} lần gửi lại.`
-          : "OTP đã được gửi lại, hiệu lực 5 phút. Đây là lần gửi lại cuối cùng.";
-
-      setResendSuccess(successMessage);
-      clearResendSuccessLater();
-    } catch (err) {
-      logAuthClientError("resend-email-verify", err);
-
-      if (err instanceof AuthApiError) {
-        if (shouldResetVerifySession(err)) {
-          clearVerifySessionAndRestart(err.message);
-          throw err;
-        }
-
-        setResendError(
-          getAuthFieldError(err, ["email", "otpCode"]) ??
-            err.message ??
-            AUTH_GENERIC.resendFailed,
-        );
-        throw err;
-      }
-
-      setResendError((currentError) => currentError ?? AUTH_GENERIC.resendFailed);
-      throw err;
-    }
+    clearAllErrors();
+    await resend();
   }
-
-  useEffect(() => {
-    return () => {
-      if (resendSuccessClearRef.current) {
-        clearTimeout(resendSuccessClearRef.current);
-      }
-      if (resetRedirectRef.current) {
-        clearTimeout(resetRedirectRef.current);
-      }
-      if (successRedirectRef.current) {
-        clearTimeout(successRedirectRef.current);
-      }
-    };
-  }, []);
 
   if (!email) {
     return (
@@ -414,7 +180,7 @@ export default function VerifyEmailPage() {
           Xác thực email
         </h2>
         <p className="mt-3 text-base font-medium text-slate-600">
-          {AUTH_GENERIC.sessionInvalid}
+          Phiên không hợp lệ. Vui lòng thực hiện lại từ đầu.
         </p>
         <div className="mt-4">
           <Link
@@ -428,11 +194,6 @@ export default function VerifyEmailPage() {
     );
   }
 
-  const remainingVerifyAttempts = Math.max(
-    0,
-    MAX_VERIFY_ATTEMPTS - failedAttempts,
-  );
-  const remainingResends = Math.max(0, MAX_RESEND_ATTEMPTS - resendCount);
   const resendLimitReached = remainingResends === 0;
 
   return (
@@ -500,40 +261,40 @@ export default function VerifyEmailPage() {
           />
         </div>
 
-        {failedAttempts > 0 && remainingVerifyAttempts > 0 ? (
+        {remainingAttempts > 0 && remainingAttempts < MAX_VERIFY_ATTEMPTS ? (
           <p className="text-center text-sm font-semibold text-red-600">
-            Bạn còn {remainingVerifyAttempts} lần nhập với mã hiện tại.
+            Bạn còn {remainingAttempts} lần nhập với mã hiện tại.
           </p>
         ) : null}
 
-        {submitError ? (
+        {errors.submit ? (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-800">
-            {submitError}
+            {errors.submit}
           </div>
         ) : null}
 
-        {resendError ? (
+        {errors.resend ? (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-800">
-            {resendError}
+            {errors.resend}
           </div>
         ) : null}
 
-        {resendSuccess ? (
+        {errors.success ? (
           <div
             className="overflow-x-auto whitespace-nowrap rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-[13px] font-semibold text-emerald-900"
             role="status"
             aria-live="polite"
           >
-            {resendSuccess}
+            {errors.success}
           </div>
         ) : null}
 
         <button
           type="submit"
-          disabled={loading || verified || resettingSession}
+          disabled={isVerifying || verified || resettingSession}
           className="h-12 w-full cursor-pointer rounded-xl bg-slate-900 text-sm font-bold text-white shadow-md transition-all duration-200 ease-out hover:bg-slate-800 hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:active:scale-100"
         >
-          {loading ? "Đang xử lý..." : "Xác thực"}
+          {isVerifying ? "Đang xử lý..." : "Xác thực"}
         </button>
 
         <div className="flex flex-col items-center gap-3 border-t border-slate-200 pt-6">
@@ -545,7 +306,7 @@ export default function VerifyEmailPage() {
             resendLabel="Gửi lại sau"
             variant="outline"
             className="min-h-9 border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-500 shadow-none hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
-            disabled={verified || resettingSession || resendLimitReached}
+            disabled={verified || resettingSession || resendLimitReached || isResending}
           />
           {remainingResends === 1 ? (
             <p className="text-sm font-semibold text-amber-600">
