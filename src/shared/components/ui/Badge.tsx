@@ -1,61 +1,36 @@
-import * as React from "react";
-import { cn } from "@/src/shared/utils/cn";
+import { ReactNode } from 'react';
 
-export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: "success" | "warning" | "danger" | "info" | "neutral" | "fuchsia" | "primary" | "amber";
-  size?: "sm" | "md";
-  dot?: boolean;
-  icon?: React.ReactNode;
+interface BadgeProps {
+  children: ReactNode;
+  variant?: 'success' | 'warning' | 'error' | 'info' | 'neutral';
+  size?: 'sm' | 'md';
+  className?: string;
 }
 
-const variantStyles = {
-  success: "border-emerald-200 bg-emerald-50 text-emerald-800 shadow-emerald-100",
-  warning: "border-amber-200 bg-amber-50 text-amber-800 shadow-amber-100",
-  danger: "border-red-200 bg-red-50 text-red-800 shadow-red-100",
-  info: "border-indigo-200 bg-indigo-50 text-indigo-800 shadow-indigo-100",
-  neutral: "border-slate-300 bg-slate-100 text-slate-600 shadow-slate-100",
-  fuchsia: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-800 shadow-fuchsia-100",
-  amber: "border-amber-200 bg-amber-50 text-amber-800 shadow-amber-100",
-  primary: "border-indigo-200 bg-indigo-100 text-indigo-800 shadow-indigo-100",
-};
+export function Badge({
+  children,
+  variant = 'neutral',
+  size = 'md',
+  className = '',
+}: BadgeProps) {
+  const baseStyles = 'inline-flex items-center gap-1 rounded-full font-bold';
+  
+  const sizeStyles = {
+    sm: 'px-2 py-0.5 text-[10px]',
+    md: 'px-2 py-1 text-xs',
+  };
+  
+  const variantStyles = {
+    success: 'bg-green-100 text-green-700',
+    warning: 'bg-amber-100 text-amber-700',
+    error: 'bg-red-100 text-red-700',
+    info: 'bg-blue-100 text-blue-700',
+    neutral: 'bg-slate-100 text-slate-600',
+  };
 
-const dotColors = {
-  success: "bg-emerald-500",
-  warning: "bg-amber-500",
-  danger: "bg-red-500",
-  info: "bg-indigo-500",
-  neutral: "bg-slate-500",
-  fuchsia: "bg-fuchsia-500",
-  amber: "bg-amber-500",
-  primary: "bg-indigo-500",
-};
-
-const sizeStyles = {
-  sm: "px-2 py-0.5 text-[10px]",
-  md: "px-3 py-1.5 text-xs",
-};
-
-export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ className, variant = "neutral", size = "sm", dot = false, icon, children, ...props }, ref) => {
-    return (
-      <span
-        ref={ref}
-        className={cn(
-          "inline-flex items-center justify-center gap-1.5 rounded-full border-2 font-black uppercase tracking-wider shadow-sm transition-all",
-          variantStyles[variant],
-          sizeStyles[size],
-          className
-        )}
-        {...props}
-      >
-        {dot && (
-          <span className={cn("h-1.5 w-1.5 rounded-full", dotColors[variant])} />
-        )}
-        {icon && <span className="[&>svg]:w-3 [&>svg]:h-3">{icon}</span>}
-        {children}
-      </span>
-    );
-  }
-);
-
-Badge.displayName = "Badge";
+  return (
+    <span className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}>
+      {children}
+    </span>
+  );
+}

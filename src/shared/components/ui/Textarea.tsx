@@ -1,6 +1,8 @@
 import * as React from "react";
 import { cn } from "@/src/shared/utils/cn";
-import { AlertCircle } from "lucide-react";
+import {
+  WarningCircle,
+} from "@phosphor-icons/react";
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
@@ -29,7 +31,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         />
         {error && (
           <div className="flex items-center gap-1.5 text-red-500 mt-0.5">
-            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            <WarningCircle className="h-3.5 w-3.5 shrink-0" />
             <p className="text-xs font-medium">{error}</p>
           </div>
         )}

@@ -1,16 +1,16 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Activity,
+  Heartbeat,
   ArrowRight,
-  BookOpenText,
-  Home,
+  BookOpen,
+  House,
   PhoneCall,
-  TimerReset,
-} from "lucide-react";
+  Timer,
+} from "@phosphor-icons/react";
 
 type TabId = "home" | "about" | "cancellation-policy";
 
@@ -22,13 +22,13 @@ type TabConfig = {
 };
 
 const TABS: TabConfig[] = [
-  { id: "home", href: "/", label: "Trang chủ", icon: Home },
-  { id: "about", href: "/about", label: "Giới thiệu", icon: BookOpenText },
+  { id: "home", href: "/", label: "Trang chủ", icon: House },
+  { id: "about", href: "/about", label: "Giới thiệu", icon: BookOpen },
   {
     id: "cancellation-policy",
     href: "/cancellation-policy",
     label: "Chính sách",
-    icon: TimerReset,
+    icon: Timer,
   },
 ];
 
@@ -79,7 +79,7 @@ export default function PublicInfoHeader() {
               className="inline-flex items-center gap-3 text-slate-950 transition-colors hover:text-emerald-600"
             >
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30">
-                <Activity className="h-5 w-5" />
+                <Heartbeat className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-lg font-black tracking-tight">SmashCourt</p>

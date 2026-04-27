@@ -1,6 +1,9 @@
 "use client";
 
-import { AlertTriangle, Trash2 } from "lucide-react";
+import {
+  Warning,
+  Trash,
+} from "@phosphor-icons/react";
 import { Button } from "@/src/shared/components/ui/Button";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { Modal } from "@/src/shared/components/ui/Modal";
@@ -14,7 +17,7 @@ export function DeleteCourtTypeDialog({ courtType, onClose, onConfirm }: { court
       onClose={onClose}
       title="Loại sân"
       subtitle="Xác nhận xóa"
-      icon={<AlertTriangle className="h-5 w-5" />}
+      icon={<Warning className="h-5 w-5" />}
       maxWidth="md"
       headerGradient="from-red-500 to-pink-500"
     >
@@ -34,7 +37,7 @@ export function DeleteCourtTypeDialog({ courtType, onClose, onConfirm }: { court
             onClick={onConfirm}
             variant="danger"
             className="flex-1"
-            leftIcon={<Trash2 className="h-4 w-4" />}
+            leftIcon={<Trash className="h-4 w-4" />}
           >
             Xác nhận xóa
           </Button>

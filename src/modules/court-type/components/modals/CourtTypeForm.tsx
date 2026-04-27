@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit3 } from "lucide-react";
+import {
+  Plus,
+  PencilSimpleLine,
+} from "@phosphor-icons/react";
 import { Button } from "@/src/shared/components/ui/Button";
 import { Input } from "@/src/shared/components/ui/Input";
 import { Textarea } from "@/src/shared/components/ui/Textarea";

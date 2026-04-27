@@ -2,18 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  AlertTriangle,
-  CheckCircle2,
-  Clock3,
-  Loader2,
+  Warning,
+  CheckCircle,
+  Clock,
+  CircleNotch,
   Plus,
-  RefreshCw,
-  Save,
+  ArrowClockwise,
+  FloppyDisk,
   ShieldCheck,
-  Sparkles,
-  Trash2,
-  Undo2,
-} from "lucide-react";
+  Sparkle,
+  Trash,
+  ArrowCounterClockwise,
+} from "@phosphor-icons/react";
 
 import { AuthApiError } from "@/src/api/auth.api";
 import {
@@ -213,7 +213,7 @@ function PolicyEditorRow({
             <div
               className={`flex h-10 w-10 items-center justify-center rounded-xl ${color.icon}`}
             >
-              <Clock3 className="h-5 w-5" />
+              <Clock className="h-5 w-5" />
             </div>
             <div>
               <Flex align="center" spacing="sm">
@@ -221,7 +221,7 @@ function PolicyEditorRow({
                   {formatPolicyHours(policy.hoursBefore)}
                 </h3>
                 {policy.isNew && (
-                  <Badge variant="primary" size="sm" icon={<Sparkles className="h-3 w-3" />}>Mới</Badge>
+                  <Badge variant="primary" size="sm" icon={<Sparkle className="h-3 w-3" />}>Mới</Badge>
                 )}
               </Flex>
               <p className="mt-0.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -242,7 +242,7 @@ function PolicyEditorRow({
             className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-30"
             title="Xóa chính sách"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash className="h-4 w-4" />
           </button>
         </Flex>
 
@@ -486,7 +486,7 @@ export default function CancellationPolicyManager() {
   }
 
   return (
-    <div className="space-y-6 animate-slide-up w-full text-slate-900 pb-20">
+    <div className="space-y-6 animate-slide-up w-full text-slate-900 px-8 pt-6 pb-12">
       {/* Minimal Hero Section */}
       <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-8 text-white shadow-xl shadow-slate-900/10">
         <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-indigo-500/20 blur-[60px]" />
@@ -546,7 +546,7 @@ export default function CancellationPolicyManager() {
               variant="outline"
               size="sm"
               onClick={handleReset}
-              leftIcon={<Undo2 className="h-3.5 w-3.5" />}
+              leftIcon={<ArrowCounterClockwise className="h-3.5 w-3.5" />}
             >
               Hoàn tác
             </Button>
@@ -556,7 +556,7 @@ export default function CancellationPolicyManager() {
             size="sm"
             onClick={() => void loadPolicies()}
             disabled={loading || saving}
-            leftIcon={<RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
+            leftIcon={<ArrowClockwise className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
           >
             Làm mới
           </Button>
@@ -577,7 +577,7 @@ export default function CancellationPolicyManager() {
             onClick={handleSave}
             disabled={!isDirty || saving || loading}
             isLoading={saving}
-            leftIcon={<Save className="h-3.5 w-3.5" />}
+            leftIcon={<FloppyDisk className="h-3.5 w-3.5" />}
           >
             Lưu thay đổi
           </Button>
@@ -596,7 +596,7 @@ export default function CancellationPolicyManager() {
         </div>
       ) : error ? (
         <Alert variant="error" className="mt-4 py-8 flex flex-col items-center text-center">
-          <AlertTriangle className="h-10 w-10 text-red-500 mb-3" />
+          <Warning className="h-10 w-10 text-red-500 mb-3" />
           <p className="font-bold text-red-800">Lỗi kết nối</p>
           <p className="mt-1 text-sm text-red-600 max-w-sm">{error}</p>
         </Alert>
@@ -647,9 +647,9 @@ export default function CancellationPolicyManager() {
             }`}
           >
             {toast.tone === "success" ? (
-              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+              <CheckCircle className="h-5 w-5 text-emerald-500" />
             ) : (
-              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <Warning className="h-5 w-5 text-red-500" />
             )}
             <p
               className={`text-sm font-bold ${

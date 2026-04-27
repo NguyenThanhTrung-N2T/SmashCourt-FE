@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Zap } from "lucide-react";
+import {
+  Plus,
+  Lightning,
+} from "@phosphor-icons/react";
 
 import { Button } from "@/src/shared/components/ui/Button";
 import { Input } from "@/src/shared/components/ui/Input";
@@ -162,7 +165,7 @@ export function CreateServiceModal({
           onClick={handleCreate}
           disabled={saving}
           isLoading={saving}
-          leftIcon={<Zap className="h-4 w-4" />}
+          leftIcon={<Lightning className="h-4 w-4" />}
           className="bg-gradient-to-r from-orange-600 to-amber-600 text-white hover:shadow-lg shadow-md"
         >
           Lưu và Kinh doanh

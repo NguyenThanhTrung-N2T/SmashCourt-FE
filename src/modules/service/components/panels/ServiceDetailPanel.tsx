@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Coffee, Edit3, CheckCircle2, Trash2, RefreshCw, AlertTriangle } from "lucide-react";
+import {
+  Coffee,
+  PencilSimpleLine,
+  CheckCircle,
+  Trash,
+  ArrowClockwise,
+  Warning,
+} from "@phosphor-icons/react";
 
 import { Button } from "@/src/shared/components/ui/Button";
 import { Input } from "@/src/shared/components/ui/Input";
@@ -119,10 +126,18 @@ export function ServiceDetailPanel({
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
-      <div className="relative h-28 w-full bg-gradient-to-r from-orange-500 to-amber-600">
+      <div
+        className="relative h-28 w-full"
+        style={{ background: "linear-gradient(135deg, #2A9D5C 0%, #1B5E38 100%)" }}
+      >
+        {/* Subtle texture overlay */}
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
         <div className="absolute -bottom-10 left-8">
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white p-2 shadow-lg">
-            <div className="flex h-full w-full items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-600">
+          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white p-2 shadow-lg shadow-[#1B5E38]/20">
+            <div
+              className="flex h-full w-full items-center justify-center rounded-xl"
+              style={{ background: "linear-gradient(145deg, #2D7A50 0%, #1B5E38 100%)" }}
+            >
               <Coffee className="h-8 w-8 text-white drop-shadow-md" />
             </div>
           </div>
@@ -135,21 +150,21 @@ export function ServiceDetailPanel({
       </div>
 
       <div className="flex-1 overflow-y-auto px-8 pb-6 pt-14">
-        <h2 className="text-2xl font-black tracking-tight bg-gradient-to-r from-orange-600 to-amber-700 bg-clip-text text-transparent">
+        <h2 className="text-2xl font-black tracking-tight bg-gradient-to-r from-[#2A9D5C] to-[#1B5E38] bg-clip-text text-transparent">
           {service.name}
         </h2>
         {service.description && (
           <p className="mt-2 text-sm text-slate-500 max-w-lg">{service.description}</p>
         )}
 
-        <div className="mt-8 rounded-3xl border border-slate-100 bg-orange-50/20 p-6">
+        <div className="mt-8 rounded-3xl border border-[#1B5E38]/10 bg-[#1B5E38]/5 p-6">
           <Flex justify="between" align="center" className="mb-6">
             <Flex align="center" spacing="sm">
-              <Edit3 className="h-5 w-5 text-slate-600" />
+              <PencilSimpleLine className="h-5 w-5 text-[#1B5E38]" />
               <h3 className="text-base font-bold text-slate-800">Thông tin sản phẩm/dịch vụ</h3>
             </Flex>
             {isDirty && (
-              <span className="animate-pulse rounded-full bg-amber-200 px-3 py-1 text-xs font-black text-amber-800">
+              <span className="animate-pulse rounded-full bg-[#1B5E38]/15 px-3 py-1 text-xs font-black text-[#1B5E38]">
                 CHƯA LƯU
               </span>
             )}
@@ -172,7 +187,7 @@ export function ServiceDetailPanel({
                   setErrors((p) => ({ ...p, name: undefined }));
                 }}
                 error={errors.name}
-                className="text-base shadow-sm focus:border-orange-500 focus:ring-orange-100"
+                className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
               />
             </div>
 
@@ -183,7 +198,7 @@ export function ServiceDetailPanel({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ví dụ: Nước suối đóng chai 500ml ướp lạnh..."
                 rows={2}
-                className="text-sm shadow-sm focus:border-orange-500 focus:ring-orange-100"
+                className="text-sm shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
               />
             </div>
 
@@ -200,7 +215,7 @@ export function ServiceDetailPanel({
                 }}
                 error={errors.defaultPrice}
                 rightIcon={<span className="text-sm font-bold text-slate-400">đ</span>}
-                className="text-base shadow-sm focus:border-orange-500 focus:ring-orange-100"
+                className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
               />
             </div>
 
@@ -215,7 +230,7 @@ export function ServiceDetailPanel({
                 }}
                 placeholder="VD: Chai, Lon, Lượt..."
                 error={errors.unit}
-                className="text-base shadow-sm focus:border-orange-500 focus:ring-orange-100"
+                className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
               />
             </div>
           </Grid>
@@ -234,7 +249,7 @@ export function ServiceDetailPanel({
               setErrors({});
             }}
             disabled={!isDirty || saving}
-            leftIcon={<RefreshCw className="h-4 w-4" />}
+            leftIcon={<ArrowClockwise className="h-4 w-4" />}
           >
             Reset
           </Button>
@@ -243,7 +258,7 @@ export function ServiceDetailPanel({
             variant="dangerSoft"
             onClick={() => setShowDeleteConfirm(true)}
             disabled={deleting || saving || service.status === ServiceStatus.DELETED}
-            leftIcon={<Trash2 className="h-4 w-4" />}
+            leftIcon={<Trash className="h-4 w-4" />}
           >
             Ngưng kinh doanh
           </Button>
@@ -254,8 +269,7 @@ export function ServiceDetailPanel({
           onClick={handleSave}
           disabled={saving || !isDirty}
           isLoading={saving}
-          className="bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white"
-          leftIcon={<CheckCircle2 className="h-5 w-5" />}
+          leftIcon={<CheckCircle className="h-5 w-5" />}
         >
           Lưu thay đổi
         </Button>
@@ -266,7 +280,7 @@ export function ServiceDetailPanel({
         onClose={() => setShowDeleteConfirm(false)}
         title="Xác nhận ngưng kinh doanh"
         subtitle="Hệ thống"
-        icon={<AlertTriangle className="h-5 w-5" />}
+        icon={<Warning className="h-5 w-5" />}
         maxWidth="md"
         headerGradient="from-red-500 to-pink-500"
       >
@@ -287,7 +301,7 @@ export function ServiceDetailPanel({
               onClick={handleDelete}
               disabled={deleting}
               isLoading={deleting}
-              leftIcon={<Trash2 className="h-4 w-4" />}
+              leftIcon={<Trash className="h-4 w-4" />}
             >
               Xác nhận ngưng
             </Button>

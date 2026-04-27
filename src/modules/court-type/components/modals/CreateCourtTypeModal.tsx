@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import {
+  Plus,
+} from "@phosphor-icons/react";
 import { Modal } from "@/src/shared/components/ui/Modal";
 import { CourtTypeForm } from "./CourtTypeForm";
 import { createCourtType } from "@/src/api/court-type.api";

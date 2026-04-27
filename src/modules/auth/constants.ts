@@ -11,7 +11,7 @@ export type UserRole = "CUSTOMER" | "STAFF" | "BRANCH_MANAGER" | "OWNER";
 const roleToRedirect: Record<UserRole, string> = {
   CUSTOMER: "/",
   STAFF: "/",
-  BRANCH_MANAGER: "/",
+  BRANCH_MANAGER: "/manager",
   OWNER: "/",
 };
 

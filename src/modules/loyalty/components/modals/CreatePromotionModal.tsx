@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Zap } from "lucide-react";
+import {
+  Plus,
+  Lightning,
+} from "@phosphor-icons/react";
 
 import { Button } from "@/src/shared/components/ui/Button";
 import { Input } from "@/src/shared/components/ui/Input";
@@ -193,7 +196,7 @@ export function CreatePromotionModal({
           disabled={saving}
           isLoading={saving}
           className="bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white shadow-md shadow-fuchsia-500/20 hover:shadow-lg hover:-translate-y-0.5 transition-all outline-none border-none"
-          leftIcon={<Zap className="h-4 w-4" />}
+          leftIcon={<Lightning className="h-4 w-4" />}
         >
           Tạo khuyến mãi
         </Button>

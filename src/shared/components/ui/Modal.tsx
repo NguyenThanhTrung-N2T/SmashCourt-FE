@@ -1,6 +1,8 @@
 import * as React from "react";
 import { cn } from "@/src/shared/utils/cn";
-import { X } from "lucide-react";
+import {
+  X,
+} from "@phosphor-icons/react";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -30,7 +32,7 @@ export function Modal({
   icon,
   children,
   maxWidth = "lg",
-  headerGradient = "from-indigo-500 to-violet-500",
+  headerGradient = "from-[#1B5E38] to-[#2A9D5C]",
   className,
 }: ModalProps) {
   React.useEffect(() => {

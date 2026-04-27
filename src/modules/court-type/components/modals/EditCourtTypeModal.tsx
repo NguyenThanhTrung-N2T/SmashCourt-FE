@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Edit3 } from "lucide-react";
+import {
+  PencilSimpleLine,
+} from "@phosphor-icons/react";
 import { Modal } from "@/src/shared/components/ui/Modal";
 import { CourtTypeForm } from "./CourtTypeForm";
 import { updateCourtType } from "@/src/api/court-type.api";
@@ -32,7 +34,7 @@ export function EditCourtTypeModal({ courtType, onClose, onSaved }: { courtType:
       onClose={onClose}
       title={courtType.name}
       subtitle="Chỉnh sửa"
-      icon={<Edit3 className="h-5 w-5" />}
+      icon={<PencilSimpleLine className="h-5 w-5" />}
       maxWidth="lg"
       headerGradient="from-indigo-500 to-violet-500"
     >
@@ -43,7 +45,7 @@ export function EditCourtTypeModal({ courtType, onClose, onSaved }: { courtType:
         onSubmit={handleSubmit}
         saving={saving}
         buttonText="Lưu thay đổi"
-        buttonIcon={<Edit3 className="h-4 w-4" />}
+        buttonIcon={<PencilSimpleLine className="h-4 w-4" />}
         error={error}
       />
     </Modal>

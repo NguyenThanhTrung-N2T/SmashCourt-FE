@@ -5,19 +5,19 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
-  CalendarDays,
-  UsersRound,
+  CalendarDots,
+  UsersThree,
   FileText,
-  DoorOpen,
+  Door,
   QrCode,
-  LayoutGrid,
-  MessagesSquare,
-  LogOut,
-  RefreshCw,
+  SquaresFour,
+  ChatTeardropText,
+  SignOut,
+  ArrowClockwise,
   Clock,
   ShieldCheck,
-  CheckCircle2,
-} from "lucide-react";
+  CheckCircle,
+} from "@phosphor-icons/react";
 
 import { authLogout, authRefresh } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
@@ -49,25 +49,25 @@ const MENU_ITEMS: MenuItem[] = [
   },
   {
     label: "Lưới Sân Áp Dụng",
-    icon: <LayoutGrid className="h-5 w-5" />,
+    icon: <SquaresFour className="h-5 w-5" />,
     hint: "Trực quan lưới sân đang trống",
     roles: ["STAFF", "BRANCH_MANAGER", "BRANCH-MANAGER"],
   },
   {
     label: "Lịch đặt sân",
-    icon: <CalendarDays className="h-5 w-5" />,
+    icon: <CalendarDots className="h-5 w-5" />,
     hint: "Lịch thao tác & Kéo giờ sân",
     roles: ["STAFF", "BRANCH_MANAGER", "BRANCH-MANAGER"],
   },
   {
     label: "Quản trị Cơ sở",
-    icon: <DoorOpen className="h-5 w-5" />,
+    icon: <Door className="h-5 w-5" />,
     hint: "Thiết lập sân bãi & Kỹ thuật",
     roles: ["BRANCH_MANAGER", "BRANCH-MANAGER"],
   },
   {
     label: "Nhân sự trực ca",
-    icon: <UsersRound className="h-5 w-5" />,
+    icon: <UsersThree className="h-5 w-5" />,
     hint: "Phân ca & Chấm công Staff",
     roles: ["BRANCH_MANAGER", "BRANCH-MANAGER"],
   },
@@ -79,7 +79,7 @@ const MENU_ITEMS: MenuItem[] = [
   },
   {
     label: "Hỗ trợ Phản hồi",
-    icon: <MessagesSquare className="h-5 w-5" />,
+    icon: <ChatTeardropText className="h-5 w-5" />,
     hint: "Kênh livechat khách hàng",
     roles: ["STAFF", "BRANCH_MANAGER", "BRANCH-MANAGER"],
   },
@@ -242,7 +242,7 @@ export default function WorkspaceHomeShell({
             disabled={controlsDisabled}
             className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-red-400/30 bg-gradient-to-r from-red-500/20 to-pink-500/20 px-5 py-4 text-sm font-extrabold text-red-100 transition-all duration-200 hover:from-red-500/30 hover:to-pink-500/30 hover:shadow-xl hover:shadow-red-500/20 hover:-translate-y-1 active:scale-95 disabled:opacity-60"
           >
-            <LogOut className="h-5 w-5" />
+            <SignOut className="h-5 w-5" />
             Out ca & Thoát
           </button>
         </aside>
@@ -290,21 +290,21 @@ export default function WorkspaceHomeShell({
                 { 
                   title: "Sân đang hoạt động", 
                   value: "8/12", 
-                  icon: LayoutGrid, 
+                  icon: SquaresFour, 
                   color: "emerald",
                   trend: "+2 từ hôm qua"
                 },
                 { 
                   title: "Khách hàng hôm nay", 
                   value: "47", 
-                  icon: UsersRound, 
+                  icon: UsersThree, 
                   color: isManager ? "sky" : "amber",
                   trend: "+12% so với tuần trước"
                 },
                 { 
                   title: "Booking sắp tới", 
                   value: "23", 
-                  icon: CalendarDays, 
+                  icon: CalendarDots, 
                   color: "blue",
                   trend: "Trong 4 giờ tới"
                 },
@@ -356,7 +356,7 @@ export default function WorkspaceHomeShell({
               <div className="flex items-start justify-between gap-4 mb-8">
                 <div className="flex-1">
                   <div className={`inline-flex items-center gap-2 rounded-full border border-${themeColors.primary}-200 bg-${themeColors.primary}-50 px-3 py-1 text-xs font-black uppercase tracking-widest text-${themeColors.primary}-700`}>
-                    <CalendarDays className="h-3.5 w-3.5" />
+                    <CalendarDots className="h-3.5 w-3.5" />
                     Hoạt động gần đây
                   </div>
                   <h2 className={`mt-4 text-2xl font-extrabold bg-gradient-to-r from-slate-900 to-${themeColors.primary}-700 bg-clip-text text-transparent lg:text-3xl`}>
@@ -371,9 +371,9 @@ export default function WorkspaceHomeShell({
               <div className="space-y-4">
                 {[
                   { action: "Check-in khách hàng", detail: "Nguyễn Văn A - Sân 3", time: "5 phút trước", icon: QrCode, color: "emerald" },
-                  { action: "Cập nhật booking", detail: "Sân 1 - 18:00-19:30", time: "12 phút trước", icon: CalendarDays, color: "blue" },
+                  { action: "Cập nhật booking", detail: "Sân 1 - 18:00-19:30", time: "12 phút trước", icon: CalendarDots, color: "blue" },
                   { action: "Xác nhận thanh toán", detail: "Invoice #1234 - 450.000đ", time: "25 phút trước", icon: FileText, color: "violet" },
-                  { action: "Thêm khách hàng mới", detail: "Trần Thị B - 0901234567", time: "1 giờ trước", icon: UsersRound, color: isManager ? "sky" : "amber" },
+                  { action: "Thêm khách hàng mới", detail: "Trần Thị B - 0901234567", time: "1 giờ trước", icon: UsersThree, color: isManager ? "sky" : "amber" },
                 ].map((activity, index) => {
                   const Icon = activity.icon;
                   const colorMap: Record<string, { bg: string; text: string; border: string }> = {
@@ -415,7 +415,7 @@ export default function WorkspaceHomeShell({
                   </h2>
                 </div>
                 <div className={`flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br ${themeColors.gradient} text-white shadow-xl shadow-${themeColors.secondary}-500/30 animate-pulse-glow`}>
-                  <UsersRound className="h-8 w-8" />
+                  <UsersThree className="h-8 w-8" />
                 </div>
               </div>
               
@@ -441,7 +441,7 @@ export default function WorkspaceHomeShell({
                   <dt className="text-[11px] font-black uppercase tracking-wider text-slate-500">Trạng thái</dt>
                   <dd className="mt-2">
                     <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-emerald-800">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <CheckCircle className="h-3.5 w-3.5" />
                       {user.status}
                     </span>
                   </dd>
@@ -455,7 +455,7 @@ export default function WorkspaceHomeShell({
                   disabled={controlsDisabled || !hasAccessToken} 
                   className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r ${themeColors.gradient} px-6 py-3.5 text-sm font-extrabold text-white shadow-xl shadow-${themeColors.primary}-500/30 transition-all hover:shadow-2xl hover:-translate-y-1 active:scale-95 disabled:opacity-60`}
                 >
-                  <RefreshCw className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`} />
+                  <ArrowClockwise className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`} />
                   Gia hạn phiên làm việc
                 </button>
                 {message && <div className="mt-4 rounded-2xl bg-emerald-50 border-2 border-emerald-200 p-4 text-sm font-bold text-emerald-800 animate-in fade-in shadow-sm">{message}</div>}

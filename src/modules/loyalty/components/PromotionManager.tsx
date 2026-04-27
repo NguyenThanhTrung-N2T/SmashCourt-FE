@@ -2,22 +2,22 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  AlertTriangle,
+  Warning,
   Calendar,
-  CheckCircle2,
-  Edit3,
-  Loader2,
+  CheckCircle,
+  PencilSimpleLine,
+  CircleNotch,
   Megaphone,
-  PercentIcon,
+  Percent,
   Plus,
-  RefreshCw,
-  Search,
-  Sparkles,
+  ArrowClockwise,
+  MagnifyingGlass,
+  Sparkle,
   Tag,
-  Trash2,
+  Trash,
   XCircle,
-  Zap,
-} from "lucide-react";
+  Lightning,
+} from "@phosphor-icons/react";
 
 import {
   createPromotion,
@@ -129,117 +129,65 @@ function PromotionStatsHeader({
 
   return (
     <>
-      {/* Dark Header */}
-      <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-8 text-white shadow-xl shadow-slate-900/10 mb-6">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-[60px]" />
-        <div className="pointer-events-none absolute -left-10 -bottom-10 h-64 w-64 rounded-full bg-violet-500/10 blur-[50px]" />
-
-        <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center w-full">
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-fuchsia-300">
-              <Megaphone className="h-3.5 w-3.5" /> Quản trị
-            </div>
-            <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl text-white">
-              Quản lý{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-violet-400">
-                Khuyến mãi
-              </span>
-            </h1>
-            <p className="mt-2 text-sm text-slate-400 max-w-md">
-              Tạo & quản lý các chương trình khuyến mãi. Khách hàng có tài khoản sẽ được chọn chương trình khi đặt sân.
-            </p>
-          </div>
-
-          <div className="hidden shrink-0 sm:flex items-center justify-center pr-4">
-            <div
-              className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-fuchsia-500/10 border border-white/10 shadow-[0_0_30px_rgba(217,70,239,0.15)] animate-pulse"
-              style={{ animationDuration: "3s" }}
-            >
-              <div
-                className="absolute inset-2 rounded-3xl border border-fuchsia-500/20 border-dashed animate-spin"
-                style={{ animationDuration: "15s" }}
-              />
-              <Megaphone className="relative h-10 w-10 text-fuchsia-400" />
-            </div>
-          </div>
+      {/* Page Header — matches dashboard/service/loyalty style */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-slate-900">
+            Khuyến mãi
+          </h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">
+            Tạo & quản lý các chương trình khuyến mãi cho hệ thống đặt sân.
+          </p>
         </div>
-      </section>
-
-      {/* Action Bar */}
-      <Flex justify="between" align="center" wrap="wrap" className="mb-6">
-        <Flex align="center" spacing="sm">
-          <h2 className="text-xl font-bold tracking-tight text-slate-800">
-            Danh sách khuyến mãi
-          </h2>
-          <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
-            {promotions.length} chương trình
-          </span>
-        </Flex>
-
-        <Flex align="center" spacing="sm">
+        <div className="flex items-center gap-3 shrink-0">
           <Button
             variant="outline"
             size="sm"
             onClick={onRefresh}
             disabled={loading}
-            leftIcon={<RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
+            leftIcon={<ArrowClockwise className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
           >
             Làm mới
           </Button>
           <Button
             variant="primary"
             size="sm"
-            className="bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white shadow-md shadow-fuchsia-500/20 hover:shadow-lg hover:shadow-fuchsia-500/30 hover:-translate-y-0.5 transition-all outline-none border-none"
             onClick={onCreateNew}
             leftIcon={<Plus className="h-3.5 w-3.5" />}
           >
             Tạo khuyến mãi
           </Button>
-        </Flex>
-      </Flex>
+        </div>
+      </div>
 
-      {/* Stats Cards */}
-      <Grid cols={3} spacing="md" className="mb-8">
+      {/* KPI mini-cards — same visual as dashboard/service */}
+      <div className="grid gap-4 grid-cols-3">
         {[
-          {
-            icon: Tag,
-            color: "text-fuchsia-500",
-            bg: "bg-fuchsia-100",
-            val: loading ? "–" : promotions.length,
-            label: "Tổng số chương trình",
-          },
-          {
-            icon: Sparkles,
-            color: "text-emerald-500",
-            bg: "bg-emerald-100",
-            val: loading ? "–" : activeCount,
-            label: "Đang hoạt động",
-          },
-          {
-            icon: PercentIcon,
-            color: "text-indigo-500",
-            bg: "bg-indigo-100",
-            val: loading ? "–" : `${maxDiscount}%`,
-            label: "Giảm giá cao nhất",
-          },
+          { icon: Tag, val: loading ? "–" : promotions.length, label: "Tổng số chương trình" },
+          { icon: Sparkle, val: loading ? "–" : activeCount, label: "Đang hoạt động" },
+          { icon: Percent, val: loading ? "–" : `${maxDiscount}%`, label: "Giảm giá cao nhất" },
         ].map((s, i) => (
-          <Stack
-            spacing="md"
-            key={i}
-            className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition-colors"
-          >
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${s.bg}`}>
-              <s.icon className={`h-5 w-5 ${s.color}`} />
+          <div key={i} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1B5E38]/10 text-[#1B5E38]">
+              <s.icon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900">{s.val}</p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {s.label}
-              </p>
+              <p className="text-2xl font-extrabold text-slate-900 leading-none">{s.val}</p>
+              <p className="mt-1 text-xs font-semibold text-slate-500">{s.label}</p>
             </div>
-          </Stack>
+          </div>
         ))}
-      </Grid>
+      </div>
+
+      {/* List section label + action row */}
+      <Flex justify="between" align="center" wrap="wrap">
+        <Flex align="center" spacing="sm">
+          <h2 className="text-lg font-bold tracking-tight text-slate-800">Danh sách khuyến mãi</h2>
+          <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
+            {promotions.length} chương trình
+          </span>
+        </Flex>
+      </Flex>
     </>
   );
 }
@@ -272,12 +220,12 @@ function PromotionListCard({
         <p className="text-xs text-slate-500">Chọn để xem chi tiết & chỉnh sửa</p>
         <div className="mt-3">
           <Input
-            leftIcon={<Search className="h-3.5 w-3.5" />}
+            leftIcon={<MagnifyingGlass className="h-3.5 w-3.5" />}
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Tìm khuyến mãi..."
-            className="py-2 text-xs focus:border-fuchsia-400 focus:ring-fuchsia-100"
+            className="py-2 text-xs focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
           />
         </div>
       </div>
@@ -299,16 +247,21 @@ function PromotionListCard({
             <button
               key={promo.id}
               onClick={() => onSelect(promo.id)}
-              className={`group flex w-full items-center gap-4 rounded-2xl border-2 p-3 text-left transition-all duration-200 hover:shadow-md ${isSelected
-                ? "border-fuchsia-400 bg-fuchsia-50/40 shadow-sm"
-                : "border-transparent hover:border-slate-200 bg-transparent hover:bg-white"
-                }`}
+              className={`group relative flex w-full items-center gap-4 rounded-2xl border p-3 text-left transition-all duration-200 ${
+                isSelected
+                  ? "border-[#1B5E38]/25 bg-[#1B5E38]/5 shadow-sm ring-1 ring-[#1B5E38]/15"
+                  : "border-transparent hover:border-slate-200 bg-transparent hover:bg-white hover:shadow-sm"
+              }`}
             >
+              {isSelected && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full bg-[#1B5E38]" />
+              )}
               <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-inner ${isSelected
-                  ? "bg-gradient-to-br from-fuchsia-500 to-violet-600"
-                  : "bg-gradient-to-br from-slate-300 to-slate-400 group-hover:from-fuchsia-400 group-hover:to-violet-500"
-                  }`}
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all ${
+                  isSelected
+                    ? "bg-[#1B5E38] shadow-lg shadow-[#1B5E38]/30"
+                    : "bg-slate-100 group-hover:bg-[#1B5E38]/80"
+                }`}
               >
                 <Megaphone className="h-6 w-6 text-white drop-shadow-sm" />
               </div>
@@ -323,7 +276,7 @@ function PromotionListCard({
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  <Badge variant="primary" size="sm" icon={<PercentIcon className="h-2.5 w-2.5" />}>
+                  <Badge variant="primary" size="sm" icon={<Percent className="h-2.5 w-2.5" />}>
                     {Number(promo.discountRate)}%
                   </Badge>
                   <Badge variant={statusCfg.variant} size="sm" dot>
@@ -339,7 +292,7 @@ function PromotionListCard({
   );
 }
 
-// ─── Detail / Edit Panel (Right) ──────────────────────────────────────────────
+// ─── Detail / PencilSimple Panel (Right) ──────────────────────────────────────────────
 
 function PromotionDetailPanel({
   promotion,
@@ -446,10 +399,17 @@ function PromotionDetailPanel({
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
       {/* Visual Banner */}
-      <div className="relative h-28 w-full bg-gradient-to-r from-fuchsia-500 to-violet-600">
+      <div
+        className="relative h-28 w-full"
+        style={{ background: "linear-gradient(135deg, #2A9D5C 0%, #1B5E38 100%)" }}
+      >
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
         <div className="absolute -bottom-10 left-8">
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white p-2 shadow-lg">
-            <div className="flex h-full w-full items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500 to-violet-600">
+          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white p-2 shadow-lg shadow-[#1B5E38]/20">
+            <div
+              className="flex h-full w-full items-center justify-center rounded-xl"
+              style={{ background: "linear-gradient(145deg, #2D7A50 0%, #1B5E38 100%)" }}
+            >
               <Megaphone className="h-8 w-8 text-white drop-shadow-md" />
             </div>
           </div>
@@ -463,7 +423,7 @@ function PromotionDetailPanel({
       </div>
 
       <div className="flex-1 overflow-y-auto px-8 pb-6 pt-14">
-        <h2 className="text-2xl font-black tracking-tight bg-gradient-to-r from-fuchsia-600 to-violet-700 bg-clip-text text-transparent">
+        <h2 className="text-2xl font-black tracking-tight bg-gradient-to-r from-[#2A9D5C] to-[#1B5E38] bg-clip-text text-transparent">
           {promotion.name}
         </h2>
 
@@ -471,7 +431,7 @@ function PromotionDetailPanel({
         <Grid cols={3} className="mt-6" spacing="md">
           <Flex align="center" spacing="md" className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-200 text-indigo-700">
-              <PercentIcon className="h-6 w-6" />
+              <Percent className="h-6 w-6" />
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-indigo-500">Tỷ lệ giảm</p>
@@ -498,11 +458,11 @@ function PromotionDetailPanel({
           </Flex>
         </Grid>
 
-        {/* Edit Form */}
-        <div className="mt-8 rounded-3xl border border-slate-100 bg-fuchsia-50/30 p-6">
+        {/* PencilSimple Form */}
+        <div className="mt-8 rounded-3xl border border-[#1B5E38]/10 bg-[#1B5E38]/5 p-6">
           <Flex justify="between" align="center" className="mb-6">
             <Flex align="center" spacing="sm">
-              <Edit3 className="h-5 w-5 text-slate-600" />
+              <PencilSimpleLine className="h-5 w-5 text-[#1B5E38]" />
               <h3 className="text-base font-bold text-slate-800">Chỉnh sửa khuyến mãi</h3>
             </Flex>
             {isDirty && (
@@ -531,7 +491,7 @@ function PromotionDetailPanel({
                 }}
                 placeholder="VD: Khuyến mãi hè 2026"
                 error={errors.name}
-                className="text-base focus:border-fuchsia-500 focus:ring-fuchsia-100"
+                className="text-base focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
               />
               {!errors.name && (
                 <p className="mt-2 text-xs font-medium text-slate-500">
@@ -555,7 +515,7 @@ function PromotionDetailPanel({
                 }}
                 error={errors.discountRate}
                 rightIcon={<span className="text-sm font-bold text-slate-400">%</span>}
-                className="text-base focus:border-fuchsia-500 focus:ring-fuchsia-100"
+                className="text-base focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
               />
               {!errors.discountRate && (
                 <p className="mt-2 text-xs font-medium text-slate-500 leading-relaxed">
@@ -578,7 +538,7 @@ function PromotionDetailPanel({
                   setErrors((p) => ({ ...p, startDate: undefined, endDate: undefined }));
                 }}
                 error={errors.startDate}
-                className="text-base focus:border-fuchsia-500 focus:ring-fuchsia-100"
+                className="text-base focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
               />
             </div>
 
@@ -594,7 +554,7 @@ function PromotionDetailPanel({
                   setErrors((p) => ({ ...p, endDate: undefined }));
                 }}
                 error={errors.endDate}
-                className="text-base focus:border-fuchsia-500 focus:ring-fuchsia-100"
+                className="text-base focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
               />
               {!errors.endDate && (
                 <p className="mt-2 text-xs font-medium text-slate-500">
@@ -619,7 +579,7 @@ function PromotionDetailPanel({
               setErrors({});
             }}
             disabled={!isDirty || saving}
-            leftIcon={<RefreshCw className="h-4 w-4" />}
+            leftIcon={<ArrowClockwise className="h-4 w-4" />}
           >
             Reset
           </Button>
@@ -628,7 +588,7 @@ function PromotionDetailPanel({
             variant="dangerSoft"
             onClick={() => setShowDeleteConfirm(true)}
             disabled={deleting || saving}
-            leftIcon={<Trash2 className="h-4 w-4" />}
+            leftIcon={<Trash className="h-4 w-4" />}
           >
             Xóa
           </Button>
@@ -636,11 +596,10 @@ function PromotionDetailPanel({
 
         <Button
           variant="primary"
-          className="bg-fuchsia-600 hover:bg-fuchsia-700 active:bg-fuchsia-800 outline-none border-none shadow-lg text-white font-black"
           onClick={handleSave}
           disabled={saving || !isDirty}
           isLoading={saving}
-          leftIcon={<CheckCircle2 className="h-5 w-5" />}
+          leftIcon={<CheckCircle className="h-5 w-5" />}
         >
           Lưu thay đổi
         </Button>
@@ -653,7 +612,7 @@ function PromotionDetailPanel({
           onClose={() => setShowDeleteConfirm(false)}
           title="Xác nhận xóa"
           subtitle="THAO TÁC NÀY KHÔNG THỂ HOÀN TÁC"
-          icon={<AlertTriangle className="h-6 w-6" />}
+          icon={<Warning className="h-6 w-6" />}
           maxWidth="md"
         >
           <div className="p-6">
@@ -673,7 +632,7 @@ function PromotionDetailPanel({
                 onClick={handleDelete}
                 disabled={deleting}
                 isLoading={deleting}
-                leftIcon={<Trash2 className="h-4 w-4" />}
+                leftIcon={<Trash className="h-4 w-4" />}
               >
                 Xóa khuyến mãi
               </Button>
@@ -762,7 +721,7 @@ export default function PromotionManager() {
   const selectedPromotion = promotions.find((p) => p.id === selectedId) ?? null;
 
   return (
-    <div className="w-full">
+    <div className="space-y-6 w-full animate-slide-up">
       {/* Header */}
       <PromotionStatsHeader
         promotions={promotions}
@@ -774,21 +733,21 @@ export default function PromotionManager() {
       {/* States */}
       {loading && (
         <Stack align="center" justify="center" spacing="md" className="my-20 w-full">
-          <Loader2 className="h-8 w-8 animate-spin text-fuchsia-500" />
+          <CircleNotch className="h-8 w-8 animate-spin text-[#1B5E38]" />
           <p className="font-semibold text-slate-500">Đang đồng bộ dữ liệu khuyến mãi...</p>
         </Stack>
       )}
 
       {!loading && loadError && (
         <Alert variant="error" className="my-10 py-12 flex flex-col items-center text-center">
-          <AlertTriangle className="mb-4 h-12 w-12 text-red-400" />
+          <Warning className="mb-4 h-12 w-12 text-red-400" />
           <h3 className="text-xl font-bold text-red-800">Lỗi đồng bộ dữ liệu</h3>
           <p className="mt-2 text-red-600">{loadError}</p>
           <Button
             onClick={load}
             variant="danger"
             className="mt-6"
-            leftIcon={<RefreshCw className="h-5 w-5" />}
+            leftIcon={<ArrowClockwise className="h-5 w-5" />}
           >
             Thử lại
           </Button>
@@ -797,9 +756,12 @@ export default function PromotionManager() {
 
       {/* Empty State */}
       {!loading && !loadError && promotions.length === 0 && (
-        <Stack align="center" className="my-10 rounded-[2rem] border-2 border-dashed border-slate-300 bg-slate-50 p-16 text-center w-full">
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-fuchsia-100 mb-4">
-            <Megaphone className="h-10 w-10 text-fuchsia-500" />
+        <Stack align="center" className="my-10 rounded-[2rem] border-2 border-dashed border-[#1B5E38]/25 bg-[#1B5E38]/5 p-16 text-center w-full">
+          <div
+            className="flex h-20 w-20 items-center justify-center rounded-2xl mb-4 shadow-inner"
+            style={{ background: "linear-gradient(145deg, #2D7A50 0%, #1B5E38 100%)" }}
+          >
+            <Megaphone className="h-10 w-10 text-white drop-shadow" />
           </div>
           <h3 className="text-xl font-bold text-slate-700">Chưa có chương trình khuyến mãi</h3>
           <p className="mt-2 text-sm text-slate-500 max-w-sm">
@@ -808,7 +770,7 @@ export default function PromotionManager() {
           <Button
             onClick={() => setShowCreateModal(true)}
             variant="primary"
-            className="mt-6 bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 outline-none border-none"
+            className="mt-6 shadow-md hover:shadow-lg hover:-translate-y-0.5"
             leftIcon={<Plus className="h-5 w-5" />}
           >
             Tạo khuyến mãi đầu tiên
@@ -818,9 +780,9 @@ export default function PromotionManager() {
 
       {/* Content Layout */}
       {!loading && !loadError && promotions.length > 0 && (
-        <Grid cols={5} spacing="lg" className="w-full">
+        <div className="grid grid-cols-5 gap-6 w-full h-[600px] min-h-[600px]">
           {/* Left: List */}
-          <div className="col-span-2">
+          <div className="col-span-2 h-full">
             <PromotionListCard
               promotions={promotions}
               selectedId={selectedId}
@@ -833,7 +795,7 @@ export default function PromotionManager() {
           </div>
 
           {/* Right: Detail */}
-          <div className="col-span-3 relative">
+          <div className="col-span-3 h-full relative">
             {selectedPromotion ? (
               <PromotionDetailPanel
                 key={selectedPromotion.id}
@@ -851,7 +813,7 @@ export default function PromotionManager() {
               </Stack>
             )}
           </div>
-        </Grid>
+        </div>
       )}
 
       {/* Create Modal */}
@@ -872,9 +834,9 @@ export default function PromotionManager() {
             }`}
           >
             {toast.tone === "success" ? (
-              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+              <CheckCircle className="h-5 w-5 text-emerald-500" />
             ) : (
-              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <Warning className="h-5 w-5 text-red-500" />
             )}
             <p
               className={`text-sm font-bold ${

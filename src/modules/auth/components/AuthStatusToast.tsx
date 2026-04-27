@@ -1,7 +1,10 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  Warning,
+  CheckCircle,
+} from "@phosphor-icons/react";
 
 type AuthStatusToastProps = {
   visible: boolean;
@@ -37,9 +40,9 @@ export default function AuthStatusToast({
           }`}
         >
           {isSuccess ? (
-            <CheckCircle2 className="h-7 w-7" strokeWidth={2.3} aria-hidden />
+            <CheckCircle className="h-7 w-7" strokeWidth={2.3} aria-hidden />
           ) : (
-            <AlertTriangle className="h-7 w-7" strokeWidth={2.3} aria-hidden />
+            <Warning className="h-7 w-7" strokeWidth={2.3} aria-hidden />
           )}
         </div>
         <p

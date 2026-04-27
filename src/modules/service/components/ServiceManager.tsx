@@ -2,20 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  AlertTriangle,
-  Banknote,
-  CheckCircle2,
+  Warning,
+  Money,
+  CheckCircle,
   Coffee,
-  Edit3,
-  Loader2,
+  CircleNotch,
   Plus,
-  RefreshCw,
-  Search,
-  Settings2,
+  ArrowClockwise,
+  MagnifyingGlass,
+  SlidersHorizontal,
   Tag,
-  Trash2,
-  Zap,
-} from "lucide-react";
+  Lightning,
+} from "@phosphor-icons/react";
 
 import {
   createService,
@@ -33,15 +31,12 @@ import { useToast } from "@/src/shared/hooks/useToast";
 
 import { Button } from "@/src/shared/components/ui/Button";
 import { Input } from "@/src/shared/components/ui/Input";
-import { Textarea } from "@/src/shared/components/ui/Textarea";
-import { Alert } from "@/src/shared/components/ui/Alert";
-import { Modal } from "@/src/shared/components/ui/Modal";
 import { Flex } from "@/src/shared/components/layout/Flex";
-import { Grid } from "@/src/shared/components/layout/Grid";
 import { Badge } from "@/src/shared/components/ui/Badge";
 import { CreateServiceModal } from "./modals/CreateServiceModal";
 
 import { ServiceDetailPanel } from "./panels/ServiceDetailPanel";
+
 
 // ─── Status config ────────────────────────────────────────────────────────────
 
@@ -78,58 +73,23 @@ function ServiceStatsHeader({
 
   return (
     <>
-      <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-8 text-white shadow-xl shadow-slate-900/10 mb-6">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-orange-500/20 blur-[60px]" />
-        <div className="pointer-events-none absolute -left-10 -bottom-10 h-64 w-64 rounded-full bg-amber-500/10 blur-[50px]" />
-
-        <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center w-full">
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-orange-300">
-              <Coffee className="h-3.5 w-3.5" /> Dịch vụ
-            </div>
-            <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl text-white">
-              Cửa hàng{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">
-                & Tiện ích
-              </span>
-            </h1>
-            <p className="mt-2 text-sm text-slate-400 max-w-md">
-              Quản lý các mặt hàng bán lẻ như nước và dịch vụ thuê dụng cụ như vợt, giày tại sân.
-            </p>
-          </div>
-
-          <div className="hidden shrink-0 sm:flex items-center justify-center pr-4">
-            <div
-              className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-orange-500/10 border border-white/10 shadow-[0_0_30px_rgba(249,115,22,0.15)] animate-pulse"
-              style={{ animationDuration: "3s" }}
-            >
-              <div
-                className="absolute inset-2 rounded-3xl border border-orange-500/20 border-dashed animate-spin"
-                style={{ animationDuration: "15s" }}
-              />
-              <Coffee className="relative h-10 w-10 text-orange-400" />
-            </div>
-          </div>
+      {/* Page Header — matches dashboard style */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-slate-900">
+            Dịch vụ
+          </h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">
+            Quản lý mặt hàng bán lẻ và dịch vụ thuê dụng cụ tại sân.
+          </p>
         </div>
-      </section>
-
-      <Flex justify="between" align="center" wrap="wrap" className="mb-6">
-        <Flex align="center" spacing="sm">
-          <h2 className="text-xl font-bold tracking-tight text-slate-800">
-            Danh sách dịch vụ
-          </h2>
-          <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
-            {services.length} mặt hàng
-          </span>
-        </Flex>
-
-        <Flex align="center" spacing="sm">
+        <div className="flex items-center gap-3 shrink-0">
           <Button
             variant="outline"
             size="sm"
             onClick={onRefresh}
             disabled={loading}
-            leftIcon={<RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
+            leftIcon={<ArrowClockwise className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
           >
             Làm mới
           </Button>
@@ -137,47 +97,41 @@ function ServiceStatsHeader({
             variant="primary"
             size="sm"
             onClick={onCreateNew}
-            className="bg-gradient-to-r from-orange-600 to-amber-600 shadow-orange-500/20 hover:shadow-orange-500/30 text-white"
             leftIcon={<Plus className="h-3.5 w-3.5" />}
           >
             Tạo mới
           </Button>
-        </Flex>
-      </Flex>
+        </div>
+      </div>
 
-      <Grid cols={2} spacing="md" className="mb-8 max-w-2xl">
+      {/* KPI mini-cards — same visual as dashboard */}
+      <div className="grid gap-4 grid-cols-2 max-w-md">
         {[
           {
             icon: Tag,
-            color: "text-orange-500",
-            bg: "bg-orange-100",
             val: loading ? "–" : services.length,
             label: "Tổng mặt hàng",
           },
           {
-            icon: Zap,
-            color: "text-emerald-500",
-            bg: "bg-emerald-100",
+            icon: Lightning,
             val: loading ? "–" : activeCount,
             label: "Đang kinh doanh",
           },
         ].map((s, i) => (
           <div
             key={i}
-            className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition-colors"
+            className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all"
           >
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${s.bg}`}>
-              <s.icon className={`h-5 w-5 ${s.color}`} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1B5E38]/10 text-[#1B5E38]">
+              <s.icon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900">{s.val}</p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {s.label}
-              </p>
+              <p className="text-2xl font-extrabold text-slate-900 leading-none">{s.val}</p>
+              <p className="mt-1 text-xs font-semibold text-slate-500">{s.label}</p>
             </div>
           </div>
         ))}
-      </Grid>
+      </div>
     </>
   );
 }
@@ -213,7 +167,7 @@ function ServiceListCard({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Tìm theo tên..."
-          leftIcon={<Search className="h-4 w-4" />}
+          leftIcon={<MagnifyingGlass className="h-4 w-4" />}
           className="py-2.5 px-3 text-sm"
         />
       </div>
@@ -235,32 +189,40 @@ function ServiceListCard({
             <button
               key={service.id}
               onClick={() => onSelect(service.id)}
-              className={`group flex w-full items-center gap-4 rounded-2xl border-2 p-3 text-left transition-all duration-200 hover:shadow-md ${isSelected
-                ? "border-orange-400 bg-orange-50/40 shadow-sm"
-                : "border-transparent hover:border-slate-200 bg-transparent hover:bg-white"
-                }`}
+              className={`group relative flex w-full items-center gap-4 rounded-2xl border p-3 text-left transition-all duration-200 ${
+                isSelected
+                  ? "border-[#1B5E38]/25 bg-[#1B5E38]/5 shadow-sm ring-1 ring-[#1B5E38]/15"
+                  : "border-transparent hover:border-slate-200 bg-transparent hover:bg-white hover:shadow-sm"
+              }`}
             >
+              {/* Active indicator strip */}
+              {isSelected && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full bg-[#1B5E38]" />
+              )}
+
               <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-inner ${isSelected
-                  ? "bg-gradient-to-br from-orange-500 to-amber-600"
-                  : "bg-gradient-to-br from-slate-300 to-slate-400 group-hover:from-orange-400 group-hover:to-amber-500"
-                  }`}
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all ${
+                  isSelected
+                    ? "bg-[#1B5E38] shadow-lg shadow-[#1B5E38]/30"
+                    : "bg-slate-100 group-hover:bg-[#1B5E38]/80"
+                }`}
               >
-                <Settings2 className="h-6 w-6 text-white drop-shadow-sm" />
+                <SlidersHorizontal className="h-5 w-5 text-white drop-shadow-sm" />
               </div>
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span
-                    className={`text-sm font-extrabold truncate ${isSelected ? "text-slate-900" : "text-slate-700"
-                      }`}
+                    className={`text-sm font-bold truncate transition-colors ${
+                      isSelected ? "text-slate-900" : "text-slate-700"
+                    }`}
                   >
                     {service.name}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  <span className="inline-flex items-center gap-1 rounded-md bg-zinc-100/80 border border-zinc-200 px-2 py-0.5 text-[11px] font-bold text-zinc-800">
-                    <Banknote className="h-2.5 w-2.5 text-zinc-500" />
+                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                    <Money className="h-2.5 w-2.5 text-slate-400" />
                     {service.defaultPrice.toLocaleString()} đ / {service.unit}
                   </span>
                   <Badge variant={statusCfg.variant} size="sm" dot>
@@ -276,7 +238,7 @@ function ServiceListCard({
   );
 }
 
-// ─── Detail / Edit Panel (Right) ──────────────────────────────────────────────
+// ─── Detail / PencilSimple Panel (Right) ──────────────────────────────────────────────
 
 
 
@@ -355,7 +317,7 @@ export default function ServiceManager() {
   const selectedService = services.find((p) => p.id === selectedId) ?? null;
 
   return (
-    <div className="space-y-6 animate-slide-up w-full">
+    <div className="space-y-6 animate-slide-up w-full px-8 pt-6 pb-10">
       <ServiceStatsHeader
         services={services}
         loading={loading}
@@ -365,34 +327,38 @@ export default function ServiceManager() {
 
       {loading && (
         <Flex justify="center" align="center" spacing="md" className="my-20 flex-col">
-          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-          <p className="font-semibold text-slate-500">Đang đồng bộ dữ liệu dịch vụ...</p>
+          <CircleNotch className="h-8 w-8 animate-spin text-[#1B5E38]" />
+          <p className="font-semibold text-slate-500">Đang tải dữ liệu dịch vụ...</p>
         </Flex>
       )}
 
       {!loading && loadError && (
         <div className="my-10 flex flex-col items-center rounded-[2rem] border-2 border-red-200 bg-red-50 p-12 text-center shadow-sm w-full">
-          <AlertTriangle className="mb-4 h-12 w-12 text-red-400" />
+          <Warning className="mb-4 h-12 w-12 text-red-400" />
           <h3 className="text-xl font-bold text-red-800">Lỗi đồng bộ dữ liệu</h3>
           <p className="mt-2 text-red-600">{loadError}</p>
-          <Button variant="danger" onClick={load} className="mt-6" leftIcon={<RefreshCw className="h-5 w-5" />}>
+          <Button variant="danger" onClick={load} className="mt-6" leftIcon={<ArrowClockwise className="h-5 w-5" />}>
             Thử lại
           </Button>
         </div>
       )}
 
       {!loading && !loadError && services.length === 0 && (
-        <div className="my-10 flex flex-col items-center rounded-[2rem] border-2 border-dashed border-slate-300 bg-slate-50 p-16 text-center w-full">
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-orange-100 mb-4">
-            <Coffee className="h-10 w-10 text-orange-500" />
+        <div className="my-10 flex flex-col items-center rounded-[2rem] border-2 border-dashed border-[#1B5E38]/25 bg-[#1B5E38]/5 p-16 text-center w-full">
+          <div
+            className="flex h-20 w-20 items-center justify-center rounded-2xl mb-4 shadow-inner"
+            style={{ background: "linear-gradient(145deg, #2D7A50 0%, #1B5E38 100%)" }}
+          >
+            <Coffee className="h-10 w-10 text-white drop-shadow" />
           </div>
           <h3 className="text-xl font-bold text-slate-700">Chưa có dịch vụ nào</h3>
           <p className="mt-2 text-sm text-slate-500 max-w-sm">
             Tạo mới các sản phẩm như nước giải khát, quần áo hoặc dịch vụ thuê vợt để cung cấp cho người chơi.
           </p>
           <Button
+            variant="primary"
             onClick={() => setShowCreateModal(true)}
-            className="mt-6 bg-gradient-to-r from-orange-600 to-amber-600 shadow-md hover:-translate-y-0.5 text-white"
+            className="mt-6 shadow-md hover:-translate-y-0.5"
             leftIcon={<Plus className="h-5 w-5" />}
           >
             Tạo dịch vụ đầu tiên
@@ -456,9 +422,9 @@ export default function ServiceManager() {
             }`}
         >
           {toast.tone === "success" ? (
-            <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+            <CheckCircle className="h-6 w-6 text-emerald-500" />
           ) : (
-            <AlertTriangle className="h-6 w-6 text-red-500" />
+            <Warning className="h-6 w-6 text-red-500" />
           )}
           <p className={`font-bold ${toast.tone === "success" ? "text-emerald-800" : "text-red-800"}`}>
             {toast.message}

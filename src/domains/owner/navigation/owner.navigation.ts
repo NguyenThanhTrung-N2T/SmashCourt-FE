@@ -1,19 +1,63 @@
 import { NavItem } from "@/src/shared/types/navigation.types";
-import { BarChart2, Building2, Users, Grid3x3, Gift, ShieldCheck, Settings, Coffee } from "lucide-react";
+import {
+  ChartBar,
+  Buildings,
+  Users,
+  User,
+  CourtBasketball,
+  SquaresFour,
+  Gift,
+  ShieldCheck,
+  Gear,
+  Coffee,
+  CalendarDots,
+  CreditCard,
+  Tag,
+} from "@phosphor-icons/react";
 
 export const OWNER_NAV: NavItem[] = [
     {
         label: "Tổng quan",
         href: "/owner",
-        icon: BarChart2,
+        icon: ChartBar,
         hint: "KPI & Báo cáo",
         exact: true,
     },
     {
         label: "Chi nhánh",
         href: "/owner/branches",
-        icon: Building2,
+        icon: Buildings,
         hint: "Điều phối các cơ sở",
+    },
+    {
+        label: "Bookings",
+        href: "/owner/bookings",
+        icon: CalendarDots,
+        hint: "Đơn đặt sân & lịch sử",
+    },
+    {
+        label: "Thanh toán",
+        href: "/owner/payments",
+        icon: CreditCard,
+        hint: "Quản lý giao dịch",
+    },
+    {
+        label: "Bảng giá",
+        href: "/owner/pricing",
+        icon: Tag,
+        hint: "Cấu hình giá theo khung giờ",
+    },
+    {
+        label: "Sân",
+        href: "/owner/courts",
+        icon: SquaresFour,
+        hint: "Quản lý sân thi đấu",
+    },
+    {
+        label: "Khách hàng",
+        href: "/owner/customers",
+        icon: User,
+        hint: "Hồ sơ & lịch sử khách hàng",
     },
     {
         label: "Nhân sự",
@@ -30,7 +74,7 @@ export const OWNER_NAV: NavItem[] = [
     {
         label: "Loại sân",
         href: "/owner/court-types",
-        icon: Grid3x3,
+        icon: CourtBasketball,
         hint: "Quản lý các loại sân",
     },
     {
@@ -48,7 +92,7 @@ export const OWNER_NAV: NavItem[] = [
     {
         label: "Cài đặt",
         href: "/owner/settings",
-        icon: Settings,
+        icon: Gear,
         hint: "Cấu hình hệ thống",
     },
 ];

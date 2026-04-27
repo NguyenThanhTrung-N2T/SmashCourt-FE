@@ -4,15 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Calendar,
-  CheckCircle2,
+  CheckCircle,
   Clock,
   MapPin,
   XCircle,
-  Filter,
-  Search,
-  ChevronRight,
+  Funnel,
+  MagnifyingGlass,
+  CaretRight,
   ArrowLeft,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 type BookingStatus = "completed" | "upcoming" | "cancelled";
 
@@ -79,7 +79,7 @@ export default function BookingHistory() {
         return {
           label: "Đã hoàn thành",
           color: "text-emerald-700 bg-emerald-50 border-emerald-200",
-          icon: CheckCircle2,
+          icon: CheckCircle,
         };
       case "upcoming":
         return {
@@ -116,7 +116,7 @@ export default function BookingHistory() {
 
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative flex-1 max-w-md">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <MagnifyingGlass className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Tìm kiếm theo sân hoặc chi nhánh..."
@@ -215,7 +215,7 @@ export default function BookingHistory() {
                     </div>
 
                     <button className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-emerald-500 hover:text-white">
-                      <ChevronRight className="h-5 w-5" />
+                      <CaretRight className="h-5 w-5" />
                     </button>
                   </div>
                 </div>
@@ -226,7 +226,7 @@ export default function BookingHistory() {
 
         {filteredBookings.length === 0 && (
           <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
-            <Filter className="mx-auto h-12 w-12 text-slate-300" />
+            <Funnel className="mx-auto h-12 w-12 text-slate-300" />
             <p className="mt-4 text-lg font-semibold text-slate-600">
               Không tìm thấy lịch sử đặt sân
             </p>

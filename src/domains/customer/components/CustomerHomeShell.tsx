@@ -4,26 +4,26 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Activity,
-  BotMessageSquare,
-  CalendarClock,
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  Clock3,
+  Heartbeat,
+  Robot,
+  CalendarBlank,
+  CheckCircle,
+  CaretDown,
+  CaretRight,
+  CaretUp,
+  Clock,
   Crown,
-  History,
+  ClockCounterClockwise,
   Info,
-  Layers3,
-  LogOut,
+  Stack,
+  SignOut,
   MapPin,
-  MousePointer2,
-  Sparkles,
+  Cursor,
+  Sparkle,
   Trophy,
-  UserRound,
-  Zap,
-} from "lucide-react";
+  User,
+  Lightning,
+} from "@phosphor-icons/react";
 
 import { authLogout } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
@@ -269,7 +269,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
           <div className="flex items-center gap-10">
             <div className="flex items-center gap-3 group">
               <div className="flex h-10 w-10 items-center justify-center rounded-[0.8rem] bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-all group-hover:shadow-emerald-500/50 group-hover:scale-110 animate-pulse-glow">
-                <Activity className="h-6 w-6" />
+                <Heartbeat className="h-6 w-6" />
               </div>
               <span className="hidden text-2xl font-black tracking-tight text-white sm:block">
                 Smash<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Court</span>
@@ -287,7 +287,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                 onClick={() => router.push("/customer/history")}
                 className="flex shrink-0 items-center gap-2 rounded-full bg-transparent px-6 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/10 hover:text-white hover:scale-105"
               >
-                <History className="h-4 w-4" /> Lịch sử của tôi
+                <ClockCounterClockwise className="h-4 w-4" /> Lịch sử của tôi
               </button>
             </nav>
           </div>
@@ -317,7 +317,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                     Hạng Tân Binh
                   </p>
                 </div>
-                <ChevronDown
+                <CaretDown
                   className={`h-4 w-4 text-slate-400 transition-transform ${isProfileOpen ? "rotate-180" : ""}`}
                 />
               </button>
@@ -358,13 +358,13 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                   onClick={() => router.push("/customer/profile")}
                   className="flex w-full items-center gap-3 rounded-xl p-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 hover:text-emerald-600"
                 >
-                  <UserRound className="h-4 w-4" /> Xem thông tin tài khoản
+                  <User className="h-4 w-4" /> Xem thông tin tài khoản
                 </button>
                 <button
                   onClick={() => router.push("/customer/history")}
                   className="flex w-full items-center gap-3 rounded-xl p-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 hover:text-emerald-600 md:hidden"
                 >
-                  <History className="h-4 w-4" /> Lịch sử Đặt sân
+                  <ClockCounterClockwise className="h-4 w-4" /> Lịch sử Đặt sân
                 </button>
                 <div className="my-1 h-px w-full bg-slate-50" />
                 <button
@@ -372,7 +372,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                   disabled={controlsDisabled}
                   className="flex w-full items-center gap-3 rounded-xl p-3 text-sm font-bold text-red-600 transition-colors hover:bg-red-50"
                 >
-                  <LogOut className="h-4 w-4" /> Đăng xuất
+                  <SignOut className="h-4 w-4" /> Đăng xuất
                 </button>
               </div>
             </div>
@@ -384,7 +384,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
         <div className="mb-10 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
           <div className="w-full lg:w-3/5 text-white">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-100">
-              <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+              <Sparkle className="h-3.5 w-3.5 animate-pulse" />
               Lịch đặt sân thông minh
             </div>
             <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
@@ -402,8 +402,8 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
           <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3 lg:w-auto">
             <article className="group rounded-3xl border border-white/20 bg-gradient-to-br from-white/15 to-white/5 p-5 shadow-xl backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-2xl hover:border-emerald-400/30 animate-slide-up">
               <div className="flex items-center justify-between">
-                <CalendarClock className="h-6 w-6 text-emerald-300 transition-transform group-hover:scale-110" />
-                <Sparkles className="h-4 w-4 text-emerald-300/50 animate-pulse" />
+                <CalendarBlank className="h-6 w-6 text-emerald-300 transition-transform group-hover:scale-110" />
+                <Sparkle className="h-4 w-4 text-emerald-300/50 animate-pulse" />
               </div>
               <p className="mt-3 text-3xl font-extrabold leading-none text-white">
                 0
@@ -415,7 +415,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
             <article className="group rounded-3xl border border-white/20 bg-gradient-to-br from-blue-500/15 to-white/5 p-5 shadow-xl backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-2xl hover:border-blue-400/30 animate-slide-up" style={{ animationDelay: '0.1s' }}>
               <div className="flex items-center justify-between">
                 <Trophy className="h-6 w-6 text-blue-300 transition-transform group-hover:scale-110" />
-                <Zap className="h-4 w-4 text-blue-300/50 animate-pulse" />
+                <Lightning className="h-4 w-4 text-blue-300/50 animate-pulse" />
               </div>
               <p className="mt-3 text-3xl font-extrabold leading-none text-white">
                 12
@@ -427,7 +427,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
             <article className="group rounded-3xl border border-emerald-400/40 bg-gradient-to-br from-emerald-500/25 to-teal-500/15 p-5 shadow-xl backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-2xl hover:border-emerald-400/60 animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <div className="flex items-center justify-between">
                 <Crown className="h-6 w-6 text-amber-300 transition-transform group-hover:scale-110 group-hover:rotate-12" />
-                <Sparkles className="h-4 w-4 text-amber-300/70 animate-pulse" />
+                <Sparkle className="h-4 w-4 text-amber-300/70 animate-pulse" />
               </div>
               <p className="mt-3 text-3xl font-extrabold leading-none bg-gradient-to-r from-emerald-100 to-teal-100 bg-clip-text text-transparent">
                 1,250
@@ -444,7 +444,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
             <div>
               <h2 className="flex items-center gap-2.5 text-xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-emerald-700 bg-clip-text text-transparent lg:text-2xl">
                 Chọn sân theo khung giờ{" "}
-                <Zap className="h-6 w-6 text-emerald-500 animate-pulse" />
+                <Lightning className="h-6 w-6 text-emerald-500 animate-pulse" />
               </h2>
               <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-slate-500 lg:text-[15px]">
                 Time-grid là trục thời gian nguyên ngày cho từng sân. Kéo trực
@@ -463,11 +463,11 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                   <option>CS Quận 7 (Huỳnh Tấn Phát)</option>
                   <option>CS Quận 10 (Thành Thái)</option>
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-transform group-hover:text-emerald-600" />
+                <CaretDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-transform group-hover:text-emerald-600" />
               </div>
 
               <div className="relative w-full sm:w-auto group">
-                <CalendarClock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-emerald-600 transition-transform group-hover:scale-110" />
+                <CalendarBlank className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-emerald-600 transition-transform group-hover:scale-110" />
                 <input
                   type="date"
                   defaultValue={today}
@@ -491,7 +491,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
               Đã đặt
             </span>
             <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500">
-              <MousePointer2 className="h-4 w-4" />
+              <Cursor className="h-4 w-4" />
               Kéo để chọn range
             </span>
           </div>
@@ -533,7 +533,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                     <div key={court} className="flex items-center gap-4">
                       <div className="w-[150px] rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] font-semibold text-slate-800 shadow-sm">
                         <div className="flex items-center gap-2">
-                          <Layers3 className="h-5 w-5 text-slate-500" />
+                          <Stack className="h-5 w-5 text-slate-500" />
                           <span>{court}</span>
                         </div>
                       </div>
@@ -594,7 +594,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1">
                 <p className="flex items-center gap-2 text-base font-bold text-emerald-700">
-                  <Clock3 className="h-5 w-5" />
+                  <Clock className="h-5 w-5" />
                   Chế độ đặt nhiều sân cùng giờ
                 </p>
                 <p className="mt-1.5 text-[15px] leading-relaxed text-slate-700">
@@ -623,7 +623,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                               : "border-slate-300 bg-white text-slate-700 hover:-translate-y-0.5 hover:border-emerald-400 hover:text-emerald-700"
                         }`}
                       >
-                        <Layers3 className="h-4 w-4" />
+                        <Stack className="h-4 w-4" />
                         {court}
                       </button>
                     );
@@ -631,7 +631,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                 </div>
                 {canBook ? (
                   <p className="mt-4 inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <CheckCircle className="h-4 w-4 text-emerald-600" />
                     Bạn đang chọn: {selectedCourts.join(", ")} -{" "}
                     {selectedRangeLabel}
                   </p>
@@ -648,7 +648,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                 disabled={!canBook}
                 className="group inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-slate-900 via-emerald-700 to-teal-700 px-7 text-sm font-semibold text-white shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 animate-gradient"
               >
-                Đặt sân <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                Đặt sân <CaretRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </button>
             </div>
           </div>
@@ -662,7 +662,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
           <div className="flex items-center justify-between bg-slate-900 px-6 py-5 text-white">
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
-                <Sparkles className="h-4 w-4" />
+                <Sparkle className="h-4 w-4" />
               </div>
               <h3 className="text-sm font-bold tracking-wide">
                 Smash AI Assistant
@@ -672,14 +672,14 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
               onClick={() => setIsChatOpen(false)}
               className="rounded-full bg-white/10 p-1.5 text-white/50 transition-colors hover:text-white"
             >
-              <ChevronUp className="h-4 w-4 rotate-180" />
+              <CaretUp className="h-4 w-4 rotate-180" />
             </button>
           </div>
 
           <div className="flex h-[360px] flex-col gap-5 overflow-y-auto bg-slate-50 p-5">
             <div className="flex max-w-[85%] items-start gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-500">
-                <BotMessageSquare className="h-4 w-4" />
+                <Robot className="h-4 w-4" />
               </div>
               <div className="rounded-2xl rounded-tl-sm border border-slate-100 bg-white px-5 py-3.5 text-sm font-medium leading-relaxed text-slate-700 shadow-sm">
                 Chào {user.fullName}! Bạn muốn tìm sân theo giờ cố định hay chọn
@@ -696,7 +696,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-5 pr-14 text-[15px] font-medium outline-none transition-colors focus:border-emerald-500 focus:bg-white"
               />
               <button className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm transition-colors hover:bg-emerald-400">
-                <ChevronRight className="h-6 w-6" />
+                <CaretRight className="h-6 w-6" />
               </button>
             </div>
           </div>
@@ -707,7 +707,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
         onClick={() => setIsChatOpen(!isChatOpen)}
         className="group fixed bottom-10 right-6 z-[100] flex h-16 w-16 items-center justify-center rounded-full border-2 border-slate-800 bg-gradient-to-br from-slate-900 to-emerald-900 text-white shadow-2xl shadow-slate-900/30 transition-all hover:scale-110 hover:shadow-emerald-500/30 animate-pulse-glow"
       >
-        <BotMessageSquare className="h-7 w-7 transition-transform group-hover:scale-110" />
+        <Robot className="h-7 w-7 transition-transform group-hover:scale-110" />
         <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-[10px] font-bold shadow-lg animate-pulse">
           1
         </span>
@@ -721,7 +721,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
             : "pointer-events-none translate-y-8 opacity-0"
         }`}
       >
-        <ChevronUp className="h-6 w-6" />
+        <CaretUp className="h-6 w-6" />
       </button>
 
       <AuthStatusToast

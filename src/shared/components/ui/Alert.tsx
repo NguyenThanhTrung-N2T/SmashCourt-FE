@@ -1,6 +1,11 @@
 import * as React from "react";
 import { cn } from "@/src/shared/utils/cn";
-import { AlertCircle, CheckCircle2, Info, AlertTriangle } from "lucide-react";
+import {
+  WarningCircle,
+  CheckCircle,
+  Info,
+  Warning,
+} from "@phosphor-icons/react";
 
 export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "error" | "warning" | "success" | "info";
@@ -15,9 +20,9 @@ const variantStyles = {
 };
 
 const iconMap = {
-  error: AlertCircle,
-  warning: AlertTriangle,
-  success: CheckCircle2,
+  error: WarningCircle,
+  warning: Warning,
+  success: CheckCircle,
   info: Info,
 };
 

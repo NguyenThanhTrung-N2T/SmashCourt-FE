@@ -2,24 +2,23 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  AlertTriangle,
-  Award,
-  CheckCircle2,
-  Crown,
-  Edit3,
-  Gem,
-  Layers,
+  Warning,
   Medal,
-  PercentIcon,
-  RefreshCw,
-  RotateCcw,
-  Save,
-  Sparkles,
+  CheckCircle,
+  Crown,
+  PencilSimpleLine,
+  Diamond,
+  Stack,
+  Percent,
+  ArrowClockwise,
+  ArrowCounterClockwise,
+  FloppyDisk,
+  Sparkle,
   Trophy,
   Users,
-  Zap,
-  Loader2
-} from "lucide-react";
+  Lightning,
+  CircleNotch,
+} from "@phosphor-icons/react";
 
 import {
   fetchAllLoyaltyTiers,
@@ -55,7 +54,7 @@ function getTierCfg(name: string): TierCfg {
     return {
       gradient: "from-violet-500 to-fuchsia-600",
       gradientText: "from-violet-600 to-fuchsia-700",
-      icon: Gem,
+      icon: Diamond,
       saveBg: "bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white",
       pillBg: "bg-violet-100/90",
       pillText: "text-violet-900",
@@ -68,7 +67,7 @@ function getTierCfg(name: string): TierCfg {
     return {
       gradient: "from-cyan-300 to-sky-400",
       gradientText: "from-cyan-500 to-sky-600",
-      icon: Sparkles,
+      icon: Sparkle,
       saveBg: "bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white",
       pillBg: "bg-cyan-100/90",
       pillText: "text-cyan-900",
@@ -107,7 +106,7 @@ function getTierCfg(name: string): TierCfg {
     return {
       gradient: "from-amber-600 to-amber-800",
       gradientText: "from-amber-700 to-amber-900",
-      icon: Award,
+      icon: Medal,
       saveBg: "bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white",
       pillBg: "bg-orange-100/90",
       pillText: "text-orange-900",
@@ -119,7 +118,7 @@ function getTierCfg(name: string): TierCfg {
   return {
     gradient: "from-slate-400 to-slate-600",
     gradientText: "from-slate-600 to-slate-800",
-    icon: Layers,
+    icon: Stack,
     saveBg: "bg-slate-600 hover:bg-slate-700 active:bg-slate-800 text-white",
     pillBg: "bg-slate-200/90",
     pillText: "text-slate-800",
@@ -146,85 +145,48 @@ function TopStatsHeader({
 
   return (
     <>
-      {/* Dark Header */}
-      <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-8 text-white shadow-xl shadow-slate-900/10 mb-6">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-amber-500/20 blur-[60px]" />
-        <div className="pointer-events-none absolute -left-10 -bottom-10 h-64 w-64 rounded-full bg-yellow-500/10 blur-[50px]" />
-
-        <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center w-full">
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-300">
-              <Trophy className="h-3.5 w-3.5" /> Quản trị
-            </div>
-            <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl text-white">
-              Quản lý{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400">
-                Hạng thành viên
-              </span>
-            </h1>
-            <p className="mt-2 text-sm text-slate-400 max-w-md">
-              Thiết lập ngưỡng điểm xét hạng & tỷ lệ ưu đãi cho hệ thống. Hệ thống tự động xếp loại khách hàng theo điểm tích lũy.
-            </p>
-          </div>
-
-          <div className="hidden shrink-0 sm:flex items-center justify-center pr-4">
-            <div
-              className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-amber-500/10 border border-white/10 shadow-[0_0_30px_rgba(251,191,36,0.15)] animate-pulse"
-              style={{ animationDuration: "3s" }}
-            >
-              <div
-                className="absolute inset-2 rounded-3xl border border-amber-500/20 border-dashed animate-spin"
-                style={{ animationDuration: "15s" }}
-              />
-              <Trophy className="relative h-10 w-10 text-amber-400" />
-            </div>
-          </div>
+      {/* Page Header — matches dashboard style */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-slate-900">
+            Hạng thành viên
+          </h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">
+            Thiết lập ngưỡng điểm xét hạng và tỷ lệ ưu đãi cho hệ thống.
+          </p>
         </div>
-      </section>
-
-      {/* Action Bar */}
-      <Flex justify="between" align="center" wrap="wrap" className="mb-6">
-        <Flex align="center" spacing="sm">
-          <h2 className="text-xl font-bold tracking-tight text-slate-800">
-            Cấu hình hạng thành viên
-          </h2>
-          <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
-            {tiers.length} hạng
-          </span>
-        </Flex>
-
-        <Flex align="center" spacing="sm">
+        <div className="flex items-center gap-3 shrink-0">
           <Button
             variant="outline"
             size="sm"
             onClick={onRefresh}
             disabled={loading}
-            leftIcon={<RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
+            leftIcon={<ArrowClockwise className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
           >
             Làm mới
           </Button>
-        </Flex>
-      </Flex>
+        </div>
+      </div>
 
-      {/* Stats Cards */}
-      <Grid cols={4} spacing="md" className="mb-8">
+      {/* Stats Cards — same as dashboard KPI mini-cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { icon: Trophy, color: "text-amber-500", bg: "bg-amber-100", val: loading ? "–" : tiers.length, label: "Tổng số hạng" },
-          { icon: PercentIcon, color: "text-emerald-500", bg: "bg-emerald-100", val: loading ? "–" : `${maxDiscount}%`, label: "Giảm giá tối đa" },
-          { icon: Zap, color: "text-indigo-500", bg: "bg-indigo-100", val: loading ? "–" : maxPoints.toLocaleString("vi-VN"), label: "Ngưỡng điểm kịch trần" },
-          { icon: Users, color: "text-slate-500", bg: "bg-slate-100", val: "--", label: "Tổng thành viên (Sắp có)" },
+          { icon: Trophy, val: loading ? "–" : tiers.length, label: "Tổng số hạng" },
+          { icon: Percent, val: loading ? "–" : `${maxDiscount}%`, label: "Giảm giá tối đa" },
+          { icon: Lightning, val: loading ? "–" : maxPoints.toLocaleString("vi-VN"), label: "Ngưỡng điểm kịch trần" },
+          { icon: Users, val: "--", label: "Tổng thành viên (Sắp có)" },
         ].map((s, i) => (
-          <div key={i} className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition-colors">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${s.bg}`}>
-              <s.icon className={`h-5 w-5 ${s.color}`} />
+          <div key={i} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1B5E38]/10 text-[#1B5E38]">
+              <s.icon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900">{s.val}</p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-500">{s.label}</p>
+              <p className="text-2xl font-extrabold text-slate-900 leading-none">{s.val}</p>
+              <p className="mt-1 text-xs font-semibold text-slate-500">{s.label}</p>
             </div>
           </div>
         ))}
-      </Grid>
+      </div>
     </>
   );
 }
@@ -275,10 +237,10 @@ function TierListCard({
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold ${cfg.pillBg} ${cfg.pillText}`}>
-                    <Zap className="h-2.5 w-2.5" /> {tier.minPoints.toLocaleString()} đ
+                    <Lightning className="h-2.5 w-2.5" /> {tier.minPoints.toLocaleString()} đ
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-md bg-emerald-100/80 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
-                    <PercentIcon className="h-2.5 w-2.5" /> {Number(tier.discountRate)}%
+                    <Percent className="h-2.5 w-2.5" /> {Number(tier.discountRate)}%
                   </span>
                 </div>
               </div>
@@ -290,7 +252,7 @@ function TierListCard({
   );
 }
 
-// ─── Right Panel: Detail & Edit ───────────────────────────────────────────────
+// ─── Right Panel: Detail & PencilSimple ───────────────────────────────────────────────
 
 function DetailPanel({
   tier,
@@ -366,7 +328,7 @@ function DetailPanel({
         <Grid cols={2} spacing="md" className="mt-6">
           <Flex align="center" spacing="md" className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
-              <Zap className="h-6 w-6" />
+              <Lightning className="h-6 w-6" />
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Điểm tối thiểu</p>
@@ -375,7 +337,7 @@ function DetailPanel({
           </Flex>
           <Flex align="center" spacing="md" className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-200 text-emerald-700">
-              <PercentIcon className="h-6 w-6" />
+              <Percent className="h-6 w-6" />
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-emerald-600/70">Tỷ lệ giảm giá</p>
@@ -384,11 +346,11 @@ function DetailPanel({
           </Flex>
         </Grid>
 
-        {/* Edit Form Area */}
+        {/* PencilSimple Form Area */}
         <div className={`mt-8 rounded-3xl border border-slate-100 ${cfg.formBg} p-6`}>
           <Flex align="center" justify="between" className="mb-6">
             <Flex align="center" spacing="sm">
-              <Edit3 className="h-5 w-5 text-slate-600" />
+              <PencilSimpleLine className="h-5 w-5 text-slate-600" />
               <h3 className="text-base font-bold text-slate-800">Cấu hình điều kiện hạng</h3>
             </Flex>
             {isDirty && (
@@ -452,7 +414,7 @@ function DetailPanel({
           variant="ghost"
           onClick={() => { setMinPoints(String(tier.minPoints)); setDiscountRate(String(tier.discountRate)); setErrors({}); }}
           disabled={!isDirty || saving}
-          leftIcon={<RotateCcw className="h-4 w-4" />}
+          leftIcon={<ArrowCounterClockwise className="h-4 w-4" />}
         >
           Reset
         </Button>
@@ -463,7 +425,7 @@ function DetailPanel({
           disabled={saving || !isDirty}
           isLoading={saving}
           className={cfg.saveBg}
-          leftIcon={<Save className="h-5 w-5" />}
+          leftIcon={<FloppyDisk className="h-5 w-5" />}
         >
           Lưu cấu hình
         </Button>
@@ -510,24 +472,24 @@ export default function LoyaltyTierManager() {
   const selectedTier = tiers.find((t) => t.id === selectedId) ?? null;
 
   return (
-    <div className="w-full">
+    <div className="space-y-6 w-full animate-slide-up">
       {/* 1. Header Card */}
       <TopStatsHeader tiers={tiers} loading={loading} onRefresh={load} />
 
       {/* States */}
       {loading && (
         <Flex justify="center" align="center" spacing="md" className="my-20 flex-col">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="font-semibold text-slate-500">Đang đồng bộ dữ liệu hạng...</p>
+          <CircleNotch className="h-8 w-8 animate-spin text-[#1B5E38]" />
+          <p className="font-semibold text-slate-500">Đang tải dữ liệu hạng...</p>
         </Flex>
       )}
 
       {!loading && loadError && (
         <div className="my-10 flex flex-col items-center rounded-[2rem] border-2 border-red-200 bg-red-50 p-12 text-center shadow-sm w-full">
-          <AlertTriangle className="mb-4 h-12 w-12 text-red-400" />
+          <Warning className="mb-4 h-12 w-12 text-red-400" />
           <h3 className="text-xl font-bold text-red-800">Lỗi đồng bộ dữ liệu</h3>
           <p className="mt-2 text-red-600">{loadError}</p>
-          <Button variant="danger" onClick={load} className="mt-6" leftIcon={<RefreshCw className="h-5 w-5" />}>
+          <Button variant="danger" onClick={load} className="mt-6" leftIcon={<ArrowClockwise className="h-5 w-5" />}>
             Thử lại
           </Button>
         </div>
@@ -535,9 +497,9 @@ export default function LoyaltyTierManager() {
 
       {/* 2. Content Layout */}
       {!loading && !loadError && tiers.length > 0 && selectedTier && (
-        <div className="grid grid-cols-5 gap-6 w-full">
+        <div className="grid grid-cols-5 gap-6 w-full h-[600px] min-h-[600px]">
           {/* Left: List Card */}
-          <div className="col-span-2">
+          <div className="col-span-2 h-full">
             <TierListCard
               tiers={tiers}
               selectedId={selectedId}
@@ -548,7 +510,7 @@ export default function LoyaltyTierManager() {
           </div>
 
           {/* Right: Detail Card */}
-          <div className="col-span-3">
+          <div className="col-span-3 h-full">
             <DetailPanel
               key={selectedTier.id}
               tier={selectedTier}
@@ -567,8 +529,8 @@ export default function LoyaltyTierManager() {
         <div className={`flex items-center gap-3 rounded-2xl border-2 bg-white px-5 py-4 shadow-2xl ${toast.tone === "success" ? "border-emerald-300" : "border-red-300"
           }`}>
           {toast.tone === "success"
-            ? <CheckCircle2 className="h-6 w-6 text-emerald-500" />
-            : <AlertTriangle className="h-6 w-6 text-red-500" />}
+            ? <CheckCircle className="h-6 w-6 text-emerald-500" />
+            : <Warning className="h-6 w-6 text-red-500" />}
           <p className={`font-bold ${toast.tone === "success" ? "text-emerald-800" : "text-red-800"}`}>
             {toast.message}
           </p>

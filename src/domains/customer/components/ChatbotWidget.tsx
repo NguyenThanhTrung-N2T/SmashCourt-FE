@@ -1,7 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { BotMessageSquare, ChevronRight, ChevronUp, Sparkles, X } from "lucide-react";
+import {
+  Robot,
+  CaretRight,
+  CaretUp,
+  Sparkle,
+  X,
+} from "@phosphor-icons/react";
 
 type Message = {
   id: number;
@@ -113,7 +119,7 @@ export default function ChatbotWidget() {
           <X className="h-6 w-6 transition-transform group-hover:scale-110" />
         ) : (
           <>
-            <BotMessageSquare className="h-7 w-7 transition-transform group-hover:scale-110" />
+            <Robot className="h-7 w-7 transition-transform group-hover:scale-110" />
             <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-[10px] font-bold shadow-lg animate-pulse">
               1
             </span>
@@ -133,7 +139,7 @@ export default function ChatbotWidget() {
         <div className="flex items-center justify-between bg-slate-900 px-6 py-5 text-white">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
-              <Sparkles className="h-4 w-4" />
+              <Sparkle className="h-4 w-4" />
             </div>
             <div>
               <h3 className="text-sm font-bold tracking-wide">Smash AI Assistant</h3>
@@ -145,7 +151,7 @@ export default function ChatbotWidget() {
             className="rounded-full bg-white/10 p-1.5 text-white/50 transition-colors hover:bg-white/20 hover:text-white"
             aria-label="Đóng chatbot"
           >
-            <ChevronUp className="h-4 w-4 rotate-180" />
+            <CaretUp className="h-4 w-4 rotate-180" />
           </button>
         </div>
 
@@ -162,7 +168,7 @@ export default function ChatbotWidget() {
               {message.sender === "bot" ? (
                 <div className="flex max-w-[85%] items-start gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-500">
-                    <BotMessageSquare className="h-4 w-4" />
+                    <Robot className="h-4 w-4" />
                   </div>
                   <div className="rounded-2xl rounded-tl-sm border border-slate-100 bg-white px-4 py-3 text-sm font-medium leading-relaxed text-slate-700 shadow-sm">
                     <p className="whitespace-pre-line">{message.text}</p>
@@ -192,7 +198,7 @@ export default function ChatbotWidget() {
           {isTyping && (
             <div className="flex items-start gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-500">
-                <BotMessageSquare className="h-4 w-4" />
+                <Robot className="h-4 w-4" />
               </div>
               <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm border border-slate-100 bg-white px-4 py-3 shadow-sm">
                 <span
@@ -254,7 +260,7 @@ export default function ChatbotWidget() {
               disabled={!inputValue.trim()}
               className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm transition-all hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <ChevronRight className="h-5 w-5" />
+              <CaretRight className="h-5 w-5" />
             </button>
           </form>
         </div>

@@ -1,6 +1,8 @@
 import * as React from "react";
 import { cn } from "@/src/shared/utils/cn";
-import { Check } from "lucide-react";
+import {
+  Check,
+} from "@phosphor-icons/react";
 
 export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
   label?: React.ReactNode;

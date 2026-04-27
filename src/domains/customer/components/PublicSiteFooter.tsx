@@ -1,4 +1,8 @@
-﻿import { Activity, ArrowRight, PhoneCall } from "lucide-react";
+import {
+  Heartbeat,
+  ArrowRight,
+  PhoneCall,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 
 export default function PublicSiteFooter() {
@@ -9,7 +13,7 @@ export default function PublicSiteFooter() {
         <div className="max-w-xl">
           <div className="flex items-center gap-3 text-white">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-emerald-300">
-              <Activity className="h-5 w-5" />
+              <Heartbeat className="h-5 w-5" />
             </div>
             <div>
               <p className="text-lg font-black tracking-tight">SmashCourt</p>

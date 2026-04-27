@@ -3,19 +3,19 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  Award,
+  Medal,
   Calendar,
   Crown,
-  Edit,
-  Mail,
+  PencilSimple,
+  EnvelopeSimple,
   Phone,
-  Sparkles,
+  Sparkle,
   Star,
   Trophy,
-  TrendingUp,
-  Zap,
+  TrendUp,
+  Lightning,
   ArrowLeft,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import type { AuthUserSession } from "@/src/modules/auth/session/sessionStore";
 
 type UserProfileProps = {
@@ -24,11 +24,11 @@ type UserProfileProps = {
 
 const RANKS = [
   { name: "Tân Binh", minPoints: 0, color: "slate", icon: Star },
-  { name: "Đồng", minPoints: 500, color: "amber", icon: Award },
+  { name: "Đồng", minPoints: 500, color: "amber", icon: Medal },
   { name: "Bạc", minPoints: 1500, color: "slate", icon: Trophy },
   { name: "Vàng", minPoints: 3000, color: "yellow", icon: Crown },
-  { name: "Bạch Kim", minPoints: 5000, color: "cyan", icon: Sparkles },
-  { name: "Kim Cương", minPoints: 10000, color: "blue", icon: Zap },
+  { name: "Bạch Kim", minPoints: 5000, color: "cyan", icon: Sparkle },
+  { name: "Kim Cương", minPoints: 10000, color: "blue", icon: Lightning },
 ];
 
 function getRankInfo(points: number) {
@@ -104,7 +104,7 @@ export default function UserProfile({ user }: UserProfileProps) {
                   </div>
                 )}
                 <button className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-white border-2 border-slate-200 text-slate-600 shadow-lg transition-all hover:bg-emerald-500 hover:text-white hover:border-emerald-500">
-                  <Edit className="h-4 w-4" />
+                  <PencilSimple className="h-4 w-4" />
                 </button>
               </div>
 
@@ -114,7 +114,7 @@ export default function UserProfile({ user }: UserProfileProps) {
                 </h2>
                 <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm text-slate-600">
                   <span className="flex items-center gap-1.5">
-                    <Mail className="h-4 w-4 text-emerald-600" />
+                    <EnvelopeSimple className="h-4 w-4 text-emerald-600" />
                     {user.email}
                   </span>
                   <span className="flex items-center gap-1.5">
@@ -142,7 +142,7 @@ export default function UserProfile({ user }: UserProfileProps) {
                 Tích điểm để mở khóa đặc quyền cao hơn
               </p>
             </div>
-            <TrendingUp className="h-8 w-8 text-emerald-600 animate-pulse" />
+            <TrendUp className="h-8 w-8 text-emerald-600 animate-pulse" />
           </div>
 
           {/* Current Rank */}

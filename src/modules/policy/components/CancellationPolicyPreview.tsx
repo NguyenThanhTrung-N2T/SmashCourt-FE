@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  AlertTriangle,
+  Warning,
   ArrowUpRight,
-  Clock3,
-  RefreshCw,
+  Clock,
+  ArrowClockwise,
   ShieldCheck,
-  TimerReset,
-} from "lucide-react";
+  Timer,
+} from "@phosphor-icons/react";
 
 import { fetchCancelPolicies } from "@/src/api/cancel-policy.api";
 import {
@@ -112,7 +112,7 @@ function ErrorState({
   return (
     <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 px-5 py-8 text-center shadow-sm">
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white text-rose-500 shadow-sm">
-        <AlertTriangle className="h-5 w-5" />
+        <Warning className="h-5 w-5" />
       </div>
       <h2 className="mt-3 text-xl font-extrabold text-slate-950">
         Chưa thể tải dữ liệu chính sách
@@ -125,7 +125,7 @@ function ErrorState({
         onClick={onRetry}
         className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-extrabold text-white transition-all hover:-translate-y-0.5 hover:bg-emerald-600"
       >
-        <RefreshCw className="h-4 w-4" />
+        <ArrowClockwise className="h-4 w-4" />
         Tải lại dữ liệu
       </button>
     </div>
@@ -136,7 +136,7 @@ function EmptyState() {
   return (
     <div className="rounded-[1.5rem] border border-slate-200 bg-white px-5 py-8 text-center shadow-sm">
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-        <Clock3 className="h-5 w-5" />
+        <Clock className="h-5 w-5" />
       </div>
       <h2 className="mt-3 text-xl font-extrabold text-slate-950">
         Chưa có dữ liệu chính sách hủy
@@ -156,7 +156,7 @@ function SummaryRail({ policies }: { policies: CancelPolicy[] }) {
     <div className="space-y-3 lg:sticky lg:top-32">
       <div className="rounded-[1.5rem] border border-slate-200 bg-slate-950 p-5 text-white shadow-xl">
         <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">
-          <TimerReset className="h-3 w-3" />
+          <Timer className="h-3 w-3" />
           Tóm tắt
         </div>
         <h2 className="mt-3 text-xl font-black tracking-tight">
