@@ -50,7 +50,7 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
     },
   },
 
-  INVALID_OTP: {
+  OTP_INVALID: {
     default: "Mã xác thực không đúng. Vui lòng kiểm tra và nhập lại.",
     contexts: {
       "verify-email": "Mã xác thực không đúng. Vui lòng kiểm tra email và nhập lại.",
@@ -112,6 +112,7 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
   UNAUTHORIZED: {
     default: "Bạn cần đăng nhập để tiếp tục.",
     contexts: {
+      login: "Email hoặc mật khẩu không đúng. Vui lòng kiểm tra và thử lại.",
       generic: "Bạn cần đăng nhập để truy cập tính năng này.",
     },
   },
@@ -119,6 +120,7 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
   FORBIDDEN: {
     default: "Bạn không có quyền thực hiện thao tác này.",
     contexts: {
+      login: "Vui lòng xác thực email trước khi đăng nhập.",
       generic: "Bạn không có quyền truy cập tính năng này.",
     },
   },
@@ -152,6 +154,35 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
     default: "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.",
     contexts: {
       generic: "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
+    },
+  },
+
+  EMAIL_EXISTS: {
+    default: "Email đã được sử dụng",
+    contexts: {
+      register: "Email này đã được đăng ký. Vui lòng đăng nhập hoặc sử dụng email khác.",
+    },
+  },
+
+  VALIDATION_ERROR: {
+    default: "Thông tin không hợp lệ. Vui lòng kiểm tra và thử lại.",
+    contexts: {
+      register: "Thông tin đăng ký không hợp lệ. Vui lòng kiểm tra các trường.",
+      login: "Thông tin đăng nhập không hợp lệ. Vui lòng kiểm tra và thử lại.",
+    },
+  },
+
+  RESOURCE_IN_USE: {
+    default: "Tài nguyên đang được sử dụng. Không thể thực hiện thao tác này.",
+    contexts: {
+      generic: "Không thể xóa vì đang được sử dụng.",
+    },
+  },
+
+  NAME_DUPLICATE: {
+    default: "Tên đã tồn tại. Vui lòng sử dụng tên khác.",
+    contexts: {
+      generic: "Tên này đã được sử dụng. Vui lòng chọn tên khác.",
     },
   },
 };

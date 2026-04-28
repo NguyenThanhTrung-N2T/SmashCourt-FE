@@ -73,6 +73,7 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [verifyHint, setVerifyHint] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [showVerifyLink, setShowVerifyLink] = useState(false);
 
   // Use new hooks for error handling and redirects
   const { errors, showError, clearAllErrors } = useAuthErrors({
@@ -103,6 +104,7 @@ export default function LoginPage() {
     e.preventDefault();
     if (isRedirecting || googleLoading) return;
     clearAllErrors();
+    setShowVerifyLink(false);
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
@@ -149,6 +151,14 @@ export default function LoginPage() {
       }
     } catch (err) {
       logError(err);
+      
+      // Check for email not verified error - show error with link to verify-email page
+      if (hasAuthErrorCode(err, "EMAIL_NOT_VERIFIED")) {
+        setShowVerifyLink(true);
+        showError("form", err, "login");
+        return;
+      }
+      
       if (isAccountLockedError(err)) {
         showError("locked", err, "login");
       } else {
@@ -212,9 +222,19 @@ export default function LoginPage() {
       {errors.form ? (
         <div className="mb-6 flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4 shadow-sm">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
-          <p className="flex-1 text-sm font-bold leading-relaxed text-red-800">
-            {errors.form}
-          </p>
+          <div className="flex-1">
+            <p className="text-sm font-bold leading-relaxed text-red-800">
+              {errors.form}
+            </p>
+            {showVerifyLink && (
+              <Link
+                href="/auth/register"
+                className="mt-2 inline-block text-sm font-bold text-emerald-600 hover:text-emerald-500 hover:underline"
+              >
+                Đăng ký lại để nhận mã xác thực →
+              </Link>
+            )}
+          </div>
         </div>
       ) : null}
 

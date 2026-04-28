@@ -3,6 +3,7 @@ export type ApiValidationErrors = Record<string, string[]>;
 export type ApiEnvelope<T> = {
   success?: boolean;
   code?: string;
+  errorCode?: string;  // Backend uses 'errorCode' field
   message?: string | null;
   detail?: string | null;
   error?: string | null;

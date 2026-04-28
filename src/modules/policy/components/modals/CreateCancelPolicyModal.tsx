@@ -43,7 +43,7 @@ export function CreateCancelPolicyModal({
       subtitle="CẤU HÌNH CHÍNH SÁCH HOÀN TIỀN"
       icon={<ShieldCheck className="h-5 w-5" />}
       maxWidth="lg"
-      headerGradient="from-indigo-500 to-indigo-600"
+      headerGradient="from-[#1B5E38] to-[#2A9D5C]"
     >
       <div className="p-6 space-y-6">
         <Grid cols={2} spacing="md">
@@ -57,7 +57,7 @@ export function CreateCancelPolicyModal({
               value={hoursBefore}
               onChange={(e) => setHoursBefore(Number(e.target.value))}
               rightIcon={<span className="text-sm font-bold text-slate-400">giờ</span>}
-              className="text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-100"
+              className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
             />
           </div>
 
@@ -71,7 +71,7 @@ export function CreateCancelPolicyModal({
               value={refundPercent}
               onChange={(e) => setRefundPercent(Number(e.target.value))}
               rightIcon={<span className="text-sm font-bold opacity-50">%</span>}
-              className="text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-100"
+              className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
             />
           </div>
         </Grid>
@@ -83,7 +83,7 @@ export function CreateCancelPolicyModal({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="VD: Không áp dụng hoàn tiền dịp Lễ Tết..."
-            className="text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-100"
+            className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
           />
         </div>
       </div>
@@ -94,7 +94,7 @@ export function CreateCancelPolicyModal({
         </Button>
         <Button
           onClick={handleConfirm}
-          className="bg-indigo-600 text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-700"
+          variant="primary"
         >
           Xác nhận Thêm
         </Button>

@@ -3,18 +3,19 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
 import { AlertCircle, Mail, Send } from "lucide-react";
 
 import {
   authForgotPassword,
   getAuthFieldError,
+  hasAuthErrorCode,
 } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
 import {
   setEmail,
   setForgotPasswordFlashMessage,
 } from "@/src/modules/auth/session/sessionStore";
+import type { AuthFormEvent } from "@/src/modules/auth/types/forms";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -38,9 +39,10 @@ export default function ForgotPasswordPage() {
     setMounted(true);
   }, []);
 
-  async function onSubmit(e: FormEvent) {
+  async function onSubmit(e: AuthFormEvent) {
     e.preventDefault();
     setError(null);
+    setToastError(null);
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail) {
@@ -52,12 +54,23 @@ export default function ForgotPasswordPage() {
       setLoading(true);
       const data = await authForgotPassword({ email: trimmedEmail });
       setEmail(trimmedEmail);
+      
+      // Always show the generic success message from backend
       setForgotPasswordFlashMessage(
-        data.message ??
-          "Nếu email tồn tại, mã OTP sẽ được gửi tới hộp thư của bạn.",
+        data.message ?? "Nếu email tồn tại, OTP sẽ được gửi đến hộp thư của bạn",
       );
+      
       router.push("/auth/forgot-password/verify-otp");
     } catch (err) {
+      // Only OAuth accounts throw errors
+      if (hasAuthErrorCode(err, "BAD_REQUEST")) {
+        const errorMessage = err instanceof Error ? err.message : "";
+        if (errorMessage.toLowerCase().includes("google")) {
+          setToastError("Tài khoản này đăng nhập bằng Google, không có mật khẩu để đặt lại");
+          return;
+        }
+      }
+      
       const fieldError = getAuthFieldError(err, "email");
       setToastError(
         fieldError ??
@@ -129,6 +142,15 @@ export default function ForgotPasswordPage() {
             </>
           )}
         </button>
+
+        <div className="mt-4 rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
+          <p className="font-semibold text-slate-700 mb-2">Không nhận được OTP?</p>
+          <ul className="space-y-1 list-disc list-inside">
+            <li>Kiểm tra thư mục spam/junk</li>
+            <li>Đảm bảo email đã được xác thực khi đăng ký</li>
+            <li>Chờ 60 giây trước khi gửi lại</li>
+          </ul>
+        </div>
 
         <p className="mt-8 text-center text-sm font-medium text-slate-600">
           <Link

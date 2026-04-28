@@ -157,8 +157,8 @@ function TopStatsHeader({
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
+            size="md"
             onClick={onRefresh}
             disabled={loading}
             leftIcon={<ArrowClockwise className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}

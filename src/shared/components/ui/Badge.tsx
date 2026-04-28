@@ -5,6 +5,8 @@ interface BadgeProps {
   variant?: 'success' | 'warning' | 'error' | 'info' | 'neutral';
   size?: 'sm' | 'md';
   className?: string;
+  icon?: ReactNode;
+  dot?: boolean;
 }
 
 export function Badge({
@@ -12,6 +14,8 @@ export function Badge({
   variant = 'neutral',
   size = 'md',
   className = '',
+  icon,
+  dot = false,
 }: BadgeProps) {
   const baseStyles = 'inline-flex items-center gap-1 rounded-full font-bold';
   
@@ -28,8 +32,20 @@ export function Badge({
     neutral: 'bg-slate-100 text-slate-600',
   };
 
+  const dotStyles = {
+    success: 'bg-green-500',
+    warning: 'bg-amber-500',
+    error: 'bg-red-500',
+    info: 'bg-blue-500',
+    neutral: 'bg-slate-500',
+  };
+
   return (
     <span className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}>
+      {dot && (
+        <span className={`h-1.5 w-1.5 rounded-full ${dotStyles[variant]}`} />
+      )}
+      {icon && <span className="inline-flex items-center">{icon}</span>}
       {children}
     </span>
   );

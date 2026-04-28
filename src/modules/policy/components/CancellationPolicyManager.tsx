@@ -4,14 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Warning,
   CheckCircle,
-  Clock,
   CircleNotch,
   Plus,
   ArrowClockwise,
   FloppyDisk,
   ShieldCheck,
-  Sparkle,
-  Trash,
   ArrowCounterClockwise,
 } from "@phosphor-icons/react";
 
@@ -22,11 +19,7 @@ import {
   fetchCancelPolicies,
   updateCancelPolicy,
 } from "@/src/api/cancel-policy.api";
-import {
-  formatPolicyHours,
-  getPolicyRangeLabel,
-  sortCancelPolicies,
-} from "@/src/modules/policy/utils/cancellationPolicy";
+import { sortCancelPolicies } from "@/src/modules/policy/utils/cancellationPolicy";
 import type {
   CancelPolicy,
   SaveCancelPolicyRequest,
@@ -34,12 +27,10 @@ import type {
 import { useToast } from "@/src/shared/hooks/useToast";
 
 import { Button } from "@/src/shared/components/ui/Button";
-import { Input } from "@/src/shared/components/ui/Input";
 import { Alert } from "@/src/shared/components/ui/Alert";
-import { Modal } from "@/src/shared/components/ui/Modal";
 import { Flex } from "@/src/shared/components/layout/Flex";
-import { Grid } from "@/src/shared/components/layout/Grid";
 import { Badge } from "@/src/shared/components/ui/Badge";
+import { PolicyEditorRow } from "./PolicyEditorRow";
 import { CreateCancelPolicyModal, type CreateCancelPolicyPayload } from "./modals/CreateCancelPolicyModal";
 
 // ─────────────────────────────────────────────────────────
@@ -139,170 +130,6 @@ function resolveErrorMessage(error: unknown) {
     return error.message;
   }
   return "Đã xảy ra lỗi khi làm việc với chính sách hủy.";
-}
-
-function getRefundColor(percent: number) {
-  if (percent >= 80) {
-    return {
-      bar: "from-emerald-500 to-teal-400",
-      text: "text-emerald-700",
-      bg: "bg-emerald-50",
-      border: "border-emerald-200",
-      icon: "text-emerald-600 bg-emerald-100",
-      badgeVariant: "success" as const,
-    };
-  }
-  if (percent >= 40) {
-    return {
-      bar: "from-amber-500 to-orange-400",
-      text: "text-amber-700",
-      bg: "bg-amber-50",
-      border: "border-amber-200",
-      icon: "text-amber-600 bg-amber-100",
-      badgeVariant: "warning" as const,
-    };
-  }
-  return {
-    bar: "from-rose-500 to-red-400",
-    text: "text-rose-700",
-    bg: "bg-rose-50",
-    border: "border-rose-200",
-    icon: "text-rose-600 bg-rose-100",
-    badgeVariant: "danger" as const,
-  };
-}
-
-// ─────────────────────────────────────────────────────────
-// EDITOR ROW COMPONENT
-// ─────────────────────────────────────────────────────────
-
-function PolicyEditorRow({
-  policy,
-  allPolicies,
-  onChange,
-  onRemove,
-  disableRemove,
-  index,
-}: {
-  policy: EditableCancelPolicy;
-  allPolicies: EditableCancelPolicy[];
-  onChange: (
-    policyId: string,
-    key: "hoursBefore" | "refundPercent" | "description",
-    value: string | number,
-  ) => void;
-  onRemove: (policyId: string) => void;
-  disableRemove: boolean;
-  index: number;
-}) {
-  const color = getRefundColor(policy.refundPercent);
-
-  return (
-    <div
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-300 hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-900/5 animate-slide-up"
-      style={{ animationDelay: `${index * 0.05}s` }}
-    >
-      {/* Top indicator line */}
-      <div
-        className={`absolute left-0 right-0 top-0 h-1 bg-gradient-to-r ${color.bar}`}
-      />
-
-      <div className="flex flex-1 flex-col p-5">
-        <Flex justify="between" align="center" className="mb-4">
-          <Flex align="center" spacing="md">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-xl ${color.icon}`}
-            >
-              <Clock className="h-5 w-5" />
-            </div>
-            <div>
-              <Flex align="center" spacing="sm">
-                <h3 className="text-lg font-bold text-slate-900">
-                  {formatPolicyHours(policy.hoursBefore)}
-                </h3>
-                {policy.isNew && (
-                  <Badge variant="primary" size="sm" icon={<Sparkle className="h-3 w-3" />}>Mới</Badge>
-                )}
-              </Flex>
-              <p className="mt-0.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                {getPolicyRangeLabel(
-                  allPolicies,
-                  allPolicies.findIndex(
-                    (item) => item.clientId === policy.clientId,
-                  ),
-                )}
-              </p>
-            </div>
-          </Flex>
-
-          <button
-            type="button"
-            onClick={() => onRemove(policy.clientId)}
-            disabled={disableRemove}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-30"
-            title="Xóa chính sách"
-          >
-            <Trash className="h-4 w-4" />
-          </button>
-        </Flex>
-
-        <div className="mt-2 grid grid-cols-1 items-start gap-6 sm:grid-cols-12 lg:grid-cols-12">
-          <div className="col-span-1 sm:col-span-4 lg:col-span-2 xl:col-span-2">
-            <Input
-              label="Hủy trước"
-              type="number"
-              min={0}
-              max={720}
-              step={1}
-              value={policy.hoursBefore}
-              onChange={(event) =>
-                onChange(
-                  policy.clientId,
-                  "hoursBefore",
-                  Number(event.target.value),
-                )
-              }
-              rightIcon={<span className="text-sm font-bold text-slate-400">giờ</span>}
-              className="text-base font-extrabold shadow-sm focus:border-indigo-500 focus:ring-indigo-100"
-            />
-          </div>
-
-          <div className="col-span-1 sm:col-span-4 lg:col-span-2 xl:col-span-2">
-            <Input
-              label="Hoàn tiền"
-              type="number"
-              min={0}
-              max={100}
-              step={0.01}
-              value={policy.refundPercent}
-              onChange={(event) =>
-                onChange(
-                  policy.clientId,
-                  "refundPercent",
-                  Number(event.target.value),
-                )
-              }
-              rightIcon={<span className="text-sm font-extrabold opacity-50">%</span>}
-              className={`text-base font-extrabold shadow-sm focus:border-indigo-500 focus:ring-indigo-100 ${color.text} ${color.bg}`}
-            />
-          </div>
-
-          <div className="col-span-1 sm:col-span-12 lg:col-span-8 xl:col-span-8">
-            <Input
-              label="Ghi chú"
-              type="text"
-              value={policy.description ?? ""}
-              onChange={(event) =>
-                onChange(policy.clientId, "description", event.target.value)
-              }
-              placeholder="VD: Không áp dụng hoàn tiền dịp Lễ Tết..."
-              className="text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-100"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 // ─────────────────────────────────────────────────────────
@@ -487,73 +314,20 @@ export default function CancellationPolicyManager() {
 
   return (
     <div className="space-y-6 animate-slide-up w-full text-slate-900 px-8 pt-6 pb-12">
-      {/* Minimal Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-8 py-8 text-white shadow-xl shadow-slate-900/10">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-indigo-500/20 blur-[60px]" />
-        <div className="pointer-events-none absolute -left-10 -bottom-10 h-64 w-64 rounded-full bg-emerald-500/10 blur-[50px]" />
-
-        <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center w-full">
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-indigo-300">
-              <ShieldCheck className="h-3.5 w-3.5" /> Quản trị
-            </div>
-            <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl text-white">
-              Chính sách{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">
-                Hủy sân
-              </span>
-            </h1>
-            <p className="mt-2 text-sm text-slate-400 max-w-md">
-              Điều chỉnh các mốc hoàn tiền linh hoạt. Đảm bảo trải nghiệm minh
-              bạch cho toàn hệ thống.
-            </p>
-          </div>
-
-          <div className="hidden shrink-0 sm:flex items-center justify-center pr-4">
-            <div
-              className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-indigo-500/10 border border-white/10 shadow-[0_0_30px_rgba(99,102,241,0.15)] animate-pulse"
-              style={{ animationDuration: "3s" }}
-            >
-              <div
-                className="absolute inset-2 rounded-3xl border border-indigo-500/20 border-dashed animate-spin"
-                style={{ animationDuration: "15s" }}
-              />
-              <ShieldCheck className="relative h-10 w-10 text-indigo-400 shadow-indigo-500/50" />
-            </div>
-          </div>
+      {/* Page Header — matches dashboard style */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-slate-900">
+            Chính sách hủy sân
+          </h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">
+            Điều chỉnh các mốc hoàn tiền linh hoạt. Đảm bảo trải nghiệm minh bạch cho toàn hệ thống.
+          </p>
         </div>
-      </section>
-
-      {/* Compact Action Bar */}
-      <Flex justify="between" align="center" wrap="wrap" className="mt-2 mb-2">
-        <Flex align="center" spacing="sm">
-          <h2 className="text-xl font-bold tracking-tight text-slate-800">
-            Danh sách thiết lập
-          </h2>
-          <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
-            {draftPolicies.length} mốc
-          </span>
-          {isDirty && (
-            <Badge variant="warning" dot className="ml-2 animate-pulse">
-              Chưa lưu
-            </Badge>
-          )}
-        </Flex>
-
-        <Flex align="center" spacing="sm">
-          {isDirty && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleReset}
-              leftIcon={<ArrowCounterClockwise className="h-3.5 w-3.5" />}
-            >
-              Hoàn tác
-            </Button>
-          )}
+        <div className="flex items-center gap-3 shrink-0">
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
+            size="md"
             onClick={() => void loadPolicies()}
             disabled={loading || saving}
             leftIcon={<ArrowClockwise className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
@@ -562,18 +336,44 @@ export default function CancellationPolicyManager() {
           </Button>
           <Button
             variant="primary"
-            size="sm"
-            className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 shadow-sm"
+            size="md"
             onClick={handleOpenAddModal}
             disabled={loading || saving}
             leftIcon={<Plus className="h-3.5 w-3.5" />}
           >
             Thêm chính sách
           </Button>
+        </div>
+      </div>
+
+      {/* List section label + action row */}
+      <Flex justify="between" align="center" wrap="wrap">
+        <Flex align="center" spacing="sm">
+          <h2 className="text-lg font-bold tracking-tight text-slate-800">Danh sách thiết lập</h2>
+          <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
+            {draftPolicies.length} mốc
+          </span>
+          {isDirty && (
+            <Badge variant="warning" dot className="animate-pulse">
+              Chưa lưu
+            </Badge>
+          )}
+        </Flex>
+
+        <Flex align="center" spacing="sm">
+          {isDirty && (
+            <Button
+              variant="ghost"
+              size="md"
+              onClick={handleReset}
+              leftIcon={<ArrowCounterClockwise className="h-3.5 w-3.5" />}
+            >
+              Hoàn tác
+            </Button>
+          )}
           <Button
             variant="primary"
-            size="sm"
-            className="bg-slate-900 text-white hover:bg-slate-800 shadow-md"
+            size="md"
             onClick={handleSave}
             disabled={!isDirty || saving || loading}
             isLoading={saving}
@@ -601,15 +401,18 @@ export default function CancellationPolicyManager() {
           <p className="mt-1 text-sm text-red-600 max-w-sm">{error}</p>
         </Alert>
       ) : draftPolicies.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 py-16 text-center mt-4 transition hover:border-indigo-300">
-          <ShieldCheck className="h-10 w-10 text-slate-300 mb-4" />
-          <p className="text-sm font-bold text-slate-600">
-            Chưa có chính sách nào được thiết lập
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-8 py-16 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1B5E38]/10 mb-4">
+            <ShieldCheck className="h-8 w-8 text-[#1B5E38]" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-900 mb-2">Chưa có chính sách nào</h3>
+          <p className="text-sm text-slate-600 mb-4">
+            Tạo chính sách hủy đầu tiên để thiết lập quy định hoàn tiền.
           </p>
           <Button
-            variant="outline"
-            className="mt-4 text-indigo-600 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50"
+            variant="primary"
             onClick={handleOpenAddModal}
+            leftIcon={<Plus className="h-4 w-4" />}
           >
             Tạo mốc đầu tiên
           </Button>
@@ -642,18 +445,20 @@ export default function CancellationPolicyManager() {
       {toast.visible && (
         <div className="fixed bottom-8 right-8 z-[100] transition-all duration-300 animate-slide-up">
           <div
-            className={`flex items-center gap-3 rounded-2xl border-2 bg-white px-5 py-3.5 shadow-xl ${
-              toast.tone === "success" ? "border-emerald-200" : "border-red-200"
+            className={`flex items-start gap-3 rounded-xl border-2 px-5 py-4 shadow-2xl backdrop-blur-sm ${
+              toast.tone === "success"
+                ? "border-emerald-200 bg-emerald-50/95"
+                : "border-red-200 bg-red-50/95"
             }`}
           >
             {toast.tone === "success" ? (
-              <CheckCircle className="h-5 w-5 text-emerald-500" />
+              <CheckCircle className="h-5 w-5 shrink-0 text-emerald-600" />
             ) : (
-              <Warning className="h-5 w-5 text-red-500" />
+              <Warning className="h-5 w-5 shrink-0 text-red-600" />
             )}
             <p
               className={`text-sm font-bold ${
-                toast.tone === "success" ? "text-emerald-800" : "text-red-800"
+                toast.tone === "success" ? "text-emerald-900" : "text-red-900"
               }`}
             >
               {toast.message}

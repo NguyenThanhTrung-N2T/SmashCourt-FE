@@ -105,6 +105,23 @@ export default function RegisterPage() {
       router.push("/auth/verify-email");
     } catch (err) {
       logError(err);
+      
+      // Check for EMAIL_EXISTS with unverified email
+      if (hasAuthErrorCode(err, "EMAIL_EXISTS")) {
+        const errorMessage = err instanceof Error ? err.message : "";
+        const isUnverified = errorMessage.toLowerCase().includes("chưa được xác thực") ||
+                            errorMessage.toLowerCase().includes("chua duoc xac thuc");
+        
+        if (isUnverified) {
+          // Email exists but not verified - redirect to verify-email page
+          setEmail(trimmedEmail);
+          startRegisterVerifySession(trimmedEmail);
+          setRegisterFlashMessage("Email đã được đăng ký nhưng chưa xác thực. Vui lòng nhập mã OTP.");
+          router.push("/auth/verify-email");
+          return;
+        }
+      }
+      
       const fieldError =
         getAuthFieldError(err, ["email", "fullName", "phone", "password"]) ??
         null;

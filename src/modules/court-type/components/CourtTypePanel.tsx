@@ -100,20 +100,20 @@ export default function CourtTypePanel() {
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
+            size="md"
             onClick={load}
             disabled={loading}
-            leftIcon={<ArrowClockwise className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
           >
+            <ArrowClockwise className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             Làm mới
           </Button>
           <Button
             variant="primary"
-            size="sm"
+            size="md"
             onClick={() => setShowCreateModal(true)}
-            leftIcon={<Plus className="h-3.5 w-3.5" />}
           >
+            <Plus className="h-3.5 w-3.5" />
             Tạo loại sân
           </Button>
         </div>
@@ -131,7 +131,8 @@ export default function CourtTypePanel() {
       {!loading && error && (
         <Alert variant="error" title="Không thể tải dữ liệu">
           <p className="mb-3">{error}</p>
-          <Button variant="danger" size="sm" onClick={load} leftIcon={<ArrowClockwise className="h-4 w-4" />}>
+          <Button variant="danger" size="sm" onClick={load}>
+            <ArrowClockwise className="h-4 w-4" />
             Thử lại
           </Button>
         </Alert>
@@ -148,8 +149,8 @@ export default function CourtTypePanel() {
           <Button
             variant="primary"
             onClick={() => setShowCreateModal(true)}
-            leftIcon={<Plus className="h-4 w-4" />}
           >
+            <Plus className="h-4 w-4" />
             Tạo loại sân mới
           </Button>
         </div>
@@ -216,8 +217,18 @@ export default function CourtTypePanel() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <Badge variant={active ? "success" : "neutral"} size="sm" icon={active ? <CheckCircle /> : <XCircle />}>
-                        {active ? "Hoạt động" : "Đã xóa"}
+                      <Badge variant={active ? "success" : "neutral"} size="sm">
+                        {active ? (
+                          <>
+                            <CheckCircle className="h-3 w-3" />
+                            Hoạt động
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="h-3 w-3" />
+                            Đã xóa
+                          </>
+                        )}
                       </Badge>
                     </td>
                     <td className="px-6 py-4">
@@ -226,16 +237,16 @@ export default function CourtTypePanel() {
                           size="sm"
                           variant="secondary"
                           onClick={() => setEditingCourtType(courtType)}
-                          leftIcon={<PencilSimpleLine className="h-3.5 w-3.5" />}
                         >
+                          <PencilSimpleLine className="h-3.5 w-3.5" />
                           Sửa
                         </Button>
                         <Button
                           size="sm"
-                          variant="dangerSoft"
+                          variant="danger"
                           onClick={() => setDeletingId(courtType.id)}
-                          leftIcon={<Trash className="h-3.5 w-3.5" />}
                         >
+                          <Trash className="h-3.5 w-3.5" />
                           Xóa
                         </Button>
                       </div>

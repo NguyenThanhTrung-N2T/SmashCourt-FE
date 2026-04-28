@@ -52,7 +52,7 @@ type StatusCfg = {
   bg: string;
   text: string;
   dot: string;
-  variant: "success" | "warning" | "danger" | "neutral" | "primary";
+  variant: 'success' | 'warning' | 'error' | 'info' | 'neutral';
 };
 
 function getStatusCfg(status: PromotionStatus): StatusCfg {
@@ -79,14 +79,16 @@ function getStatusCfg(status: PromotionStatus): StatusCfg {
         bg: "bg-red-100",
         text: "text-red-800",
         dot: "bg-red-500",
-        variant: "danger",
+        variant: "error",
       };
   }
 }
 
 function formatDate(dateStr: string) {
   try {
-    const parts = dateStr.split("-");
+    // Handle ISO datetime format (e.g., "2026-04-01T00:00:00")
+    const dateOnly = dateStr.split("T")[0];
+    const parts = dateOnly.split("-");
     if (parts.length === 3) {
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
@@ -97,8 +99,13 @@ function formatDate(dateStr: string) {
 }
 
 function toInputDate(dateStr: string) {
-  // Already YYYY-MM-DD format from API
-  return dateStr;
+  // Handle ISO datetime format and extract date part
+  try {
+    const dateOnly = dateStr.split("T")[0];
+    return dateOnly;
+  } catch {
+    return dateStr;
+  }
 }
 
 function getTodayStr() {
@@ -141,8 +148,8 @@ function PromotionStatsHeader({
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
+            size="md"
             onClick={onRefresh}
             disabled={loading}
             leftIcon={<ArrowClockwise className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
@@ -151,7 +158,7 @@ function PromotionStatsHeader({
           </Button>
           <Button
             variant="primary"
-            size="sm"
+            size="md"
             onClick={onCreateNew}
             leftIcon={<Plus className="h-3.5 w-3.5" />}
           >
@@ -276,7 +283,7 @@ function PromotionListCard({
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  <Badge variant="primary" size="sm" icon={<Percent className="h-2.5 w-2.5" />}>
+                  <Badge variant="neutral" size="sm" icon={<Percent className="h-2.5 w-2.5" />}>
                     {Number(promo.discountRate)}%
                   </Badge>
                   <Badge variant={statusCfg.variant} size="sm" dot>
@@ -570,7 +577,7 @@ function PromotionDetailPanel({
       <Flex className="shrink-0 border-t border-slate-100 bg-slate-50/80 px-8 py-5" justify="between" align="center">
         <Flex align="center" spacing="sm">
           <Button
-            variant="ghost"
+            variant="secondary"
             onClick={() => {
               setName(promotion.name);
               setDiscountRate(String(promotion.discountRate));

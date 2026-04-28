@@ -284,6 +284,8 @@ export function useOtpVerificationWithSession(
     sessionKey,
     loadSession = true,
     saveSession = true,
+    maxAttempts = 3,
+    maxResends = 3,
     ...otpOptions
   } = options;
 
@@ -317,6 +319,8 @@ export function useOtpVerificationWithSession(
 
   const otp = useOtpVerification({
     ...otpOptions,
+    maxAttempts,
+    maxResends,
     initialFailedAttempts: initialState.failedAttempts,
     initialResendCount: initialState.resendCount,
   });
@@ -342,6 +346,8 @@ export function useOtpVerificationWithSession(
     options.email,
     otp.remainingAttempts,
     otp.remainingResends,
+    maxAttempts,
+    maxResends,
   ]);
 
   return otp;

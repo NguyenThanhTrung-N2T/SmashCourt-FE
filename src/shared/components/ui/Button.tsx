@@ -1,13 +1,16 @@
 import { ReactNode } from 'react';
+import { CircleNotch } from '@phosphor-icons/react';
 
 interface ButtonProps {
   children: ReactNode;
   onClick?: () => void;
   disabled?: boolean;
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'dangerSoft';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   type?: 'button' | 'submit' | 'reset';
+  leftIcon?: ReactNode;
+  isLoading?: boolean;
 }
 
 export function Button({
@@ -18,6 +21,8 @@ export function Button({
   size = 'md',
   className = '',
   type = 'button',
+  leftIcon,
+  isLoading = false,
 }: ButtonProps) {
   const baseStyles = 'inline-flex items-center gap-2 rounded-full font-bold transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed';
   
@@ -31,6 +36,7 @@ export function Button({
     primary: 'text-white shadow-md hover:opacity-90',
     secondary: 'border border-slate-300 bg-white text-slate-700 shadow-sm hover:bg-slate-50',
     danger: 'border border-red-300 bg-white text-red-600 shadow-sm hover:bg-red-50',
+    dangerSoft: 'bg-red-50 text-red-600 hover:bg-red-100',
     ghost: 'text-slate-600 hover:bg-slate-100',
   };
   
@@ -43,10 +49,13 @@ export function Button({
     <button
       type={type}
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || isLoading}
       className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}
       style={gradientStyle}
     >
+      {isLoading ? (
+        <CircleNotch className="h-4 w-4 animate-spin" />
+      ) : leftIcon}
       {children}
     </button>
   );

@@ -22,15 +22,28 @@ export const AUTH_GENERIC = AUTH_GENERIC_MESSAGES;
  * Get context-aware error message for an authentication error
  * 
  * This function resolves authentication errors to user-friendly Vietnamese messages
- * based on the error code and the authentication operation context. It provides:
- * - Context-specific messages when available
- * - Fallback to default messages for each error code
- * - Graceful handling of errors without error codes
- * - Appropriate messages for 5xx vs 4xx errors
+ * with the following priority for 4xx errors:
+ * 1. Backend message (if meaningful and specific)
+ * 2. Error code mapping with context
+ * 3. Generic fallback message
+ * 
+ * For 5xx errors, always returns generic server error message.
+ * 
+ * This approach allows the backend to provide specific, contextual error messages
+ * while still maintaining fallback mappings for generic error codes.
  * 
  * @param error - The error object (typically AuthApiError)
  * @param context - The authentication operation context (default: "generic")
  * @returns User-friendly Vietnamese error message
+ * 
+ * @example
+ * ```typescript
+ * // Backend returns: { code: "UNAUTHORIZED", message: "Email hoặc mật khẩu không đúng" }
+ * // Result: "Email hoặc mật khẩu không đúng" (uses backend message)
+ * 
+ * // Backend returns: { code: "UNAUTHORIZED", message: "Unauthorized" }
+ * // Result: "Email hoặc mật khẩu không đúng" (uses error code mapping for login context)
+ * ```
  * 
  * @example
  * ```typescript
@@ -43,42 +56,41 @@ export const AUTH_GENERIC = AUTH_GENERIC_MESSAGES;
  *   logAuthClientError("login", err);
  * }
  * ```
- * 
- * @example
- * ```typescript
- * // In an email verification component
- * try {
- *   await authVerifyEmail({ email, otpCode });
- * } catch (err) {
- *   const message = getAuthErrorMessage(err, "verify-email");
- *   toast.error(message);
- * }
- * ```
  */
 export function getAuthErrorMessage(
   error: unknown,
   context: AuthContext = "generic"
 ): string {
-  // Handle AuthApiError with error code
-  if (error instanceof AuthApiError && error.code) {
-    const errorCode = error.code as AuthErrorCode;
-    const messageConfig = AUTH_ERROR_MESSAGES[errorCode];
-    
-    if (messageConfig) {
-      // Return context-specific message if available, otherwise default
-      return messageConfig.contexts?.[context] ?? messageConfig.default;
-    }
-  }
-
-  // Handle AuthApiError without error code (use message from backend)
+  // Handle AuthApiError
   if (error instanceof AuthApiError) {
-    // For 5xx errors, use generic server error message
+    // For 5xx errors, always use generic server error message
     if (error.status >= 500) {
       return AUTH_GENERIC.serverError;
     }
     
-    // For 4xx errors, use backend message or generic client error
-    return error.message || AUTH_GENERIC.clientError;
+    // For 4xx errors, prefer backend message if available and meaningful
+    // This allows backend to provide specific, contextual error messages
+    if (error.status >= 400 && error.status < 500) {
+      const backendMessage = error.message?.trim();
+      
+      // If backend provides a meaningful message, use it
+      if (backendMessage && backendMessage !== "Unauthorized" && backendMessage !== "Bad Request") {
+        return backendMessage;
+      }
+      
+      // Otherwise, fall back to error code mapping
+      if (error.code) {
+        const errorCode = error.code as AuthErrorCode;
+        const messageConfig = AUTH_ERROR_MESSAGES[errorCode];
+        
+        if (messageConfig) {
+          return messageConfig.contexts?.[context] ?? messageConfig.default;
+        }
+      }
+      
+      // Final fallback for 4xx without code
+      return backendMessage || AUTH_GENERIC.clientError;
+    }
   }
 
   // Handle generic errors

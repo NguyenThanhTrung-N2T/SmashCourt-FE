@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import {
-  Plus,
-  Lightning,
+  PencilSimpleLine,
+  CheckCircle,
 } from "@phosphor-icons/react";
 
 import { Button } from "@/src/shared/components/ui/Button";
@@ -14,21 +14,23 @@ import { Modal } from "@/src/shared/components/ui/Modal";
 import { Flex } from "@/src/shared/components/layout/Flex";
 import { Grid } from "@/src/shared/components/layout/Grid";
 
-import { createService } from "@/src/api/service.api";
+import { updateService } from "@/src/api/service.api";
 import { AuthApiError } from "@/src/api/auth.api";
 import type { SaveServiceRequest, Service } from "@/src/shared/types/service.types";
 
-export function CreateServiceModal({
-  onCreated,
+export function EditServiceModal({
+  service,
+  onSaved,
   onClose,
 }: {
-  onCreated: (p: Service) => void;
+  service: Service;
+  onSaved: (updated: Service) => void;
   onClose: () => void;
 }) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [unit, setUnit] = useState("");
-  const [defaultPrice, setDefaultPrice] = useState("");
+  const [name, setName] = useState(service.name);
+  const [description, setDescription] = useState(service.description || "");
+  const [unit, setUnit] = useState(service.unit);
+  const [defaultPrice, setDefaultPrice] = useState(String(service.defaultPrice));
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<{
     name?: string;
@@ -52,7 +54,7 @@ export function CreateServiceModal({
     return e;
   }
 
-  async function handleCreate() {
+  async function handleSave() {
     const e = validate();
     if (Object.keys(e).length) {
       setErrors(e);
@@ -67,8 +69,8 @@ export function CreateServiceModal({
         unit: unit.trim(),
         defaultPrice: Number(defaultPrice),
       };
-      const created = await createService(dto);
-      onCreated(created);
+      const updated = await updateService(service.id, dto);
+      onSaved(updated);
       onClose();
     } catch (err) {
       const msg = err instanceof AuthApiError ? err.message : "Đã có lỗi xảy ra.";
@@ -82,9 +84,9 @@ export function CreateServiceModal({
     <Modal
       isOpen={true}
       onClose={onClose}
-      title="Tạo dịch vụ mới"
-      subtitle="MỞ BÁN SẢN PHẨM"
-      icon={<Plus className="h-5 w-5" />}
+      title="Chỉnh sửa dịch vụ"
+      subtitle="CẬP NHẬT THÔNG TIN"
+      icon={<PencilSimpleLine className="h-5 w-5" />}
       maxWidth="xl"
       headerGradient="from-[#1B5E38] to-[#2A9D5C]"
     >
@@ -158,13 +160,13 @@ export function CreateServiceModal({
           Hủy bỏ
         </Button>
         <Button
-          onClick={handleCreate}
+          onClick={handleSave}
           disabled={saving}
           isLoading={saving}
-          leftIcon={<Lightning className="h-4 w-4" />}
+          leftIcon={<CheckCircle className="h-4 w-4" />}
           variant="primary"
         >
-          Lưu và Kinh doanh
+          Lưu thay đổi
         </Button>
       </Flex>
     </Modal>

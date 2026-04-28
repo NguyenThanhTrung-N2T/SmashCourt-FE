@@ -20,7 +20,7 @@ export type AuthErrorCode =
   | "INVALID_CREDENTIALS"
   | "EMAIL_NOT_VERIFIED"
   | "ACCOUNT_LOCKED"
-  | "INVALID_OTP"
+  | "OTP_INVALID"  // Backend uses OTP_INVALID, not INVALID_OTP
   | "OTP_EXPIRED"
   | "OTP_MAX_ATTEMPTS"
   | "OTP_LIMIT_EXCEEDED"
@@ -32,7 +32,11 @@ export type AuthErrorCode =
   | "NOT_FOUND"
   | "CONFLICT"
   | "BAD_REQUEST"
-  | "INTERNAL_ERROR";
+  | "INTERNAL_ERROR"
+  | "EMAIL_EXISTS"  // Backend specific error for email already registered
+  | "VALIDATION_ERROR"  // Backend validation error
+  | "RESOURCE_IN_USE"  // Resource is being used (future-proofing)
+  | "NAME_DUPLICATE";  // Name already exists (future-proofing)
 
 /**
  * Authentication operation contexts

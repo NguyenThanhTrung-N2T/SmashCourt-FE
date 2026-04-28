@@ -1,6 +1,7 @@
 import {
   Plus,
 } from "@phosphor-icons/react";
+import { Button } from "@/src/shared/components/ui/Button";
 
 interface PricingHeaderProps {
     onCreateClick: () => void;
@@ -17,17 +18,14 @@ export function PricingHeader({ onCreateClick }: PricingHeaderProps) {
                     Cấu hình giá hệ thống theo khung giờ & loại sân.
                 </p>
             </div>
-            <button
+            <Button
+                variant="primary"
+                size="md"
                 onClick={onCreateClick}
-                className="inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-95"
-                style={{
-                    background: "linear-gradient(135deg, #2A9D5C 0%, #1B5E38 100%)",
-                    boxShadow: "0 4px 14px rgba(27, 94, 56, 0.35)",
-                }}
             >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-3.5 w-3.5" />
                 Tạo bảng giá mới
-            </button>
+            </Button>
         </div>
     );
 }
