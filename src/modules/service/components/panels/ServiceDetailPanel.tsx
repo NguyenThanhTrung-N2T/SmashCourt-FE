@@ -23,7 +23,31 @@ import { updateService, deleteService } from "@/src/api/service.api";
 import { AuthApiError } from "@/src/api/auth.api";
 import { ServiceStatus } from "@/src/shared/types/service.types";
 import type { SaveServiceRequest, Service } from "@/src/shared/types/service.types";
-import { getStatusCfg } from "../ServiceManager";
+
+type StatusCfg = {
+  label: string;
+  variant: 'success' | 'warning' | 'error' | 'info' | 'neutral';
+};
+
+function getStatusCfg(status: ServiceStatus): StatusCfg {
+  switch (status) {
+    case ServiceStatus.ACTIVE:
+      return {
+        label: "Đang kinh doanh",
+        variant: "success",
+      };
+    case ServiceStatus.DELETED:
+      return {
+        label: "Đã ngưng",
+        variant: "neutral",
+      };
+    default:
+      return {
+        label: "Không xác định",
+        variant: "neutral",
+      };
+  }
+}
 
 export function ServiceDetailPanel({
   service,
@@ -290,7 +314,7 @@ export function ServiceDetailPanel({
           </Alert>
           <Flex justify="end" spacing="md">
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={() => setShowDeleteConfirm(false)}
               disabled={deleting}
             >
