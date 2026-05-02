@@ -4,7 +4,7 @@ import {
   Tag,
   Plus,
 } from "@phosphor-icons/react";
-import type { CourtType, TabId } from "../types";
+import type { CourtType, TabId } from "../../types";
 
 interface PricingTabsProps {
     activeTab: TabId;

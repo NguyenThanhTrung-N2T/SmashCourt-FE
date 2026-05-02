@@ -1,40 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Plus,
-  Lightning,
-} from "@phosphor-icons/react";
-
-import { Button } from "@/src/shared/components/ui/Button";
+import { Grid } from "@/src/shared/components/layout/Grid";
+import { Flex } from "@/src/shared/components/layout/Flex";
 import { Input } from "@/src/shared/components/ui/Input";
 import { Textarea } from "@/src/shared/components/ui/Textarea";
 import { Alert } from "@/src/shared/components/ui/Alert";
-import { Modal } from "@/src/shared/components/ui/Modal";
-import { Flex } from "@/src/shared/components/layout/Flex";
-import { Grid } from "@/src/shared/components/layout/Grid";
+import { Button } from "@/src/shared/components/ui/Button";
+import type { SaveServiceRequest } from "@/src/shared/types/service.types";
 
-import { createService } from "@/src/api/service.api";
-import { AuthApiError } from "@/src/api/auth.api";
-import type { SaveServiceRequest, Service } from "@/src/shared/types/service.types";
+interface ServiceFormProps {
+  initialData?: {
+    name: string;
+    description: string;
+    unit: string;
+    defaultPrice: string;
+  };
+  onSubmit: (data: SaveServiceRequest) => Promise<void>;
+  onCancel: () => void;
+  submitText: string;
+  submitIcon: React.ReactNode;
+  generalError?: string | null;
+}
 
-export function CreateServiceModal({
-  onCreated,
-  onClose,
-}: {
-  onCreated: (p: Service) => void;
-  onClose: () => void;
-}) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [unit, setUnit] = useState("");
-  const [defaultPrice, setDefaultPrice] = useState("");
+export function ServiceForm({
+  initialData,
+  onSubmit,
+  onCancel,
+  submitText,
+  submitIcon,
+  generalError,
+}: ServiceFormProps) {
+  const [name, setName] = useState(initialData?.name || "");
+  const [description, setDescription] = useState(initialData?.description || "");
+  const [unit, setUnit] = useState(initialData?.unit || "");
+  const [defaultPrice, setDefaultPrice] = useState(initialData?.defaultPrice || "");
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<{
     name?: string;
     unit?: string;
     defaultPrice?: string;
-    general?: string;
   }>({});
 
   function validate() {
@@ -52,7 +57,7 @@ export function CreateServiceModal({
     return e;
   }
 
-  async function handleCreate() {
+  async function handleSubmit() {
     const e = validate();
     if (Object.keys(e).length) {
       setErrors(e);
@@ -61,37 +66,26 @@ export function CreateServiceModal({
     setErrors({});
     setSaving(true);
     try {
-      const dto: SaveServiceRequest = {
+      await onSubmit({
         name: name.trim(),
         description: description.trim() || null,
         unit: unit.trim(),
         defaultPrice: Number(defaultPrice),
-      };
-      const created = await createService(dto);
-      onCreated(created);
-      onClose();
+      });
     } catch (err) {
-      const msg = err instanceof AuthApiError ? err.message : "Đã có lỗi xảy ra.";
-      setErrors({ general: msg });
+      // Error is caught here just to prevent unhandled promise rejection if parent throws
+      // The parent will handle displaying the general error
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <Modal
-      isOpen={true}
-      onClose={onClose}
-      title="Tạo dịch vụ mới"
-      subtitle="MỞ BÁN SẢN PHẨM"
-      icon={<Plus className="h-5 w-5" />}
-      maxWidth="xl"
-      headerGradient="from-[#1B5E38] to-[#2A9D5C]"
-    >
+    <>
       <div className="px-8 py-6">
-        {errors.general && (
+        {generalError && (
           <Alert variant="error" className="mb-6">
-            {errors.general}
+            {generalError}
           </Alert>
         )}
 
@@ -154,19 +148,19 @@ export function CreateServiceModal({
       </div>
 
       <Flex align="center" justify="end" spacing="md" className="border-t border-border px-8 py-5 bg-surface-2 rounded-b-2xl">
-        <Button onClick={onClose} disabled={saving} variant="ghost">
+        <Button onClick={onCancel} disabled={saving} variant="ghost">
           Hủy bỏ
         </Button>
         <Button
-          onClick={handleCreate}
+          onClick={handleSubmit}
           disabled={saving}
           isLoading={saving}
-          leftIcon={<Lightning className="h-4 w-4" />}
+          leftIcon={submitIcon}
           variant="primary"
         >
-          Lưu và Kinh doanh
+          {submitText}
         </Button>
       </Flex>
-    </Modal>
+    </>
   );
 }

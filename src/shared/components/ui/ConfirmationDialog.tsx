@@ -1,0 +1,114 @@
+"use client";
+
+import { useState } from 'react';
+import { X, Warning } from '@phosphor-icons/react';
+
+interface ConfirmationDialogProps {
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    showReasonInput?: boolean;
+    reasonLabel?: string;
+    reasonPlaceholder?: string;
+    onConfirm: (reason?: string) => void;
+    onCancel: () => void;
+    variant?: 'danger' | 'warning' | 'info';
+}
+
+export function ConfirmationDialog({
+    title,
+    message,
+    confirmText = 'Xác nhận',
+    cancelText = 'Hủy',
+    showReasonInput = false,
+    reasonLabel = 'Lý do',
+    reasonPlaceholder = 'Nhập lý do (tùy chọn)',
+    onConfirm,
+    onCancel,
+    variant = 'warning',
+}: ConfirmationDialogProps) {
+    const [reason, setReason] = useState('');
+
+    const handleConfirm = () => {
+        onConfirm(showReasonInput ? reason : undefined);
+    };
+
+    const variantStyles = {
+        danger: {
+            icon: 'text-red-500',
+            iconBg: 'bg-red-500/10/40',
+            button: 'bg-red-600 hover:bg-red-700 text-white',
+        },
+        warning: {
+            icon: 'text-amber-500',
+            iconBg: 'bg-amber-500/10',
+            button: 'bg-amber-600 hover:bg-amber-700 text-white',
+        },
+        info: {
+            icon: 'text-blue-500',
+            iconBg: 'bg-blue-500/10',
+            button: 'bg-primary hover:opacity-90 text-inverse',
+        },
+    };
+
+    const styles = variantStyles[variant];
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
+            <div className="bg-surface-1 rounded-3xl shadow-2xl border border-border w-full max-w-md mx-4 animate-slide-up">
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-border">
+                    <div className="flex items-center gap-3">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${styles.iconBg}`}>
+                            <Warning className={`h-5 w-5 ${styles.icon}`} />
+                        </div>
+                        <h2 className="text-lg font-extrabold text-foreground">{title}</h2>
+                    </div>
+                    <button
+                        onClick={onCancel}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-muted hover:bg-surface-2 hover:text-foreground transition-colors"
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 space-y-4">
+                    <p className="text-sm text-muted leading-relaxed">{message}</p>
+
+                    {showReasonInput && (
+                        <div>
+                            <label className="block text-xs font-bold text-foreground uppercase tracking-wide mb-2">
+                                {reasonLabel}
+                            </label>
+                            <textarea
+                                value={reason}
+                                onChange={(e) => setReason(e.target.value)}
+                                placeholder={reasonPlaceholder}
+                                rows={3}
+                                className="w-full rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm text-foreground placeholder:text-muted outline-none transition-colors hover:border-primary focus:border-primary focus:bg-surface-1 focus:ring-2 focus:ring-primary/20 resize-none"
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-3 p-6 border-t border-border">
+                    <button
+                        onClick={onCancel}
+                        className="flex-1 rounded-full border border-border bg-surface-1 px-5 py-2.5 text-sm font-bold text-foreground shadow-sm hover:bg-surface-2 transition-colors"
+                    >
+                        {cancelText}
+                    </button>
+                    <button
+                        onClick={handleConfirm}
+                        className={`flex-1 rounded-full px-5 py-2.5 text-sm font-bold shadow-md transition-all active:scale-95 ${styles.button}`}
+                    >
+                        {confirmText}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
