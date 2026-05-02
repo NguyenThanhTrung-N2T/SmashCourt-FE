@@ -11,11 +11,11 @@ export function PricingHeader({ onCreateClick }: PricingHeaderProps) {
     return (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-slate-900">
+                <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-foreground">
                     Bảng giá
                 </h1>
-                <p className="text-sm font-medium text-slate-500 mt-1">
-                    Cấu hình giá hệ thống theo khung giờ & loại sân.
+                <p className="text-sm font-medium text-muted mt-1">
+                    Cấu hình giá hệ thống theo khung giờ &amp; loại sân.
                 </p>
             </div>
             <Button

@@ -16,11 +16,11 @@ export function PageHeader({
   return (
     <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${className}`}>
       <div>
-        <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-slate-900">
+        <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-foreground">
           {title}
         </h1>
         {description && (
-          <p className="text-sm font-medium text-slate-500 mt-1">
+          <p className="text-sm font-medium text-muted mt-1">
             {description}
           </p>
         )}

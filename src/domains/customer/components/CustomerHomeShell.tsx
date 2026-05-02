@@ -256,30 +256,30 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
   }, [dragging]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50/40 pb-24 font-sans text-slate-900 selection:bg-emerald-500 selection:text-white">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-[#2A9D5C]/5 to-[#1B5E38]/5 pb-24 font-sans text-slate-900 selection:bg-[#2A9D5C] selection:text-white">
       {/* Animated gradient background */}
-      <div className="pointer-events-none absolute left-0 right-0 top-0 z-0 h-[460px] rounded-b-[2.5rem] bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 animate-gradient" />
-      
+      <div className="pointer-events-none absolute left-0 right-0 top-0 z-0 h-[460px] rounded-b-[2.5rem] bg-gradient-to-br from-slate-900 via-slate-800 to-[#1B5E38] animate-gradient" />
+
       {/* Floating orbs */}
-      <div className="pointer-events-none absolute left-10 top-20 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl animate-float" />
-      <div className="pointer-events-none absolute right-20 top-40 h-80 w-80 rounded-full bg-teal-500/10 blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+      <div className="pointer-events-none absolute left-10 top-20 h-64 w-64 rounded-full bg-[#2A9D5C]/10 blur-3xl animate-float" />
+      <div className="pointer-events-none absolute right-20 top-40 h-80 w-80 rounded-full bg-[#1B5E38]/10 blur-3xl animate-float" style={{ animationDelay: '1s' }} />
 
       <header className="relative z-50 w-full border-b border-white/10 bg-white/5 backdrop-blur-2xl shadow-lg shadow-black/5">
         <div className="mx-auto flex h-20 max-w-[1600px] items-center justify-between px-6 lg:px-10">
           <div className="flex items-center gap-10">
             <div className="flex items-center gap-3 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-[0.8rem] bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-all group-hover:shadow-emerald-500/50 group-hover:scale-110 animate-pulse-glow">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[0.8rem] bg-gradient-to-br from-[#2A9D5C] to-[#1B5E38] text-white shadow-lg shadow-[#2A9D5C]/30 transition-all group-hover:shadow-[#2A9D5C]/50 group-hover:scale-110 animate-pulse-glow">
                 <Heartbeat className="h-6 w-6" />
               </div>
               <span className="hidden text-2xl font-black tracking-tight text-white sm:block">
-                Smash<span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Court</span>
+                Smash<span className="bg-gradient-to-r from-[#2A9D5C]/80 to-white/90 bg-clip-text text-transparent">Court</span>
               </span>
             </div>
 
             <nav className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur-md md:flex shadow-lg shadow-black/5">
               <button
                 onClick={() => router.push("/")}
-                className="shrink-0 rounded-full bg-gradient-to-r from-white to-emerald-50 px-6 py-2.5 text-sm font-bold text-slate-900 shadow-lg shadow-white/20 transition-all hover:shadow-xl hover:scale-105"
+                className="shrink-0 rounded-full bg-gradient-to-r from-white to-[#2A9D5C]/10 px-6 py-2.5 text-sm font-bold text-slate-900 shadow-lg shadow-white/20 transition-all hover:shadow-xl hover:scale-105"
               >
                 Khám phá & Đặt sân
               </button>
@@ -296,7 +296,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
             <div id="profile-menu-container" className="relative ml-2">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-3 rounded-full border border-transparent p-1.5 pr-5 outline-none transition-colors hover:border-white/10 hover:bg-white/5 focus:ring-2 focus:ring-emerald-500/40"
+                className="flex items-center gap-3 rounded-full border border-transparent p-1.5 pr-5 outline-none transition-colors hover:border-white/10 hover:bg-white/5 focus:ring-2 focus:ring-[#2A9D5C]/40"
               >
                 {user.avatarUrl ? (
                   <img
@@ -305,7 +305,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                     className="h-10 w-10 rounded-full border-2 border-white/20 bg-slate-800 object-cover"
                   />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/20 text-sm font-black text-emerald-400">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2A9D5C]/30 bg-[#2A9D5C]/20 text-sm font-black text-[#2A9D5C]">
                     {initials}
                   </div>
                 )}
@@ -313,7 +313,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                   <p className="text-sm font-bold leading-tight text-white">
                     {user.fullName}
                   </p>
-                  <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                  <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-[#2A9D5C]">
                     Hạng Tân Binh
                   </p>
                 </div>
@@ -332,11 +332,11 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                   <p className="mt-0.5 truncate text-xs font-medium text-slate-500">
                     {user.email}
                   </p>
-                  
+
                   {/* Mini Progress Bar */}
                   <div className="mt-3">
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#2A9D5C]">
                         Hạng Tân Binh
                       </span>
                       <span className="text-[10px] font-bold text-slate-500">
@@ -345,7 +345,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                     </div>
                     <div className="relative h-2 overflow-hidden rounded-full bg-slate-100">
                       <div
-                        className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500 animate-shimmer"
+                        className="h-full bg-gradient-to-r from-[#2A9D5C] to-[#1B5E38] transition-all duration-500 animate-shimmer"
                         style={{ width: '50%' }}
                       />
                     </div>
@@ -356,13 +356,13 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                 </div>
                 <button
                   onClick={() => router.push("/customer/profile")}
-                  className="flex w-full items-center gap-3 rounded-xl p-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 hover:text-emerald-600"
+                  className="flex w-full items-center gap-3 rounded-xl p-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 hover:text-[#2A9D5C]"
                 >
                   <User className="h-4 w-4" /> Xem thông tin tài khoản
                 </button>
                 <button
                   onClick={() => router.push("/customer/history")}
-                  className="flex w-full items-center gap-3 rounded-xl p-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 hover:text-emerald-600 md:hidden"
+                  className="flex w-full items-center gap-3 rounded-xl p-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 hover:text-[#1B5E38] md:hidden"
                 >
                   <ClockCounterClockwise className="h-4 w-4" /> Lịch sử Đặt sân
                 </button>
@@ -383,13 +383,13 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
       <main className="relative z-10 mx-auto w-full max-w-[1500px] px-6 pb-8 pt-8 lg:px-10 lg:pt-12">
         <div className="mb-10 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
           <div className="w-full lg:w-3/5 text-white">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-100">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">
               <Sparkle className="h-3.5 w-3.5 animate-pulse" />
               Lịch đặt sân thông minh
             </div>
             <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
               Chào mừng trở lại,{" "}
-              <span className="bg-gradient-to-r from-emerald-200 to-teal-100 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-white/90 to-[#2A9D5C]/80 bg-clip-text text-transparent">
                 {user.fullName}
               </span>
             </h1>
@@ -400,10 +400,10 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
           </div>
 
           <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3 lg:w-auto">
-            <article className="group rounded-3xl border border-white/20 bg-gradient-to-br from-white/15 to-white/5 p-5 shadow-xl backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-2xl hover:border-emerald-400/30 animate-slide-up">
+            <article className="group rounded-3xl border border-white/20 bg-gradient-to-br from-white/15 to-white/5 p-5 shadow-xl backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-2xl hover:border-[#2A9D5C]/30 animate-slide-up">
               <div className="flex items-center justify-between">
-                <CalendarBlank className="h-6 w-6 text-emerald-300 transition-transform group-hover:scale-110" />
-                <Sparkle className="h-4 w-4 text-emerald-300/50 animate-pulse" />
+                <CalendarBlank className="h-6 w-6 text-[#2A9D5C]/80 transition-transform group-hover:scale-110" />
+                <Sparkle className="h-4 w-4 text-[#2A9D5C]/50 animate-pulse" />
               </div>
               <p className="mt-3 text-3xl font-extrabold leading-none text-white">
                 0
@@ -424,27 +424,27 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                 Trận đã chơi
               </p>
             </article>
-            <article className="group rounded-3xl border border-emerald-400/40 bg-gradient-to-br from-emerald-500/25 to-teal-500/15 p-5 shadow-xl backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-2xl hover:border-emerald-400/60 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            <article className="group rounded-3xl border border-[#2A9D5C]/40 bg-gradient-to-br from-[#2A9D5C]/25 to-[#1B5E38]/15 p-5 shadow-xl backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-2xl hover:border-[#2A9D5C]/60 animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <div className="flex items-center justify-between">
                 <Crown className="h-6 w-6 text-amber-300 transition-transform group-hover:scale-110 group-hover:rotate-12" />
                 <Sparkle className="h-4 w-4 text-amber-300/70 animate-pulse" />
               </div>
-              <p className="mt-3 text-3xl font-extrabold leading-none bg-gradient-to-r from-emerald-100 to-teal-100 bg-clip-text text-transparent">
+              <p className="mt-3 text-3xl font-extrabold leading-none bg-gradient-to-r from-white/90 to-[#2A9D5C]/80 bg-clip-text text-transparent">
                 1,250
               </p>
-              <p className="mt-1.5 text-sm font-medium text-emerald-100">
+              <p className="mt-1.5 text-sm font-medium text-white/90">
                 Điểm thành viên
               </p>
             </article>
           </div>
         </div>
 
-        <section className="relative flex flex-col gap-8 rounded-[2rem] border-2 border-transparent bg-gradient-to-br from-white via-white to-emerald-50/30 p-6 shadow-2xl shadow-slate-900/10 lg:p-10 before:absolute before:inset-0 before:-z-10 before:rounded-[2rem] before:bg-gradient-to-br before:from-emerald-500/20 before:via-teal-500/10 before:to-transparent before:blur-xl">
+        <section className="relative flex flex-col gap-8 rounded-[2rem] border-2 border-transparent bg-gradient-to-br from-white via-white to-[#2A9D5C]/5 p-6 shadow-2xl shadow-slate-900/10 lg:p-10 before:absolute before:inset-0 before:-z-10 before:rounded-[2rem] before:bg-gradient-to-br before:from-[#2A9D5C]/20 before:via-[#1B5E38]/10 before:to-transparent before:blur-xl">
           <div className="flex flex-col gap-6 border-b border-slate-100 pb-7 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="flex items-center gap-2.5 text-xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-emerald-700 bg-clip-text text-transparent lg:text-2xl">
+              <h2 className="flex items-center gap-2.5 text-xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-[#1B5E38] bg-clip-text text-transparent lg:text-2xl">
                 Chọn sân theo khung giờ{" "}
-                <Lightning className="h-6 w-6 text-emerald-500 animate-pulse" />
+                <Lightning className="h-6 w-6 text-[#2A9D5C] animate-pulse" />
               </h2>
               <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-slate-500 lg:text-[15px]">
                 Time-grid là trục thời gian nguyên ngày cho từng sân. Kéo trực
@@ -456,22 +456,22 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
 
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-2.5 shadow-inner sm:flex-row">
               <div className="relative w-full sm:w-auto group">
-                <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-emerald-600 transition-transform group-hover:scale-110" />
-                <select className="h-12 w-full cursor-pointer appearance-none rounded-[14px] border-2 border-slate-200 bg-white pl-12 pr-6 text-sm font-semibold text-slate-700 shadow-sm outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 hover:border-emerald-400 sm:w-[300px]">
+                <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#1B5E38] transition-transform group-hover:scale-110" />
+                <select className="h-12 w-full cursor-pointer appearance-none rounded-[14px] border-2 border-slate-200 bg-white pl-12 pr-6 text-sm font-semibold text-slate-700 shadow-sm outline-none transition-all focus:border-[#2A9D5C] focus:ring-2 focus:ring-[#2A9D5C]/20 hover:border-[#2A9D5C]/60 sm:w-[300px]">
                   <option>CS Tân Bình (Nguyễn Văn Linh)</option>
                   <option>CS Gò Vấp (Phan Văn Trị)</option>
                   <option>CS Quận 7 (Huỳnh Tấn Phát)</option>
                   <option>CS Quận 10 (Thành Thái)</option>
                 </select>
-                <CaretDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-transform group-hover:text-emerald-600" />
+                <CaretDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-transform group-hover:text-[#1B5E38]" />
               </div>
 
               <div className="relative w-full sm:w-auto group">
-                <CalendarBlank className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-emerald-600 transition-transform group-hover:scale-110" />
+                <CalendarBlank className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#1B5E38] transition-transform group-hover:scale-110" />
                 <input
                   type="date"
                   defaultValue={today}
-                  className="h-12 w-full cursor-pointer rounded-[14px] border-2 border-slate-200 bg-white pl-12 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 hover:border-emerald-400 sm:w-[220px]"
+                  className="h-12 w-full cursor-pointer rounded-[14px] border-2 border-slate-200 bg-white pl-12 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none transition-all focus:border-[#2A9D5C] focus:ring-2 focus:ring-[#2A9D5C]/20 hover:border-[#2A9D5C]/60 sm:w-[220px]"
                 />
               </div>
             </div>
@@ -482,8 +482,8 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
               <span className="h-4 w-6 rounded border border-slate-300 bg-white" />
               Còn trống
             </span>
-            <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
-              <span className="h-4 w-6 rounded bg-emerald-500" />
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#1B5E38]">
+              <span className="h-4 w-6 rounded bg-[#2A9D5C]" />
               Đang chọn
             </span>
             <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500">
@@ -524,9 +524,9 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                   const selectedOverlay =
                     selectedRange && isCourtSelected
                       ? normalizeRange(
-                          selectedRange.startIdx,
-                          selectedRange.endIdx,
-                        )
+                        selectedRange.startIdx,
+                        selectedRange.endIdx,
+                      )
                       : null;
 
                   return (
@@ -544,7 +544,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                         }}
                         onMouseDown={(e) => onTrackMouseDown(court, e.clientX)}
                         onMouseMove={(e) => onTrackMouseMove(court, e.clientX)}
-                        className="relative h-14 flex-1 cursor-crosshair rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-emerald-300"
+                        className="relative h-14 flex-1 cursor-crosshair rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-[#2A9D5C]/50"
                         style={{
                           backgroundImage: `linear-gradient(to right, rgba(226,232,240,0.7) 1px, transparent 1px)`,
                           backgroundSize: `${100 / blockCount}% 100%`,
@@ -563,7 +563,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
 
                         {selectedOverlay ? (
                           <div
-                            className="pointer-events-none absolute inset-y-1 rounded-lg bg-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.25)] transition-all"
+                            className="pointer-events-none absolute inset-y-1 rounded-lg bg-[#2A9D5C] shadow-[0_0_0_2px_rgba(27,94,56,0.25)] transition-all"
                             style={{
                               left: `${(selectedOverlay.startIdx / blockCount) * 100}%`,
                               width: `${((selectedOverlay.endIdx - selectedOverlay.startIdx + 1) / blockCount) * 100}%`,
@@ -573,7 +573,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
 
                         {selectedOverlay ? (
                           <div
-                            className="pointer-events-none absolute top-0 z-10 -translate-y-[115%] rounded-full border border-emerald-600 bg-white px-3 py-1 text-xs font-semibold text-emerald-700 shadow-sm"
+                            className="pointer-events-none absolute top-0 z-10 -translate-y-[115%] rounded-full border border-[#1B5E38] bg-white px-3 py-1 text-xs font-semibold text-[#1B5E38] shadow-sm"
                             style={{
                               left: `${(selectedOverlay.startIdx / blockCount) * 100}%`,
                               transform: "translateX(-2px)",
@@ -590,10 +590,10 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-5 lg:p-6">
+          <div className="rounded-2xl border border-[#2A9D5C]/30 bg-gradient-to-br from-[#2A9D5C]/10 to-white p-5 lg:p-6">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1">
-                <p className="flex items-center gap-2 text-base font-bold text-emerald-700">
+                <p className="flex items-center gap-2 text-base font-bold text-[#1B5E38]">
                   <Clock className="h-5 w-5" />
                   Chế độ đặt nhiều sân cùng giờ
                 </p>
@@ -605,23 +605,22 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                   {COURTS.map((court) => {
                     const available = selectedRange
                       ? isRangeAvailable(
-                          court,
-                          selectedRange.startIdx,
-                          selectedRange.endIdx,
-                        )
+                        court,
+                        selectedRange.startIdx,
+                        selectedRange.endIdx,
+                      )
                       : false;
                     return (
                       <button
                         key={`chip-${court}`}
                         disabled={!selectedRange || !available}
                         onClick={() => onToggleCourt(court)}
-                        className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
-                          selectedCourts.includes(court)
-                            ? "border-emerald-500 bg-emerald-500 text-white shadow-sm"
+                        className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all ${selectedCourts.includes(court)
+                            ? "border-[#2A9D5C] bg-[#2A9D5C] text-white shadow-sm"
                             : !selectedRange || !available
                               ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
-                              : "border-slate-300 bg-white text-slate-700 hover:-translate-y-0.5 hover:border-emerald-400 hover:text-emerald-700"
-                        }`}
+                              : "border-slate-300 bg-white text-slate-700 hover:-translate-y-0.5 hover:border-[#2A9D5C]/60 hover:text-[#1B5E38]"
+                          }`}
                       >
                         <Stack className="h-4 w-4" />
                         {court}
@@ -630,8 +629,8 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                   })}
                 </div>
                 {canBook ? (
-                  <p className="mt-4 inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
+                  <p className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#2A9D5C]/30 bg-white px-3 py-2 text-sm font-semibold text-slate-900">
+                    <CheckCircle className="h-4 w-4 text-[#1B5E38]" />
                     Bạn đang chọn: {selectedCourts.join(", ")} -{" "}
                     {selectedRangeLabel}
                   </p>
@@ -646,7 +645,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
 
               <button
                 disabled={!canBook}
-                className="group inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-slate-900 via-emerald-700 to-teal-700 px-7 text-sm font-semibold text-white shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 animate-gradient"
+                className="group inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-slate-900 via-[#1B5E38] to-[#2A9D5C] px-7 text-sm font-semibold text-white shadow-xl shadow-[#2A9D5C]/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#2A9D5C]/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 animate-gradient"
               >
                 Đặt sân <CaretRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </button>
@@ -661,7 +660,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
         >
           <div className="flex items-center justify-between bg-slate-900 px-6 py-5 text-white">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2A9D5C]/20 text-[#2A9D5C]">
                 <Sparkle className="h-4 w-4" />
               </div>
               <h3 className="text-sm font-bold tracking-wide">
@@ -693,9 +692,9 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
               <input
                 type="text"
                 placeholder="Hỏi AI bất kỳ điều gì..."
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-5 pr-14 text-[15px] font-medium outline-none transition-colors focus:border-emerald-500 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-5 pr-14 text-[15px] font-medium outline-none transition-colors focus:border-[#2A9D5C] focus:bg-white"
               />
-              <button className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm transition-colors hover:bg-emerald-400">
+              <button className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-xl bg-[#2A9D5C] text-white shadow-sm transition-colors hover:bg-[#1B5E38]">
                 <CaretRight className="h-6 w-6" />
               </button>
             </div>
@@ -705,7 +704,7 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
 
       <button
         onClick={() => setIsChatOpen(!isChatOpen)}
-        className="group fixed bottom-10 right-6 z-[100] flex h-16 w-16 items-center justify-center rounded-full border-2 border-slate-800 bg-gradient-to-br from-slate-900 to-emerald-900 text-white shadow-2xl shadow-slate-900/30 transition-all hover:scale-110 hover:shadow-emerald-500/30 animate-pulse-glow"
+        className="group fixed bottom-10 right-6 z-[100] flex h-16 w-16 items-center justify-center rounded-full border-2 border-slate-800 bg-gradient-to-br from-slate-900 to-[#1B5E38] text-white shadow-2xl shadow-slate-900/30 transition-all hover:scale-110 hover:shadow-[#2A9D5C]/30 animate-pulse-glow"
       >
         <Robot className="h-7 w-7 transition-transform group-hover:scale-110" />
         <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-[10px] font-bold shadow-lg animate-pulse">
@@ -715,11 +714,10 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
 
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-[120px] right-6 z-[90] flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:text-emerald-600 active:scale-90 lg:right-10 ${
-          showScrollTop
+        className={`fixed bottom-[120px] right-6 z-[90] flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-[#2A9D5C] hover:text-[#1B5E38] active:scale-90 lg:right-10 ${showScrollTop
             ? "translate-y-0 opacity-100"
             : "pointer-events-none translate-y-8 opacity-0"
-        }`}
+          }`}
       >
         <CaretUp className="h-6 w-6" />
       </button>

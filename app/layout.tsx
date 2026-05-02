@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import AuthSessionSync from "@/src/modules/auth/components/AuthSessionSync";
+import { ThemeProvider } from "@/src/contexts/ThemeContext";
+import { themeInitScript } from "@/src/scripts/theme-init";
 import "./globals.css";
 
 const interSans = Inter({
@@ -19,10 +21,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
+    <html lang="vi" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+          suppressHydrationWarning
+        />
+      </head>
       <body className={`${interSans.variable} font-sans antialiased`}>
-        <AuthSessionSync />
-        {children}
+        <ThemeProvider>
+          <AuthSessionSync />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

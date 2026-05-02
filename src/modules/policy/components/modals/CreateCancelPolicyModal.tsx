@@ -57,7 +57,7 @@ export function CreateCancelPolicyModal({
               value={hoursBefore}
               onChange={(e) => setHoursBefore(Number(e.target.value))}
               rightIcon={<span className="text-sm font-bold text-slate-400">giờ</span>}
-              className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
+              className="text-base shadow-sm focus:border-primary focus:ring-primary/10"
             />
           </div>
 
@@ -71,7 +71,7 @@ export function CreateCancelPolicyModal({
               value={refundPercent}
               onChange={(e) => setRefundPercent(Number(e.target.value))}
               rightIcon={<span className="text-sm font-bold opacity-50">%</span>}
-              className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
+              className="text-base shadow-sm focus:border-primary focus:ring-primary/10"
             />
           </div>
         </Grid>
@@ -83,12 +83,12 @@ export function CreateCancelPolicyModal({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="VD: Không áp dụng hoàn tiền dịp Lễ Tết..."
-            className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
+            className="text-base shadow-sm focus:border-primary focus:ring-primary/10"
           />
         </div>
       </div>
 
-      <Flex align="center" justify="end" spacing="md" className="border-t border-slate-100 px-8 py-5 bg-slate-50/50 rounded-b-2xl">
+      <Flex align="center" justify="end" spacing="md" className="border-t border-border px-8 py-5 bg-surface-2/50 rounded-b-2xl">
         <Button onClick={onClose} variant="ghost">
           Hủy bỏ
         </Button>

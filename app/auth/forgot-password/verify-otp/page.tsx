@@ -56,6 +56,9 @@ export default function VerifyOtpPage() {
 
   // Load initial session state
   const [initialState] = useState(() => {
+    if (typeof window === "undefined") {
+      return { failedAttempts: 0, resendCount: 0 };
+    }
     const storedSession = getForgotPasswordVerifySession();
     return {
       failedAttempts: storedSession?.failedAttempts ?? 0,

@@ -43,17 +43,14 @@ export default function OtpInput({
     onChange(joined);
   }
 
-  // Đồng bộ với input đăng ký: nền slate-50, viền slate-200, chữ slate (không đen đậm)
+  // Đồng bộ với input đăng ký: nền surface-2, viền border, chữ foreground
   const boxClass =
-    "flex h-14 w-11 shrink-0 cursor-pointer rounded-xl border-2 border-slate-200 bg-slate-50 text-center text-2xl font-semibold tabular-nums text-slate-700 shadow-sm outline-none " +
+    "flex h-14 w-11 shrink-0 cursor-pointer rounded-xl border-2 border-border bg-surface-2 text-center text-2xl font-semibold tabular-nums text-foreground shadow-sm outline-none " +
     "transition-all duration-200 ease-out motion-reduce:transition-none " +
-    "hover:border-emerald-500 hover:bg-emerald-50 hover:text-slate-900 hover:shadow-md hover:ring-2 hover:ring-emerald-200/90 " +
+    "hover:border-emerald-500 hover:bg-emerald-500/10 hover:text-foreground hover:shadow-md hover:ring-2 hover:ring-emerald-200/90 " +
     "active:scale-[0.97] motion-reduce:active:scale-100 " +
-    "focus:border-emerald-600 focus:bg-white focus:text-slate-900 focus:shadow-lg focus:ring-4 focus:ring-emerald-400/30 " +
+    "focus:border-emerald-600 focus:bg-surface-1 focus:text-foreground focus:shadow-lg focus:ring-4 focus:ring-emerald-400/30 " +
     "disabled:cursor-not-allowed disabled:opacity-50 " +
-    "dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-200 " +
-    "dark:hover:border-emerald-400 dark:hover:bg-emerald-950/40 dark:hover:ring-emerald-500/30 " +
-    "dark:focus:border-emerald-400 dark:focus:ring-emerald-500/35 " +
     "sm:h-16 sm:w-12 sm:text-[1.75rem]";
 
   return (

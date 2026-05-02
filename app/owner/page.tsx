@@ -69,16 +69,16 @@ export default function OwnerDashboardPage() {
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-slate-900 dark:text-white">
             Tổng quan
           </h1>
-          <p className="text-sm font-medium text-slate-500 mt-1">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
             Theo dõi hiệu suất kinh doanh, doanh thu và lịch đặt sân.
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {/* Secondary: pill, white, border */}
-          <button className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
+          <button className="inline-flex items-center gap-2 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
             Xuất dữ liệu
           </button>
           {/* Primary: pill, gradient green */}
@@ -105,7 +105,7 @@ export default function OwnerDashboardPage() {
               className={`relative rounded-2xl p-6 shadow-sm transition-all duration-200 hover:shadow-md overflow-hidden ${
                 kpi.isPrimary
                   ? "text-white"
-                  : "bg-white border border-slate-200 text-slate-900"
+                  : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
               }`}
               style={
                 kpi.isPrimary
@@ -116,7 +116,7 @@ export default function OwnerDashboardPage() {
               <div className="flex items-start justify-between">
                 <p
                   className={`text-xs font-semibold uppercase tracking-wide ${
-                    kpi.isPrimary ? "text-green-200" : "text-slate-500"
+                    kpi.isPrimary ? "text-green-200" : "text-slate-500 dark:text-slate-400"
                   }`}
                 >
                   {kpi.label}
@@ -126,7 +126,7 @@ export default function OwnerDashboardPage() {
                   className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${
                     kpi.isPrimary
                       ? "border-white/30 text-white hover:bg-white/10"
-                      : "border-slate-200 text-slate-400 hover:bg-slate-50"
+                      : "border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"
                   }`}
                 >
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -135,7 +135,7 @@ export default function OwnerDashboardPage() {
 
               <p
                 className={`mt-3 text-4xl font-extrabold tracking-tight leading-none ${
-                  kpi.isPrimary ? "text-white" : "text-slate-900"
+                  kpi.isPrimary ? "text-white" : "text-slate-900 dark:text-white"
                 }`}
               >
                 {kpi.value}
@@ -160,7 +160,7 @@ export default function OwnerDashboardPage() {
                 )}
                 <span
                   className={`text-[11px] font-medium ${
-                    kpi.isPrimary ? "text-green-200/90" : "text-slate-400"
+                    kpi.isPrimary ? "text-green-200/90" : "text-slate-400 dark:text-slate-500"
                   }`}
                 >
                   {kpi.sub}
@@ -180,10 +180,10 @@ export default function OwnerDashboardPage() {
       <div className="grid gap-4 xl:grid-cols-3">
 
         {/* Revenue Chart */}
-        <div className="xl:col-span-2 rounded-2xl bg-white p-6 shadow-sm border border-slate-200">
+        <div className="xl:col-span-2 rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm border border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-base font-extrabold text-slate-900">Doanh thu theo tuần</h2>
-            <button className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+            <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Doanh thu theo tuần</h2>
+            <button className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
               <MoreHorizontal className="h-5 w-5" />
             </button>
           </div>
@@ -198,7 +198,7 @@ export default function OwnerDashboardPage() {
                     {bar.h}%
                   </div>
                   {/* Background track (empty capsule) */}
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full rounded-full bg-slate-100"
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full rounded-full bg-slate-100 dark:bg-slate-700"
                     style={{ height: "100%" }}
                   />
                   {/* Filled capsule bar */}
@@ -231,10 +231,10 @@ export default function OwnerDashboardPage() {
         <div className="flex flex-col gap-4">
 
           {/* Court Occupancy */}
-          <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-200">
+          <div className="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm border border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-extrabold text-slate-900">Tỷ lệ lấp sân</h2>
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Tỷ lệ lấp sân</h2>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                 Hôm nay
               </span>
             </div>
@@ -263,26 +263,26 @@ export default function OwnerDashboardPage() {
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-xl font-black text-slate-900">75%</span>
+                  <span className="text-xl font-black text-slate-900 dark:text-white">75%</span>
                 </div>
               </div>
 
               <div className="flex-1 space-y-3">
                 <div>
-                  <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
+                  <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     <span>Giờ vàng</span>
-                    <span className="text-[#1B5E38]">90%</span>
+                    <span className="text-[#1B5E38] dark:text-[#2A9D5C]">90%</span>
                   </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div className="h-full rounded-full w-[90%]" style={{ background: "linear-gradient(90deg,#2A9D5C,#1B5E38)" }} />
                   </div>
                 </div>
                 <div>
-                  <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
+                  <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     <span>Giờ thường</span>
-                    <span className="text-amber-500">40%</span>
+                    <span className="text-amber-500 dark:text-amber-400">40%</span>
                   </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div className="h-full bg-amber-400 rounded-full w-[40%]" />
                   </div>
                 </div>
@@ -291,10 +291,10 @@ export default function OwnerDashboardPage() {
           </div>
 
           {/* Today's Schedule */}
-          <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-200 flex-1">
+          <div className="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm border border-slate-200 dark:border-slate-700 flex-1">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-extrabold text-slate-900">Lịch sắp tới</h2>
-              <button className="text-xs font-bold text-[#1B5E38] hover:underline">
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Lịch sắp tới</h2>
+              <button className="text-xs font-bold text-[#1B5E38] dark:text-[#2A9D5C] hover:underline">
                 Xem tất cả
               </button>
             </div>
@@ -303,22 +303,22 @@ export default function OwnerDashboardPage() {
               {schedule.map((slot, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-3 rounded-2xl bg-slate-50 border border-slate-100 p-3 transition-all hover:bg-slate-100"
+                  className="flex items-center gap-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 p-3 transition-all hover:bg-slate-100 dark:hover:bg-slate-700"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 shadow-sm">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 shadow-sm">
                     <Clock className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-slate-900">{slot.time}</p>
-                    <p className="text-xs font-medium text-slate-500">{slot.court}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">{slot.time}</p>
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{slot.court}</p>
                   </div>
                   {slot.status === "Đang chơi" ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#1B5E38]/10 px-2.5 py-1 text-[10px] font-bold text-[#1B5E38]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#1B5E38]/10 dark:bg-[#2A9D5C]/20 px-2.5 py-1 text-[10px] font-bold text-[#1B5E38] dark:text-[#2A9D5C]">
                       <CheckCircle2 className="h-3 w-3" />
                       Đang chơi
                     </span>
                   ) : (
-                    <span className="inline-flex items-center rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-bold text-slate-600">
+                    <span className="inline-flex items-center rounded-full bg-slate-200 dark:bg-slate-700 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:text-slate-300">
                       Sắp tới
                     </span>
                   )}

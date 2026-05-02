@@ -106,7 +106,7 @@ export function CreateServiceModal({
             }}
             placeholder="VD: Nước suối Aquafina"
             error={errors.name}
-            className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
+            className="text-base shadow-sm focus:border-primary focus:ring-primary/10"
           />
 
           <Textarea
@@ -115,7 +115,7 @@ export function CreateServiceModal({
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
             placeholder="Dành riêng cho miêu tả (không bắt buộc)..."
-            className="text-sm shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
+            className="text-sm shadow-sm focus:border-primary focus:ring-primary/10"
           />
 
           <Grid cols={2} spacing="md">
@@ -153,7 +153,7 @@ export function CreateServiceModal({
         </Grid>
       </div>
 
-      <Flex align="center" justify="end" spacing="md" className="border-t border-slate-100 px-8 py-5 bg-slate-50/50 rounded-b-2xl">
+      <Flex align="center" justify="end" spacing="md" className="border-t border-border px-8 py-5 bg-surface-2 rounded-b-2xl">
         <Button onClick={onClose} disabled={saving} variant="ghost">
           Hủy bỏ
         </Button>

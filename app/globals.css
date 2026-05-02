@@ -1,22 +1,74 @@
 @import "tailwindcss";
 
+@theme {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+@variant dark (.dark &);
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --primary: #1B5E38;
+  --secondary: #2A9D5C;
+  --accent: #2D7A50;
+
+  /* Surface hierarchy */
+  --surface-1: #ffffff;
+  --surface-2: #f1f5f9;
+  --surface-3: #e2e8f0;
+  --border: #e2e8f0;
+  --muted: #64748b;
+
+  /* Page-level & inverse */
+  --page-bg: #EBEBEB;
+  --inverse: #0f172a;
+  --surface-inverse: #0f172a;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #e2e8f0;
+  --primary: #34d399;
+  --secondary: #10b981;
+  --accent: #059669;
+
+  /* Surface hierarchy — each level is slightly lighter */
+  --surface-1: #1e293b;
+  --surface-2: #273548;
+  --surface-3: #334155;
+  --border: #334155;
+  --muted: #94a3b8;
+
+  /* Page-level & inverse */
+  --page-bg: #0f172a;
+  --inverse: #e2e8f0;
+  --surface-inverse: #1e293b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-inverse: var(--inverse);
+  --color-surface-inverse: var(--surface-inverse);
   --font-sans: var(--font-inter-sans), sans-serif;
   --font-mono: monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body {
@@ -149,6 +201,15 @@ input[type="reset"] {
 
 .animate-slide-in-right {
   animation: slide-in-right 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-100%); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Custom Scrollbar Utilities */

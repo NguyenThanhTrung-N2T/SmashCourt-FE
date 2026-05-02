@@ -16,14 +16,14 @@ export function PricingStats({ stats }: PricingStatsProps) {
             {stats.map((s) => (
                 <div
                     key={s.label}
-                    className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all"
+                    className="flex items-center gap-4 rounded-2xl border border-border bg-surface-1 p-4 shadow-sm hover:shadow-md transition-all"
                 >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1B5E38]/10 text-[#1B5E38]">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         <s.icon className="h-5 w-5" />
                     </div>
                     <div>
-                        <p className="text-2xl font-extrabold text-slate-900 leading-none">{s.val}</p>
-                        <p className="mt-0.5 text-xs font-semibold text-slate-500">{s.label}</p>
+                        <p className="text-2xl font-extrabold text-foreground leading-none">{s.val}</p>
+                        <p className="mt-0.5 text-xs font-semibold text-muted">{s.label}</p>
                     </div>
                 </div>
             ))}

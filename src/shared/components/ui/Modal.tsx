@@ -59,7 +59,7 @@ export function Modal({
       {/* Content */}
       <div 
         className={cn(
-          "relative w-full animate-slide-up rounded-2xl border-2 border-white/40 bg-white shadow-2xl flex flex-col max-h-[90vh]",
+          "relative w-full animate-slide-up rounded-2xl border-2 border-white/40 bg-surface-1 shadow-2xl flex flex-col max-h-[90vh]",
           shadowBorders[maxWidth],
           className
         )}

@@ -34,7 +34,7 @@ export default function BenefitsLayout({ children }: { children: ReactNode }) {
     <div className="flex-1 h-[calc(100vh-4rem)] flex flex-col overflow-hidden w-full">
       {/* ── Tab Bar ── */}
       <div className="shrink-0 px-8 pt-6 pb-2">
-        <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-100/80 p-1 w-fit">
+        <div className="flex items-center gap-1 rounded-2xl border border-border bg-surface-2 p-1 w-fit">
           {TABS.map((tab) => {
             const isActive = pathname.startsWith(tab.href);
             const Icon = tab.icon;
@@ -45,24 +45,24 @@ export default function BenefitsLayout({ children }: { children: ReactNode }) {
                 href={tab.href}
                 className={`relative inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-bold transition-all duration-200 ${
                   isActive
-                    ? "bg-white text-[#1B5E38] shadow-md shadow-slate-200/50"
-                    : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
+                    ? "bg-surface-1 text-primary shadow-md shadow-border/50"
+                    : "text-muted hover:text-foreground hover:bg-surface-1/50"
                 }`}
               >
                 <div
                   className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200 ${
-                    isActive ? "bg-[#1B5E38] shadow-sm" : "bg-slate-200/80"
+                    isActive ? "bg-primary shadow-sm" : "bg-surface-3"
                   }`}
                 >
                   <Icon
                     className={`h-3.5 w-3.5 transition-colors ${
-                      isActive ? "text-white" : "text-slate-500"
+                      isActive ? "text-inverse" : "text-muted"
                     }`}
                   />
                 </div>
                 {tab.label}
                 {isActive && (
-                  <span className="absolute -bottom-1 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-[#1B5E38]" />
+                  <span className="absolute -bottom-1 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-primary" />
                 )}
               </Link>
             );

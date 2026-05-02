@@ -26,12 +26,12 @@ export function BranchSelector({
   className = '',
 }: BranchSelectorProps) {
   return (
-    <div className={`flex items-center gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm ${className}`}>
+    <div className={`flex items-center gap-3 bg-surface-1 p-4 rounded-2xl border border-border shadow-sm ${className}`}>
       <IconContainer variant="secondary">
-        <Storefront className="h-5 w-5 text-slate-500" />
+        <Storefront className="h-5 w-5 text-muted" />
       </IconContainer>
       <div className="flex-1">
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+        <p className="text-xs font-bold text-muted uppercase tracking-wide">
           {label}
         </p>
         <div className="mt-1">

@@ -33,7 +33,7 @@ export function SearchInput({
 
   return (
     <div className="relative">
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">
         {loading ? (
           <CircleNotch className="h-5 w-5 animate-spin" />
         ) : (
@@ -45,12 +45,12 @@ export function SearchInput({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-11 py-3 text-sm text-slate-700 outline-none transition-colors hover:border-[#1B5E38] focus:border-[#1B5E38] focus:bg-white focus:ring-2 focus:ring-[#1B5E38]/20"
+        className="w-full rounded-xl border border-border bg-surface-2 pl-11 pr-11 py-3 text-sm text-foreground outline-none transition-colors hover:border-primary focus:border-primary focus:bg-surface-1 focus:ring-2 focus:ring-primary/20 placeholder:text-muted"
       />
       {value && (
         <button
           onClick={handleClear}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
         >
           <X className="h-5 w-5" />
         </button>
