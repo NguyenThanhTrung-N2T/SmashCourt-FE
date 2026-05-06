@@ -9,8 +9,8 @@ import {
   authLogin2fa,
   hasAuthErrorCode,
 } from "@/src/api/auth.api";
-import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
-import OtpInput from "@/src/modules/auth/components/OtpInput";
+import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
+import OtpInput from "@/src/features/auth/components/OtpInput";
 import {
   clearEmail,
   clearTempToken,
@@ -21,13 +21,13 @@ import {
   setAuthenticatedSession,
   startTwoFactorVerifySession,
   type TwoFactorVerifySession,
-} from "@/src/modules/auth/session/sessionStore";
-import { formatEmailShort } from "@/src/modules/auth/utils/clientErrors";
-import { isValidOtp, normalizeOtp } from "@/src/modules/auth/validators";
-import { useAuthRedirect } from "@/src/modules/auth/hooks/useAuthRedirect";
-import { useAuthError } from "@/src/modules/auth/hooks/useAuthError";
-import { useAuthErrorLogger } from "@/src/modules/auth/hooks/useAuthError";
-import type { AuthFormEvent } from "@/src/modules/auth/types/forms";
+} from "@/src/features/auth/session/sessionStore";
+import { formatEmailShort } from "@/src/features/auth/utils/clientErrors";
+import { isValidOtp, normalizeOtp } from "@/src/features/auth/validators";
+import { useAuthRedirect } from "@/src/features/auth/hooks/useAuthRedirect";
+import { useAuthError } from "@/src/features/auth/hooks/useAuthError";
+import { useAuthErrorLogger } from "@/src/features/auth/hooks/useAuthError";
+import type { AuthFormEvent } from "@/src/features/auth/types/forms";
 
 const RESET_REDIRECT_MS = 3500;
 const MAX_VERIFY_ATTEMPTS = 3;
@@ -220,11 +220,10 @@ export default function TwoFactorPage() {
 
   return (
     <section
-      className={`mx-auto max-w-md transition-all duration-500 ease-out motion-reduce:transition-none ${
-        entered
+      className={`mx-auto max-w-md transition-all duration-500 ease-out motion-reduce:transition-none ${entered
           ? "translate-y-0 opacity-100"
           : "translate-y-2 opacity-0 motion-reduce:translate-y-0"
-      }`}
+        }`}
     >
       <header
         className={`text-center ${entered ? "auth-animate-fade-up" : ""}`}
@@ -235,9 +234,8 @@ export default function TwoFactorPage() {
       </header>
 
       <div
-        className={`mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 ${
-          entered ? "auth-animate-fade-up-delay" : ""
-        }`}
+        className={`mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 ${entered ? "auth-animate-fade-up-delay" : ""
+          }`}
       >
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200/80">
           <Shield className="h-5 w-5 text-emerald-600" aria-hidden />
@@ -256,18 +254,16 @@ export default function TwoFactorPage() {
       </div>
 
       <p
-        className={`mt-3 text-center text-sm font-medium text-slate-600 ${
-          entered ? "auth-animate-fade-up-delay" : ""
-        }`}
+        className={`mt-3 text-center text-sm font-medium text-slate-600 ${entered ? "auth-animate-fade-up-delay" : ""
+          }`}
       >
         {TEXT.prompt}
       </p>
 
       <form className="mt-8 flex flex-col gap-6" onSubmit={onSubmit}>
         <div
-          className={`flex justify-center ${
-            entered ? "auth-animate-fade-up-delay-2" : ""
-          }`}
+          className={`flex justify-center ${entered ? "auth-animate-fade-up-delay-2" : ""
+            }`}
         >
           <OtpInput
             value={otpCode}

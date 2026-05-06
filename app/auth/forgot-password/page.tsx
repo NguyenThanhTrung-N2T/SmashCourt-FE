@@ -10,12 +10,12 @@ import {
   getAuthFieldError,
   hasAuthErrorCode,
 } from "@/src/api/auth.api";
-import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
+import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
 import {
   setEmail,
   setForgotPasswordFlashMessage,
-} from "@/src/modules/auth/session/sessionStore";
-import type { AuthFormEvent } from "@/src/modules/auth/types/forms";
+} from "@/src/features/auth/session/sessionStore";
+import type { AuthFormEvent } from "@/src/features/auth/types/forms";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -54,12 +54,12 @@ export default function ForgotPasswordPage() {
       setLoading(true);
       const data = await authForgotPassword({ email: trimmedEmail });
       setEmail(trimmedEmail);
-      
+
       // Always show the generic success message from backend
       setForgotPasswordFlashMessage(
         data.message ?? "Nếu email tồn tại, OTP sẽ được gửi đến hộp thư của bạn",
       );
-      
+
       router.push("/auth/forgot-password/verify-otp");
     } catch (err) {
       // Only OAuth accounts throw errors
@@ -70,13 +70,13 @@ export default function ForgotPasswordPage() {
           return;
         }
       }
-      
+
       const fieldError = getAuthFieldError(err, "email");
       setToastError(
         fieldError ??
-          (err instanceof Error
-            ? err.message
-            : "Gửi yêu cầu khôi phục thất bại."),
+        (err instanceof Error
+          ? err.message
+          : "Gửi yêu cầu khôi phục thất bại."),
       );
     } finally {
       setLoading(false);
@@ -85,9 +85,8 @@ export default function ForgotPasswordPage() {
 
   return (
     <section
-      className={`w-full transform transition-all duration-700 motion-reduce:transform-none motion-reduce:transition-none ${
-        mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-      }`}
+      className={`w-full transform transition-all duration-700 motion-reduce:transform-none motion-reduce:transition-none ${mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+        }`}
     >
       <div className="mb-10 text-center">
         <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">

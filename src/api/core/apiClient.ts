@@ -9,7 +9,7 @@ import {
   getAccessToken,
   getAuthUser,
   setAccessToken,
-} from "@/src/modules/auth/session/sessionStore";
+} from "@/src/features/auth/session/sessionStore";
 
 import type { AuthApiSuccess } from "@/src/shared/types/api.types";
 import type { ApiErrorPayload } from "@/src/shared/types/api.types";

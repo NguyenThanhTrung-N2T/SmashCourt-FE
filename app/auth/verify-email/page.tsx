@@ -6,10 +6,10 @@ import { useEffect, useState } from "react";
 import { Mail } from "lucide-react";
 
 import { hasAuthErrorCode } from "@/src/api/auth.api";
-import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
-import CountdownButton from "@/src/modules/auth/components/CountdownButton";
-import OtpInput from "@/src/modules/auth/components/OtpInput";
-import { OtpType } from "@/src/modules/auth/constants";
+import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
+import CountdownButton from "@/src/features/auth/components/CountdownButton";
+import OtpInput from "@/src/features/auth/components/OtpInput";
+import { OtpType } from "@/src/features/auth/constants";
 import {
   clearAuthSession,
   clearRegisterVerifySession,
@@ -17,12 +17,12 @@ import {
   getEmail,
   getRegisterVerifySession,
   setPostVerifyLoginHint,
-} from "@/src/modules/auth/session/sessionStore";
-import { formatEmailShort } from "@/src/modules/auth/utils/clientErrors";
-import { useOtpVerification } from "@/src/modules/auth/hooks/useOtpVerification";
-import { useAuthRedirect } from "@/src/modules/auth/hooks/useAuthRedirect";
-import { useAuthErrors } from "@/src/modules/auth/hooks/useAuthError";
-import type { AuthFormEvent } from "@/src/modules/auth/types/forms";
+} from "@/src/features/auth/session/sessionStore";
+import { formatEmailShort } from "@/src/features/auth/utils/clientErrors";
+import { useOtpVerification } from "@/src/features/auth/hooks/useOtpVerification";
+import { useAuthRedirect } from "@/src/features/auth/hooks/useAuthRedirect";
+import { useAuthErrors } from "@/src/features/auth/hooks/useAuthError";
+import type { AuthFormEvent } from "@/src/features/auth/types/forms";
 
 const RESET_REDIRECT_MS = 3500;
 const MAX_VERIFY_ATTEMPTS = 3;
@@ -124,7 +124,7 @@ export default function VerifyEmailPage() {
       "submit",
       new Error(
         message ??
-          "Phiên xác thực đã hết hiệu lực. Bạn sẽ được đưa về trang đăng ký sau ít giây."
+        "Phiên xác thực đã hết hiệu lực. Bạn sẽ được đưa về trang đăng ký sau ít giây."
       ),
       "verify-email"
     );
@@ -175,9 +175,8 @@ export default function VerifyEmailPage() {
   if (!email) {
     return (
       <section
-        className={`mx-auto max-w-md text-center transition-opacity duration-500 ease-out motion-reduce:transition-none ${
-          entered ? "opacity-100" : "opacity-0"
-        }`}
+        className={`mx-auto max-w-md text-center transition-opacity duration-500 ease-out motion-reduce:transition-none ${entered ? "opacity-100" : "opacity-0"
+          }`}
       >
         <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
           Xác thực email
@@ -201,11 +200,10 @@ export default function VerifyEmailPage() {
 
   return (
     <section
-      className={`mx-auto max-w-md transition-all duration-500 ease-out motion-reduce:transition-none ${
-        entered
+      className={`mx-auto max-w-md transition-all duration-500 ease-out motion-reduce:transition-none ${entered
           ? "translate-y-0 opacity-100"
           : "translate-y-2 opacity-0 motion-reduce:translate-y-0"
-      }`}
+        }`}
     >
       <header
         className={`text-center ${entered ? "auth-animate-fade-up" : ""}`}
@@ -216,9 +214,8 @@ export default function VerifyEmailPage() {
       </header>
 
       <div
-        className={`mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 ${
-          entered ? "auth-animate-fade-up-delay" : ""
-        }`}
+        className={`mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 ${entered ? "auth-animate-fade-up-delay" : ""
+          }`}
       >
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200/80">
           <Mail className="h-5 w-5 text-emerald-600" aria-hidden />
@@ -237,24 +234,21 @@ export default function VerifyEmailPage() {
       </div>
 
       <p
-        className={`mt-3 text-center text-sm font-medium text-slate-600 ${
-          entered ? "auth-animate-fade-up-delay" : ""
-        }`}
+        className={`mt-3 text-center text-sm font-medium text-slate-600 ${entered ? "auth-animate-fade-up-delay" : ""
+          }`}
       >
         Nhập 6 chữ số trong email.
       </p>
 
       <form
-        className={`mt-8 flex flex-col gap-6 ${
-          verified ? "pointer-events-none opacity-40" : ""
-        }`}
+        className={`mt-8 flex flex-col gap-6 ${verified ? "pointer-events-none opacity-40" : ""
+          }`}
         onSubmit={onSubmit}
         {...(verified ? { "aria-hidden": true } : {})}
       >
         <div
-          className={`flex justify-center ${
-            entered ? "auth-animate-fade-up-delay-2" : ""
-          }`}
+          className={`flex justify-center ${entered ? "auth-animate-fade-up-delay-2" : ""
+            }`}
         >
           <OtpInput
             value={otpCode}

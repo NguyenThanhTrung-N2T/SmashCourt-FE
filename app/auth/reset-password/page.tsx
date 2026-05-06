@@ -10,13 +10,13 @@ import {
   authForgotPasswordReset,
   getAuthFieldError,
 } from "@/src/api/auth.api";
-import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
+import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
 import {
   clearEmail,
   clearResetToken,
   getResetToken,
-} from "@/src/modules/auth/session/sessionStore";
-import { isValidPassword } from "@/src/modules/auth/validators";
+} from "@/src/features/auth/session/sessionStore";
+import { isValidPassword } from "@/src/features/auth/validators";
 
 const REDIRECT_MS = 2000;
 
@@ -103,7 +103,7 @@ export default function ResetPasswordPage() {
 
       setError(
         fieldError ??
-          (err instanceof Error ? err.message : "Đặt lại mật khẩu thất bại."),
+        (err instanceof Error ? err.message : "Đặt lại mật khẩu thất bại."),
       );
     } finally {
       setLoading(false);
@@ -135,9 +135,8 @@ export default function ResetPasswordPage() {
 
   return (
     <section
-      className={`w-full transform transition-all duration-700 motion-reduce:transform-none motion-reduce:transition-none ${
-        mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-      }`}
+      className={`w-full transform transition-all duration-700 motion-reduce:transform-none motion-reduce:transition-none ${mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+        }`}
     >
       <div className="mb-10 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">

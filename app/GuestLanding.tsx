@@ -20,9 +20,9 @@ import {
   MapPin,
 } from "lucide-react";
 
-import PublicInfoHeader from "@/src/domains/customer/components/PublicInfoHeader";
-import PublicSiteFooter from "@/src/domains/customer/components/PublicSiteFooter";
-import ChatbotWidget from "@/src/domains/customer/components/ChatbotWidget";
+import PublicInfoHeader from "@/src/layouts/customer/components/PublicInfoHeader";
+import PublicSiteFooter from "@/src/layouts/customer/components/PublicSiteFooter";
+import ChatbotWidget from "@/src/layouts/customer/components/ChatbotWidget";
 
 const FEATURES = [
   {
@@ -190,13 +190,12 @@ export default function GuestLanding() {
                       {Array.from({ length: 31 }, (_, i) => (
                         <div
                           key={i}
-                          className={`rounded-lg p-2 transition-all hover:scale-105 ${
-                            i === 15
+                          className={`rounded-lg p-2 transition-all hover:scale-105 ${i === 15
                               ? "bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-md"
                               : i % 3 === 0
                                 ? "bg-emerald-100 text-emerald-700"
                                 : "bg-slate-50 text-slate-700 hover:bg-emerald-50"
-                          }`}
+                            }`}
                         >
                           {i + 1}
                         </div>

@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
-import PublicInfoHeader from "@/src/domains/customer/components/PublicInfoHeader";
-import PublicSiteFooter from "@/src/domains/customer/components/PublicSiteFooter";
-import ChatbotWidget from "@/src/domains/customer/components/ChatbotWidget";
+import PublicInfoHeader from "@/src/layouts/customer/components/PublicInfoHeader";
+import PublicSiteFooter from "@/src/layouts/customer/components/PublicSiteFooter";
+import ChatbotWidget from "@/src/layouts/customer/components/ChatbotWidget";
 
 export default function PublicInfoLayout({
   children,

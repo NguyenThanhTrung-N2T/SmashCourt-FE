@@ -1,8 +1,8 @@
 "use client";
 
 import { ReactNode } from "react";
-import { RoleGuard } from "@/src/modules/auth/components/RoleGuard";
-import OwnerSidebarLayout from "@/src/domains/owner/components/OwnerSidebarLayout";
+import { RoleGuard } from "@/src/features/auth/components/RoleGuard";
+import OwnerSidebarLayout from "@/src/layouts/owner/components/OwnerSidebarLayout";
 
 export default function OwnerLayout({ children }: { children: ReactNode }) {
   return (

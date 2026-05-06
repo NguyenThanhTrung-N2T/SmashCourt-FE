@@ -9,9 +9,9 @@ import {
   authGoogleCallback,
   hasAuthErrorCode,
 } from "@/src/api/auth.api";
-import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
-import { getRedirectPathByRole } from "@/src/modules/auth/constants";
-import { setAuthenticatedSession } from "@/src/modules/auth/session/sessionStore";
+import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
+import { getRedirectPathByRole } from "@/src/features/auth/constants";
+import { setAuthenticatedSession } from "@/src/features/auth/session/sessionStore";
 
 const REDIRECT_MS = 2000;
 
@@ -139,9 +139,8 @@ export default function GoogleOauthCallbackClient() {
 
   return (
     <section
-      className={`mx-auto max-w-md transition-all duration-500 ease-out motion-reduce:transition-none ${
-        mounted ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
-      }`}
+      className={`mx-auto max-w-md transition-all duration-500 ease-out motion-reduce:transition-none ${mounted ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+        }`}
     >
       <div className="mb-10 text-center">
         <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">

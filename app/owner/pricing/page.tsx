@@ -1,7 +1,7 @@
 "use client";
 
-import PricingManager from "@/src/modules/pricing/components/management/PricingManager";
+import OwnerPricingPage from "@/src/features/pricing/owner/OwnerPricingPage";
 
 export default function PricingPage() {
-  return <PricingManager />;
+  return <OwnerPricingPage />;
 }

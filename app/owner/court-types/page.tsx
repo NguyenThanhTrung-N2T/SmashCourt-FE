@@ -1,4 +1,4 @@
-import CourtTypePanel from "@/src/modules/court-type/components/CourtTypePanel";
+import CourtTypePanel from "@/src/features/court-type/owner/components/CourtTypePanel";
 
 export default function CourtTypesPage() {
   return <CourtTypePanel />;

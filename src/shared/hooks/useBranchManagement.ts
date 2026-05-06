@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { fetchBranchById, updateBranch, suspendBranch, activateBranch } from '@/src/api/branch.api';
 import type { BranchDto, UpdateBranchDto } from '@/src/shared/types/branch.types';
-import { handleApiError } from '@/src/modules/branch-management/utils/error-handling';
+import { handleApiError } from '@/src/features/branch/owner/utils/error-handling';
 
 export function useBranchManagement(branchId: string) {
   const [branch, setBranch] = useState<BranchDto | null>(null);

@@ -8,16 +8,16 @@ import { AlertCircle, Lock, Mail, Phone, User, UserPlus } from "lucide-react";
 import {
   authRegister,
 } from "@/src/api/auth.api";
-import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
+import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
 import {
   setEmail,
   setRegisterFlashMessage,
   startRegisterVerifySession,
-} from "@/src/modules/auth/session/sessionStore";
-import { isValidPassword } from "@/src/modules/auth/validators";
-import { useAuthErrors } from "@/src/modules/auth/hooks/useAuthError";
-import { useAuthErrorLogger } from "@/src/modules/auth/hooks/useAuthError";
-import type { AuthFormEvent } from "@/src/modules/auth/types/forms";
+} from "@/src/features/auth/session/sessionStore";
+import { isValidPassword } from "@/src/features/auth/validators";
+import { useAuthErrors } from "@/src/features/auth/hooks/useAuthError";
+import { useAuthErrorLogger } from "@/src/features/auth/hooks/useAuthError";
+import type { AuthFormEvent } from "@/src/features/auth/types/forms";
 import { hasAuthErrorCode, getAuthFieldError } from "@/src/api/auth.api";
 
 function isAlternativeLoginMethodError(message?: string) {
@@ -105,13 +105,13 @@ export default function RegisterPage() {
       router.push("/auth/verify-email");
     } catch (err) {
       logError(err);
-      
+
       // Check for EMAIL_EXISTS with unverified email
       if (hasAuthErrorCode(err, "EMAIL_EXISTS")) {
         const errorMessage = err instanceof Error ? err.message : "";
         const isUnverified = errorMessage.toLowerCase().includes("chưa được xác thực") ||
-                            errorMessage.toLowerCase().includes("chua duoc xac thuc");
-        
+          errorMessage.toLowerCase().includes("chua duoc xac thuc");
+
         if (isUnverified) {
           // Email exists but not verified - redirect to verify-email page
           setEmail(trimmedEmail);
@@ -121,7 +121,7 @@ export default function RegisterPage() {
           return;
         }
       }
-      
+
       const fieldError =
         getAuthFieldError(err, ["email", "fullName", "phone", "password"]) ??
         null;
@@ -144,9 +144,8 @@ export default function RegisterPage() {
 
   return (
     <section
-      className={`w-full transform transition-all duration-700 ease-out motion-reduce:transform-none motion-reduce:transition-none ${
-        mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-      }`}
+      className={`w-full transform transition-all duration-700 ease-out motion-reduce:transform-none motion-reduce:transition-none ${mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+        }`}
     >
       <div className="mb-10 text-center">
         <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">

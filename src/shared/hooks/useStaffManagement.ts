@@ -9,8 +9,8 @@ import type {
   BulkStaffOperationDto,
   BulkStaffOperationResultDto,
 } from '@/src/shared/types/branch.types';
-import { handleApiError } from '@/src/modules/branch-management/utils/error-handling';
-import { branchCache } from '@/src/modules/branch-management/utils/caching';
+import { handleApiError } from '@/src/features/branch/owner/utils/error-handling';
+import { branchCache } from '@/src/features/branch/owner/utils/caching';
 
 export function useStaffManagement(branchId: string) {
   const [staff, setStaff] = useState<PaginatedData<BranchStaffDto> | null>(null);

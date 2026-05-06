@@ -1,5 +1,5 @@
 import { authProtectedFetch } from "@/src/api/auth.api";
-import { sortCancelPolicies } from "@/src/modules/policy/utils/cancellationPolicy";
+import { sortCancelPolicies } from "@/src/features/policy/utils/cancellationPolicy";
 import type {
   CancelPolicy,
   SaveCancelPolicyRequest,

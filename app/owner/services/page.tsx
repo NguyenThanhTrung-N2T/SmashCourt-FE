@@ -1,5 +1,5 @@
-import ServiceManager from "@/src/modules/service/components/ServiceManager";
+import OwnerServicePage from "@/src/features/service/owner/OwnerServicePage";
 
 export default function ServicesPage() {
-  return <ServiceManager />;
+  return <OwnerServicePage />;
 }

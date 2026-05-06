@@ -3,12 +3,13 @@ import { authProtectedFetch } from "@/src/api/auth.api";
 import type {
     CurrentPriceDto,
     EffectivePriceDto,
+    PriceVersionDto,
     CreateSystemPriceDto,
     CreateBranchPriceDto,
     DeleteBranchPriceDto,
     CalculatePriceDto,
     CalculatePriceResultDto,
-} from "@/src/shared/types/pricing.types";
+} from "@/src/features/pricing/types";
 
 // ─── SYSTEM PRICE APIs ───────────────────────────────────────────────────────
 
@@ -23,6 +24,26 @@ export async function fetchSystemPriceHistory(
     const params = courtTypeId ? `?courtTypeId=${courtTypeId}` : "";
     const response = await authProtectedFetch<CurrentPriceDto[]>(
         `/api/system-prices${params}`,
+        { method: "GET" },
+    );
+
+    const data = response.data;
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+
+    return [];
+}
+
+/**
+ * GET /api/system-prices/versions
+ * Retrieve available effective dates for a court type.
+ */
+export async function fetchSystemPriceVersions(
+    courtTypeId: string,
+): Promise<PriceVersionDto[]> {
+    const params = new URLSearchParams({ courtTypeId });
+    const response = await authProtectedFetch<PriceVersionDto[]>(
+        `/api/system-prices/versions?${params.toString()}`,
         { method: "GET" },
     );
 
@@ -59,7 +80,7 @@ export async function fetchCurrentSystemPrices(
  * Fetch pricing snapshot at a specific date.
  */
 export async function fetchResolvedSystemPrices(
-    date: string,
+    date: string, //YYYY-mm-dd
     courtTypeId?: string,
 ): Promise<CurrentPriceDto[]> {
     const params = new URLSearchParams({ date });
@@ -110,6 +131,27 @@ export async function fetchBranchPriceHistory(
     const params = courtTypeId ? `?courtTypeId=${courtTypeId}` : "";
     const response = await authProtectedFetch<CurrentPriceDto[]>(
         `/api/branches/${branchId}/prices${params}`,
+        { method: "GET" },
+    );
+
+    const data = response.data;
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+
+    return [];
+}
+
+/**
+ * GET /api/branches/{branchId}/prices/versions
+ * Retrieve branch override effective dates for a court type.
+ */
+export async function fetchBranchPriceVersions(
+    branchId: string,
+    courtTypeId: string,
+): Promise<PriceVersionDto[]> {
+    const params = new URLSearchParams({ courtTypeId });
+    const response = await authProtectedFetch<PriceVersionDto[]>(
+        `/api/branches/${branchId}/prices/versions?${params.toString()}`,
         { method: "GET" },
     );
 

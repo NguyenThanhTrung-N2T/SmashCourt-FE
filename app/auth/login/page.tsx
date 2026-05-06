@@ -10,7 +10,7 @@ import {
   authLogin,
   hasAuthErrorCode,
 } from "@/src/api/auth.api";
-import AuthStatusToast from "@/src/modules/auth/components/AuthStatusToast";
+import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
 import {
   consumePostVerifyLoginHint,
   getEmail,
@@ -18,11 +18,11 @@ import {
   setAuthenticatedSession,
   setTempToken,
   startTwoFactorVerifySession,
-} from "@/src/modules/auth/session/sessionStore";
-import { useAuthRedirect } from "@/src/modules/auth/hooks/useAuthRedirect";
-import { useAuthErrors } from "@/src/modules/auth/hooks/useAuthError";
-import { useAuthErrorLogger } from "@/src/modules/auth/hooks/useAuthError";
-import type { AuthFormEvent } from "@/src/modules/auth/types/forms";
+} from "@/src/features/auth/session/sessionStore";
+import { useAuthRedirect } from "@/src/features/auth/hooks/useAuthRedirect";
+import { useAuthErrors } from "@/src/features/auth/hooks/useAuthError";
+import { useAuthErrorLogger } from "@/src/features/auth/hooks/useAuthError";
+import type { AuthFormEvent } from "@/src/features/auth/types/forms";
 
 function normalizeText(value: string | null | undefined) {
   return (value ?? "")
@@ -151,14 +151,14 @@ export default function LoginPage() {
       }
     } catch (err) {
       logError(err);
-      
+
       // Check for email not verified error - show error with link to verify-email page
       if (hasAuthErrorCode(err, "EMAIL_NOT_VERIFIED")) {
         setShowVerifyLink(true);
         showError("form", err, "login");
         return;
       }
-      
+
       if (isAccountLockedError(err)) {
         showError("locked", err, "login");
       } else {
@@ -192,9 +192,8 @@ export default function LoginPage() {
 
   return (
     <section
-      className={`w-full transform transition-all duration-700 ${
-        mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-      }`}
+      className={`w-full transform transition-all duration-700 ${mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+        }`}
     >
       <div className="mb-10 text-center">
         <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">

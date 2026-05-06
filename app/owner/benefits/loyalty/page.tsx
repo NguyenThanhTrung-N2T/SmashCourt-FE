@@ -1,4 +1,4 @@
-import LoyaltyTierManager from "@/src/modules/loyalty/components/LoyaltyTierManager";
+import LoyaltyTierManager from "@/src/features/benefit/components/LoyaltyTierManager";
 
 export default function LoyaltyPage() {
   return <LoyaltyTierManager />;

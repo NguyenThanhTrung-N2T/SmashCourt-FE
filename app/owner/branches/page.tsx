@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BranchManagementView } from "@/src/modules/branch-management/components/BranchManagementView";
+import { BranchManagementView } from "@/src/features/branch/owner/components/BranchManagementView";
 import { fetchBranches } from "@/src/api/branch.api";
 import type { BranchDto } from "@/src/shared/types/branch.types";
 import { Storefront, CaretDown } from "@phosphor-icons/react";
@@ -88,8 +88,8 @@ export default function BranchesPage() {
   }
 
   return (
-    <BranchManagementView 
-      key={selectedBranchId} 
+    <BranchManagementView
+      key={selectedBranchId}
       branchId={selectedBranchId}
       branches={branches}
       selectedBranchId={selectedBranchId}
