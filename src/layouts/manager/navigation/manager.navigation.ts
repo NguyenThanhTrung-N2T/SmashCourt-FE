@@ -10,11 +10,12 @@ import {
   FileText,
   TrendUp,
   UserCircle,
+  Gear
 } from "@phosphor-icons/react";
 
 export const MANAGER_NAV: NavItem[] = [
   {
-    label: "Dashboard",
+    label: "Tổng quan",
     href: "/manager",
     icon: ChartBar,
     hint: "Tổng quan chi nhánh",
@@ -27,51 +28,51 @@ export const MANAGER_NAV: NavItem[] = [
     hint: "Quản lý đặt sân",
   },
   {
-    label: "Time Grid",
+    label: "Khung giờ",
     href: "/manager/time-grid",
     icon: SquaresFour,
     hint: "Lịch sân theo giờ",
   },
   {
-    label: "Courts",
+    label: "Sân",
     href: "/manager/courts",
     icon: GridFour,
     hint: "Quản lý sân thi đấu",
   },
   {
-    label: "Services",
+    label: "Dịch vụ",
     href: "/manager/services",
     icon: Coffee,
     hint: "Dịch vụ & mặt hàng",
   },
   {
-    label: "Customers",
+    label: "Khách hàng",
     href: "/manager/customers",
     icon: Users,
     hint: "Khách hàng",
   },
   {
-    label: "Staff",
+    label: "Nhân viên",
     href: "/manager/staff",
     icon: UsersThree,
     hint: "Nhân viên chi nhánh",
   },
   {
-    label: "Invoices",
+    label: "Hóa đơn",
     href: "/manager/invoices",
     icon: FileText,
     hint: "Hóa đơn & thanh toán",
   },
   {
-    label: "Reports",
+    label: "Báo cáo",
     href: "/manager/reports",
     icon: TrendUp,
     hint: "Báo cáo doanh thu",
   },
   {
-    label: "Profile",
-    href: "/manager/profile",
-    icon: UserCircle,
-    hint: "Hồ sơ cá nhân",
-  },
+    label: "Cài đặt",
+    href: "/manager/settings",
+    icon: Gear,
+    hint: "Cấu hình hệ thống"
+  }
 ];

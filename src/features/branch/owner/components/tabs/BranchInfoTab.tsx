@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { Storefront, MapPin, Phone, Clock, User, CheckCircle, Warning } from '@phosphor-icons/react';
-import type { BranchDto, UpdateBranchDto } from '@/src/shared/types/branch.types';
+import type { BranchDto, UpdateBranchDto } from '@/src/features/branch/types/branch.types';
 import { useBranchManagement } from '@/src/shared/hooks/useBranchManagement';
 import { validateBranchForm } from '../../utils/validation';
 import { ConfirmationDialog } from '@/src/shared/components/ui';
-import { LoadingSkeleton } from '../shared/LoadingSkeleton';
+import { BranchInfoLoading, BranchErrorState } from '../states';
+import { Button } from '@/src/shared/components/ui/Button';
+import { Badge } from '@/src/shared/components/ui/Badge';
 
 interface BranchInfoTabProps {
     branchId: string;
@@ -122,16 +124,11 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
     };
 
     if (loading && !branch) {
-        return <LoadingSkeleton variant="form" rows={6} />;
+        return <BranchInfoLoading />;
     }
 
     if (error && !branch) {
-        return (
-            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-center">
-                <Warning className="h-12 w-12 text-red-500 mx-auto mb-3" />
-                <p className="text-sm font-bold text-red-600">{error}</p>
-            </div>
-        );
+        return <BranchErrorState message={error} />;
     }
 
     return (
@@ -151,15 +148,30 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
             )}
 
             <div className="rounded-2xl border border-border bg-surface-1 shadow-sm p-6">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                        <Storefront className="h-5 w-5 text-primary" />
+                {branch && (
+                    <div className="flex items-center justify-between mb-6">
+                        {(() => {
+                            const isActive = branch.status === 0;
+                            const isSuspended = branch.status === 1;
+                            return (
+                                <Badge
+                                    variant={isActive ? 'success' : isSuspended ? 'warning' : 'neutral'}
+                                    dot
+                                >
+                                    {isActive ? 'Đang hoạt động' : isSuspended ? 'Tạm khóa' : 'Đã xóa'}
+                                </Badge>
+                            );
+                        })()}
+
+                        {branch.managerName && (
+                            <div className="flex items-center gap-2 text-sm">
+                                <User className="h-4 w-4 text-muted shrink-0" />
+                                <span className="text-muted">Quản lý hiện tại:</span>
+                                <span className="font-bold text-foreground">{branch.managerName}</span>
+                            </div>
+                        )}
                     </div>
-                    <div>
-                        <h3 className="text-base font-extrabold text-foreground">Thông tin chi nhánh</h3>
-                        <p className="text-xs text-muted">Cập nhật thông tin cơ bản của chi nhánh</p>
-                    </div>
-                </div>
+                )}
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <div>
@@ -294,45 +306,32 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
                     </div>
                 </div>
 
-                {branch?.managerName && (
-                    <div className="mt-6 pt-6 border-t border-border">
-                        <div className="flex items-center gap-3 text-sm">
-                            <User className="h-4 w-4 text-muted" />
-                            <span className="text-muted">Quản lý hiện tại:</span>
-                            <span className="font-bold text-foreground">{branch.managerName}</span>
-                        </div>
-                    </div>
-                )}
-
                 <div className="flex items-center gap-3 mt-6 pt-6 border-t border-border">
-                    <button
+                    <Button
                         onClick={handleSave}
                         disabled={saving || loading}
-                        className="flex-1 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{
-                            background: "linear-gradient(135deg, #2A9D5C 0%, #1B5E38 100%)",
-                            boxShadow: "0 4px 14px rgba(27, 94, 56, 0.35)",
-                        }}
+                        isLoading={saving}
+                        className="flex-1 justify-center"
                     >
-                        {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
-                    </button>
+                        Lưu thay đổi
+                    </Button>
 
-                    {branch?.status === 'ACTIVE' ? (
-                        <button
+                    {branch?.status === 0 ? (
+                        <Button
+                            variant="danger"
                             onClick={() => setShowSuspendDialog(true)}
                             disabled={loading}
-                            className="rounded-full border border-red-500/40 bg-surface-1 px-5 py-2.5 text-sm font-bold text-red-500 shadow-sm hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Tạm khóa
-                        </button>
+                        </Button>
                     ) : (
-                        <button
+                        <Button
+                            variant="success"
                             onClick={() => setShowActivateDialog(true)}
                             disabled={loading}
-                            className="rounded-full border border-emerald-500/40 bg-surface-1 px-5 py-2.5 text-sm font-bold text-emerald-500 shadow-sm hover:bg-emerald-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Kích hoạt
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>

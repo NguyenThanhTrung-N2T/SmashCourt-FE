@@ -49,14 +49,14 @@ export default function Sidebar({
  aria-current={active ?"page" : undefined}
  className={`group flex items-center gap-3 py-2.5 px-6 border-l-[3px] transition-all duration-200 ${
  active
- ?"border-[#0A5C36] bg-[#0A5C36]/5 text-[#0A5C36] font-bold"
+ ?"border-primary bg-primary/5 text-primary font-bold"
  :"border-transparent text-muted hover:bg-surface-2/50 hover:text-foreground font-medium"
  }`}
  >
  <Icon
  className={`h-[18px] w-[18px] ${
  active
- ?"text-[#0A5C36]"
+ ?"text-primary"
  :"text-muted group-hover:text-slate-600"
  }`}
  />

@@ -2,20 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { Users, User, Plus, Trash, MagnifyingGlass, Warning } from '@phosphor-icons/react';
-import type { BranchStaffDto, AddStaffDto, UserSearchResultDto, UserBranchRole } from '@/src/shared/types/branch.types';
+import type { BranchStaffDto, AddStaffDto, UserSearchResultDto, UserBranchRole } from '@/src/features/branch/types/branch.types';
 import { useStaffManagement } from '@/src/shared/hooks/useStaffManagement';
 import { useUserSearch } from '@/src/shared/hooks/useUserSearch';
 import { SearchInput } from '../shared/SearchInput';
 import { Pagination } from '../shared/Pagination';
 import { ConfirmationDialog } from '@/src/shared/components/ui';
-import { LoadingSkeleton } from '../shared/LoadingSkeleton';
+import { BranchStaffLoading } from '../states';
+import { EmptyState } from '@/src/shared/components/layout';
+import { Button } from '@/src/shared/components/ui/Button';
 import { useToast } from '@/src/shared/hooks/useToast';
 
 interface BranchStaffTabProps {
     branchId: string;
+    onToast?: (tone: 'success' | 'error', message: string) => void;
 }
 
-export function BranchStaffTab({ branchId }: BranchStaffTabProps) {
+export function BranchStaffTab({ branchId, onToast }: BranchStaffTabProps) {
     const {
         staff,
         loading,
@@ -30,6 +33,7 @@ export function BranchStaffTab({ branchId }: BranchStaffTabProps) {
     const [staffToRemove, setStaffToRemove] = useState<BranchStaffDto | null>(null);
     const [selectedRole, setSelectedRole] = useState<UserBranchRole>(1); // Default to STAFF
     const { show: showToast } = useToast();
+    const toast = onToast ?? showToast;
 
     const { users, loading: searchLoading, setSearchTerm: setUserSearchTerm } = useUserSearch({
         eligibleForStaff: true,
@@ -53,7 +57,7 @@ export function BranchStaffTab({ branchId }: BranchStaffTabProps) {
                 reason: 'Added via branch management screen',
             };
             await addStaffMember(dto);
-            showToast('success', 'Thêm nhân viên thành công');
+            toast('success', 'Thêm nhân viên thành công');
             setShowAddModal(false);
         } catch (err) {
             // Error handled by hook
@@ -66,7 +70,7 @@ export function BranchStaffTab({ branchId }: BranchStaffTabProps) {
             await removeStaffMember(staffToRemove.userId, {
                 reason: 'Removed via branch management screen',
             });
-            showToast('success', 'Gỡ nhân viên thành công');
+            toast('success', 'Gỡ nhân viên thành công');
             setStaffToRemove(null);
         } catch (err) {
             // Error handled by hook
@@ -104,7 +108,7 @@ export function BranchStaffTab({ branchId }: BranchStaffTabProps) {
     };
 
     if (loading && !staff) {
-        return <LoadingSkeleton variant="table" rows={5} />;
+        return <BranchStaffLoading />;
     }
 
     return (
@@ -128,17 +132,10 @@ export function BranchStaffTab({ branchId }: BranchStaffTabProps) {
                         </div>
                     </div>
 
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-95"
-                        style={{
-                            background: "linear-gradient(135deg, #2A9D5C 0%, #1B5E38 100%)",
-                            boxShadow: "0 4px 14px rgba(27, 94, 56, 0.35)",
-                        }}
-                    >
+                    <Button onClick={() => setShowAddModal(true)}>
                         <Plus className="h-4 w-4" />
                         Thêm nhân viên
-                    </button>
+                    </Button>
                 </div>
 
                 <div className="mb-4">
@@ -192,11 +189,11 @@ export function BranchStaffTab({ branchId }: BranchStaffTabProps) {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-12">
-                        <Users className="h-16 w-16 text-muted mx-auto mb-4" />
-                        <p className="text-base font-bold text-foreground">Chưa có nhân viên</p>
-                        <p className="text-sm text-muted mt-2">Thêm nhân viên để bắt đầu quản lý</p>
-                    </div>
+                    <EmptyState
+                        icon={<Users className="h-16 w-16 text-muted" />}
+                        title="Chưa có nhân viên"
+                        description="Thêm nhân viên để bắt đầu quản lý"
+                    />
                 )}
 
                 {/* Pagination */}

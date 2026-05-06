@@ -2,26 +2,30 @@
 
 import { useState, useEffect } from 'react';
 import { UserCircle, User, Plus, Trash, Warning } from '@phosphor-icons/react';
-import type { BranchManagerDto, AssignManagerDto, UserSearchResultDto } from '@/src/shared/types/branch.types';
+import type { BranchManagerDto, AssignManagerDto, UserSearchResultDto } from '@/src/features/branch/types/branch.types';
 import { getCurrentManager, assignManager, removeManager } from '@/src/api/branch.api';
 import { useUserSearch } from '@/src/shared/hooks/useUserSearch';
 import { SearchInput } from '../shared/SearchInput';
 import { ConfirmationDialog } from '@/src/shared/components/ui';
-import { LoadingSkeleton } from '../shared/LoadingSkeleton';
+import { BranchManagerLoading } from '../states';
+import { EmptyState } from '@/src/shared/components/layout';
+import { Button } from '@/src/shared/components/ui/Button';
 import { handleApiError } from '../../utils/error-handling';
 import { useToast } from '@/src/shared/hooks/useToast';
 
 interface BranchManagerTabProps {
     branchId: string;
+    onToast?: (tone: 'success' | 'error', message: string) => void;
 }
 
-export function BranchManagerTab({ branchId }: BranchManagerTabProps) {
+export function BranchManagerTab({ branchId, onToast }: BranchManagerTabProps) {
     const [manager, setManager] = useState<BranchManagerDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [showRemoveDialog, setShowRemoveDialog] = useState(false);
     const { show: showToast } = useToast();
+    const toast = onToast ?? showToast;
 
     const { users, loading: searchLoading, setSearchTerm } = useUserSearch({
         eligibleForManager: true,
@@ -53,12 +57,12 @@ export function BranchManagerTab({ branchId }: BranchManagerTabProps) {
                 reason: 'Assigned via branch management screen',
             };
             await assignManager(branchId, dto);
-            showToast('success', 'Gán quản lý chi nhánh thành công');
+            toast('success', 'Gán quản lý chi nhánh thành công');
             setShowAssignModal(false);
             await loadManager();
         } catch (err) {
             const message = handleApiError(err);
-            showToast('error', message);
+            toast('error', message);
         }
     };
 
@@ -67,17 +71,17 @@ export function BranchManagerTab({ branchId }: BranchManagerTabProps) {
             await removeManager(branchId, {
                 reason: 'Removed via branch management screen',
             });
-            showToast('success', 'Gỡ quản lý chi nhánh thành công');
+            toast('success', 'Gỡ quản lý chi nhánh thành công');
             setShowRemoveDialog(false);
             await loadManager();
         } catch (err) {
             const message = handleApiError(err);
-            showToast('error', message);
+            toast('error', message);
         }
     };
 
     if (loading) {
-        return <LoadingSkeleton variant="card" rows={3} />;
+        return <BranchManagerLoading />;
     }
 
     return (
@@ -90,7 +94,7 @@ export function BranchManagerTab({ branchId }: BranchManagerTabProps) {
             )}
 
             <div className="rounded-2xl border border-border bg-surface-1 shadow-sm p-6">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3 mb-6">
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
                             <UserCircle className="h-5 w-5 text-primary" />
@@ -100,20 +104,6 @@ export function BranchManagerTab({ branchId }: BranchManagerTabProps) {
                             <p className="text-xs text-muted">Gán hoặc thay đổi người quản lý chi nhánh</p>
                         </div>
                     </div>
-
-                    {!manager && (
-                        <button
-                            onClick={() => setShowAssignModal(true)}
-                            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-95"
-                            style={{
-                                background: "linear-gradient(135deg, #2A9D5C 0%, #1B5E38 100%)",
-                                boxShadow: "0 4px 14px rgba(27, 94, 56, 0.35)",
-                            }}
-                        >
-                            <Plus className="h-4 w-4" />
-                            Gán quản lý
-                        </button>
-                    )}
                 </div>
 
                 {manager ? (
@@ -142,11 +132,17 @@ export function BranchManagerTab({ branchId }: BranchManagerTabProps) {
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center py-12">
-                        <UserCircle className="h-16 w-16 text-muted mx-auto mb-4" />
-                        <p className="text-base font-bold text-foreground">Chưa có quản lý</p>
-                        <p className="text-sm text-muted mt-2">Chi nhánh này chưa được gán quản lý</p>
-                    </div>
+                    <EmptyState
+                        icon={<UserCircle className="h-16 w-16 text-muted" />}
+                        title="Chưa có quản lý"
+                        description="Chi nhánh này chưa được gán quản lý"
+                        action={
+                            <Button onClick={() => setShowAssignModal(true)}>
+                                <Plus className="h-4 w-4" />
+                                Gán quản lý
+                            </Button>
+                        }
+                    />
                 )}
             </div>
 

@@ -3,7 +3,7 @@ import {
     Stack,
     Tag,
 } from "@phosphor-icons/react";
-import type { CourtType, TabId } from "../../../types";
+import type { CourtType, TabId } from "../../../types/pricing.types";
 
 interface PricingTabsProps {
     activeTab: TabId;

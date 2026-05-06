@@ -1,4 +1,4 @@
-import type { CourtType, CurrentPriceDto, EffectivePriceDto, PriceConfig, PriceRow, TimeSlot } from "./types";
+import type { CourtType, CurrentPriceDto, EffectivePriceDto, PriceConfig, PriceRow, TimeSlot } from "./types/pricing.types";
 
 export function fmt(n: number): string {
     return n.toLocaleString("vi-VN") + "đ";

@@ -68,7 +68,7 @@ export interface BranchDto {
   avatarUrl?: string;
   openTime: string; // TimeOnly
   closeTime: string; // TimeOnly
-  status: "ACTIVE" | "SUSPENDED" | "DELETED";
+  status: 0 | 1 | 2; // 0 = ACTIVE, 1 = SUSPENDED, 2 = DELETED
   createdAt: string; // DateTime
   updatedAt: string; // DateTime
   managerName?: string;

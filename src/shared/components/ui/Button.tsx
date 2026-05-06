@@ -5,7 +5,7 @@ interface ButtonProps {
  children: ReactNode;
  onClick?: () => void;
  disabled?: boolean;
- variant?:'primary' |'secondary' |'danger' |'ghost' |'dangerSoft';
+ variant?:'primary' |'secondary' |'danger' |'ghost' |'dangerSoft' |'success';
  size?:'sm' |'md' |'lg';
  className?: string;
  type?:'button' |'submit' |'reset';
@@ -38,6 +38,7 @@ export function Button({
  danger:'border border-red-500/40 bg-surface-1 text-red-500 shadow-sm hover:bg-red-500/10',
  dangerSoft:'bg-red-500/10 text-red-500 hover:bg-red-500/15',
  ghost:'text-muted hover:bg-surface-2',
+ success:'border border-emerald-500/40 bg-surface-1 text-emerald-500 shadow-sm hover:bg-emerald-500/10',
  };
  
  const gradientStyle = variant ==='primary' ? {

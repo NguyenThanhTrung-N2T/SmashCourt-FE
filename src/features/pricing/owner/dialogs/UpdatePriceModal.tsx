@@ -5,7 +5,7 @@ import {
     X,
 } from "@phosphor-icons/react";
 import { fmt, todayStr } from "../../utils";
-import type { PriceRow } from "../../types";
+import type { PriceRow } from "../../types/pricing.types";
 
 interface UpdatePriceModalProps {
     row: PriceRow;

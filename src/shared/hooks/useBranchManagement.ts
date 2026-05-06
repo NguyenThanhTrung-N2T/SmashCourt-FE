@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { fetchBranchById, updateBranch, suspendBranch, activateBranch } from '@/src/api/branch.api';
-import type { BranchDto, UpdateBranchDto } from '@/src/shared/types/branch.types';
+import type { BranchDto, UpdateBranchDto } from '@/src/features/branch/types/branch.types';
 import { handleApiError } from '@/src/features/branch/owner/utils/error-handling';
 
 export function useBranchManagement(branchId: string) {
@@ -51,7 +51,7 @@ export function useBranchManagement(branchId: string) {
     try {
       await suspendBranch(branchId);
       if (branch) {
-        setBranch({ ...branch, status: 'SUSPENDED' });
+        setBranch({ ...branch, status: 1 });
       }
     } catch (err) {
       const message = handleApiError(err);
@@ -70,7 +70,7 @@ export function useBranchManagement(branchId: string) {
     try {
       await activateBranch(branchId);
       if (branch) {
-        setBranch({ ...branch, status: 'ACTIVE' });
+        setBranch({ ...branch, status: 0 });
       }
     } catch (err) {
       const message = handleApiError(err);

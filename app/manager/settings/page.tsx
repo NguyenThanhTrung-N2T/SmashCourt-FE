@@ -2,6 +2,6 @@
 
 import { SettingsPage } from "@/src/features/settings/components/SettingsPage";
 
-export default function OwnerSettingsPage() {
+export default function ManagerSettingsPage() {
   return <SettingsPage />;
 }

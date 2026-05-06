@@ -2,89 +2,89 @@
 
 import { useState } from 'react';
 import { X, Storefront, MapPin, Phone, Clock, User } from '@phosphor-icons/react';
-import type { CreateBranchDto } from '@/src/shared/types/branch.types';
-import type { UserSearchResultDto } from '@/src/shared/types/branch.types';
+import type { CreateBranchDto } from '@/src/features/branch/types/branch.types';
+import type { UserSearchResultDto } from '@/src/features/branch/types/branch.types';
 import { validateBranchForm } from '../../utils/validation';
 import { SearchInput } from '../shared/SearchInput';
 import { useUserSearch } from '@/src/shared/hooks/useUserSearch';
 
 interface AddBranchModalProps {
- onClose: () => void;
- onSave: (data: CreateBranchDto) => Promise<void>;
+    onClose: () => void;
+    onSave: (data: CreateBranchDto) => Promise<void>;
 }
 
 export function AddBranchModal({ onClose, onSave }: AddBranchModalProps) {
- const [formData, setFormData] = useState<Omit<CreateBranchDto, 'managerId'> & { managerId?: string }>({
- name: '',
- address: '',
- phone: '',
- avatarUrl: '',
- latitude: undefined,
- longitude: undefined,
- openTime: '06:00:00',
- closeTime: '22:00:00',
- managerId: undefined,
+    const [formData, setFormData] = useState<Omit<CreateBranchDto, 'managerId'> & { managerId?: string }>({
+    name: '',
+    address: '',
+    phone: '',
+    avatarUrl: '',
+    latitude: undefined,
+    longitude: undefined,
+    openTime: '06:00:00',
+    closeTime: '22:00:00',
+    managerId: undefined,
  });
 
- const [selectedManager, setSelectedManager] = useState<UserSearchResultDto | null>(null);
- const [showManagerSearch, setShowManagerSearch] = useState(false);
- const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
- const [saving, setSaving] = useState(false);
+    const [selectedManager, setSelectedManager] = useState<UserSearchResultDto | null>(null);
+    const [showManagerSearch, setShowManagerSearch] = useState(false);
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+    const [saving, setSaving] = useState(false);
 
- const { users, loading: searchLoading, setSearchTerm } = useUserSearch({
- eligibleForManager: true,
- pageSize: 5,
+    const { users, loading: searchLoading, setSearchTerm } = useUserSearch({
+    eligibleForManager: true,
+    pageSize: 5,
  });
 
- const handleInputChange = (field: keyof typeof formData, value: any) => {
- setFormData(prev => ({ ...prev, [field]: value }));
- if (validationErrors[field]) {
- setValidationErrors(prev => {
- const newErrors = { ...prev };
- delete newErrors[field];
- return newErrors;
- });
- }
+    const handleInputChange = (field: keyof typeof formData, value: any) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        if (validationErrors[field]) {
+            setValidationErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors[field];
+            return newErrors;
+        });
+    }
  };
 
- const handleManagerSelect = (manager: UserSearchResultDto) => {
- setSelectedManager(manager);
- setFormData(prev => ({ ...prev, managerId: manager.id }));
- setShowManagerSearch(false);
+    const handleManagerSelect = (manager: UserSearchResultDto) => {
+    setSelectedManager(manager);
+    setFormData(prev => ({ ...prev, managerId: manager.id }));
+    setShowManagerSearch(false);
  };
 
- const handleSave = async () => {
- // Validate form
- const errors = validateBranchForm({
- name: formData.name,
- address: formData.address,
- openTime: formData.openTime,
- closeTime: formData.closeTime,
- phone: formData.phone,
- });
+    const handleSave = async () => {
+        // Validate form
+        const errors = validateBranchForm({
+        name: formData.name,
+        address: formData.address,
+        openTime: formData.openTime,
+        closeTime: formData.closeTime,
+        phone: formData.phone,
+    });
 
- if (!formData.managerId) {
- errors.push({ field: 'managerId', message: 'Vui lòng chọn quản lý chi nhánh' });
- }
+    if (!formData.managerId) {
+        errors.push({ field: 'managerId', message: 'Vui lòng chọn quản lý chi nhánh' });
+    }
 
- if (errors.length > 0) {
- const errorMap: Record<string, string> = {};
- errors.forEach(err => {
- errorMap[err.field] = err.message;
- });
- setValidationErrors(errorMap);
- return;
- }
+    if (errors.length > 0) {
+        const errorMap: Record<string, string> = {};
+        errors.forEach(err => {
+        errorMap[err.field] = err.message;
+    });
+    setValidationErrors(errorMap);
+    return;
+    }
 
- setSaving(true);
- try {
- await onSave(formData as CreateBranchDto);
- onClose();
- } catch (err) {
- // Error handled by parent
- } finally {
- setSaving(false);
- }
+    setSaving(true);
+    try {
+        await onSave(formData as CreateBranchDto);
+        onClose();
+    } catch (err) {
+    // Error handled by parent
+    } finally {
+        setSaving(false);
+    }
  };
 
  return (

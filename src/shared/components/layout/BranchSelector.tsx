@@ -5,7 +5,7 @@ import { Select } from '../ui/Select';
 interface Branch {
   id: string;
   name: string;
-  status?: string;
+  status?: 0 | 1 | 2;
 }
 
 interface BranchSelectorProps {
@@ -42,7 +42,7 @@ export function BranchSelector({
           >
             {branches.map((branch) => (
               <option key={branch.id} value={branch.id}>
-                {branch.name} {branch.status === "SUSPENDED" ? "(Tạm khóa)" : ""}
+                {branch.name} {branch.status === 1 ? "(Tạm khóa)" : ""}
               </option>
             ))}
           </Select>

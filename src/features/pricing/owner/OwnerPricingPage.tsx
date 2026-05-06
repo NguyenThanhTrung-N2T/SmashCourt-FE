@@ -12,7 +12,7 @@ import {
 } from "@/src/api/pricing.api";
 import { fetchBranches, fetchBranchCourtTypes } from "@/src/api/branch.api";
 import { fetchAllCourtTypes } from "@/src/api/court-type.api";
-import type { BranchDto, BranchCourtTypeDto } from "@/src/shared/types/branch.types";
+import type { BranchDto, BranchCourtTypeDto } from "@/src/features/branch/types/branch.types";
 import { useToast } from "@/src/shared/hooks/useToast";
 import {
     normalizeDateString,
@@ -20,7 +20,7 @@ import {
     transformCurrentApiData,
     transformEffectiveData,
 } from "../utils";
-import type { CourtType, CurrentPriceDto, EffectivePriceDto, PriceRow, PriceVersionDto, TabId, TimeSlot, SavePriceDto, PriceConfig } from "../types";
+import type { CourtType, CurrentPriceDto, EffectivePriceDto, PriceRow, PriceVersionDto, TabId, TimeSlot, SavePriceDto, PriceConfig } from "../types/pricing.types";
 import { UpdatePriceModal } from "./dialogs/UpdatePriceModal";
 import { CreateWizardModal } from "./dialogs/CreateWizardModal";
 import { PricingHeader } from "./components/layout/PricingHeader";
@@ -415,7 +415,7 @@ export default function OwnerPricingPage() {
                                 <option value="" disabled>-- Chọn chi nhánh --</option>
                                 {branches.map((branch) => (
                                     <option key={branch.id} value={branch.id}>
-                                        {branch.name} {branch.status === "SUSPENDED" ? "(Tam khoa)" : ""}
+                                        {branch.name} {branch.status === 1 ? "(Tam khoa)" : ""}
                                     </option>
                                 ))}
                             </select>

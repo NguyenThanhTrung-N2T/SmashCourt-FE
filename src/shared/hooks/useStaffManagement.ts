@@ -8,7 +8,7 @@ import type {
   StaffFilterQuery,
   BulkStaffOperationDto,
   BulkStaffOperationResultDto,
-} from '@/src/shared/types/branch.types';
+} from '@/src/features/branch/types/branch.types';
 import { handleApiError } from '@/src/features/branch/owner/utils/error-handling';
 import { branchCache } from '@/src/features/branch/owner/utils/caching';
 

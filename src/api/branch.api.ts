@@ -9,7 +9,7 @@ import type {
   AddServiceToBranchDto,
   UpdateBranchServiceDto,
   BranchServiceDto,
-} from "../shared/types/branch.types";
+} from "../features/branch/types/branch.types";
 import type {
   BranchManagerDto,
   AssignManagerDto,
@@ -23,7 +23,7 @@ import type {
   UserSearchResultDto,
   UserSearchQuery,
   UserBranchAssignmentDto,
-} from "../shared/types/branch.types";
+} from "../features/branch/types/branch.types";
 
 // ============================================================================
 // 1. Branch CRUD Endpoints

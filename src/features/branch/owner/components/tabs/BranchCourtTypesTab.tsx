@@ -2,23 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import { CourtBasketball, Plus, Trash, Warning } from '@phosphor-icons/react';
-import type { BranchCourtTypeDto, AddCourtTypeToBranchDto } from '@/src/shared/types/branch.types';
+import type { BranchCourtTypeDto, AddCourtTypeToBranchDto } from '@/src/features/branch/types/branch.types';
 import { fetchBranchCourtTypes, addCourtTypeToBranch, removeCourtTypeFromBranch } from '@/src/api/branch.api';
 import { ConfirmationDialog } from '@/src/shared/components/ui';
-import { LoadingSkeleton } from '../shared/LoadingSkeleton';
+import { BranchCourtTypesLoading } from '../states';
+import { EmptyState } from '@/src/shared/components/layout';
 import { handleApiError } from '../../utils/error-handling';
 import { useToast } from '@/src/shared/hooks/useToast';
 
 interface BranchCourtTypesTabProps {
     branchId: string;
+    onToast?: (tone: 'success' | 'error', message: string) => void;
 }
 
-export function BranchCourtTypesTab({ branchId }: BranchCourtTypesTabProps) {
+export function BranchCourtTypesTab({ branchId, onToast }: BranchCourtTypesTabProps) {
     const [branchCourtTypes, setBranchCourtTypes] = useState<BranchCourtTypeDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [courtTypeToRemove, setCourtTypeToRemove] = useState<BranchCourtTypeDto | null>(null);
     const { show: showToast } = useToast();
+
+    const toast = onToast ?? showToast;
 
     const loadData = async () => {
         setLoading(true);
@@ -43,11 +47,11 @@ export function BranchCourtTypesTab({ branchId }: BranchCourtTypesTabProps) {
                 courtTypeId,
             };
             await addCourtTypeToBranch(branchId, dto);
-            showToast('success', 'Thêm loại sân thành công');
+            toast('success', 'Thêm loại sân thành công');
             await loadData();
-        } catch (err) {
+        } catch (err: any) {
             const message = handleApiError(err);
-            showToast('error', message);
+            toast('error', message);
         }
     };
 
@@ -55,12 +59,12 @@ export function BranchCourtTypesTab({ branchId }: BranchCourtTypesTabProps) {
         if (!courtTypeToRemove) return;
         try {
             await removeCourtTypeFromBranch(branchId, courtTypeToRemove.courtTypeId);
-            showToast('success', 'Gỡ loại sân thành công');
+            toast('success', 'Gỡ loại sân thành công');
             setCourtTypeToRemove(null);
             await loadData();
-        } catch (err) {
+        } catch (err: any) {
             const message = handleApiError(err);
-            showToast('error', message);
+            toast('error', message);
         }
     };
 
@@ -68,7 +72,7 @@ export function BranchCourtTypesTab({ branchId }: BranchCourtTypesTabProps) {
     const availableCourtTypes = branchCourtTypes.filter(ct => !ct.isActive);
 
     if (loading) {
-        return <LoadingSkeleton variant="card" rows={4} />;
+        return <BranchCourtTypesLoading />;
     }
 
     return (
@@ -129,12 +133,11 @@ export function BranchCourtTypesTab({ branchId }: BranchCourtTypesTabProps) {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-12">
-                        <CourtBasketball className="h-16 w-16 text-muted mx-auto mb-4" />
-                        <p className="text-base font-bold text-foreground">Chưa có loại sân</p>
-                        <p className="text-sm text-muted mt-2">Thêm loại sân để khách hàng có thể đặt sân</p>
-                    </div>
-                )}
+                    <EmptyState
+                        icon={<CourtBasketball className="h-16 w-16 text-muted" />}
+                        title="Chưa có loại sân"
+                        description="Thêm loại sân để khách hàng có thể đặt sân"
+                    />)}
 
                 {/* Available Court Types to Add */}
                 {availableCourtTypes.length > 0 && (
