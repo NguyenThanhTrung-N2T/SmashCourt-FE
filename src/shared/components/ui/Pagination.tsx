@@ -8,6 +8,7 @@ interface PaginationProps {
   totalItems: number;
   pageSize: number;
   onPageChange: (page: number) => void;
+  itemLabel?: string; // e.g., "nhân viên", "chi nhánh", "kết quả"
 }
 
 export function Pagination({
@@ -16,6 +17,7 @@ export function Pagination({
   totalItems,
   pageSize,
   onPageChange,
+  itemLabel = "kết quả",
 }: PaginationProps) {
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
@@ -73,11 +75,11 @@ export function Pagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/50">
-      <div className="text-sm text-slate-600">
-        Hiển thị <span className="font-bold text-slate-900">{startItem}</span> đến{' '}
-        <span className="font-bold text-slate-900">{endItem}</span> trong tổng số{' '}
-        <span className="font-bold text-slate-900">{totalItems}</span> kết quả
+    <div className="flex items-center justify-between rounded-xl border border-border bg-surface-1 px-6 py-4">
+      <div className="text-sm text-muted">
+        Hiển thị <span className="font-bold text-foreground">{startItem}</span> đến{' '}
+        <span className="font-bold text-foreground">{endItem}</span> trong tổng số{' '}
+        <span className="font-bold text-foreground">{totalItems}</span> {itemLabel}
       </div>
 
       <div className="flex items-center gap-2">
@@ -86,9 +88,10 @@ export function Pagination({
           disabled={!canGoPrevious}
           className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${
             canGoPrevious
-              ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-[#1B5E38]'
-              : 'border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed'
+              ? 'border-border bg-surface-1 text-foreground hover:bg-surface-2 hover:border-primary'
+              : 'border-border bg-surface-2 text-muted cursor-not-allowed opacity-50'
           }`}
+          aria-label="Trang trước"
         >
           <CaretLeft className="h-4 w-4" />
         </button>
@@ -96,7 +99,7 @@ export function Pagination({
         {getPageNumbers().map((page, index) => {
           if (page === '...') {
             return (
-              <span key={`ellipsis-${index}`} className="px-2 text-slate-400">
+              <span key={`ellipsis-${index}`} className="px-2 text-muted">
                 ...
               </span>
             );
@@ -111,9 +114,11 @@ export function Pagination({
               onClick={() => onPageChange(pageNum)}
               className={`flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-bold transition-all ${
                 isActive
-                  ? 'border-[#1B5E38] bg-[#1B5E38] text-white shadow-md'
-                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-[#1B5E38]'
+                  ? 'border-primary bg-primary text-white shadow-md'
+                  : 'border-border bg-surface-1 text-foreground hover:bg-surface-2 hover:border-primary'
               }`}
+              aria-label={`Trang ${pageNum}`}
+              aria-current={isActive ? 'page' : undefined}
             >
               {pageNum}
             </button>
@@ -125,9 +130,10 @@ export function Pagination({
           disabled={!canGoNext}
           className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${
             canGoNext
-              ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-[#1B5E38]'
-              : 'border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed'
+              ? 'border-border bg-surface-1 text-foreground hover:bg-surface-2 hover:border-primary'
+              : 'border-border bg-surface-2 text-muted cursor-not-allowed opacity-50'
           }`}
+          aria-label="Trang sau"
         >
           <CaretRight className="h-4 w-4" />
         </button>

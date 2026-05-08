@@ -1,4 +1,4 @@
-import { ReactNode } from'react';
+import { ReactNode, forwardRef } from'react';
 import { CircleNotch } from'@phosphor-icons/react';
 
 interface ButtonProps {
@@ -13,7 +13,7 @@ interface ButtonProps {
  isLoading?: boolean;
 }
 
-export function Button({
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button({
  children,
  onClick,
  disabled = false,
@@ -23,8 +23,8 @@ export function Button({
  type ='button',
  leftIcon,
  isLoading = false,
-}: ButtonProps) {
- const baseStyles ='inline-flex items-center gap-2 rounded-full font-bold transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed';
+}, ref) {
+ const baseStyles ='inline-flex items-center justify-center gap-2 rounded-full font-bold transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed';
  
  const sizeStyles = {
  sm:'px-3 py-1.5 text-xs',
@@ -48,6 +48,7 @@ export function Button({
 
  return (
  <button
+ ref={ref}
  type={type}
  onClick={onClick}
  disabled={disabled || isLoading}
@@ -60,4 +61,4 @@ export function Button({
  {children}
  </button>
  );
-}
+});

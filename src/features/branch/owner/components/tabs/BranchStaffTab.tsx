@@ -6,7 +6,7 @@ import type { BranchStaffDto, AddStaffDto, UserSearchResultDto, UserBranchRole }
 import { useStaffManagement } from '@/src/shared/hooks/useStaffManagement';
 import { useUserSearch } from '@/src/shared/hooks/useUserSearch';
 import { SearchInput } from '../shared/SearchInput';
-import { Pagination } from '../shared/Pagination';
+import { Pagination } from "@/src/shared/components/ui/Pagination";
 import { ConfirmationDialog } from '@/src/shared/components/ui';
 import { BranchStaffLoading } from '../states';
 import { EmptyState } from '@/src/shared/components/layout';
