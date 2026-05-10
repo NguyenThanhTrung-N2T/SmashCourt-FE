@@ -12,6 +12,7 @@ import { Alert } from "@/src/shared/components/ui/Alert";
 import { Badge } from "@/src/shared/components/ui/Badge";
 import { useBranches } from "@/src/features/branch/customer/hooks/useBranches";
 import type { BranchDto } from "@/src/features/branch/types/branch.types";
+import { SmartImage } from "@/src/shared/components/ui";
 
 interface BranchSelectionStepProps {
   selectedBranchId: string | null;
@@ -67,10 +68,9 @@ export function BranchSelectionStep({
               onClick={() => onSelectBranch(branch)}
               className={`
                 group relative rounded-2xl border-2 p-6 text-left transition-all
-                ${
-                  isSelected
-                    ? "border-primary bg-primary/5 shadow-lg"
-                    : "border-border bg-surface-1 hover:border-primary/50 hover:shadow-md"
+                ${isSelected
+                  ? "border-primary bg-primary/5 shadow-lg"
+                  : "border-border bg-surface-1 hover:border-primary/50 hover:shadow-md"
                 }
               `}
             >
@@ -85,11 +85,13 @@ export function BranchSelectionStep({
 
               {/* Branch Avatar */}
               {branch.avatarUrl && (
-                <div className="mb-4 h-32 w-full overflow-hidden rounded-xl">
-                  <img
+                <div className="relative mb-4 h-32 w-full overflow-hidden rounded-xl">
+                  <SmartImage
                     src={branch.avatarUrl}
                     alt={branch.name}
-                    className="h-full w-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 300px"
                   />
                 </div>
               )}

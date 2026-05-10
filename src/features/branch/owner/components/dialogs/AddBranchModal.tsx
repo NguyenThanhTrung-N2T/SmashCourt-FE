@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { X, Storefront, MapPin, Phone, Clock, User } from '@phosphor-icons/react';
+import { ImageUploader } from '@/src/shared/components/ui/ImageUploader';
 import type { CreateBranchDto } from '@/src/features/branch/types/branch.types';
 import type { UserSearchResultDto } from '@/src/features/branch/types/branch.types';
 import { validateBranchForm } from '../../utils/validation';
@@ -30,6 +31,7 @@ export function AddBranchModal({ onClose, onSave }: AddBranchModalProps) {
     const [showManagerSearch, setShowManagerSearch] = useState(false);
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
     const [saving, setSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
     const { users, loading: searchLoading, setSearchTerm } = useUserSearch({
     eligibleForManager: true,
@@ -149,17 +151,14 @@ export function AddBranchModal({ onClose, onSave }: AddBranchModalProps) {
  </div>
 
  <div className="md:col-span-2">
- <label className="block text-xs font-bold text-foreground uppercase tracking-wide mb-2">
- URL ảnh đại diện
- </label>
- <input
- type="text"
- value={formData.avatarUrl}
- onChange={(e) => handleInputChange('avatarUrl', e.target.value)}
- placeholder="https://example.com/branch-logo.jpg"
- className="w-full rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm text-foreground outline-none transition-colors hover:border-primary focus:border-primary focus:bg-surface-1 focus:ring-2 focus:ring-primary/20 placeholder:text-muted"
+ <ImageUploader
+  label="Ảnh đại diện chi nhánh"
+  folder="branches"
+  value={formData.avatarUrl}
+  onChange={(url) => handleInputChange('avatarUrl', url)}
+  onClear={() => handleInputChange('avatarUrl', '')}
+  onUploadingChange={setIsUploading}
  />
- <p className="mt-1 text-xs text-muted">URL hình ảnh đại diện cho chi nhánh (tùy chọn)</p>
  </div>
 
  <div className="md:col-span-2">
@@ -344,14 +343,14 @@ export function AddBranchModal({ onClose, onSave }: AddBranchModalProps) {
  </button>
  <button
  onClick={handleSave}
- disabled={saving}
+ disabled={saving || isUploading}
  className="flex-1 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
  style={{
  background: "linear-gradient(135deg, #2A9D5C 0%, #1B5E38 100%)",
  boxShadow: "0 4px 14px rgba(27, 94, 56, 0.35)",
  }}
  >
- {saving ? 'Đang tạo...' : 'Tạo chi nhánh'}
+ {saving ? 'Đang tạo...' : isUploading ? 'Đang tải ảnh...' : 'Tạo chi nhánh'}
  </button>
  </div>
  </div>

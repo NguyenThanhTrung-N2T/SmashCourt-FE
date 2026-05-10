@@ -27,6 +27,7 @@ import {
   setAccessToken,
   type AuthUserSession,
 } from "@/src/features/auth/session/sessionStore";
+import { SmartImage } from "@/src/shared/components/ui/SmartImage";
 
 type WorkspaceHomeShellProps = {
   accessToken: string;
@@ -183,9 +184,11 @@ export default function WorkspaceHomeShell({
         <aside className={`w-full shrink-0 rounded-[2.5rem] border-2 border-white/20 bg-gradient-to-br ${themeColors.darkBg} px-8 py-8 text-white shadow-2xl shadow-${themeColors.primary}-900/30 backdrop-blur-xl lg:w-96 animate-slide-up`}>
           <div className="flex items-center gap-4">
             {user.avatarUrl ? (
-              <img
+              <SmartImage
                 src={user.avatarUrl}
                 alt={user.fullName}
+                width={80}
+                height={80}
                 className={`h-20 w-20 rounded-3xl border-4 border-white/20 object-cover shadow-xl animate-pulse-glow`}
               />
             ) : (

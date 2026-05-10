@@ -1,64 +1,92 @@
-import { ReactNode, forwardRef } from'react';
-import { CircleNotch } from'@phosphor-icons/react';
+import { ReactNode, forwardRef } from 'react';
+import { CircleNotch } from '@phosphor-icons/react';
 
 interface ButtonProps {
- children: ReactNode;
- onClick?: () => void;
- disabled?: boolean;
- variant?:'primary' |'secondary' |'danger' |'ghost' |'dangerSoft' |'success';
- size?:'sm' |'md' |'lg';
- className?: string;
- type?:'button' |'submit' |'reset';
- leftIcon?: ReactNode;
- isLoading?: boolean;
+    children: ReactNode;
+    onClick?: () => void;
+    disabled?: boolean;
+    variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'dangerSoft' | 'success';
+    size?: 'sm' | 'md' | 'lg';
+    className?: string;
+    type?: 'button' | 'submit' | 'reset';
+    leftIcon?: ReactNode;
+    isLoading?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button({
- children,
- onClick,
- disabled = false,
- variant ='primary',
- size ='md',
- className ='',
- type ='button',
- leftIcon,
- isLoading = false,
+    children,
+    onClick,
+    disabled = false,
+    variant = 'primary',
+    size = 'md',
+    className = '',
+    type = 'button',
+    leftIcon,
+    isLoading = false,
 }, ref) {
- const baseStyles ='inline-flex items-center justify-center gap-2 rounded-full font-bold transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed';
- 
- const sizeStyles = {
- sm:'px-3 py-1.5 text-xs',
- md:'px-5 py-2.5 text-sm',
- lg:'px-6 py-3 text-base',
- };
- 
- const variantStyles = {
- primary:'text-white shadow-md hover:opacity-90',
- secondary:'border border-border bg-surface-1 text-foreground shadow-sm hover:bg-surface-2',
- danger:'border border-red-500/40 bg-surface-1 text-red-500 shadow-sm hover:bg-red-500/10',
- dangerSoft:'bg-red-500/10 text-red-500 hover:bg-red-500/15',
- ghost:'text-muted hover:bg-surface-2',
- success:'border border-emerald-500/40 bg-surface-1 text-emerald-500 shadow-sm hover:bg-emerald-500/10',
- };
- 
- const gradientStyle = variant ==='primary' ? {
- background:"linear-gradient(135deg, #2A9D5C 0%, #1B5E38 100%)",
- boxShadow:"0 4px 14px rgba(27, 94, 56, 0.35)",
- } : undefined;
+    const isDisabled = disabled || isLoading;
 
- return (
- <button
- ref={ref}
- type={type}
- onClick={onClick}
- disabled={disabled || isLoading}
- className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}
- style={gradientStyle}
- >
- {isLoading ? (
- <CircleNotch className="h-4 w-4 animate-spin" />
- ) : leftIcon}
- {children}
- </button>
- );
+    const baseStyles = 'inline-flex items-center justify-center gap-2 rounded-full font-bold transition-all';
+
+    const sizeStyles = {
+        sm: 'px-3 py-1.5 text-xs',
+        md: 'px-5 py-2.5 text-sm',
+        lg: 'px-6 py-3 text-base',
+    };
+
+    const variantStyles = {
+        primary: 'text-white shadow-md hover:opacity-90',
+        secondary: 'border border-border bg-surface-1 text-foreground shadow-sm hover:bg-surface-2',
+        danger: 'border border-red-500/40 bg-surface-1 text-red-500 shadow-sm hover:bg-red-500/10',
+        dangerSoft: 'bg-red-500/10 text-red-500 hover:bg-red-500/15',
+        ghost: 'text-muted hover:bg-surface-2',
+        success: 'border border-emerald-500/40 bg-surface-1 text-emerald-500 shadow-sm hover:bg-emerald-500/10',
+    };
+
+    const gradientStyle = variant === 'primary' ? {
+        background: 'linear-gradient(135deg, #2A9D5C 0%, #1B5E38 100%)',
+        boxShadow: '0 4px 14px rgba(27, 94, 56, 0.35)',
+    } : undefined;
+
+    if (isDisabled) {
+        // When disabled, the span owns:
+        //   • layout classes from `className` (e.g. flex-1) so flex parents work correctly
+        //   • cursor-not-allowed — browsers honour cursor on non-disabled elements
+        // The button owns:
+        //   • all visual / size classes
+        //   • pointer-events-none — prevents hover styles from firing
+        //   • native disabled for form semantics & a11y
+        return (
+            <span className={`inline-flex cursor:pointer ${className}`}>
+                <button
+                    ref={ref}
+                    type={type}
+                    disabled
+                    aria-disabled="true"
+                    className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} opacity-50 pointer-events-none w-full`}
+                    style={gradientStyle}
+                >
+                    {isLoading ? (
+                        <CircleNotch className="h-4 w-4 animate-spin" />
+                    ) : leftIcon}
+                    {children}
+                </button>
+            </span>
+        );
+    }
+
+    return (
+        <button
+            ref={ref}
+            type={type}
+            onClick={onClick}
+            className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} active:scale-95 ${className}`}
+            style={gradientStyle}
+        >
+            {isLoading ? (
+                <CircleNotch className="h-4 w-4 animate-spin" />
+            ) : leftIcon}
+            {children}
+        </button>
+    );
 });

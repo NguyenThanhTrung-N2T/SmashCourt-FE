@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/src/shared/components/ui/Modal";
 import { Input } from "@/src/shared/components/ui/Input";
 import { Button } from "@/src/shared/components/ui/Button";
+import { ImageUploader } from "@/src/shared/components/ui/ImageUploader";
 import { PencilSimple } from "@phosphor-icons/react";
 import { updateUser } from "@/src/api/user-management.api";
 import { AuthApiError } from "@/src/api/core";
@@ -24,6 +25,7 @@ export function EditStaffModal({ staff, onClose, onSuccess, onError }: EditStaff
     avatarUrl: staff.avatarUrl || "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,12 +104,13 @@ export function EditStaffModal({ staff, onClose, onSuccess, onError }: EditStaff
           error={errors.phone}
         />
 
-        <Input
-          label="URL ảnh đại diện"
-          type="url"
-          placeholder="https://example.com/avatar.jpg"
+        <ImageUploader
+          label="Ảnh đại diện"
+          folder="avatars"
           value={formData.avatarUrl}
-          onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
+          onChange={(url) => setFormData({ ...formData, avatarUrl: url })}
+          onClear={() => setFormData({ ...formData, avatarUrl: '' })}
+          onUploadingChange={setIsUploading}
           error={errors.avatarurl}
         />
 
@@ -115,7 +118,7 @@ export function EditStaffModal({ staff, onClose, onSuccess, onError }: EditStaff
           <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
             Hủy
           </Button>
-          <Button type="submit" variant="primary" isLoading={loading} className="flex-1">
+          <Button type="submit" variant="primary" isLoading={loading} disabled={loading || isUploading} className="flex-1">
             Lưu thay đổi
           </Button>
         </div>

@@ -3,6 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+
 import {
   Heartbeat,
   Robot,
@@ -32,7 +33,7 @@ import {
   clearAuthSession,
   type AuthUserSession,
 } from "@/src/features/auth/session/sessionStore";
-
+import { SmartImage } from "@/src/shared/components/ui/SmartImage";
 type CustomerHomeShellProps = {
   accessToken: string;
   user: AuthUserSession;
@@ -299,9 +300,11 @@ export default function CustomerHomeShell({ user }: CustomerHomeShellProps) {
                 className="flex items-center gap-3 rounded-full border border-transparent p-1.5 pr-5 outline-none transition-colors hover:border-white/10 hover:bg-white/5 focus:ring-2 focus:ring-[#2A9D5C]/40"
               >
                 {user.avatarUrl ? (
-                  <img
+                  <SmartImage
                     src={user.avatarUrl}
                     alt="Avatar"
+                    width={40}
+                    height={40}
                     className="h-10 w-10 rounded-full border-2 border-white/20 bg-slate-800 object-cover"
                   />
                 ) : (

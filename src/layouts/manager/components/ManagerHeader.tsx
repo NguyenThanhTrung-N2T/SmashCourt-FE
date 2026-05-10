@@ -12,6 +12,7 @@ import {
     Buildings,
 } from "@phosphor-icons/react";
 import { type AuthUserSession } from "@/src/features/auth/session/sessionStore";
+import { SmartImage } from "@/src/shared/components/ui";
 import ThemeToggle from "@/src/shared/components/ui/ThemeToggle";
 
 function getInitials(fullName: string) {
@@ -135,9 +136,11 @@ export default function ManagerHeader({
                         className="flex items-center gap-2.5 cursor-pointer group rounded-full pr-3 pl-1 py-1 hover:bg-surface-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B5E38]"
                     >
                         {user.avatarUrl ? (
-                            <img
+                            <SmartImage
                                 src={user.avatarUrl}
                                 alt={user.fullName}
+                                width={40}
+                                height={40}
                                 className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm"
                             />
                         ) : (

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Storefront, MapPin, Phone, Clock, User, CheckCircle, Warning } from '@phosphor-icons/react';
+import { Storefront, MapPin, Phone, Clock, User, Warning } from '@phosphor-icons/react';
+import { ImageUploader } from '@/src/shared/components/ui/ImageUploader';
 import type { BranchDto, UpdateBranchDto } from '@/src/features/branch/types/branch.types';
 import { useBranchManagement } from '@/src/features/branch/owner/hooks/useBranchManagement';
 import { validateBranchForm } from '../../utils/validation';
@@ -9,6 +10,8 @@ import { ConfirmationDialog } from '@/src/shared/components/ui';
 import { BranchInfoLoading, BranchErrorState } from '../states';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Badge } from '@/src/shared/components/ui/Badge';
+import { useToast } from '@/src/shared/hooks/useToast';
+import { Toast } from '@/src/shared/components/ui/Toast';
 
 interface BranchInfoTabProps {
     branchId: string;
@@ -28,6 +31,7 @@ const inputCls = (hasError?: boolean) =>
 
 export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
     const { branch, loading, error, loadBranch, updateBranchInfo, suspend, activate } = useBranchManagement(branchId);
+    const { toast, show } = useToast();
 
     const [formData, setFormData] = useState<UpdateBranchDto>({
         name: '',
@@ -44,7 +48,7 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
     const [showSuspendDialog, setShowSuspendDialog] = useState(false);
     const [showActivateDialog, setShowActivateDialog] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         loadBranch();
@@ -88,12 +92,10 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
         }
 
         setSaving(true);
-        setSuccessMessage('');
         try {
             await updateBranchInfo(formData);
-            setSuccessMessage('Cập nhật thông tin chi nhánh thành công');
+            show('success', 'Cập nhật thông tin chi nhánh thành công');
             onUpdate?.();
-            setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
             // Error handled by hook
         } finally {
@@ -105,8 +107,7 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
         try {
             await suspend();
             setShowSuspendDialog(false);
-            setSuccessMessage('Tạm khóa chi nhánh thành công');
-            setTimeout(() => setSuccessMessage(''), 3000);
+            show('success', 'Tạm khóa chi nhánh thành công');
         } catch (err) {
             // Error handled by hook
         }
@@ -116,12 +117,22 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
         try {
             await activate();
             setShowActivateDialog(false);
-            setSuccessMessage('Kích hoạt chi nhánh thành công');
-            setTimeout(() => setSuccessMessage(''), 3000);
+            show('success', 'Kích hoạt chi nhánh thành công');
         } catch (err) {
             // Error handled by hook
         }
     };
+
+    const hasChanges = branch ? (
+        formData.name !== branch.name ||
+        formData.address !== branch.address ||
+        formData.phone !== (branch.phone || '') ||
+        formData.avatarUrl !== (branch.avatarUrl || '') ||
+        formData.latitude !== branch.latitude ||
+        formData.longitude !== branch.longitude ||
+        formData.openTime !== branch.openTime ||
+        formData.closeTime !== branch.closeTime
+    ) : false;
 
     if (loading && !branch) {
         return <BranchInfoLoading />;
@@ -133,12 +144,6 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
 
     return (
         <div className="space-y-6">
-            {successMessage && (
-                <div className="rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/10 p-4 flex items-center gap-3">
-                    <CheckCircle className="h-6 w-6 text-emerald-500 shrink-0" />
-                    <p className="font-bold text-emerald-600">{successMessage}</p>
-                </div>
-            )}
 
             {error && (
                 <div className="rounded-2xl border-2 border-red-500/40 bg-red-500/10 p-4 flex items-center gap-3">
@@ -208,17 +213,14 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
                     </div>
 
                     <div className="md:col-span-2">
-                        <label className="block text-xs font-bold text-foreground uppercase tracking-wide mb-2">
-                            URL ảnh đại diện
-                        </label>
-                        <input
-                            type="text"
+                        <ImageUploader
+                            label="Ảnh đại diện chi nhánh"
+                            folder="branches"
                             value={formData.avatarUrl}
-                            onChange={(e) => handleInputChange('avatarUrl', e.target.value)}
-                            placeholder="https://example.com/branch-logo.jpg"
-                            className={inputCls()}
+                            onChange={(url) => handleInputChange('avatarUrl', url)}
+                            onClear={() => handleInputChange('avatarUrl', '')}
+                            onUploadingChange={setIsUploading}
                         />
-                        <p className="mt-1 text-xs text-muted">URL hình ảnh đại diện cho chi nhánh (tùy chọn)</p>
                     </div>
 
                     <div className="md:col-span-2">
@@ -309,7 +311,7 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
                 <div className="flex items-center gap-3 mt-6 pt-6 border-t border-border">
                     <Button
                         onClick={handleSave}
-                        disabled={saving || loading}
+                        disabled={saving || loading || isUploading || !hasChanges}
                         isLoading={saving}
                         className="flex-1 justify-center"
                     >
@@ -359,6 +361,8 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
                     onCancel={() => setShowActivateDialog(false)}
                 />
             )}
+
+            <Toast toast={toast} />
         </div>
     );
 }

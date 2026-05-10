@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SmartImage } from "@/src/shared/components/ui/SmartImage";
 import { usePathname } from "next/navigation";
 import {
   SignOut,
@@ -47,18 +48,16 @@ export default function ManagerSidebar({
             href={item.href}
             onClick={onMobileClose}
             aria-current={active ? "page" : undefined}
-            className={`group flex items-center gap-3 py-2.5 px-6 border-l-[3px] transition-all duration-200 ${
-              active
+            className={`group flex items-center gap-3 py-2.5 px-6 border-l-[3px] transition-all duration-200 ${active
                 ? "border-primary bg-primary/5 text-primary font-bold"
                 : "border-transparent text-muted hover:bg-surface-2/50 hover:text-foreground font-medium"
-            }`}
+              }`}
           >
             <Icon
-              className={`h-[18px] w-[18px] ${
-                active
+              className={`h-[18px] w-[18px] ${active
                   ? "text-primary"
                   : "text-muted group-hover:text-slate-600"
-              }`}
+                }`}
             />
             <span className="text-sm">{item.label}</span>
           </Link>
@@ -71,7 +70,7 @@ export default function ManagerSidebar({
     <>
       {/* Logo */}
       <div className="h-[88px] px-6 flex items-center gap-2.5 shrink-0">
-        <img src="/favicon.ico" alt="SmashCourt Logo" className="h-9 w-9 rounded-xl" />
+        <SmartImage src="/favicon.ico" alt="SmashCourt Logo" width={36} height={36} className="h-9 w-9 rounded-xl" />
         <span className="text-lg font-extrabold tracking-tight text-foreground">
           SmashCourt
         </span>
@@ -138,7 +137,7 @@ export default function ManagerSidebar({
           <div className="absolute inset-0 bg-slate-900/60 rounded-3xl" />
           <div className="relative z-10 text-white flex flex-col gap-3">
             <div className="h-9 w-9 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
-              <img src="/favicon.ico" alt="App" className="h-5 w-5 rounded-md" />
+              <SmartImage src="/favicon.ico" alt="App" width={20} height={20} className="h-5 w-5 rounded-md" />
             </div>
             <div>
               <p className="font-extrabold text-sm leading-tight">

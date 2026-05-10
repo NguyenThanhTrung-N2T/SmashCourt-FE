@@ -103,10 +103,10 @@ export function OwnerBranchPage() {
                     />
 
                     <div className="min-h-[400px]">
-                        {activeTab === 'info' && <BranchInfoTab branchId={selectedBranchId} />}
-                        {activeTab === 'manager' && <BranchManagerTab branchId={selectedBranchId} onToast={showToast} />}
-                        {activeTab === 'staff' && <BranchStaffTab branchId={selectedBranchId} onToast={showToast} />}
-                        {activeTab === 'courts' && <BranchCourtTypesTab branchId={selectedBranchId} onToast={showToast} />}
+                        {activeTab === 'info' && <BranchInfoTab key={`info-${selectedBranchId}`} branchId={selectedBranchId} />}
+                        {activeTab === 'manager' && <BranchManagerTab key={`manager-${selectedBranchId}`} branchId={selectedBranchId} onToast={showToast} />}
+                        {activeTab === 'staff' && <BranchStaffTab key={`staff-${selectedBranchId}`} branchId={selectedBranchId} onToast={showToast} />}
+                        {activeTab === 'courts' && <BranchCourtTypesTab key={`courts-${selectedBranchId}`} branchId={selectedBranchId} onToast={showToast} />}
                     </div>
                 </>
             )}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import {
   Medal,
   Calendar,
@@ -17,6 +16,7 @@ import {
   ArrowLeft,
 } from "@phosphor-icons/react";
 import type { AuthUserSession } from "@/src/features/auth/session/sessionStore";
+import { SmartImage } from "@/src/shared/components/ui/SmartImage";
 
 type UserProfileProps = {
   user: AuthUserSession;
@@ -86,7 +86,7 @@ export default function UserProfile({ user }: UserProfileProps) {
             <div className="flex flex-col items-center sm:flex-row sm:items-end sm:gap-6">
               <div className="-mt-16 relative">
                 {user.avatarUrl ? (
-                  <Image
+                  <SmartImage
                     src={user.avatarUrl}
                     alt="Avatar"
                     width={128}

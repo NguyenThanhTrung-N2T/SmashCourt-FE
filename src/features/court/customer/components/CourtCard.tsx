@@ -7,7 +7,7 @@
 "use client";
 
 import { CheckCircle, Circle } from "@phosphor-icons/react";
-import { Badge } from "@/src/shared/components/ui/Badge";
+import { SmartImage, Badge } from "@/src/shared/components/ui";
 import type { CourtDto } from "../../types/court.types";
 import { getCourtStatusConfig, canBookCourt } from "../utils/courtStatus";
 
@@ -46,11 +46,13 @@ export function CourtCard({
     >
       {/* Image */}
       {court.avatarUrl && (
-        <div className="mb-3 aspect-video overflow-hidden rounded-lg bg-surface-2">
-          <img
+        <div className="relative mb-3 aspect-video overflow-hidden rounded-lg bg-surface-2">
+          <SmartImage
             src={court.avatarUrl}
             alt={court.name}
-            className="h-full w-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 300px"
           />
         </div>
       )}
