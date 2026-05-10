@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Storefront, MapPin, Phone, Clock, User, CheckCircle, Warning } from '@phosphor-icons/react';
 import type { BranchDto, UpdateBranchDto } from '@/src/features/branch/types/branch.types';
-import { useBranchManagement } from '@/src/shared/hooks/useBranchManagement';
+import { useBranchManagement } from '@/src/features/branch/owner/hooks/useBranchManagement';
 import { validateBranchForm } from '../../utils/validation';
 import { ConfirmationDialog } from '@/src/shared/components/ui';
 import { BranchInfoLoading, BranchErrorState } from '../states';

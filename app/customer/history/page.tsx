@@ -1,38 +1,28 @@
+/**
+ * Customer Booking History Page
+ * 
+ * Page for displaying customer booking history.
+ */
+
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import BookingHistory from "@/src/layouts/customer/components/BookingHistory";
-import { getAccessToken, getAuthUser } from "@/src/features/auth/session/sessionStore";
+import { BookingHistoryList } from "@/src/features/booking/customer/components";
 
-export default function BookingHistoryPage() {
-  const router = useRouter();
-  const [sessionOk] = useState(() => {
-    try {
-      const accessToken = getAccessToken();
-      const authUser = getAuthUser();
-      return Boolean(accessToken && authUser);
-    } catch {
-      return false;
-    }
-  });
-
-  useEffect(() => {
-    if (!sessionOk) {
-      router.push("/auth/login");
-    }
-  }, [router, sessionOk]);
-
-  if (!sessionOk) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50/40">
-        <div className="text-center">
-          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
-          <p className="mt-4 text-sm font-semibold text-slate-600">Đang tải...</p>
+export default function CustomerHistoryPage() {
+  return (
+    <div className="min-h-screen bg-surface-0 p-6">
+      <div className="mx-auto max-w-7xl">
+        {/* Page Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-foreground">Lịch sử đặt sân</h1>
+          <p className="mt-2 text-sm text-muted">
+            Xem và quản lý các đặt sân của bạn
+          </p>
         </div>
-      </div>
-    );
-  }
 
-  return <BookingHistory />;
+        {/* Booking List */}
+        <BookingHistoryList />
+      </div>
+    </div>
+  );
 }

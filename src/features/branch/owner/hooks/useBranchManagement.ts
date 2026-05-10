@@ -1,7 +1,12 @@
-import { useState, useCallback } from 'react';
-import { fetchBranchById, updateBranch, suspendBranch, activateBranch } from '@/src/api/branch.api';
-import type { BranchDto, UpdateBranchDto } from '@/src/features/branch/types/branch.types';
-import { handleApiError } from '@/src/features/branch/owner/utils/error-handling';
+/**
+ * useBranchManagement Hook
+ * 
+ * Hook for managing a single branch (load, update, suspend, activate).
+ */
+
+import { useState, useCallback } from "react";
+import { fetchBranchById, updateBranch, suspendBranch, activateBranch } from "@/src/api/branch.api";
+import type { BranchDto, UpdateBranchDto } from "../../types/branch.types";
 
 export function useBranchManagement(branchId: string) {
   const [branch, setBranch] = useState<BranchDto | null>(null);
@@ -17,7 +22,7 @@ export function useBranchManagement(branchId: string) {
       const data = await fetchBranchById(branchId);
       setBranch(data);
     } catch (err) {
-      const message = handleApiError(err);
+      const message = err instanceof Error ? err.message : "Không thể tải thông tin chi nhánh";
       setError(message);
       throw err;
     } finally {
@@ -25,23 +30,26 @@ export function useBranchManagement(branchId: string) {
     }
   }, [branchId]);
 
-  const updateBranchInfo = useCallback(async (dto: UpdateBranchDto) => {
-    if (!branchId) return;
+  const updateBranchInfo = useCallback(
+    async (dto: UpdateBranchDto) => {
+      if (!branchId) return;
 
-    setLoading(true);
-    setError(null);
-    try {
-      const updated = await updateBranch(branchId, dto);
-      setBranch(updated);
-      return updated;
-    } catch (err) {
-      const message = handleApiError(err);
-      setError(message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [branchId]);
+      setLoading(true);
+      setError(null);
+      try {
+        const updated = await updateBranch(branchId, dto);
+        setBranch(updated);
+        return updated;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Không thể cập nhật chi nhánh";
+        setError(message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [branchId]
+  );
 
   const suspend = useCallback(async () => {
     if (!branchId) return;
@@ -54,7 +62,7 @@ export function useBranchManagement(branchId: string) {
         setBranch({ ...branch, status: 1 });
       }
     } catch (err) {
-      const message = handleApiError(err);
+      const message = err instanceof Error ? err.message : "Không thể tạm ngưng chi nhánh";
       setError(message);
       throw err;
     } finally {
@@ -73,7 +81,7 @@ export function useBranchManagement(branchId: string) {
         setBranch({ ...branch, status: 0 });
       }
     } catch (err) {
-      const message = handleApiError(err);
+      const message = err instanceof Error ? err.message : "Không thể kích hoạt chi nhánh";
       setError(message);
       throw err;
     } finally {

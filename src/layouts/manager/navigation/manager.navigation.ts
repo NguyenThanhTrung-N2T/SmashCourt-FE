@@ -2,7 +2,7 @@ import { NavItem } from "@/src/shared/types/navigation.types";
 import {
   ChartBar,
   CalendarDots,
-  GridFour,
+  CourtBasketball,
   SquaresFour,
   Coffee,
   Users,
@@ -36,7 +36,7 @@ export const MANAGER_NAV: NavItem[] = [
   {
     label: "Sân",
     href: "/manager/courts",
-    icon: GridFour,
+    icon: CourtBasketball,
     hint: "Quản lý sân thi đấu",
   },
   {

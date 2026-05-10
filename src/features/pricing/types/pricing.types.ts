@@ -56,9 +56,10 @@ export interface DeleteBranchPriceDto {
 }
 
 export interface CalculatePriceDto {
-    courtTypeId: string;
+    courtId: string;
     bookingDate: string;
-    slots: { startTime: string; endTime: string }[];
+    startTime: string;
+    endTime: string;
 }
 
 export type TimeSlot = {

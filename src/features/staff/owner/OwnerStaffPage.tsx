@@ -12,7 +12,7 @@ import { fetchBranches } from "@/src/api/branch.api";
 import type { StaffUserSummary, StaffUserDetail, StaffUserStatus, StaffUserRole } from "@/src/features/staff/types/user.type";
 import type { PaginatedData } from "@/src/shared/types/api.types";
 import { BranchSelector } from "@/src/shared/components/layout/BranchSelector";
-import { PageLoadingState, TableLoadingState, EmptyState, ErrorState } from "./states";
+import { PageLoadingState, TableLoadingState, EmptyState, ErrorState } from "../shared/states";
 import { OwnerStaffTable } from "./components/OwnerStaffTable";
 import { OwnerStaffFilters } from "./components/OwnerStaffFilters";
 import { CreateStaffModal } from "./components/CreateStaffModal";
