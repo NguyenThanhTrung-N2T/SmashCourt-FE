@@ -8,9 +8,11 @@
 
 import { Calendar, Lightning } from "@phosphor-icons/react";
 import { Spinner } from "@/src/shared/components/feedback/Spinner";
-import { Alert } from "@/src/shared/components/ui/Alert";
 import { useCourts } from "@/src/features/court/customer/hooks/useCourts";
 import { InteractiveTimeGrid } from "./InteractiveTimeGrid";
+import { CourtSelectionLoading } from "./states/CourtSelectionLoading";
+import { BookingErrorState } from "./states/BookingErrorState";
+import { BookingEmptyState } from "./states/BookingEmptyState";
 import type { CourtDto } from "@/src/features/court/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
@@ -45,26 +47,19 @@ export function CourtAndTimeSelectionStep({
   });
 
   if (courtsLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <CourtSelectionLoading />;
   }
 
   if (courtsError) {
-    return (
-      <Alert variant="error" title="Lỗi">
-        {courtsError}
-      </Alert>
-    );
+    return <BookingErrorState message={courtsError} />;
   }
 
   if (courts.length === 0) {
     return (
-      <Alert variant="info" title="Thông báo">
-        Không có sân nào khả dụng cho loại sân này.
-      </Alert>
+      <BookingEmptyState
+        title="Không có sân khả dụng"
+        description="Không có sân nào khả dụng cho loại sân này."
+      />
     );
   }
 

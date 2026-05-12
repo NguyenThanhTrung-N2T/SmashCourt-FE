@@ -7,10 +7,10 @@
 "use client";
 
 import { CourtBasketball } from "@phosphor-icons/react";
-import { Spinner } from "@/src/shared/components/feedback/Spinner";
-import { Alert } from "@/src/shared/components/ui/Alert";
-import { Badge } from "@/src/shared/components/ui/Badge";
 import { useCourtTypes } from "@/src/features/court/customer/hooks/useCourtTypes";
+import { CourtTypeSelectionLoading } from "./states/CourtTypeSelectionLoading";
+import { BookingErrorState } from "./states/BookingErrorState";
+import { BookingEmptyState } from "./states/BookingEmptyState";
 import type { CourtType } from "@/src/shared/types/court-type.types";
 
 interface CourtTypeSelectionStepProps {
@@ -25,26 +25,19 @@ export function CourtTypeSelectionStep({
   const { courtTypes, isLoading, error } = useCourtTypes();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <CourtTypeSelectionLoading />;
   }
 
   if (error) {
-    return (
-      <Alert variant="error" title="Lỗi">
-        {error}
-      </Alert>
-    );
+    return <BookingErrorState message={error} />;
   }
 
   if (courtTypes.length === 0) {
     return (
-      <Alert variant="info" title="Thông báo">
-        Hiện tại chưa có loại sân nào khả dụng.
-      </Alert>
+      <BookingEmptyState
+        title="Chưa có loại sân"
+        description="Hiện tại chưa có loại sân nào khả dụng."
+      />
     );
   }
 
@@ -68,34 +61,33 @@ export function CourtTypeSelectionStep({
               className={`
                 group relative rounded-2xl border-2 p-6 text-center transition-all
                 ${isSelected
-                  ? "border-primary bg-primary/5 shadow-lg"
+                  ? "border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20"
                   : "border-border bg-surface-1 hover:border-primary/50 hover:shadow-md"
                 }
               `}
             >
-              {/* Selected Badge */}
-              {isSelected && (
-                <div className="absolute -top-2 -right-2">
-                  <Badge variant="success" dot>
-                    Đã chọn
-                  </Badge>
-                </div>
-              )}
-
               {/* Court Type Icon */}
               <div className="mb-4 flex justify-center">
                 <div
                   className={`
-                    flex h-16 w-16 items-center justify-center rounded-2xl transition-all
+                    flex h-16 w-16 items-center justify-center rounded-2xl transition-all relative
                     ${isSelected ? "bg-primary/20" : "bg-surface-2 group-hover:bg-primary/10"}
                   `}
                 >
                   <CourtBasketball className={`h-8 w-8 ${isSelected ? "text-primary" : "text-muted"}`} />
+                  {/* Selected Checkmark */}
+                  {isSelected && (
+                    <div className="absolute -top-1 -right-1 bg-primary text-white rounded-full p-0.5">
+                      <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Court Type Name */}
-              <h3 className="mb-2 text-lg font-bold text-foreground">
+              <h3 className={`mb-2 text-lg font-bold transition-colors ${isSelected ? "text-primary" : "text-foreground"}`}>
                 {courtType.name}
               </h3>
 
@@ -109,7 +101,7 @@ export function CourtTypeSelectionStep({
               {/* Hover Effect */}
               <div
                 className={`
-                  absolute inset-0 rounded-2xl transition-opacity
+                  absolute inset-0 rounded-2xl transition-opacity pointer-events-none
                   ${isSelected ? "opacity-0" : "opacity-0 group-hover:opacity-100"}
                 `}
                 style={{

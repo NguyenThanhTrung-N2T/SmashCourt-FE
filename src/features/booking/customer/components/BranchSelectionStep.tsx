@@ -7,12 +7,12 @@
 "use client";
 
 import { MapPin, Phone, Clock } from "@phosphor-icons/react";
-import { Spinner } from "@/src/shared/components/feedback/Spinner";
-import { Alert } from "@/src/shared/components/ui/Alert";
-import { Badge } from "@/src/shared/components/ui/Badge";
 import { useBranches } from "@/src/features/branch/customer/hooks/useBranches";
 import type { BranchDto } from "@/src/features/branch/types/branch.types";
 import { SmartImage } from "@/src/shared/components/ui";
+import { BranchSelectionLoading } from "./states/BranchSelectionLoading";
+import { BookingErrorState } from "./states/BookingErrorState";
+import { BookingEmptyState } from "./states/BookingEmptyState";
 
 interface BranchSelectionStepProps {
   selectedBranchId: string | null;
@@ -26,26 +26,19 @@ export function BranchSelectionStep({
   const { branches, isLoading, error } = useBranches();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <BranchSelectionLoading />;
   }
 
   if (error) {
-    return (
-      <Alert variant="error" title="Lỗi">
-        {error}
-      </Alert>
-    );
+    return <BookingErrorState message={error} />;
   }
 
   if (branches.length === 0) {
     return (
-      <Alert variant="info" title="Thông báo">
-        Hiện tại chưa có chi nhánh nào khả dụng.
-      </Alert>
+      <BookingEmptyState
+        title="Chưa có chi nhánh"
+        description="Hiện tại chưa có chi nhánh nào khả dụng."
+      />
     );
   }
 
@@ -69,20 +62,11 @@ export function BranchSelectionStep({
               className={`
                 group relative rounded-2xl border-2 p-6 text-left transition-all
                 ${isSelected
-                  ? "border-primary bg-primary/5 shadow-lg"
+                  ? "border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20"
                   : "border-border bg-surface-1 hover:border-primary/50 hover:shadow-md"
                 }
               `}
             >
-              {/* Selected Badge */}
-              {isSelected && (
-                <div className="absolute -top-2 -right-2">
-                  <Badge variant="success" dot>
-                    Đã chọn
-                  </Badge>
-                </div>
-              )}
-
               {/* Branch Avatar */}
               {branch.avatarUrl && (
                 <div className="relative mb-4 h-32 w-full overflow-hidden rounded-xl">
@@ -93,11 +77,16 @@ export function BranchSelectionStep({
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 300px"
                   />
+                  {/* Selected Overlay on Image */}
+                  {isSelected && (
+                    <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Branch Name */}
-              <h3 className="mb-3 text-lg font-bold text-foreground">
+              <h3 className={`mb-3 text-lg font-bold transition-colors ${isSelected ? "text-primary" : "text-foreground"}`}>
                 {branch.name}
               </h3>
 
@@ -126,7 +115,7 @@ export function BranchSelectionStep({
               {/* Hover Effect */}
               <div
                 className={`
-                  absolute inset-0 rounded-2xl transition-opacity
+                  absolute inset-0 rounded-2xl transition-opacity pointer-events-none
                   ${isSelected ? "opacity-0" : "opacity-0 group-hover:opacity-100"}
                 `}
                 style={{

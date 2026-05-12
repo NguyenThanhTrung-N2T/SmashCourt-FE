@@ -93,3 +93,12 @@ export async function cancelBookingByToken(token: string): Promise<void> {
     method: "POST",
   });
 }
+
+/**
+ * Cancel booking by ID (Authenticated Customer)
+ */
+export async function cancelCustomerBooking(bookingId: string): Promise<void> {
+  await authProtectedFetch<null>(`/api/me/bookings/${bookingId}/cancel`, {
+    method: "POST",
+  });
+}

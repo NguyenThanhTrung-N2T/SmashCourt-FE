@@ -28,3 +28,20 @@ export interface PaymentConfirmationDto {
   amount: number;
   message: string;
 }
+
+// ============================================================================
+// Retry Payment Types
+// ============================================================================
+
+/**
+ * Response from retry payment endpoint
+ * 
+ * Returned when customer retries payment for a PENDING booking.
+ * Contains new payment URL and extended expiration time.
+ */
+export interface RetryPaymentResponseDto {
+  bookingId: string;
+  paymentUrl: string;
+  expiresAt: string; // ISO 8601 datetime
+  finalTotal: number;
+}

@@ -7,16 +7,18 @@
 "use client";
 
 import { useState } from "react";
+import { CalendarBlank } from "@phosphor-icons/react";
 import { Pagination } from "@/src/shared/components/ui/Pagination";
 import { EmptyState } from "@/src/shared/components/layout/EmptyState";
-import { Spinner } from "@/src/shared/components/feedback/Spinner";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { BookingCard } from "./BookingCard";
 import { BookingDetailModal } from "./BookingDetailModal";
 import { BookingFilters } from "./BookingFilters";
+import { BookingHistoryLoading } from "./states/BookingHistoryLoading";
+import { BookingErrorState } from "./states/BookingErrorState";
 import { useCustomerBookings } from "../hooks/useCustomerBookings";
 import { useBookingDetail } from "../hooks/useBookingDetail";
-import { Receipt } from "@phosphor-icons/react";
+import { useRetryPayment } from "../hooks/useRetryPayment";
 import type { BookingStatus } from "../../types/booking.types";
 
 export function BookingHistoryList() {
@@ -26,6 +28,8 @@ export function BookingHistoryList() {
   });
 
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const { retryPayment, isLoading: isRetryingPayment, error: paymentError, clearError } = useRetryPayment();
+  
   const {
     booking: selectedBooking,
     isLoading: isLoadingDetail,
@@ -34,10 +38,27 @@ export function BookingHistoryList() {
 
   const handleViewDetail = (bookingId: string) => {
     setSelectedBookingId(bookingId);
+    clearError();
   };
 
   const handleCloseDetail = () => {
     setSelectedBookingId(null);
+    clearError();
+  };
+
+  const handlePayNow = async (bookingId: string) => {
+    const result = await retryPayment(bookingId);
+    
+    if (result) {
+      // Redirect to payment URL
+      window.location.href = result.paymentUrl;
+    }
+    // Error is handled by the hook and displayed via paymentError state
+  };
+
+  const handleCancelSuccess = () => {
+    // Refresh the booking list after successful cancellation
+    refetch();
   };
 
   const handlePageChange = (page: number) => {
@@ -49,25 +70,17 @@ export function BookingHistoryList() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <BookingHistoryLoading />;
   }
 
   if (error) {
-    return (
-      <Alert variant="error" title="Lỗi">
-        {error}
-      </Alert>
-    );
+    return <BookingErrorState message={error} onRetry={refetch} />;
   }
 
   if (!bookings || bookings.items.length === 0) {
     return (
       <EmptyState
-        icon={<Receipt className="h-12 w-12" />}
+        icon={<CalendarBlank className="h-12 w-12 text-muted" />}
         title="Chưa có đặt sân nào"
         description="Bạn chưa có lịch sử đặt sân. Hãy đặt sân ngay để bắt đầu!"
       />
@@ -86,6 +99,13 @@ export function BookingHistoryList() {
           }}
         />
 
+        {/* Payment Error Alert */}
+        {paymentError && (
+          <Alert variant="error" title="Lỗi thanh toán">
+            {paymentError}
+          </Alert>
+        )}
+
         {/* Booking Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {bookings.items.map((booking, index) => (
@@ -93,6 +113,7 @@ export function BookingHistoryList() {
               key={booking.bookingId || `booking-${index}`}
               booking={booking}
               onViewDetail={handleViewDetail}
+              onPayNow={handlePayNow}
             />
           ))}
         </div>
@@ -119,6 +140,7 @@ export function BookingHistoryList() {
         booking={selectedBooking}
         isLoading={isLoadingDetail}
         error={detailError}
+        onCancelSuccess={handleCancelSuccess}
       />
     </>
   );

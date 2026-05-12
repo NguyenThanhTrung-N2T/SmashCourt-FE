@@ -497,7 +497,7 @@ function BookingConfirmation({
           <p className="text-lg font-bold text-foreground">{formatDate(date)}</p>
           <p className="mt-1 text-sm text-muted">
             {formatTime(slots[0].startTime)} - {formatTime(slots[slots.length - 1].endTime)} (
-            {slots.length} khung giờ)
+            {slots.length} slot)
           </p>
         </div>
 
@@ -512,7 +512,7 @@ function BookingConfirmation({
 
       <Alert variant="info" title="Lưu ý">
         Sau khi xác nhận, bạn sẽ được chuyển đến trang thanh toán. Vui lòng hoàn tất thanh toán
-        trong vòng 15 phút để giữ chỗ.
+        trong vòng 10 phút để giữ chỗ.
       </Alert>
     </div>
   );

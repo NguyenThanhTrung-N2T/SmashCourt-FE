@@ -87,7 +87,7 @@ export function Modal({
         </div>
         
         {/* Body */}
-        <div className="overflow-y-auto w-full flex-1">
+        <div className="overflow-y-auto w-full flex-1 custom-scrollbar">
           {children}
         </div>
       </div>

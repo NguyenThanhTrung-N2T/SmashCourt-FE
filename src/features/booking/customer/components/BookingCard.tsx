@@ -4,7 +4,7 @@
  * Displays a booking summary card in the booking history list.
  */
 
-import { CalendarBlank, Clock, MapPin, Receipt } from "@phosphor-icons/react";
+import { CalendarBlank, Clock, MapPin, Receipt, CreditCard } from "@phosphor-icons/react";
 import { Badge } from "@/src/shared/components/ui/Badge";
 import { Button } from "@/src/shared/components/ui/Button";
 import type { BookingDto } from "../../types/booking.types";
@@ -18,12 +18,18 @@ import {
 interface BookingCardProps {
   booking: BookingDto;
   onViewDetail: (bookingId: string) => void;
+  onPayNow?: (bookingId: string) => void;
 }
 
-export function BookingCard({ booking, onViewDetail }: BookingCardProps) {
+export function BookingCard({ booking, onViewDetail, onPayNow }: BookingCardProps) {
   const statusConfig = getBookingStatusConfig(booking.status);
   const displayCode = booking.bookingCode || (booking.id || booking.bookingId)?.substring(0, 8).toUpperCase() || "Không xác định";
   const finalTotal = booking.finalTotal ?? booking.invoice?.finalTotal;
+  const paymentStatus = booking.paymentStatus ?? booking.invoice?.paymentStatus;
+  
+  // Check if payment is pending (UNPAID = 0) and booking is pending
+  const isPendingPayment = (paymentStatus === 0 || paymentStatus === "UNPAID") && 
+                          (booking.status === 0 || booking.status === "PENDING");
 
   return (
     <div className="rounded-xl border-2 border-border bg-surface-1 p-4 shadow-sm transition-all hover:shadow-md">
@@ -91,14 +97,27 @@ export function BookingCard({ booking, onViewDetail }: BookingCardProps) {
       </div>
 
       {/* Actions */}
-      <Button
-        variant="secondary"
-        size="sm"
-        className="w-full"
-        onClick={() => onViewDetail(booking.id || booking.bookingId || "")}
-      >
-        Xem chi tiết
-      </Button>
+      <div className="flex gap-2">
+        {isPendingPayment && onPayNow && (
+          <Button
+            variant="primary"
+            size="sm"
+            className="flex-1"
+            onClick={() => onPayNow(booking.id || booking.bookingId || "")}
+            leftIcon={<CreditCard className="h-4 w-4" />}
+          >
+            Thanh toán
+          </Button>
+        )}
+        <Button
+          variant="secondary"
+          size="sm"
+          className={isPendingPayment ? "flex-1" : "w-full"}
+          onClick={() => onViewDetail(booking.id || booking.bookingId || "")}
+        >
+          Xem chi tiết
+        </Button>
+      </div>
     </div>
   );
 }

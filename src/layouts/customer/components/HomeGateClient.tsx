@@ -12,7 +12,6 @@ import {
   setAccessToken,
   type AuthUserSession,
 } from "@/src/features/auth/session/sessionStore";
-import CustomerHomeShell from "./CustomerHomeShell";
 import WorkspaceHomeShell from "@/src/layouts/employee/components/WorkspaceHomeShell";
 
 function readSession() {
@@ -35,11 +34,18 @@ function OwnerRedirect() {
   useEffect(() => {
     router.replace("/owner");
   }, [router]);
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950">
-      <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
-    </div>
-  );
+  // Use inline style to ensure theme variable is applied
+  return <div className="min-h-screen" style={{ background: 'var(--background)' }} />;
+}
+
+/** Redirect CUSTOMER to /bookings/new (avoids calling router.push during render) */
+function CustomerRedirect() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/bookings/new");
+  }, [router]);
+  // Use inline style to ensure theme variable is applied
+  return <div className="min-h-screen" style={{ background: 'var(--background)' }} />;
 }
 
 export default function HomeGateClient() {
@@ -128,7 +134,7 @@ export default function HomeGateClient() {
       return <WorkspaceHomeShell accessToken={accessToken} user={authUser} />;
     }
     if (role === "CUSTOMER") {
-      return <CustomerHomeShell accessToken={accessToken} user={authUser} />;
+      return <CustomerRedirect />;
     }
   }
 
