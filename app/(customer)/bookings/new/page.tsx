@@ -36,6 +36,13 @@ export default function NewBookingPage() {
 
   // Get current user if logged in
   const [currentUser, setCurrentUser] = useState<ReturnType<typeof getAuthUser>>(null);
+  
+  // Track which fields were pre-filled from user account (to determine read-only state)
+  const [preFilledFields, setPreFilledFields] = useState({
+    name: false,
+    phone: false,
+    email: false,
+  });
 
   useEffect(() => {
     const user = getAuthUser();
@@ -43,9 +50,20 @@ export default function NewBookingPage() {
     
     // Pre-fill guest information if user is logged in
     if (user) {
+      const hasName = !!(user.fullName && user.fullName.trim());
+      const hasPhone = !!(user.phone && user.phone.trim());
+      const hasEmail = !!(user.email && user.email.trim());
+      
       setGuestName(user.fullName || "");
       setGuestPhone(user.phone || "");
       setGuestEmail(user.email || "");
+      
+      // Mark which fields were actually pre-filled
+      setPreFilledFields({
+        name: hasName,
+        phone: hasPhone,
+        email: hasEmail,
+      });
     }
   }, []);
 
@@ -67,6 +85,13 @@ export default function NewBookingPage() {
   const [guestPhone, setGuestPhone] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const [bookingNote, setBookingNote] = useState("");
+
+  // Validation errors for guest information
+  const [validationErrors, setValidationErrors] = useState({
+    name: "",
+    phone: "",
+    email: "",
+  });
 
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [isCalculatingPrice, setIsCalculatingPrice] = useState(false);
@@ -138,6 +163,43 @@ export default function NewBookingPage() {
     setSelectedSlots([]);
   };
 
+  // Validation functions
+  const validatePhone = (phone: string): string => {
+    if (!phone.trim()) return "";
+    const phoneRegex = /^(0|\+84)[3|5|7|8|9][0-9]{8}$/;
+    const cleanPhone = phone.trim().replace(/\s/g, '');
+    if (!phoneRegex.test(cleanPhone)) {
+      return "Số điện thoại không hợp lệ (VD: 0901234567)";
+    }
+    return "";
+  };
+
+  const validateEmail = (email: string): string => {
+    if (!email.trim()) return "";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      return "Email không hợp lệ";
+    }
+    return "";
+  };
+
+  const handleGuestNameChange = (value: string) => {
+    setGuestName(value);
+    setValidationErrors(prev => ({ ...prev, name: "" }));
+  };
+
+  const handleGuestPhoneChange = (value: string) => {
+    setGuestPhone(value);
+    const error = validatePhone(value);
+    setValidationErrors(prev => ({ ...prev, phone: error }));
+  };
+
+  const handleGuestEmailChange = (value: string) => {
+    setGuestEmail(value);
+    const error = validateEmail(value);
+    setValidationErrors(prev => ({ ...prev, email: error }));
+  };
+
   const handleNext = () => {
     setError(null);
     if (currentStep < 4) {
@@ -171,6 +233,20 @@ export default function NewBookingPage() {
     // Validate guest information
     if (!guestName.trim() || !guestPhone.trim() || !guestEmail.trim()) {
       setError("Vui lòng nhập đầy đủ họ tên, số điện thoại và email");
+      return;
+    }
+
+    // Validate phone number format (Vietnamese phone numbers)
+    const phoneRegex = /^(0|\+84)[3|5|7|8|9][0-9]{8}$/;
+    if (!phoneRegex.test(guestPhone.trim().replace(/\s/g, ''))) {
+      setError("Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam (10-11 số)");
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(guestEmail.trim())) {
+      setError("Email không hợp lệ. Vui lòng nhập đúng định dạng email");
       return;
     }
 
@@ -268,11 +344,13 @@ export default function NewBookingPage() {
               guestPhone={guestPhone}
               guestEmail={guestEmail}
               bookingNote={bookingNote}
-              onGuestNameChange={setGuestName}
-              onGuestPhoneChange={setGuestPhone}
-              onGuestEmailChange={setGuestEmail}
+              onGuestNameChange={handleGuestNameChange}
+              onGuestPhoneChange={handleGuestPhoneChange}
+              onGuestEmailChange={handleGuestEmailChange}
               onBookingNoteChange={setBookingNote}
               isLoggedIn={currentUser !== null}
+              preFilledFields={preFilledFields}
+              validationErrors={validationErrors}
               totalAmount={totalAmount}
             />
           )}
@@ -303,7 +381,14 @@ export default function NewBookingPage() {
             <Button
               variant="primary"
               onClick={handleSubmitBooking}
-              disabled={isSubmitting}
+              disabled={
+                isSubmitting ||
+                !guestName.trim() ||
+                !guestPhone.trim() ||
+                !guestEmail.trim() ||
+                !!validationErrors.phone ||
+                !!validationErrors.email
+              }
               isLoading={isSubmitting}
               className="ml-auto"
               leftIcon={<CheckCircle className="h-5 w-5" />}
@@ -332,6 +417,16 @@ interface BookingConfirmationProps {
   onGuestEmailChange: (value: string) => void;
   onBookingNoteChange: (value: string) => void;
   isLoggedIn: boolean;
+  preFilledFields: {
+    name: boolean;
+    phone: boolean;
+    email: boolean;
+  };
+  validationErrors: {
+    name: string;
+    phone: string;
+    email: string;
+  };
   totalAmount: number;
 }
 
@@ -350,8 +445,14 @@ function BookingConfirmation({
   onGuestEmailChange,
   onBookingNoteChange,
   isLoggedIn,
+  preFilledFields,
+  validationErrors,
   totalAmount,
 }: BookingConfirmationProps) {
+  // Determine which fields should be read-only (only if they were pre-filled from account)
+  const isNameReadOnly = preFilledFields.name;
+  const isPhoneReadOnly = preFilledFields.phone;
+  const isEmailReadOnly = preFilledFields.email;
   const formatTime = (time: string) => time.substring(0, 5);
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -403,14 +504,17 @@ function BookingConfirmation({
               value={guestName}
               onChange={(e) => onGuestNameChange(e.target.value)}
               placeholder="Nguyễn Văn A"
-              className={inputCls(false, isLoggedIn)}
-              readOnly={isLoggedIn}
+              className={inputCls(!!validationErrors.name, isNameReadOnly)}
+              readOnly={isNameReadOnly}
               required
             />
-            {isLoggedIn && (
+            {isNameReadOnly && (
               <p className="mt-1 text-xs text-muted">
                 Thông tin từ tài khoản của bạn
               </p>
+            )}
+            {validationErrors.name && (
+              <p className="mt-1 text-xs text-red-500">{validationErrors.name}</p>
             )}
           </div>
 
@@ -423,14 +527,17 @@ function BookingConfirmation({
               value={guestPhone}
               onChange={(e) => onGuestPhoneChange(e.target.value)}
               placeholder="0901234567"
-              className={inputCls(false, isLoggedIn)}
-              readOnly={isLoggedIn}
+              className={inputCls(!!validationErrors.phone, isPhoneReadOnly)}
+              readOnly={isPhoneReadOnly}
               required
             />
-            {isLoggedIn && (
+            {isPhoneReadOnly && (
               <p className="mt-1 text-xs text-muted">
                 Thông tin từ tài khoản của bạn
               </p>
+            )}
+            {validationErrors.phone && (
+              <p className="mt-1 text-xs text-red-500">{validationErrors.phone}</p>
             )}
           </div>
 
@@ -443,14 +550,17 @@ function BookingConfirmation({
               value={guestEmail}
               onChange={(e) => onGuestEmailChange(e.target.value)}
               placeholder="example@email.com"
-              className={inputCls(false, isLoggedIn)}
-              readOnly={isLoggedIn}
+              className={inputCls(!!validationErrors.email, isEmailReadOnly)}
+              readOnly={isEmailReadOnly}
               required
             />
-            {isLoggedIn && (
+            {isEmailReadOnly && (
               <p className="mt-1 text-xs text-muted">
                 Thông tin từ tài khoản của bạn
               </p>
+            )}
+            {validationErrors.email && (
+              <p className="mt-1 text-xs text-red-500">{validationErrors.email}</p>
             )}
           </div>
 

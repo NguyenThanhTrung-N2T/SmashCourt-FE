@@ -9,6 +9,7 @@ import { Alert } from "@/src/shared/components/ui/Alert";
 import { Flex } from "@/src/shared/components/layout/Flex";
 import { Grid } from "@/src/shared/components/layout/Grid";
 import { getTierCfg } from "./LoyaltyTierConfig";
+import { createNumericChangeHandler } from "@/src/shared/utils/inputValidation";
 
 export function LoyaltyTierDetailPanel({
     tier,
@@ -130,7 +131,10 @@ export function LoyaltyTierDetailPanel({
                                 type="number"
                                 min={0}
                                 value={minPoints}
-                                onChange={(e) => { setMinPoints(e.target.value); setErrors((p) => ({ ...p, minPoints: undefined })); }}
+                                onChange={createNumericChangeHandler(
+                                    (val) => { setMinPoints(val); setErrors((p) => ({ ...p, minPoints: undefined })); },
+                                    { min: 0, allowDecimal: false }
+                                )}
                                 error={errors.minPoints}
                                 className={`text-base shadow-sm ${cfg.inputFocus}`}
                                 rightIcon={<span className="text-sm font-bold text-slate-400">Pts</span>}
@@ -150,7 +154,10 @@ export function LoyaltyTierDetailPanel({
                                 max={100}
                                 step={0.1}
                                 value={discountRate}
-                                onChange={(e) => { setDiscountRate(e.target.value); setErrors((p) => ({ ...p, discountRate: undefined })); }}
+                                onChange={createNumericChangeHandler(
+                                    (val) => { setDiscountRate(val); setErrors((p) => ({ ...p, discountRate: undefined })); },
+                                    { min: 0, max: 100, allowDecimal: true }
+                                )}
                                 error={errors.discountRate}
                                 className={`text-base shadow-sm ${cfg.inputFocus}`}
                                 rightIcon={<span className="text-sm font-bold text-slate-400">%</span>}

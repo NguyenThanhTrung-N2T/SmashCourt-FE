@@ -5,6 +5,7 @@ import type {
   Promotion,
   SavePromotionRequest,
 } from "@/src/shared/types/promotion.types";
+import { DiscountType } from "@/src/shared/types/promotion.types";
 
 // ─── API functions ────────────────────────────────────────────────────────────
 
@@ -12,7 +13,7 @@ import type {
  * GET /api/promotions
  * Lấy danh sách tất cả khuyến mãi (không bao gồm DELETED)
  */
-export async function fetchAllPromotions(page = 1, pageSize = 10): Promise<PaginatedData<Promotion>> {
+export async function fetchAllPromotions(page = 1, pageSize = 12): Promise<PaginatedData<Promotion>> {
   const response = await authProtectedFetch<PaginatedData<Promotion>>(
     `/api/promotions?page=${page}&pageSize=${pageSize}`,
     { method: "GET" },
@@ -27,6 +28,21 @@ export async function fetchAllPromotions(page = 1, pageSize = 10): Promise<Pagin
       hasNext: false,
       hasPrev: false,
     };
+  }
+  return response.data;
+}
+
+/**
+ * GET /api/promotions/active
+ * Lấy danh sách khuyến mãi đang hoạt động (ACTIVE)
+ */
+export async function fetchActivePromotions(): Promise<Promotion[]> {
+  const response = await authProtectedFetch<Promotion[]>(
+    `/api/promotions/active`,
+    { method: "GET" },
+  );
+  if (!response.data) {
+    return [];
   }
   return response.data;
 }
@@ -92,3 +108,54 @@ export async function deletePromotion(id: string): Promise<void> {
     method: "DELETE",
   });
 }
+
+/**
+ * Helper function to calculate discount amount
+ * @param promotion - The promotion object
+ * @param bookingAmount - The original booking amount
+ * @returns The discount amount
+ */
+export function calculateDiscountAmount(
+  promotion: Promotion,
+  bookingAmount: number,
+): number {
+  let discountAmount = 0;
+
+  if (promotion.discountType === DiscountType.PERCENT) {
+    discountAmount = (bookingAmount * promotion.discountValue) / 100;
+
+    // Apply max discount cap if specified
+    if (promotion.maxDiscountAmount && discountAmount > promotion.maxDiscountAmount) {
+      discountAmount = promotion.maxDiscountAmount;
+    }
+  } else if (promotion.discountType === DiscountType.FIXED) {
+    discountAmount = promotion.discountValue;
+
+    // Cannot exceed booking amount
+    if (discountAmount > bookingAmount) {
+      discountAmount = bookingAmount;
+    }
+  }
+
+  return Math.round(discountAmount);
+}
+
+/**
+ * Helper function to format discount display
+ * @param promotion - The promotion object
+ * @returns Formatted discount string
+ */
+export function formatDiscountDisplay(promotion: Promotion): string {
+  if (promotion.discountType === DiscountType.PERCENT) {
+    let display = `${promotion.discountValue}%`;
+    if (promotion.maxDiscountAmount) {
+      display += ` (tối đa ${promotion.maxDiscountAmount.toLocaleString("vi-VN")} VNĐ)`;
+    }
+    return display;
+  } else {
+    return `${promotion.discountValue.toLocaleString("vi-VN")} VNĐ`;
+  }
+}
+
+// Legacy function name for backward compatibility
+export const fetchActivePromotion = fetchActivePromotions;

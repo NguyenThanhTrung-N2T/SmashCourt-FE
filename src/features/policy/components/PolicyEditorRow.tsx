@@ -11,6 +11,7 @@ import {
     getPolicyRangeLabel,
 } from "@/src/features/policy/utils/cancellationPolicy";
 import type { CancelPolicy } from "@/src/shared/types/cancel-policy.types";
+import { createNumericChangeHandler } from "@/src/shared/utils/inputValidation";
 
 type EditableCancelPolicy = CancelPolicy & {
     clientId: string;
@@ -128,13 +129,10 @@ export function PolicyEditorRow({
                             max={720}
                             step={1}
                             value={policy.hoursBefore}
-                            onChange={(event) =>
-                                onChange(
-                                    policy.clientId,
-                                    "hoursBefore",
-                                    Number(event.target.value),
-                                )
-                            }
+                            onChange={createNumericChangeHandler(
+                                (val) => onChange(policy.clientId, "hoursBefore", Number(val)),
+                                { min: 0, max: 720, allowDecimal: false }
+                            )}
                             rightIcon={<span className="text-sm font-bold text-slate-400">giờ</span>}
                             className="text-base font-extrabold shadow-sm focus:border-primary focus:ring-primary/10"
                         />
@@ -148,13 +146,10 @@ export function PolicyEditorRow({
                             max={100}
                             step={0.01}
                             value={policy.refundPercent}
-                            onChange={(event) =>
-                                onChange(
-                                    policy.clientId,
-                                    "refundPercent",
-                                    Number(event.target.value),
-                                )
-                            }
+                            onChange={createNumericChangeHandler(
+                                (val) => onChange(policy.clientId, "refundPercent", Number(val)),
+                                { min: 0, max: 100, allowDecimal: true }
+                            )}
                             rightIcon={<span className="text-sm font-extrabold opacity-50">%</span>}
                             className={`text-base font-extrabold shadow-sm focus:border-primary focus:ring-primary/10 ${color.text} ${color.bg}`}
                         />

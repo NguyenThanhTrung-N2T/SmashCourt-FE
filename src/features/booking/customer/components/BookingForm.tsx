@@ -15,6 +15,11 @@ import { Alert } from "@/src/shared/components/ui/Alert";
 import { useCreateBooking } from "../hooks/useCreateBooking";
 import { formatCurrency, formatDate, formatTime } from "../utils/bookingStatus";
 import type { CourtSlotDto } from "../../types/booking.types";
+import {
+  createValidatedChangeHandler,
+  createTrimOnBlurHandler,
+  ValidationRules,
+} from "@/src/shared/utils/inputValidation";
 
 interface BookingFormProps {
   selectedCourts: Array<CourtSlotDto & { courtName: string; price: number }>;
@@ -158,7 +163,11 @@ export function BookingForm({
           label="Họ và tên"
           placeholder="Nguyễn Văn A"
           value={formData.guestName}
-          onChange={(e) => handleChange("guestName", e.target.value)}
+          onChange={createValidatedChangeHandler(
+            (val) => handleChange("guestName", val),
+            ValidationRules.vietnameseText
+          )}
+          onBlur={createTrimOnBlurHandler((val) => setFormData((prev) => ({ ...prev, guestName: val })))}
           leftIcon={<User className="h-4 w-4" />}
           error={validationErrors.guestName}
           required
@@ -168,7 +177,10 @@ export function BookingForm({
           label="Số điện thoại"
           placeholder="0901234567"
           value={formData.guestPhone}
-          onChange={(e) => handleChange("guestPhone", e.target.value)}
+          onChange={createValidatedChangeHandler(
+            (val) => handleChange("guestPhone", val),
+            ValidationRules.phoneFormat
+          )}
           leftIcon={<Phone className="h-4 w-4" />}
           error={validationErrors.guestPhone}
           required
@@ -179,7 +191,11 @@ export function BookingForm({
           type="email"
           placeholder="email@example.com"
           value={formData.guestEmail}
-          onChange={(e) => handleChange("guestEmail", e.target.value)}
+          onChange={createValidatedChangeHandler(
+            (val) => handleChange("guestEmail", val),
+            ValidationRules.emailFormat
+          )}
+          onBlur={createTrimOnBlurHandler((val) => setFormData((prev) => ({ ...prev, guestEmail: val })))}
           leftIcon={<EnvelopeSimple className="h-4 w-4" />}
           error={validationErrors.guestEmail}
         />

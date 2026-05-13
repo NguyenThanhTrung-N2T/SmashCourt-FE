@@ -7,6 +7,11 @@ import { Button } from "@/src/shared/components/ui/Button";
 import { UserPlus } from "@phosphor-icons/react";
 import { createUser } from "@/src/api/user-management.api";
 import { AuthApiError } from "@/src/api/core";
+import {
+  createValidatedChangeHandler,
+  createTrimOnBlurHandler,
+  ValidationRules,
+} from "@/src/shared/utils/inputValidation";
 
 interface CreateStaffModalProps {
   onClose: () => void;
@@ -87,7 +92,11 @@ export function CreateStaffModal({ onClose, onSuccess, onError }: CreateStaffMod
           type="email"
           placeholder="example@email.com"
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onChange={createValidatedChangeHandler(
+            (val) => setFormData({ ...formData, email: val }),
+            ValidationRules.emailFormat
+          )}
+          onBlur={createTrimOnBlurHandler((val) => setFormData({ ...formData, email: val }))}
           error={errors.email}
           required
         />
@@ -97,7 +106,11 @@ export function CreateStaffModal({ onClose, onSuccess, onError }: CreateStaffMod
           type="text"
           placeholder="Nguyễn Văn A"
           value={formData.fullName}
-          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+          onChange={createValidatedChangeHandler(
+            (val) => setFormData({ ...formData, fullName: val }),
+            ValidationRules.vietnameseText
+          )}
+          onBlur={createTrimOnBlurHandler((val) => setFormData({ ...formData, fullName: val }))}
           error={errors.fullname}
           required
         />
@@ -107,7 +120,10 @@ export function CreateStaffModal({ onClose, onSuccess, onError }: CreateStaffMod
           type="tel"
           placeholder="+84901234567"
           value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+          onChange={createValidatedChangeHandler(
+            (val) => setFormData({ ...formData, phone: val }),
+            ValidationRules.phoneFormat
+          )}
           error={errors.phone}
         />
 

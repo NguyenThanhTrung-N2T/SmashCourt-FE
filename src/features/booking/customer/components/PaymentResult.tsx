@@ -63,12 +63,12 @@ export function PaymentResult() {
 
   const handleViewBooking = () => {
     if (result?.bookingId) {
-      router.push(`/customer/history`);
+      router.push(`/bookings`);
     }
   };
 
   const handleBackHome = () => {
-    router.push("/");
+    router.push("/bookings/new");
   };
 
   if (isLoading) {

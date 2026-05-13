@@ -1,4 +1,4 @@
-import { ArrowClockwise, Plus, Tag, Sparkle, Percent } from "@phosphor-icons/react";
+import { ArrowClockwise, Plus, Tag, Sparkle, TrendUp } from "@phosphor-icons/react";
 import { Button } from "@/src/shared/components/ui/Button";
 import { Flex } from "@/src/shared/components/layout/Flex";
 import { PromotionStatus } from "@/src/shared/types/promotion.types";
@@ -16,9 +16,7 @@ export function PromotionStatsHeader({
     onCreateNew: () => void;
 }) {
     const activeCount = promotions.filter((p) => p.status === PromotionStatus.ACTIVE).length;
-    const maxDiscount = promotions.length
-        ? Math.max(...promotions.map((p) => Number(p.discountRate)))
-        : 0;
+    const totalUsage = promotions.reduce((sum, p) => sum + (p.usedCount || 0), 0);
 
     return (
         <>
@@ -58,7 +56,7 @@ export function PromotionStatsHeader({
                 {[
                     { icon: Tag, val: loading ? "–" : promotions.length, label: "Tổng số chương trình" },
                     { icon: Sparkle, val: loading ? "–" : activeCount, label: "Đang hoạt động" },
-                    { icon: Percent, val: loading ? "–" : `${maxDiscount}%`, label: "Giảm giá cao nhất" },
+                    { icon: TrendUp, val: loading ? "–" : totalUsage.toLocaleString("vi-VN"), label: "Lượt sử dụng" },
                 ].map((s, i) => (
                     <div key={i} className="flex items-center gap-4 rounded-2xl border border-border bg-surface-1 p-4 shadow-sm hover:shadow-md transition-all">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">

@@ -9,6 +9,11 @@ import { PencilSimple } from "@phosphor-icons/react";
 import { updateUser } from "@/src/api/user-management.api";
 import { AuthApiError } from "@/src/api/core";
 import type { StaffUserDetail } from "@/src/features/staff/types/user.type";
+import {
+  createValidatedChangeHandler,
+  createTrimOnBlurHandler,
+  ValidationRules,
+} from "@/src/shared/utils/inputValidation";
 
 interface EditStaffModalProps {
   staff: StaffUserDetail;
@@ -90,7 +95,11 @@ export function EditStaffModal({ staff, onClose, onSuccess, onError }: EditStaff
           type="text"
           placeholder="Nguyễn Văn A"
           value={formData.fullName}
-          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+          onChange={createValidatedChangeHandler(
+            (val) => setFormData({ ...formData, fullName: val }),
+            ValidationRules.vietnameseText
+          )}
+          onBlur={createTrimOnBlurHandler((val) => setFormData({ ...formData, fullName: val }))}
           error={errors.fullname}
           required
         />
@@ -100,7 +109,10 @@ export function EditStaffModal({ staff, onClose, onSuccess, onError }: EditStaff
           type="tel"
           placeholder="+84901234567"
           value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+          onChange={createValidatedChangeHandler(
+            (val) => setFormData({ ...formData, phone: val }),
+            ValidationRules.phoneFormat
+          )}
           error={errors.phone}
         />
 

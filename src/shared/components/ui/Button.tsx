@@ -49,29 +49,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     } : undefined;
 
     if (isDisabled) {
-        // When disabled, the span owns:
-        //   • layout classes from `className` (e.g. flex-1) so flex parents work correctly
-        //   • cursor-not-allowed — browsers honour cursor on non-disabled elements
-        // The button owns:
-        //   • all visual / size classes
-        //   • pointer-events-none — prevents hover styles from firing
-        //   • native disabled for form semantics & a11y
         return (
-            <span className={`inline-flex cursor:pointer ${className}`}>
-                <button
-                    ref={ref}
-                    type={type}
-                    disabled
-                    aria-disabled="true"
-                    className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} opacity-50 pointer-events-none w-full`}
-                    style={gradientStyle}
-                >
-                    {isLoading ? (
-                        <CircleNotch className="h-4 w-4 animate-spin" />
-                    ) : leftIcon}
-                    {children}
-                </button>
-            </span>
+            <button
+                ref={ref}
+                type={type}
+                disabled
+                aria-disabled="true"
+                className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} opacity-50 cursor-not-allowed pointer-events-none ${className}`}
+                style={gradientStyle}
+            >
+                {isLoading ? (
+                    <CircleNotch className="h-4 w-4 animate-spin" />
+                ) : leftIcon}
+                {children}
+            </button>
         );
     }
 

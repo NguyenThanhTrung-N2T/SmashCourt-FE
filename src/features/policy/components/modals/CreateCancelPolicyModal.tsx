@@ -9,6 +9,7 @@ import { Input } from "@/src/shared/components/ui/Input";
 import { Modal } from "@/src/shared/components/ui/Modal";
 import { Flex } from "@/src/shared/components/layout/Flex";
 import { Grid } from "@/src/shared/components/layout/Grid";
+import { createNumericChangeHandler } from "@/src/shared/utils/inputValidation";
 
 export interface CreateCancelPolicyPayload {
   hoursBefore: number;
@@ -55,7 +56,10 @@ export function CreateCancelPolicyModal({
               max={720}
               step={1}
               value={hoursBefore}
-              onChange={(e) => setHoursBefore(Number(e.target.value))}
+              onChange={createNumericChangeHandler(
+                (val) => setHoursBefore(Number(val)),
+                { min: 0, max: 720, allowDecimal: false }
+              )}
               rightIcon={<span className="text-sm font-bold text-slate-400">giờ</span>}
               className="text-base shadow-sm focus:border-primary focus:ring-primary/10"
             />
@@ -69,7 +73,10 @@ export function CreateCancelPolicyModal({
               max={100}
               step={0.01}
               value={refundPercent}
-              onChange={(e) => setRefundPercent(Number(e.target.value))}
+              onChange={createNumericChangeHandler(
+                (val) => setRefundPercent(Number(val)),
+                { min: 0, max: 100, allowDecimal: true }
+              )}
               rightIcon={<span className="text-sm font-bold opacity-50">%</span>}
               className="text-base shadow-sm focus:border-primary focus:ring-primary/10"
             />

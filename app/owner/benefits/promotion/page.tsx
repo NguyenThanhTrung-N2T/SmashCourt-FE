@@ -1,5 +1,5 @@
-import PromotionManager from "@/src/features/benefit/components/PromotionManager";
+import OwnerPromotionPage from "@/src/features/benefit/promotion/owner/OwnerPromotionsPage";
 
 export default function PromotionPage() {
-  return <PromotionManager />;
+  return <OwnerPromotionPage />;
 }

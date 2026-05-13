@@ -8,6 +8,12 @@ import { Textarea } from "@/src/shared/components/ui/Textarea";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { Button } from "@/src/shared/components/ui/Button";
 import type { SaveServiceRequest } from "@/src/shared/types/service.types";
+import {
+  createNumericChangeHandler,
+  createTrimOnBlurHandler,
+  createValidatedChangeHandler,
+  ValidationRules,
+} from "@/src/shared/utils/inputValidation";
 
 interface ServiceFormProps {
   initialData?: {
@@ -98,6 +104,7 @@ export function ServiceForm({
               setName(e.target.value);
               setErrors((p) => ({ ...p, name: undefined }));
             }}
+            onBlur={createTrimOnBlurHandler(setName)}
             placeholder="VD: Nước suối Aquafina"
             error={errors.name}
             className="text-base shadow-sm focus:border-primary focus:ring-primary/10"
@@ -119,10 +126,13 @@ export function ServiceForm({
                 type="number"
                 min={1}
                 value={defaultPrice}
-                onChange={(e) => {
-                  setDefaultPrice(e.target.value);
-                  setErrors((p) => ({ ...p, defaultPrice: undefined }));
-                }}
+                onChange={createNumericChangeHandler(
+                  (val) => {
+                    setDefaultPrice(val);
+                    setErrors((p) => ({ ...p, defaultPrice: undefined }));
+                  },
+                  { min: 1, allowDecimal: false }
+                )}
                 placeholder="VD: 10000"
                 error={errors.defaultPrice}
                 rightIcon={<span className="text-sm font-bold text-slate-400">đ</span>}
@@ -138,6 +148,7 @@ export function ServiceForm({
                   setUnit(e.target.value);
                   setErrors((p) => ({ ...p, unit: undefined }));
                 }}
+                onBlur={createTrimOnBlurHandler(setUnit)}
                 placeholder="VD: Chai, Lượt..."
                 error={errors.unit}
                 className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"

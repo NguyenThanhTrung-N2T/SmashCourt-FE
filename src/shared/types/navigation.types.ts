@@ -2,6 +2,6 @@ export interface NavItem {
     label: string;
     href: string;
     icon: React.ElementType;
-    hint: string;
+    hint?: string;
     exact?: boolean;
 }

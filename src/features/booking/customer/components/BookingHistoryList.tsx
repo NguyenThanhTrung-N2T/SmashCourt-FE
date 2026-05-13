@@ -24,12 +24,12 @@ import type { BookingStatus } from "../../types/booking.types";
 export function BookingHistoryList() {
   const { bookings, isLoading, error, updateQuery, query, refetch } = useCustomerBookings({
     page: 1,
-    pageSize: 10,
+    pageSize: 12,
   });
 
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const { retryPayment, isLoading: isRetryingPayment, error: paymentError, clearError } = useRetryPayment();
-  
+
   const {
     booking: selectedBooking,
     isLoading: isLoadingDetail,
@@ -48,7 +48,7 @@ export function BookingHistoryList() {
 
   const handlePayNow = async (bookingId: string) => {
     const result = await retryPayment(bookingId);
-    
+
     if (result) {
       // Redirect to payment URL
       window.location.href = result.paymentUrl;

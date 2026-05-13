@@ -10,6 +10,7 @@ import { Input } from "@/src/shared/components/ui/Input";
 import { Textarea } from "@/src/shared/components/ui/Textarea";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { Flex } from "@/src/shared/components/layout/Flex";
+import { createTrimOnBlurHandler } from "@/src/shared/utils/inputValidation";
 
 interface CourtTypeFormProps {
  initialName?: string;
@@ -63,6 +64,7 @@ export function CourtTypeForm({
  setName(e.target.value);
  setValidationError("");
  }}
+ onBlur={createTrimOnBlurHandler(setName)}
  placeholder="Ví dụ: Sân đơn, Sân đôi..."
  maxLength={255}
  autoFocus

@@ -37,28 +37,73 @@ export function getStatusCfg(status: PromotionStatus): StatusCfg {
     }
 }
 
+function padDatePart(value: number): string {
+    return String(value).padStart(2, "0");
+}
+
+function parseDateString(dateStr: string): Date | null {
+    if (!dateStr?.trim()) {
+        return null;
+    }
+
+    const raw = dateStr.trim();
+    const [mainPart] = raw.split("T");
+    const trimmed = mainPart.trim();
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+        return new Date(`${trimmed}T00:00:00Z`);
+    }
+
+    const spaceMatch = trimmed.match(/^(\d{1,2}) (\d{1,2}) (\d{4})(?: .*?)?$/);
+    if (spaceMatch) {
+        const [, day, month, year] = spaceMatch;
+        return new Date(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T00:00:00Z`);
+    }
+
+    const slashMatch = trimmed.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})(?: .*?)?$/);
+    if (slashMatch) {
+        const [, day, month, year] = slashMatch;
+        return new Date(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T00:00:00Z`);
+    }
+
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+        return parsed;
+    }
+
+    return null;
+}
+
+function formatDateFromDate(date: Date) {
+    return `${padDatePart(date.getUTCDate())}/${padDatePart(date.getUTCMonth() + 1)}/${date.getUTCFullYear()}`;
+}
+
+function inputDateFromDate(date: Date) {
+    return `${date.getUTCFullYear()}-${padDatePart(date.getUTCMonth() + 1)}-${padDatePart(date.getUTCDate())}`;
+}
+
 export function formatDate(dateStr: string) {
-    try {
-        // Handle ISO datetime format (e.g.,"2026-04-01T00:00:00")
-        const dateOnly = dateStr.split("T")[0];
-        const parts = dateOnly.split("-");
-        if (parts.length === 3) {
-            return `${parts[2]}/${parts[1]}/${parts[0]}`;
-        }
-        return dateStr;
-    } catch {
+    const date = parseDateString(dateStr);
+    if (!date) {
         return dateStr;
     }
+    return formatDateFromDate(date);
 }
 
 export function toInputDate(dateStr: string) {
-    // Handle ISO datetime format and extract date part
-    try {
-        const dateOnly = dateStr.split("T")[0];
-        return dateOnly;
-    } catch {
+    const date = parseDateString(dateStr);
+    if (!date) {
         return dateStr;
     }
+    return inputDateFromDate(date);
+}
+
+export function toIsoDateString(dateStr: string) {
+    const date = parseDateString(dateStr);
+    if (!date) {
+        return `${dateStr}T00:00:00Z`;
+    }
+    return `${date.getUTCFullYear()}-${padDatePart(date.getUTCMonth() + 1)}-${padDatePart(date.getUTCDate())}T00:00:00Z`;
 }
 
 export function getTodayStr() {

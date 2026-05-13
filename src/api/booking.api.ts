@@ -47,7 +47,7 @@ export async function fetchCustomerBookings(
 ): Promise<PaginatedData<BookingDto>> {
   const params = new URLSearchParams({
     page: (query.page || 1).toString(),
-    pageSize: (query.pageSize || 10).toString(),
+    pageSize: (query.pageSize || 12).toString(),
   });
 
   if (query.status !== undefined) params.append("status", query.status.toString());
