@@ -13,6 +13,7 @@ import {
   CalendarDots,
   CreditCard,
   Tag,
+  Question,
 } from "@phosphor-icons/react";
 
 export const OWNER_NAV: NavItem[] = [
@@ -94,5 +95,30 @@ export const OWNER_NAV: NavItem[] = [
         href: "/owner/settings",
         icon: Gear,
         hint: "Cấu hình hệ thống",
+    },
+];
+
+// Account menu items for user dropdown
+export const OWNER_ACCOUNT_MENU: NavItem[] = [
+    {
+        label: "Hồ sơ cá nhân",
+        href: "/owner/profile",
+        icon: User,
+        hint: "Quản lý hồ sơ",
+        exact: false,
+    },
+    {
+        label: "Cài đặt",
+        href: "/owner/settings",
+        icon: Gear,
+        hint: "Cài đặt tài khoản",
+        exact: false,
+    },
+    {
+        label: "Trợ giúp",
+        href: "/help",
+        icon: Question,
+        hint: "Trợ giúp và hỗ trợ",
+        exact: false,
     },
 ];

@@ -177,18 +177,6 @@ export default function MobileNav({
 
         {/* Navigation Content */}
         <nav className="flex-1 overflow-y-auto scrollbar-none py-6">
-          {/* Primary CTA Button */}
-          <div className="px-4 mb-6">
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => handleNavClick("/bookings/new")}
-              className="w-full shadow-sm"
-            >
-              Đặt sân ngay
-            </Button>
-          </div>
-
           {/* Primary Navigation Links */}
           <div className="space-y-3 px-4 mb-6">
             {CUSTOMER_TOP_NAV.map((item) => {

@@ -76,7 +76,7 @@ export function CustomerPromotionsPage() {
   }
 
   return (
-    <div className="container max-w-6xl mx-auto py-8 px-4 space-y-8">
+    <div className="container max-w-7xl mx-auto py-8 px-4 space-y-8">
       {/* Page Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">

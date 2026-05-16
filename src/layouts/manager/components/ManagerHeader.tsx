@@ -7,13 +7,14 @@ import {
     List,
     CaretDown,
     SignOut,
-    UserCircle,
     CircleNotch,
     Buildings,
 } from "@phosphor-icons/react";
 import { type AuthUserSession } from "@/src/features/auth/session/sessionStore";
 import { SmartImage } from "@/src/shared/components/ui";
 import ThemeToggle from "@/src/shared/components/ui/ThemeToggle";
+import { MANAGER_ACCOUNT_MENU } from "../navigation/manager.navigation";
+import Link from "next/link";
 
 function getInitials(fullName: string) {
     const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -168,13 +169,23 @@ export default function ManagerHeader({
                                     Branch Manager
                                 </span>
                             </div>
-                            <a
-                                href="/manager/profile"
-                                className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-foreground transition-colors"
-                            >
-                                <UserCircle className="h-4 w-4 text-muted" />
-                                Hồ sơ cá nhân
-                            </a>
+                            
+                            {/* Account menu items */}
+                            {MANAGER_ACCOUNT_MENU.map((item) => {
+                                const Icon = item.icon;
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-foreground transition-colors"
+                                        title={item.hint}
+                                    >
+                                        <Icon className="h-4 w-4 text-muted" />
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
+                            
                             <button
                                 onClick={() => {
                                     setProfileOpen(false);

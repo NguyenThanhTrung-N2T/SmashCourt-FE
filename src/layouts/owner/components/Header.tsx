@@ -8,12 +8,13 @@ import {
     List,
     CaretDown,
     SignOut,
-    Gear,
     CircleNotch,
 } from "@phosphor-icons/react";
 import { type AuthUserSession } from "@/src/features/auth/session/sessionStore";
 import ThemeToggle from "@/src/shared/components/ui/ThemeToggle";
 import { SmartImage } from "@/src/shared/components/ui";
+import { OWNER_ACCOUNT_MENU } from "../navigation/owner.navigation";
+import Link from "next/link";
 
 function getInitials(fullName: string) {
     const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -161,13 +162,23 @@ export default function Header({
                                 <p className="text-sm font-bold text-foreground truncate">{user.fullName}</p>
                                 <p className="text-xs text-muted truncate">{user.email}</p>
                             </div>
-                            <a
-                                href="/owner/settings"
-                                className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-foreground transition-colors"
-                            >
-                                <Gear className="h-4 w-4 text-muted" />
-                                Cài đặt
-                            </a>
+                            
+                            {/* Account menu items */}
+                            {OWNER_ACCOUNT_MENU.map((item) => {
+                                const Icon = item.icon;
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-foreground transition-colors"
+                                        title={item.hint}
+                                    >
+                                        <Icon className="h-4 w-4 text-muted" />
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
+                            
                             <button
                                 onClick={() => {
                                     setProfileOpen(false);

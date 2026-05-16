@@ -48,7 +48,7 @@ export default function CustomerTopNav({
       className="bg-surface-1/80 backdrop-blur-md sticky top-0 z-40 border-b border-border/50 shadow-sm"
     >
       {/* Main Navigation Row */}
-      <div className="max-w-[1920px] mx-auto px-6 h-[80px] flex items-center justify-between">
+      <div className="max-w-[1920px] mx-auto px-6 h-[80px] flex items-center justify-between relative">
         {/* Logo and Brand */}
         <Link
           href="/bookings/new"
@@ -66,8 +66,8 @@ export default function CustomerTopNav({
           </span>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <div className="hidden lg:flex items-center gap-2">
+        {/* Desktop Navigation Links - Centered */}
+        <div className="hidden lg:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
           {CUSTOMER_TOP_NAV.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);

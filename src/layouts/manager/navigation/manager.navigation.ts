@@ -9,8 +9,9 @@ import {
   UsersThree,
   FileText,
   TrendUp,
-  UserCircle,
-  Gear
+  User,
+  Gear,
+  Question
 } from "@phosphor-icons/react";
 
 export const MANAGER_NAV: NavItem[] = [
@@ -75,4 +76,29 @@ export const MANAGER_NAV: NavItem[] = [
     icon: Gear,
     hint: "Cấu hình hệ thống"
   }
+];
+
+// Account menu items for user dropdown
+export const MANAGER_ACCOUNT_MENU: NavItem[] = [
+  {
+    label: "Hồ sơ cá nhân",
+    href: "/manager/profile",
+    icon: User,
+    hint: "Quản lý hồ sơ",
+    exact: false,
+  },
+  {
+    label: "Cài đặt",
+    href: "/manager/settings",
+    icon: Gear,
+    hint: "Cài đặt tài khoản",
+    exact: false,
+  },
+  {
+    label: "Trợ giúp",
+    href: "/help",
+    icon: Question,
+    hint: "Trợ giúp và hỗ trợ",
+    exact: false,
+  },
 ];
