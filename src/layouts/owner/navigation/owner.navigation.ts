@@ -5,7 +5,7 @@ import {
   Users,
   User,
   CourtBasketball,
-  SquaresFour,
+  UsersThree,
   Gift,
   ShieldCheck,
   Gear,
@@ -57,13 +57,13 @@ export const OWNER_NAV: NavItem[] = [
     {
         label: "Khách hàng",
         href: "/owner/customers",
-        icon: User,
+        icon: Users,
         hint: "Hồ sơ & lịch sử khách hàng",
     },
     {
         label: "Nhân sự",
         href: "/owner/staff",
-        icon: Users,
+        icon: UsersThree,
         hint: "Manager & Staff",
     },
     {

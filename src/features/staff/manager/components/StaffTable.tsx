@@ -5,7 +5,7 @@ import { Badge } from "@/src/shared/components/ui/Badge";
 import { Button } from "@/src/shared/components/ui/Button";
 import { ConfirmationDialog } from "@/src/shared/components/ui/ConfirmationDialog";
 import { Pagination } from "@/src/shared/components/ui/Pagination";
-import { ActionMenu, type ActionMenuItem } from "@/src/shared/components/ui/ActionMenu";
+import { ActionMenu } from "@/src/shared/components/ui/ActionMenu";
 import {
   Eye,
   PencilSimple,
@@ -148,9 +148,28 @@ export function StaffTable({
                 <tr key={staff.id} className="hover:bg-surface-2/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">
-                        {staff.fullName.charAt(0).toUpperCase()}
-                      </div>
+                      {staff.avatarUrl ? (
+                        <img
+                          src={staff.avatarUrl}
+                          alt={staff.fullName}
+                          className="h-10 w-10 rounded-full object-cover border-2 border-border shadow-sm"
+                          onError={(e) => {
+                            // Replace with fallback on error
+                            const target = e.currentTarget;
+                            const parent = target.parentElement;
+                            if (parent) {
+                              const fallback = document.createElement('div');
+                              fallback.className = 'flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm flex-shrink-0';
+                              fallback.textContent = staff.fullName.charAt(0).toUpperCase();
+                              parent.replaceChild(fallback, target);
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm flex-shrink-0">
+                          {staff.fullName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <div>
                         <p className="text-sm font-bold text-foreground">{staff.fullName}</p>
                         <p className="text-xs text-muted">ID: {staff.id.slice(0, 8)}...</p>

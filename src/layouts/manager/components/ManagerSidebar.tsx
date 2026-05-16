@@ -86,46 +86,54 @@ export default function ManagerSidebar({
       </div>
 
       {/* Nav Content */}
-      <div className="flex-1 overflow-y-auto scrollbar-none flex flex-col py-2 gap-6">
-        <div>
-          <p className="px-6 text-[9px] font-extrabold text-muted mb-2 uppercase tracking-[0.12em]">
-            List
-          </p>
-          {renderNavLinks(menuItems)}
-        </div>
+      <div className="flex-1 overflow-y-auto scrollbar-none flex flex-col py-2">
+        <div className="flex flex-col gap-6">
+          <div>
+            <p className="px-6 text-[9px] font-extrabold text-muted mb-2 uppercase tracking-[0.12em]">
+              List
+            </p>
+            {renderNavLinks(menuItems)}
+          </div>
 
-        <div>
-          <p className="px-6 text-[9px] font-extrabold text-muted mb-2 uppercase tracking-[0.12em]">
-            General
-          </p>
-          {renderNavLinks(sysItems)}
-          <nav className="space-y-0.5">
-            <button
-              aria-label="Trợ giúp"
-              className="w-full group flex items-center gap-3 py-2.5 px-6 border-l-[3px] border-transparent text-muted hover:bg-surface-2/50 hover:text-foreground font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B5E38]"
-            >
-              <Question className="h-[18px] w-[18px] text-muted group-hover:text-foreground" />
-              <span className="text-sm">Trợ giúp</span>
-            </button>
-            <button
-              onClick={onLogout}
-              disabled={isLoggingOut}
-              aria-label="Đăng xuất"
-              className="w-full group flex items-center gap-3 py-2.5 px-6 border-l-[3px] border-transparent text-muted hover:bg-red-500/10 hover:text-red-500 font-medium transition-all duration-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
-            >
-              {isLoggingOut ? (
-                <CircleNotch className="h-[18px] w-[18px] text-red-400 animate-spin" />
-              ) : (
-                <SignOut className="h-[18px] w-[18px] text-muted group-hover:text-red-500" />
-              )}
-              <span className="text-sm">{isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}</span>
-            </button>
-          </nav>
+          <div>
+            <p className="px-6 text-[9px] font-extrabold text-muted mb-2 uppercase tracking-[0.12em]">
+              General
+            </p>
+            {renderNavLinks(sysItems)}
+            <nav className="space-y-0.5">
+              <button
+                aria-label="Trợ giúp"
+                className="w-full group flex items-center gap-3 py-2.5 px-6 border-l-[3px] border-transparent text-muted hover:bg-surface-2/50 hover:text-foreground font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B5E38]"
+              >
+                <Question className="h-[18px] w-[18px] text-muted group-hover:text-foreground" />
+                <span className="text-sm">Trợ giúp</span>
+              </button>
+            </nav>
+          </div>
         </div>
       </div>
 
+      {/* Logout Button - Sticky at bottom */}
+      <div className="shrink-0 border-t border-surface-2/50 py-2">
+        <nav className="space-y-0.5">
+          <button
+            onClick={onLogout}
+            disabled={isLoggingOut}
+            aria-label="Đăng xuất"
+            className="w-full group flex items-center gap-3 py-2.5 px-6 border-l-[3px] border-transparent text-muted hover:bg-red-500/10 hover:text-red-500 font-medium transition-all duration-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+          >
+            {isLoggingOut ? (
+              <CircleNotch className="h-[18px] w-[18px] text-red-400 animate-spin" />
+            ) : (
+              <SignOut className="h-[18px] w-[18px] text-muted group-hover:text-red-500" />
+            )}
+            <span className="text-sm">{isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}</span>
+          </button>
+        </nav>
+      </div>
+
       {/* Mobile App Promo Card */}
-      <div className="p-4 shrink-0">
+      {/* <div className="p-4 shrink-0">
         <div
           className="rounded-3xl p-5 relative overflow-hidden"
           style={{
@@ -152,7 +160,7 @@ export default function ManagerSidebar({
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
     </>
   );
 
