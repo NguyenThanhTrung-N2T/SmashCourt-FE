@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useState, useEffect } from "react";
 
 import { authLogout } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
 import {
     broadcastLogoutSync,
     clearAuthSession,
+    getAuthUser,
     type AuthUserSession,
 } from "@/src/features/auth/session/sessionStore";
 
@@ -21,11 +22,33 @@ type Props = {
     branchName?: string;
 };
 
-export default function ManagerSidebarLayout({ user, children, branchName }: Props) {
+export default function ManagerSidebarLayout({ user: initialUser, children, branchName }: Props) {
     const router = useRouter();
     const [loggingOut, setLoggingOut] = useState(false);
     const [redirecting, setRedirecting] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [user, setUser] = useState<AuthUserSession>(initialUser);
+
+    // Listen for session storage changes to update user data
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const updatedUser = getAuthUser();
+            if (updatedUser) {
+                setUser(updatedUser);
+            }
+        };
+
+        // Listen for storage events (from other tabs/windows)
+        window.addEventListener("storage", handleStorageChange);
+        
+        // Also check periodically for same-tab updates
+        const interval = setInterval(handleStorageChange, 1000);
+
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+            clearInterval(interval);
+        };
+    }, []);
 
     async function onLogout() {
         try {

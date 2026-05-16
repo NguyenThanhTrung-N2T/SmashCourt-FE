@@ -139,10 +139,10 @@ export default function Header({
                                 alt={user.fullName}
                                 width={40}
                                 height={40}
-                                className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm"
+                                className="h-10 w-10 rounded-full object-cover border-2 border-surface-1 shadow-sm"
                             />
                         ) : (
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary border-2 border-white shadow-sm">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary border-2 border-surface-1 shadow-sm">
                                 {initials}
                             </div>
                         )}

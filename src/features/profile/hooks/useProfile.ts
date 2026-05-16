@@ -11,6 +11,10 @@ import {
   logoutSession,
   logoutAllOtherSessions,
 } from "@/src/api/profile.api";
+import {
+  getAuthUser,
+  setAuthUser,
+} from "@/src/features/auth/session/sessionStore";
 import type {
   UserProfile,
   UpdateProfileRequest,
@@ -32,6 +36,17 @@ export function useMyProfile() {
       setError(null);
       const response = await getMyProfile();
       setData(response);
+      
+      // Sync session storage with latest profile data
+      const currentUser = getAuthUser();
+      if (currentUser && response) {
+        setAuthUser({
+          ...currentUser,
+          fullName: response.fullName,
+          phone: response.phone,
+          avatarUrl: response.avatarUrl,
+        });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể tải thông tin profile");
     } finally {
@@ -63,6 +78,18 @@ export function useUpdateProfile() {
       setIsLoading(true);
       setError(null);
       await updateMyProfile(data);
+      
+      // Update session storage with new profile data
+      const currentUser = getAuthUser();
+      if (currentUser) {
+        setAuthUser({
+          ...currentUser,
+          fullName: data.fullName,
+          phone: data.phone || null,
+          avatarUrl: data.avatarUrl || currentUser.avatarUrl,
+        });
+      }
+      
       return { success: true };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Không thể cập nhật profile";

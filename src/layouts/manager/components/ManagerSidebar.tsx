@@ -56,7 +56,7 @@ export default function ManagerSidebar({
             <Icon
               className={`h-[18px] w-[18px] ${active
                   ? "text-primary"
-                  : "text-muted group-hover:text-slate-600"
+                  : "text-muted group-hover:text-foreground"
                 }`}
             />
             <span className="text-sm">{item.label}</span>
@@ -99,26 +99,26 @@ export default function ManagerSidebar({
             General
           </p>
           {renderNavLinks(sysItems)}
-          <nav className="space-y-0.5 px-3">
+          <nav className="space-y-0.5">
             <button
               aria-label="Trợ giúp"
-              className="w-full flex items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-foreground transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B5E38] focus-visible:ring-offset-2"
+              className="w-full group flex items-center gap-3 py-2.5 px-6 border-l-[3px] border-transparent text-muted hover:bg-surface-2/50 hover:text-foreground font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B5E38]"
             >
-              <Question className="h-4 w-4 text-muted" />
-              Trợ giúp
+              <Question className="h-[18px] w-[18px] text-muted group-hover:text-foreground" />
+              <span className="text-sm">Trợ giúp</span>
             </button>
             <button
               onClick={onLogout}
               disabled={isLoggingOut}
               aria-label="Đăng xuất"
-              className="w-full flex items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold text-muted hover:bg-red-500/10 hover:text-red-500 transition-all duration-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
+              className="w-full group flex items-center gap-3 py-2.5 px-6 border-l-[3px] border-transparent text-muted hover:bg-red-500/10 hover:text-red-500 font-medium transition-all duration-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
             >
               {isLoggingOut ? (
-                <CircleNotch className="h-4 w-4 text-red-400 animate-spin" />
+                <CircleNotch className="h-[18px] w-[18px] text-red-400 animate-spin" />
               ) : (
-                <SignOut className="h-4 w-4 text-muted" />
+                <SignOut className="h-[18px] w-[18px] text-muted group-hover:text-red-500" />
               )}
-              {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
+              <span className="text-sm">{isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}</span>
             </button>
           </nav>
         </div>
