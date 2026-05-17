@@ -118,6 +118,7 @@ export function renderConditionInput({
       );
 
     case "multi-number":
+    case "text":
       return (
         <Input
           type="text"

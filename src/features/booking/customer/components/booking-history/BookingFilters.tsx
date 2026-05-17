@@ -1,7 +1,7 @@
 /**
  * BookingFilters Component
  * 
- * Filters for booking history (status, date range).
+ * Filters for booking history (status, date range, branch, search).
  */
 
 "use client";
@@ -12,23 +12,30 @@ import { Button } from "@/src/shared/components/ui/Button";
 import { Select } from "@/src/shared/components/ui/Select";
 import { Input } from "@/src/shared/components/ui/Input";
 import { Badge } from "@/src/shared/components/ui/Badge";
-import { BookingStatus } from "../../types/booking.types";
-import { getBookingStatusConfig } from "../utils/bookingStatus";
+import { BranchSelector } from "@/src/features/branch/customer/components/BranchSelector";
+import { BookingStatus } from "../../../types/booking.types";
+import { getBookingStatusConfig } from "../../utils/bookingStatus";
 
 interface BookingFiltersProps {
   onFilterChange: (filters: {
     status?: BookingStatus;
     date?: string;
+    search?: string;
+    branchId?: string;
   }) => void;
   activeFilters: {
     status?: BookingStatus;
     date?: string;
+    search?: string;
+    branchId?: string;
+    branchName?: string;
   };
 }
 
 export function BookingFilters({ onFilterChange, activeFilters }: BookingFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [localFilters, setLocalFilters] = useState(activeFilters);
+  const [selectedBranchName, setSelectedBranchName] = useState(activeFilters.branchName || "");
 
   const statusOptions = [
     { value: "", label: "Tất cả trạng thái" },
@@ -48,6 +55,15 @@ export function BookingFilters({ onFilterChange, activeFilters }: BookingFilters
     setLocalFilters((prev) => ({ ...prev, date: value || undefined }));
   };
 
+  const handleSearchChange = (value: string) => {
+    setLocalFilters((prev) => ({ ...prev, search: value || undefined }));
+  };
+
+  const handleBranchChange = (branchId: string, branchName: string) => {
+    setLocalFilters((prev) => ({ ...prev, branchId: branchId || undefined }));
+    setSelectedBranchName(branchName);
+  };
+
   const handleApply = () => {
     onFilterChange(localFilters);
     setIsExpanded(false);
@@ -55,6 +71,7 @@ export function BookingFilters({ onFilterChange, activeFilters }: BookingFilters
 
   const handleClear = () => {
     setLocalFilters({});
+    setSelectedBranchName("");
     onFilterChange({});
   };
 
@@ -85,6 +102,11 @@ export function BookingFilters({ onFilterChange, activeFilters }: BookingFilters
       {/* Active Filters Summary */}
       {!isExpanded && activeFilterCount > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
+          {activeFilters.branchId && activeFilters.branchName && (
+            <Badge variant="info" size="sm">
+              Chi nhánh: {activeFilters.branchName}
+            </Badge>
+          )}
           {activeFilters.status !== undefined && (
             <Badge variant="info" size="sm">
               {getBookingStatusConfig(activeFilters.status).label}
@@ -95,34 +117,59 @@ export function BookingFilters({ onFilterChange, activeFilters }: BookingFilters
               {new Date(activeFilters.date).toLocaleDateString("vi-VN")}
             </Badge>
           )}
+          {activeFilters.search && (
+            <Badge variant="info" size="sm">
+              Tìm: {activeFilters.search}
+            </Badge>
+          )}
         </div>
       )}
 
       {/* Filter Controls */}
       {isExpanded && (
         <div className="mt-4 space-y-4">
-          <div className="w-full flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted">
-              Trạng thái
-            </label>
-            <Select
-              value={localFilters.status?.toString() || ""}
-              onChange={handleStatusChange}
-            >
-              {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
+          {/* Row 1: Search + Status */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Tìm kiếm"
+              type="text"
+              placeholder="Tìm theo tên, số điện thoại, mã đặt sân..."
+              value={localFilters.search || ""}
+              onChange={(e) => handleSearchChange(e.target.value)}
+            />
+
+            <div className="w-full flex flex-col gap-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-muted">
+                Trạng thái
+              </label>
+              <Select
+                value={localFilters.status?.toString() || ""}
+                onChange={handleStatusChange}
+              >
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
           </div>
 
-          <Input
-            label="Ngày đặt"
-            type="date"
-            value={localFilters.date || ""}
-            onChange={(e) => handleDateChange(e.target.value)}
-          />
+          {/* Row 2: Branch + Date */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <BranchSelector
+              value={localFilters.branchId || ""}
+              onChange={handleBranchChange}
+              label="Chi nhánh"
+            />
+
+            <Input
+              label="Ngày đặt"
+              type="date"
+              value={localFilters.date || ""}
+              onChange={(e) => handleDateChange(e.target.value)}
+            />
+          </div>
 
           <div className="flex gap-2">
             <Button

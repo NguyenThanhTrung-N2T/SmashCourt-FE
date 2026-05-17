@@ -10,7 +10,7 @@ import { useMyLoyalty, useMyLoyaltyTransactions } from "../hooks/useLoyalty";
 import { LoyaltyProgress } from "./LoyaltyProgress";
 import { TransactionList } from "./TransactionList";
 import { Button } from "@/src/shared/components/ui/Button";
-import { Trophy, Receipt } from "@phosphor-icons/react";
+import { Receipt } from "@phosphor-icons/react";
 import { 
   LoyaltyPageLoading, 
   LoyaltyErrorState, 
@@ -48,23 +48,21 @@ export function LoyaltyPageContent() {
   }
 
   return (
-    <div className="container max-w-7xl mx-auto py-8 px-4 space-y-8">
-      {/* Page Header */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <Trophy className="h-8 w-8 text-primary" weight="fill" />
+    <div className="min-h-screen bg-surface-0 p-6">
+      <div className="mx-auto max-w-7xl">
+        {/* Page Header */}
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground">Điểm thưởng</h1>
+          <p className="mt-2 text-sm text-muted">
+            Tích điểm và nhận ưu đãi khi đặt sân tại SmashCourt
+          </p>
         </div>
-        <p className="text-muted">
-          Tích điểm và nhận ưu đãi khi đặt sân tại SmashCourt
-        </p>
-      </div>
       
-      {/* Loyalty Info Card */}
-      <LoyaltyProgress loyalty={loyalty} />
+        {/* Loyalty Info Card */}
+        <LoyaltyProgress loyalty={loyalty} />
       
       {/* Transaction History Section */}
-      <div className="space-y-4">
+      <div className="mt-8 space-y-4">
         <div className="flex items-center gap-3">
           <Receipt className="h-6 w-6 text-foreground" />
           <h2 className="text-xl font-semibold text-foreground">Lịch sử tích điểm</h2>
@@ -114,7 +112,7 @@ export function LoyaltyPageContent() {
       </div>
 
       {/* Info Section */}
-      <div className="rounded-lg border border-border bg-surface-1 p-6 space-y-3">
+      <div className="mt-8 rounded-lg border border-border bg-surface-1 p-6 space-y-3">
         <h3 className="font-semibold text-foreground">Cách tích điểm</h3>
         <ul className="space-y-2 text-sm text-muted">
           <li className="flex items-start gap-2">
@@ -135,6 +133,7 @@ export function LoyaltyPageContent() {
           </li>
         </ul>
       </div>
+    </div>
     </div>
   );
 }

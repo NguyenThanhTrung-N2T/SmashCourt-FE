@@ -10,14 +10,14 @@ import { Warning, Receipt, CalendarBlank, Clock, MapPin, CurrencyCircleDollar } 
 import { Modal } from "@/src/shared/components/ui/Modal";
 import { Button } from "@/src/shared/components/ui/Button";
 import { Alert } from "@/src/shared/components/ui/Alert";
-import { useCancelPolicies } from "../hooks/useCancelPolicies";
-import type { BookingDto } from "../../types/booking.types";
+import { useCancelPolicies } from "../../hooks/useCancelPolicies";
+import type { BookingDto } from "../../../types/booking.types";
 import {
   formatCurrency,
   formatDate,
   formatTime,
   calculateRefundInfo,
-} from "../utils/bookingStatus";
+} from "../../utils/bookingStatus";
 
 interface CancelBookingModalProps {
   isOpen: boolean;

@@ -1,21 +1,11 @@
-/**
- * Customer Booking Components
- * 
- * Export all customer booking components.
- */
+// Booking History Components
+export * from "./booking-history";
 
-export { BookingCard } from "./BookingCard";
-export { BookingHistoryList } from "./BookingHistoryList";
-export { BookingDetailModal } from "./BookingDetailModal";
-export { PaymentResult } from "./PaymentResult";
-export { BookingFilters } from "./BookingFilters";
-export { BookingForm } from "./BookingForm";
-export { CancellationView } from "./CancellationView";
-export { CancelBookingModal } from "./CancelBookingModal";
-export { BookingStepIndicator } from "./BookingStepIndicator";
-export { BranchSelectionStep } from "./BranchSelectionStep";
-export { CourtTypeSelectionStep } from "./CourtTypeSelectionStep";
-export { CourtAndTimeSelectionStep } from "./CourtAndTimeSelectionStep";
+// New Booking Components
+export * from "./new-booking";
+
+// Shared Components
+export * from "./shared";
 
 // State Components
 export * from "./states";

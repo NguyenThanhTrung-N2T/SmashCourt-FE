@@ -20,7 +20,7 @@ export function getStatusCfg(status: PromotionStatus): StatusCfg {
             };
         case PromotionStatus.INACTIVE:
             return {
-                label: "Chưa hiệu lực",
+                label: "Không hoạt động",
                 bg: "bg-amber-100",
                 text: "text-amber-800",
                 dot: "bg-amber-500",

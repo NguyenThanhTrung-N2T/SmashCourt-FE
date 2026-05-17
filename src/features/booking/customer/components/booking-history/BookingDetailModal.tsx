@@ -14,10 +14,10 @@ import { Button } from "@/src/shared/components/ui/Button";
 import { Spinner } from "@/src/shared/components/feedback/Spinner";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { Divider } from "@/src/shared/components/layout/Divider";
-import { useCancelBooking } from "../hooks/useCancelBooking";
-import { useCancelPolicies } from "../hooks/useCancelPolicies";
-import { useRetryPayment } from "../hooks/useRetryPayment";
-import type { BookingDto } from "../../types/booking.types";
+import { useCancelBooking } from "../../hooks/useCancelBooking";
+import { useCancelPolicies } from "../../hooks/useCancelPolicies";
+import { useRetryPayment } from "../../hooks/useRetryPayment";
+import type { BookingDto } from "../../../types/booking.types";
 import {
   getBookingStatusConfig,
   getPaymentStatusConfig,
@@ -27,7 +27,7 @@ import {
   formatTime,
   canCancelBooking,
   calculateRefundInfo,
-} from "../utils/bookingStatus";
+} from "../../utils/bookingStatus";
 
 interface BookingDetailModalProps {
   isOpen: boolean;

@@ -14,12 +14,11 @@ import { Alert } from "@/src/shared/components/ui/Alert";
 import { BookingCard } from "./BookingCard";
 import { BookingDetailModal } from "./BookingDetailModal";
 import { BookingFilters } from "./BookingFilters";
-import { BookingHistoryLoading } from "./states/BookingHistoryLoading";
-import { BookingErrorState } from "./states/BookingErrorState";
-import { useCustomerBookings } from "../hooks/useCustomerBookings";
-import { useBookingDetail } from "../hooks/useBookingDetail";
-import { useRetryPayment } from "../hooks/useRetryPayment";
-import type { BookingStatus } from "../../types/booking.types";
+import { BookingHistoryLoading, BookingErrorState } from "../states";
+import { useCustomerBookings } from "../../hooks/useCustomerBookings";
+import { useBookingDetail } from "../../hooks/useBookingDetail";
+import { useRetryPayment } from "../../hooks/useRetryPayment";
+import type { BookingStatus } from "../../../types/booking.types";
 
 export function BookingHistoryList() {
   const { bookings, isLoading, error, updateQuery, query, refetch } = useCustomerBookings({

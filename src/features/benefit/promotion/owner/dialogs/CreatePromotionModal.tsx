@@ -106,7 +106,7 @@ export function CreatePromotionModal({
             subtitle="Nhập thông tin chương trình khuyến mãi"
             icon={<Plus className="h-5 w-5" />}
             maxWidth="2xl"
-            headerGradient=""
+            headerGradient="bg-gradient-to-r from-primary to-secondary"
         >
             <div className="px-8 py-6">
                 {errors.general && (

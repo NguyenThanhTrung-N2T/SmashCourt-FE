@@ -1,28 +1,27 @@
 /**
  * CourtTypeSelectionStep Component
  * 
- * Step 2: Select a court type.
+ * Step 2: Select a court type available at the selected branch.
  */
 
 "use client";
 
 import { CourtBasketball } from "@phosphor-icons/react";
-import { useCourtTypes } from "@/src/features/court/customer/hooks/useCourtTypes";
-import { CourtTypeSelectionLoading } from "./states/CourtTypeSelectionLoading";
-import { BookingErrorState } from "./states/BookingErrorState";
-import { BookingEmptyState } from "./states/BookingEmptyState";
-import type { CourtType } from "@/src/shared/types/court-type.types";
+import { useBranchCourtTypes } from "@/src/features/booking/customer/hooks";
+import { CourtTypeSelectionLoading, BookingErrorState, BookingEmptyState } from "../../states";
 
 interface CourtTypeSelectionStepProps {
+  branchId: string;
   selectedCourtTypeId: string | null;
-  onSelectCourtType: (courtType: CourtType) => void;
+  onSelectCourtType: (courtType: { id: string; name: string; description?: string }) => void;
 }
 
 export function CourtTypeSelectionStep({
+  branchId,
   selectedCourtTypeId,
   onSelectCourtType,
 }: CourtTypeSelectionStepProps) {
-  const { courtTypes, isLoading, error } = useCourtTypes();
+  const { courtTypes, isLoading, error } = useBranchCourtTypes({ branchId });
 
   if (isLoading) {
     return <CourtTypeSelectionLoading />;
@@ -36,7 +35,7 @@ export function CourtTypeSelectionStep({
     return (
       <BookingEmptyState
         title="Chưa có loại sân"
-        description="Hiện tại chưa có loại sân nào khả dụng."
+        description="Chi nhánh này chưa có loại sân nào khả dụng."
       />
     );
   }
@@ -46,18 +45,24 @@ export function CourtTypeSelectionStep({
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-foreground">Chọn loại sân</h2>
         <p className="mt-1 text-sm text-muted">
-          Chọn loại sân bạn muốn đặt
+          Chọn loại sân bạn muốn đặt tại chi nhánh này
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {courtTypes.map((courtType) => {
-          const isSelected = selectedCourtTypeId === courtType.id;
+          const isSelected = selectedCourtTypeId === courtType.courtTypeId;
 
           return (
             <button
               key={courtType.id}
-              onClick={() => onSelectCourtType(courtType)}
+              onClick={() =>
+                onSelectCourtType({
+                  id: courtType.courtTypeId,
+                  name: courtType.courtTypeName,
+                  description: courtType.courtTypeDescription,
+                })
+              }
               className={`
                 group relative rounded-2xl border-2 p-6 text-center transition-all
                 ${isSelected
@@ -88,13 +93,13 @@ export function CourtTypeSelectionStep({
 
               {/* Court Type Name */}
               <h3 className={`mb-2 text-lg font-bold transition-colors ${isSelected ? "text-primary" : "text-foreground"}`}>
-                {courtType.name}
+                {courtType.courtTypeName}
               </h3>
 
               {/* Court Type Description */}
-              {courtType.description && (
+              {courtType.courtTypeDescription && (
                 <p className="text-xs text-muted line-clamp-2">
-                  {courtType.description}
+                  {courtType.courtTypeDescription}
                 </p>
               )}
 

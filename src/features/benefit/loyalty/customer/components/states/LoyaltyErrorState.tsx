@@ -17,8 +17,9 @@ export function LoyaltyErrorState({
   onRetry 
 }: LoyaltyErrorStateProps) {
   return (
-    <div className="container max-w-4xl mx-auto py-8 px-4">
-      <div className="flex min-h-[500px] items-center justify-center">
+    <div className="min-h-screen bg-surface-0 p-6">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex min-h-[500px] items-center justify-center">
         <div className="text-center space-y-6 max-w-md">
           <div className="flex justify-center">
             <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-6">
@@ -37,6 +38,7 @@ export function LoyaltyErrorState({
             </Button>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

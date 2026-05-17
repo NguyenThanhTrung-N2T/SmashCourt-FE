@@ -172,8 +172,8 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
       return;
     }
 
-    // Check if condition already exists
-    const exists = conditions.some(c => c.conditionType === selectedConditionType);
+    // Check if exact condition already exists
+    const exists = conditions.some(c => c.conditionType === selectedConditionType && c.conditionValue === conditionValue.trim());
     if (exists) {
       showToast("error", "Điều kiện này đã tồn tại");
       return;
@@ -187,8 +187,8 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
     setConditionValue("");
   }
 
-  function handleRemoveCondition(type: ConditionType) {
-    setConditions(conditions.filter(c => c.conditionType !== type));
+  function handleRemoveCondition(index: number) {
+    setConditions(conditions.filter((_, i) => i !== index));
   }
 
   async function handleSubmit() {
@@ -530,11 +530,11 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
         {/* Existing Conditions */}
         {conditions.length > 0 && (
           <div className="space-y-2">
-            {conditions.map((condition) => {
+            {conditions.map((condition, index) => {
               const config = CONDITION_CONFIG[condition.conditionType];
               return (
                 <div
-                  key={condition.conditionType}
+                  key={`${condition.conditionType}-${index}`}
                   className="flex items-center justify-between rounded-lg border border-border bg-surface-2/50 p-3"
                 >
                   <div>
@@ -545,7 +545,7 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleRemoveCondition(condition.conditionType)}
+                    onClick={() => handleRemoveCondition(index)}
                     className="p-2 rounded-lg hover:bg-red-50 text-red-500 transition-colors"
                   >
                     <Trash className="h-4 w-4" />

@@ -3,17 +3,17 @@
  * 
  * Displays a booking summary card in the booking history list.
  */
-
+"use client"
 import { CalendarBlank, Clock, MapPin, Receipt, CreditCard } from "@phosphor-icons/react";
 import { Badge } from "@/src/shared/components/ui/Badge";
 import { Button } from "@/src/shared/components/ui/Button";
-import type { BookingDto } from "../../types/booking.types";
+import type { BookingDto } from "../../../types/booking.types";
 import {
   getBookingStatusConfig,
   formatCurrency,
   formatDate,
   formatTime,
-} from "../utils/bookingStatus";
+} from "../../utils/bookingStatus";
 
 interface BookingCardProps {
   booking: BookingDto;

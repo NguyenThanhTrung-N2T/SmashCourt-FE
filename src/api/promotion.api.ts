@@ -2,6 +2,9 @@ import { authProtectedFetch } from "@/src/api/auth.api";
 import type { PaginatedData } from "@/src/shared/types/api.types";
 
 import type {
+  ApplicablePromotion,
+  ApplicablePromotionRequest,
+  PromotionDiscountType,
   Promotion,
   SavePromotionRequest,
 } from "@/src/shared/types/promotion.types";
@@ -45,6 +48,20 @@ export async function fetchActivePromotions(): Promise<Promotion[]> {
     return [];
   }
   return response.data;
+}
+
+/**
+ * POST /api/promotions/applicable
+ * Lay danh sach khuyen mai ap dung duoc cho ngu canh dat san hien tai.
+ */
+export async function fetchApplicablePromotions(
+  dto: ApplicablePromotionRequest,
+): Promise<ApplicablePromotion[]> {
+  const response = await authProtectedFetch<ApplicablePromotion[]>(
+    "/api/promotions/applicable",
+    { method: "POST", body: dto },
+  );
+  return response.data ?? [];
 }
 
 /**
@@ -116,19 +133,19 @@ export async function deletePromotion(id: string): Promise<void> {
  * @returns The discount amount
  */
 export function calculateDiscountAmount(
-  promotion: Promotion,
+  promotion: DiscountDisplayPromotion,
   bookingAmount: number,
 ): number {
   let discountAmount = 0;
 
-  if (promotion.discountType === DiscountType.PERCENT) {
+  if (isPercentDiscount(promotion.discountType)) {
     discountAmount = (bookingAmount * promotion.discountValue) / 100;
 
     // Apply max discount cap if specified
     if (promotion.maxDiscountAmount && discountAmount > promotion.maxDiscountAmount) {
       discountAmount = promotion.maxDiscountAmount;
     }
-  } else if (promotion.discountType === DiscountType.FIXED) {
+  } else if (isFixedDiscount(promotion.discountType)) {
     discountAmount = promotion.discountValue;
 
     // Cannot exceed booking amount
@@ -145,8 +162,10 @@ export function calculateDiscountAmount(
  * @param promotion - The promotion object
  * @returns Formatted discount string
  */
-export function formatDiscountDisplay(promotion: Promotion): string {
-  if (promotion.discountType === DiscountType.PERCENT) {
+export function formatDiscountDisplay(
+  promotion: DiscountDisplayPromotion,
+): string {
+  if (isPercentDiscount(promotion.discountType)) {
     let display = `${promotion.discountValue}%`;
     if (promotion.maxDiscountAmount) {
       display += ` (tối đa ${promotion.maxDiscountAmount.toLocaleString("vi-VN")} VNĐ)`;
@@ -155,6 +174,20 @@ export function formatDiscountDisplay(promotion: Promotion): string {
   } else {
     return `${promotion.discountValue.toLocaleString("vi-VN")} VNĐ`;
   }
+}
+
+interface DiscountDisplayPromotion {
+  discountType: PromotionDiscountType;
+  discountValue: number;
+  maxDiscountAmount?: number | null;
+}
+
+function isPercentDiscount(discountType: PromotionDiscountType): boolean {
+  return discountType === DiscountType.PERCENT || discountType === "PERCENT";
+}
+
+function isFixedDiscount(discountType: PromotionDiscountType): boolean {
+  return discountType === DiscountType.FIXED || discountType === "FIXED";
 }
 
 // Legacy function name for backward compatibility

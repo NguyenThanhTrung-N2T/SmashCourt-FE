@@ -10,8 +10,9 @@ import Link from "next/link";
 
 export function LoyaltyEmptyState() {
   return (
-    <div className="container max-w-4xl mx-auto py-8 px-4">
-      <div className="flex min-h-[500px] items-center justify-center">
+    <div className="min-h-screen bg-surface-0 p-6">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex min-h-[500px] items-center justify-center">
         <div className="text-center space-y-6 max-w-md">
           <div className="flex justify-center">
             <div className="rounded-full bg-primary/10 p-6">
@@ -49,6 +50,7 @@ export function LoyaltyEmptyState() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

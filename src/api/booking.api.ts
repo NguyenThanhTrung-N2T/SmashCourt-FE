@@ -51,7 +51,9 @@ export async function fetchCustomerBookings(
   });
 
   if (query.status !== undefined) params.append("status", query.status.toString());
+  if (query.branchId) params.append("branchId", query.branchId);
   if (query.date) params.append("date", query.date);
+  if (query.search) params.append("search", query.search);
 
   const response = await authProtectedFetch<PaginatedData<BookingDto>>(
     `/api/me/bookings?${params}`,

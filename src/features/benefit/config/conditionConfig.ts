@@ -6,7 +6,8 @@ export type ConditionInputType =
   | "time"
   | "branch-select"
   | "court-select"
-  | "multi-number";
+  | "multi-number"
+  | "text";
 
 export interface ConditionConfig {
   label: string;
@@ -77,6 +78,12 @@ export const CONDITION_CONFIG: Record<ConditionType, ConditionConfig> = {
     placeholder: "VD: 1,15,30",
     description: "Chỉ áp dụng vào các ngày này trong tháng (phân cách bằng dấu phẩy)",
   },
+  [ConditionType.SPECIFIC_DATES]: {
+    label: "Ngày cụ thể",
+    inputType: "text",
+    placeholder: "VD: 30/04,01/05",
+    description: "Chỉ áp dụng vào các ngày cụ thể (định dạng DD/MM, phân cách bằng dấu phẩy)",
+  },
 };
 
 // Helper to get display label for condition values
@@ -97,6 +104,7 @@ export function getConditionValueDisplay(type: ConditionType, value: string): st
     case ConditionType.MONTH:
       return `Tháng ${value}`;
     case ConditionType.DAYS_OF_MONTH:
+    case ConditionType.SPECIFIC_DATES:
       return `Ngày ${value}`;
     case ConditionType.SPORT:
       return getSportLabel(value);

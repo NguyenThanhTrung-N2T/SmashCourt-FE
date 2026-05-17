@@ -9,10 +9,8 @@
 import { Calendar, Lightning } from "@phosphor-icons/react";
 import { Spinner } from "@/src/shared/components/feedback/Spinner";
 import { useCourts } from "@/src/features/court/customer/hooks/useCourts";
-import { InteractiveTimeGrid } from "./InteractiveTimeGrid";
-import { CourtSelectionLoading } from "./states/CourtSelectionLoading";
-import { BookingErrorState } from "./states/BookingErrorState";
-import { BookingEmptyState } from "./states/BookingEmptyState";
+import { InteractiveTimeGrid } from "../InteractiveTimeGrid";
+import { CourtSelectionLoading, BookingErrorState, BookingEmptyState } from "../../states";
 import type { CourtDto } from "@/src/features/court/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 

@@ -9,6 +9,8 @@ export enum DiscountType {
   FIXED = 1,
 }
 
+export type PromotionDiscountType = DiscountType | "PERCENT" | "FIXED";
+
 export enum ConditionType {
   MIN_BOOKING_AMOUNT = "MIN_BOOKING_AMOUNT",
   MAX_PREVIOUS_BOOKINGS = "MAX_PREVIOUS_BOOKINGS",
@@ -19,7 +21,8 @@ export enum ConditionType {
   START_HOUR = "START_HOUR",
   END_HOUR = "END_HOUR",
   MONTH = "MONTH",
-  DAYS_OF_MONTH = "DAYS_OF_MONTH"
+  DAYS_OF_MONTH = "DAYS_OF_MONTH",
+  SPECIFIC_DATES = "SPECIFIC_DATES"
 }
 
 export interface PromotionCondition {
@@ -59,4 +62,34 @@ export interface SavePromotionRequest {
   startDate: string;
   endDate: string;
   conditions?: PromotionCondition[];
+}
+
+export interface ApplicablePromotionRequest {
+  branchId: string;
+  courtId: string;
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  bookingAmount: number;
+}
+
+export interface ApplicablePromotion {
+  id: string;
+  name: string;
+  code: string | null;
+  promoDisplayUrl: string | null;
+  description: string | null;
+  discountType: PromotionDiscountType;
+  discountValue: number;
+  maxDiscountAmount: number | null;
+  startDate: string;
+  endDate: string;
+  discountAmount: number;
+  finalAmount: number;
+  usageLimit: number | null;
+  usedCount: number;
+  remainingUsage: number | null;
+  usagePerUserLimit: number | null;
+  userUsageCount: number;
+  remainingUserUsage: number | null;
 }

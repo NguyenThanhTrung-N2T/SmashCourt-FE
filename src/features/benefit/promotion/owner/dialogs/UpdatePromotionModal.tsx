@@ -112,7 +112,7 @@ export function UpdatePromotionModal({
             subtitle={`Cập nhật thông tin cho "${promotion.name}"`}
             icon={<PencilSimple className="h-5 w-5" />}
             maxWidth="2xl"
-            headerGradient=""
+            headerGradient="bg-gradient-to-r from-primary to-secondary"
         >
             <div className="px-8 py-6">
                 {errors.general && (

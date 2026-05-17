@@ -159,4 +159,5 @@ export interface BookingListQuery {
   customerId?: string;
   date?: string; // YYYY-MM-DD
   source?: BookingSource;
+  search?: string; // Search by customer name, phone, guest info, or booking ID
 }

@@ -1,9 +1,3 @@
-/**
- * Customer Booking History Page
- * 
- * Page for displaying customer booking history.
- */
-
 "use client";
 
 import { BookingHistoryList } from "@/src/features/booking/customer/components";
