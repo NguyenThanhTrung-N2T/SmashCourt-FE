@@ -12,6 +12,7 @@ import {
   createTrimOnBlurHandler,
   ValidationRules,
 } from "@/src/shared/utils/inputValidation";
+import { UserRole } from "@/src/features/branch/types/branch.types";
 
 interface CreateStaffModalProps {
   onClose: () => void;
@@ -38,13 +39,13 @@ export function CreateStaffModal({ onClose, onSuccess, onError }: CreateStaffMod
       const payload: {
         email: string;
         fullName: string;
-        requestedRole: "STAFF";
+        requestedRole: UserRole;
         phone?: string;
         temporaryPassword?: string;
       } = {
         email: formData.email.trim(),
         fullName: formData.fullName.trim(),
-        requestedRole: "STAFF",
+        requestedRole: UserRole.STAFF,
       };
 
       if (formData.phone.trim()) {
@@ -106,11 +107,33 @@ export function CreateStaffModal({ onClose, onSuccess, onError }: CreateStaffMod
           type="text"
           placeholder="Nguyễn Văn A"
           value={formData.fullName}
-          onChange={createValidatedChangeHandler(
-            (val) => setFormData({ ...formData, fullName: val }),
-            ValidationRules.vietnameseText
-          )}
-          onBlur={createTrimOnBlurHandler((val) => setFormData({ ...formData, fullName: val }))}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              fullName: e.target.value,
+            })
+          }
+          onBlur={(e) => {
+            const trimmed = e.target.value.trim();
+
+            setFormData({
+              ...formData,
+              fullName: trimmed,
+            });
+
+            // Optional validation
+            if (!/^[\p{L}\s]+$/u.test(trimmed)) {
+              setErrors((prev) => ({
+                ...prev,
+                fullname: "Tên không hợp lệ",
+              }));
+            } else {
+              setErrors((prev) => ({
+                ...prev,
+                fullname: "",
+              }));
+            }
+          }}
           error={errors.fullname}
           required
         />

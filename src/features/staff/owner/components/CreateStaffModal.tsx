@@ -13,6 +13,7 @@ import {
   createTrimOnBlurHandler,
   ValidationRules,
 } from "@/src/shared/utils/inputValidation";
+import { UserBranchRole, UserRole } from "@/src/features/branch/types/branch.types";
 
 interface CreateStaffModalProps {
   branchId: string;
@@ -41,14 +42,14 @@ export function CreateStaffModal({ branchId, onClose, onSuccess, onError }: Crea
       const payload: {
         email: string;
         fullName: string;
-        requestedRole: "STAFF" | "BRANCH_MANAGER";
+        requestedRole: UserRole
         branchId: string;
         phone?: string;
         temporaryPassword?: string;
       } = {
         email: formData.email.trim(),
         fullName: formData.fullName.trim(),
-        requestedRole: formData.requestedRole,
+        requestedRole: formData.requestedRole == 'STAFF' ? UserRole.STAFF : UserRole.BRANCH_MANAGER,
         branchId,
       };
 
@@ -66,13 +67,18 @@ export function CreateStaffModal({ branchId, onClose, onSuccess, onError }: Crea
       if (err instanceof AuthApiError && err.errors) {
         // Map backend validation errors to form fields
         const fieldErrors: Record<string, string> = {};
+        let errorMessage = "";
         Object.entries(err.errors).forEach(([field, messages]) => {
           const lowerField = field.toLowerCase();
           if (messages && messages.length > 0) {
             fieldErrors[lowerField] = messages[0];
+            if (!errorMessage) {
+              errorMessage = messages[0];
+            }
           }
         });
         setErrors(fieldErrors);
+        onError(errorMessage || "Không thể tạo nhân viên");
       } else {
         onError(err instanceof Error ? err.message : "Không thể tạo nhân viên");
       }
@@ -111,11 +117,33 @@ export function CreateStaffModal({ branchId, onClose, onSuccess, onError }: Crea
             type="text"
             placeholder="Nguyễn Văn A"
             value={formData.fullName}
-            onChange={createValidatedChangeHandler(
-              (val) => setFormData({ ...formData, fullName: val }),
-              ValidationRules.vietnameseText
-            )}
-            onBlur={createTrimOnBlurHandler((val) => setFormData({ ...formData, fullName: val }))}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                fullName: e.target.value,
+              })
+            }
+            onBlur={(e) => {
+              const trimmed = e.target.value.trim();
+
+              setFormData({
+                ...formData,
+                fullName: trimmed,
+              });
+
+              // Optional validation
+              if (!/^[\p{L}\s]+$/u.test(trimmed)) {
+                setErrors((prev) => ({
+                  ...prev,
+                  fullname: "Tên không hợp lệ",
+                }));
+              } else {
+                setErrors((prev) => ({
+                  ...prev,
+                  fullname: "",
+                }));
+              }
+            }}
             error={errors.fullname}
             required
           />

@@ -11,6 +11,7 @@ import type {
   LoginRequest,
   AuthUser,
   Login2faRequest,
+  ChangePasswordWithTempTokenRequest,
   ForgotPasswordRequest,
   VerifyForgotPasswordOtpRequest,
   ResetPasswordRequest,
@@ -88,6 +89,20 @@ export async function authLogin2fa(body: Login2faRequest) {
   }>(`/api/auth/login/2fa`, { method: "POST", body });
 
   return withResponseMeta(response);
+}
+
+export async function authChangePasswordWithTempToken(
+  body: ChangePasswordWithTempTokenRequest,
+) {
+  const response = await authFetch<null>(`/api/auth/change-password`, {
+    method: "POST",
+    body,
+  });
+
+  return {
+    message: response.message ?? undefined,
+    code: response.code ?? undefined,
+  };
 }
 
 export async function authRefresh() {

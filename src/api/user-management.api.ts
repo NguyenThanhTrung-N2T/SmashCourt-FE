@@ -22,7 +22,7 @@ import type {
  */
 export async function fetchUsers(params?: StaffUserQueryParams) {
   const searchParams = new URLSearchParams();
-  
+
   if (params?.searchTerm) searchParams.append('searchTerm', params.searchTerm);
   if (params?.role) searchParams.append('role', params.role);
   if (params?.status) searchParams.append('status', params.status);

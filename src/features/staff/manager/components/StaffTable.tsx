@@ -172,7 +172,6 @@ export function StaffTable({
                       )}
                       <div>
                         <p className="text-sm font-bold text-foreground">{staff.fullName}</p>
-                        <p className="text-xs text-muted">ID: {staff.id.slice(0, 8)}...</p>
                       </div>
                     </div>
                   </td>
@@ -211,18 +210,18 @@ export function StaffTable({
                           {
                             label: staff.status === "LOCKED" ? "Mở khóa" : "Khóa",
                             icon: staff.status === "LOCKED" ? <LockKeyOpen className="h-4 w-4" /> : <LockKey className="h-4 w-4" />,
-                            onClick: () => setActionDialog({ 
-                              type: staff.status === "LOCKED" ? "unlock" : "lock", 
-                              userId: staff.id 
+                            onClick: () => setActionDialog({
+                              type: staff.status === "LOCKED" ? "unlock" : "lock",
+                              userId: staff.id
                             }),
                             variant: staff.status === "LOCKED" ? "success" : "danger",
                           },
                           {
                             label: staff.status === "INACTIVE" ? "Kích hoạt" : "Vô hiệu hóa",
                             icon: staff.status === "INACTIVE" ? <UserPlus className="h-4 w-4" /> : <UserMinus className="h-4 w-4" />,
-                            onClick: () => setActionDialog({ 
-                              type: staff.status === "INACTIVE" ? "activate" : "deactivate", 
-                              userId: staff.id 
+                            onClick: () => setActionDialog({
+                              type: staff.status === "INACTIVE" ? "activate" : "deactivate",
+                              userId: staff.id
                             }),
                             variant: staff.status === "INACTIVE" ? "success" : "danger",
                           },

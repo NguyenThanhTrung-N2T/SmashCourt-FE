@@ -12,7 +12,7 @@ import { BranchStaffLoading } from '../states';
 import { EmptyState } from '@/src/shared/components/layout';
 import { Button } from '@/src/shared/components/ui/Button';
 import { useToast } from '@/src/shared/hooks/useToast';
-
+import { formatDate } from '@/src/shared/utils/date';
 interface BranchStaffTabProps {
     branchId: string;
     onToast?: (tone: 'success' | 'error', message: string) => void;
@@ -173,7 +173,7 @@ export function BranchStaffTab({ branchId, onToast }: BranchStaffTabProps) {
                                         <p className="text-xs text-muted mt-1">{member.phone}</p>
                                     )}
                                     <p className="text-xs text-muted mt-1">
-                                        Tham gia: {new Date(member.assignedAt).toLocaleDateString('vi-VN')}
+                                        Tham gia: {formatDate(member.assignedAt)}
                                         {member.assignedByName && ` • Được thêm bởi ${member.assignedByName}`}
                                     </p>
                                 </div>

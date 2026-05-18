@@ -95,11 +95,33 @@ export function EditStaffModal({ staff, onClose, onSuccess, onError }: EditStaff
           type="text"
           placeholder="Nguyễn Văn A"
           value={formData.fullName}
-          onChange={createValidatedChangeHandler(
-            (val) => setFormData({ ...formData, fullName: val }),
-            ValidationRules.vietnameseText
-          )}
-          onBlur={createTrimOnBlurHandler((val) => setFormData({ ...formData, fullName: val }))}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              fullName: e.target.value,
+            })
+          }
+          onBlur={(e) => {
+            const trimmed = e.target.value.trim();
+
+            setFormData({
+              ...formData,
+              fullName: trimmed,
+            });
+
+            // Optional validation
+            if (!/^[\p{L}\s]+$/u.test(trimmed)) {
+              setErrors((prev) => ({
+                ...prev,
+                fullname: "Tên không hợp lệ",
+              }));
+            } else {
+              setErrors((prev) => ({
+                ...prev,
+                fullname: "",
+              }));
+            }
+          }}
           error={errors.fullname}
           required
         />

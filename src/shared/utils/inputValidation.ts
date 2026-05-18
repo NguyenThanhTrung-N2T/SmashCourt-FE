@@ -63,14 +63,14 @@ export const ValidationRules = {
    * Allow Vietnamese text (including diacritics) and spaces
    */
   vietnameseText: (value: string): boolean => {
-    return /^[a-zA-ZÀ-ỹ\s]*$/.test(value);
+    return /^[\p{L}\s]*$/u.test(value);
   },
 
   /**
    * Allow Vietnamese text with numbers and spaces
    */
   vietnameseTextWithNumbers: (value: string): boolean => {
-    return /^[a-zA-Z0-9À-ỹ\s]*$/.test(value);
+    return /^[\p{L}\p{N}\s]*$/u.test(value);
   },
 
   /**
@@ -151,7 +151,16 @@ export const createValidatedChangeHandler = (
   rule: ValidationRule
 ) => {
   return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const nativeEvent = e.nativeEvent as InputEvent;
+
+    // Skip validation during IME composition
+    if (nativeEvent.isComposing) {
+      setValue(e.target.value);
+      return;
+    }
+
     const newValue = e.target.value;
+
     if (rule(newValue)) {
       setValue(newValue);
     }

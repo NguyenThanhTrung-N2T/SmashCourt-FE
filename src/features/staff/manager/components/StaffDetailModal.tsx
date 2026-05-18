@@ -5,7 +5,7 @@ import { Button } from "@/src/shared/components/ui/Button";
 import { Badge } from "@/src/shared/components/ui/Badge";
 import { User, PencilSimple, LockKey, Calendar, EnvelopeSimple, Phone, MapPin } from "@phosphor-icons/react";
 import type { StaffUserDetail, StaffUserStatus } from "@/src/features/staff/types/user.type";
-
+import { formatDate } from "@/src/shared/utils/date";
 interface StaffDetailModalProps {
   staff: StaffUserDetail;
   onClose: () => void;
@@ -31,16 +31,6 @@ export function StaffDetailModal({ staff, onClose, onEdit }: StaffDetailModalPro
         {labels[status]}
       </Badge>
     );
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString("vi-VN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   };
 
   return (

@@ -1,19 +1,19 @@
 import { NavItem } from "@/src/shared/types/navigation.types";
 import {
-  ChartBar,
-  Buildings,
-  Users,
-  User,
-  CourtBasketball,
-  UsersThree,
-  Gift,
-  ShieldCheck,
-  Gear,
-  Coffee,
-  CalendarDots,
-  CreditCard,
-  Tag,
-  Question,
+    ChartBar,
+    Buildings,
+    Users,
+    User,
+    CourtBasketball,
+    UsersThree,
+    Gift,
+    ShieldCheck,
+    Gear,
+    Coffee,
+    CalendarDots,
+
+    Tag,
+    Question,
 } from "@phosphor-icons/react";
 
 export const OWNER_NAV: NavItem[] = [
@@ -36,12 +36,12 @@ export const OWNER_NAV: NavItem[] = [
         icon: CalendarDots,
         hint: "Đơn đặt sân & lịch sử",
     },
-    {
-        label: "Thanh toán",
-        href: "/owner/payments",
-        icon: CreditCard,
-        hint: "Quản lý giao dịch",
-    },
+    // {
+    //     label: "Thanh toán",
+    //     href: "/owner/payments",
+    //     icon: CreditCard,
+    //     hint: "Quản lý giao dịch",
+    // },
     {
         label: "Bảng giá",
         href: "/owner/pricing",

@@ -3,7 +3,23 @@
  * 
  * Type definitions for staff user management
  */
+export enum UserRole {
+  CUSTOMER = 0,
+  STAFF = 1,
+  BRANCH_MANAGER = 2,
+  OWNER = 3
+}
 
+export enum UserStatus {
+  ACTIVE = 0,
+  SUSPENDED = 1,
+  LOCKED = 2
+}
+
+export enum UserBranchRole {
+  MANAGER = 0,
+  STAFF = 1
+}
 export type StaffUserRole = 'OWNER' | 'BRANCH_MANAGER' | 'STAFF' | 'CUSTOMER';
 
 export type StaffUserStatus = 'ACTIVE' | 'LOCKED' | 'INACTIVE';
@@ -55,7 +71,7 @@ export interface CreateStaffUserRequest {
   email: string;
   fullName: string;
   phone?: string;
-  requestedRole: 'STAFF' | 'BRANCH_MANAGER';
+  requestedRole: UserRole;
   branchId?: string; // Optional: BRANCH_MANAGER can omit (auto-assigned), OWNER must provide
   temporaryPassword?: string;
 }

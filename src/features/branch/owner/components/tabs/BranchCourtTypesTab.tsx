@@ -9,7 +9,7 @@ import { BranchCourtTypesLoading } from '../states';
 import { EmptyState } from '@/src/shared/components/layout';
 import { handleApiError } from '../../utils/error-handling';
 import { useToast } from '@/src/shared/hooks/useToast';
-
+import { formatDate } from '@/src/shared/utils/date';
 interface BranchCourtTypesTabProps {
     branchId: string;
     onToast?: (tone: 'success' | 'error', message: string) => void;
@@ -119,7 +119,7 @@ export function BranchCourtTypesTab({ branchId, onToast }: BranchCourtTypesTabPr
                                     )}
                                     {courtType.createdAt && (
                                         <p className="text-xs text-muted mt-2">
-                                            Thêm vào: {new Date(courtType.createdAt).toLocaleDateString('vi-VN')}
+                                            Thêm vào: {formatDate(courtType.createdAt)}
                                         </p>
                                     )}
                                 </div>

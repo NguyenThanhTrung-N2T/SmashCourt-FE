@@ -7,6 +7,7 @@ type AuthSessionKeys = {
   authSyncEvent: string;
   registerVerifyState: string;
   twoFactorVerifyState: string;
+  passwordChangeState: string;
   forgotPasswordVerifyState: string;
   registerFlashMessage: string;
   forgotPasswordFlashMessage: string;
@@ -43,6 +44,12 @@ export type TwoFactorVerifySession = {
   startedAt: number;
 };
 
+export type PasswordChangeSession = {
+  email: string;
+  tempToken: string;
+  startedAt: number;
+};
+
 const KEYS: AuthSessionKeys = {
   email: "auth.email",
   tempToken: "auth.tempToken",
@@ -52,6 +59,7 @@ const KEYS: AuthSessionKeys = {
   authSyncEvent: "auth.syncEvent",
   registerVerifyState: "auth.registerVerifyState",
   twoFactorVerifyState: "auth.twoFactorVerifyState",
+  passwordChangeState: "auth.passwordChangeState",
   forgotPasswordVerifyState: "auth.forgotPasswordVerifyState",
   registerFlashMessage: "auth.registerFlashMessage",
   forgotPasswordFlashMessage: "auth.forgotPasswordFlashMessage",
@@ -276,6 +284,36 @@ export function clearTwoFactorVerifySession() {
   removeItem(KEYS.twoFactorVerifyState);
 }
 
+export function setPasswordChangeSession(session: PasswordChangeSession) {
+  setItem(KEYS.passwordChangeState, JSON.stringify(session));
+}
+
+export function getPasswordChangeSession(): PasswordChangeSession | null {
+  const raw = getItem(KEYS.passwordChangeState);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as PasswordChangeSession;
+  } catch {
+    removeItem(KEYS.passwordChangeState);
+    return null;
+  }
+}
+
+export function startPasswordChangeSession(email: string, tempToken: string) {
+  const session: PasswordChangeSession = {
+    email: email.trim().toLowerCase(),
+    tempToken,
+    startedAt: Date.now(),
+  };
+  setPasswordChangeSession(session);
+  return session;
+}
+
+export function clearPasswordChangeSession() {
+  removeItem(KEYS.passwordChangeState);
+}
+
 export function setRegisterFlashMessage(message: string) {
   setItem(KEYS.registerFlashMessage, message);
 }
@@ -322,6 +360,7 @@ export function clearAuthSession() {
   clearAuthUser();
   clearRegisterVerifySession();
   clearTwoFactorVerifySession();
+  clearPasswordChangeSession();
   clearForgotPasswordVerifySession();
   removeItem(KEYS.registerFlashMessage);
   removeItem(KEYS.forgotPasswordFlashMessage);

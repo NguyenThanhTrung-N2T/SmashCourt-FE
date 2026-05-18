@@ -17,6 +17,7 @@ import {
   setEmail,
   setAuthenticatedSession,
   setTempToken,
+  startPasswordChangeSession,
   startTwoFactorVerifySession,
 } from "@/src/features/auth/session/sessionStore";
 import { useAuthRedirect } from "@/src/features/auth/hooks/useAuthRedirect";
@@ -129,6 +130,18 @@ export default function LoginPage() {
         setTempToken(data.tempToken);
         startTwoFactorVerifySession(trimmedEmail, data.tempToken);
         router.push("/auth/2fa");
+        return;
+      }
+
+      if (data.status === "must_change_password") {
+        if (!data.tempToken) {
+          showError("form", new Error("Phiên đổi mật khẩu không hợp lệ. Vui lòng thử lại."), "login");
+          return;
+        }
+        setEmail(trimmedEmail);
+        setTempToken(data.tempToken);
+        startPasswordChangeSession(trimmedEmail, data.tempToken);
+        router.push("/auth/change-password");
         return;
       }
 

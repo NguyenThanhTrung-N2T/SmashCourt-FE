@@ -35,6 +35,12 @@ export interface Login2faRequest {
   otpCode: string;
 }
 
+export interface ChangePasswordWithTempTokenRequest {
+  tempToken: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export interface ForgotPasswordRequest {
   email: string;
 }
