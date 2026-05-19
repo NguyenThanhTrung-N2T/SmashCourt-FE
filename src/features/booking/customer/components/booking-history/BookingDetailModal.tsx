@@ -116,6 +116,7 @@ export function BookingDetailModal({
           const promotionDiscount = booking.promotionDiscountAmount ?? booking.invoice?.promotionDiscount ?? 0;
           const finalTotal = booking.finalTotal ?? booking.invoice?.finalTotal ?? 0;
           const paymentStatus = booking.paymentStatus ?? booking.invoice?.paymentStatus;
+          const services = booking.services ?? [];
 
           return (
           <div className="space-y-6">
@@ -223,7 +224,7 @@ export function BookingDetailModal({
             </div>
 
             {/* Services */}
-            {booking.services.length > 0 && (
+            {services.length > 0 && (
               <>
                 <Divider />
                 <div>
@@ -231,7 +232,7 @@ export function BookingDetailModal({
                     Dịch vụ
                   </h3>
                   <div className="space-y-2">
-                    {booking.services.map((service, index) => (
+                    {services.map((service, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between rounded-lg bg-surface-2 p-3 text-sm"
@@ -346,7 +347,9 @@ export function BookingDetailModal({
             <Divider />
             <div className="flex items-center justify-between gap-4">
               <div className="text-xs text-muted">
-                <p>Tạo lúc: {formatDateTime(booking.createdAt)}</p>
+                {booking.createdAt && (
+                  <p>Tạo lúc: {formatDateTime(booking.createdAt)}</p>
+                )}
                 {booking.expiresAt && (
                   <p>Hết hạn lúc: {formatDateTime(booking.expiresAt)}</p>
                 )}

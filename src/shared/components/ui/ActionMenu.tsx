@@ -16,13 +16,15 @@ export interface ActionMenuItem {
 interface ActionMenuProps {
   items: ActionMenuItem[];
   size?: "sm" | "md";
+  trigger?: React.ReactNode;
 }
 
-export function ActionMenu({ items, size = "sm" }: ActionMenuProps) {
+export function ActionMenu({ items, size = "sm", trigger }: ActionMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, right: "auto" });
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -31,7 +33,9 @@ export function ActionMenu({ items, size = "sm" }: ActionMenuProps) {
         menuRef.current && 
         !menuRef.current.contains(event.target as Node) &&
         buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
+        !buttonRef.current.contains(event.target as Node) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -48,8 +52,11 @@ export function ActionMenu({ items, size = "sm" }: ActionMenuProps) {
 
   // Calculate position when menu opens
   useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const buttonRect = buttonRef.current.getBoundingClientRect();
+    if (isOpen) {
+      const element = trigger ? triggerRef.current : buttonRef.current;
+      if (!element) return;
+      
+      const buttonRect = element.getBoundingClientRect();
       const menuWidth = 200;
       const menuHeight = 200; // Approximate
       
@@ -73,7 +80,7 @@ export function ActionMenu({ items, size = "sm" }: ActionMenuProps) {
 
       setMenuPosition({ top, left, right: "auto" });
     }
-  }, [isOpen]);
+  }, [isOpen, trigger]);
 
   const visibleItems = items.filter((item) => !item.hidden);
 
@@ -92,16 +99,22 @@ export function ActionMenu({ items, size = "sm" }: ActionMenuProps) {
 
   return (
     <>
-      <Button
-        ref={buttonRef}
-        variant="secondary"
-        size={size}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label="Thao tác"
-        aria-expanded={isOpen}
-      >
-        <DotsThreeVertical className="h-5 w-5" weight="bold" />
-      </Button>
+      {trigger ? (
+        <div ref={triggerRef} onClick={() => setIsOpen(!isOpen)}>
+          {trigger}
+        </div>
+      ) : (
+        <Button
+          ref={buttonRef}
+          variant="secondary"
+          size={size}
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Thao tác"
+          aria-expanded={isOpen}
+        >
+          <DotsThreeVertical className="h-5 w-5" weight="bold" />
+        </Button>
+      )}
 
       {isOpen && typeof window !== "undefined" && createPortal(
         <>

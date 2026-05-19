@@ -16,15 +16,17 @@ import { BranchSelector } from "@/src/features/branch/customer/components/Branch
 import { BookingStatus } from "../../../types/booking.types";
 import { getBookingStatusConfig } from "../../utils/bookingStatus";
 
+type BookingStatusFilter = BookingStatus | string;
+
 interface BookingFiltersProps {
   onFilterChange: (filters: {
-    status?: BookingStatus;
+    status?: BookingStatusFilter;
     date?: string;
     search?: string;
     branchId?: string;
   }) => void;
   activeFilters: {
-    status?: BookingStatus;
+    status?: BookingStatusFilter;
     date?: string;
     search?: string;
     branchId?: string;

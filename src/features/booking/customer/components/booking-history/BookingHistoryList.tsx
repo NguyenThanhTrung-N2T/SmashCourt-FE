@@ -18,7 +18,7 @@ import { BookingHistoryLoading, BookingErrorState } from "../states";
 import { useCustomerBookings } from "../../hooks/useCustomerBookings";
 import { useBookingDetail } from "../../hooks/useBookingDetail";
 import { useRetryPayment } from "../../hooks/useRetryPayment";
-import type { BookingStatus } from "../../../types/booking.types";
+import type { BookingListQuery } from "../../../types/booking.types";
 
 export function BookingHistoryList() {
   const { bookings, isLoading, error, updateQuery, query, refetch } = useCustomerBookings({
@@ -64,7 +64,7 @@ export function BookingHistoryList() {
     updateQuery({ page });
   };
 
-  const handleFilterChange = (filters: { status?: BookingStatus; date?: string }) => {
+  const handleFilterChange = (filters: Pick<BookingListQuery, "status" | "date" | "search" | "branchId">) => {
     updateQuery({ ...filters, page: 1 });
   };
 

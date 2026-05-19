@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { X, Warning, CheckCircle } from '@phosphor-icons/react';
 
 interface ConfirmationDialogProps {
+    isOpen?: boolean;
     title: string;
     message: string;
     confirmText?: string;
@@ -17,6 +18,7 @@ interface ConfirmationDialogProps {
 }
 
 export function ConfirmationDialog({
+    isOpen = true,
     title,
     message,
     confirmText = 'Xác nhận',
@@ -29,6 +31,8 @@ export function ConfirmationDialog({
     variant = 'warning',
 }: ConfirmationDialogProps) {
     const [reason, setReason] = useState('');
+
+    if (!isOpen) return null;
 
     const handleConfirm = () => {
         onConfirm(showReasonInput ? reason : undefined);

@@ -49,6 +49,20 @@ export enum PaymentStatus {
   FAILED = 2,
 }
 
+export type BookingStatusName = keyof typeof BookingStatus;
+export type BookingSourceName = keyof typeof BookingSource;
+export type InvoicePaymentStatusName = keyof typeof InvoicePaymentStatus;
+export type SortOrder = "asc" | "desc";
+export type BookingListSortBy =
+  | "createdAt"
+  | "bookingDate"
+  | "date"
+  | "status"
+  | "customerName"
+  | "customer"
+  | "finalTotal"
+  | "total";
+
 // ============================================================================
 // DTOs
 // ============================================================================
@@ -67,6 +81,18 @@ export interface CreateOnlineBookingDto {
   guestPhone?: string;
   guestEmail?: string;
   note?: string;
+}
+
+export interface CreateWalkInBookingDto {
+  courts: CourtSlotDto[];
+  bookingDate: string; // YYYY-MM-DD
+  customerId?: string | null;
+  guestName?: string | null;
+  guestPhone?: string | null;
+  guestEmail?: string | null;
+  promotionId?: string | null;
+  note?: string | null;
+  payNow: boolean;
 }
 
 export interface OnlineBookingResponseDto {
@@ -112,10 +138,10 @@ export interface BookingDto {
   bookingId?: string;
   bookingCode?: string;
   bookingDate: string; // ISO 8601
-  status: any;
-  source: any;
-  customerName: string;
-  customerPhone: string;
+  status: BookingStatus | BookingStatusName | string;
+  source?: BookingSource | BookingSourceName | string;
+  customerName: string | null;
+  customerPhone?: string | null;
   customerEmail?: string;
   guestName?: string;
   guestPhone?: string;
@@ -124,15 +150,15 @@ export interface BookingDto {
   branchName: string;
   note?: string;
   courts: BookingCourtDto[];
-  services: BookingServiceDto[];
+  services?: BookingServiceDto[];
   invoice?: BookingInvoiceDto;
   courtFee?: number;
   serviceFee?: number;
   loyaltyDiscountAmount?: number;
   promotionDiscountAmount?: number;
   finalTotal?: number;
-  paymentStatus?: any;
-  createdAt: string; // ISO 8601
+  paymentStatus?: InvoicePaymentStatus | InvoicePaymentStatusName | string;
+  createdAt?: string; // ISO 8601
   expiresAt?: string; // ISO 8601
 }
 
@@ -140,11 +166,49 @@ export interface CancellationInfoDto {
   bookingId: string;
   branchName: string;
   bookingDate: string;
-  courts: BookingCourtDto[];
+  courtNames?: string[];
+  courts?: BookingCourtDto[];
+  startTime?: string;
+  endTime?: string;
   refundPercent: number;
   refundAmount: number;
-  canCancel: boolean;
+  status?: BookingStatus | BookingStatusName | string;
+  canCancel?: boolean;
   cancelTokenUsedAt?: string;
+}
+
+export interface BookingScheduleItemDto {
+  bookingId: string;
+  startTime: string; // HH:mm
+  endTime: string; // HH:mm
+  status: BookingStatus | BookingStatusName | string;
+}
+
+export interface BookingScheduleCourtDto {
+  courtId: string;
+  courtName: string;
+  bookings: BookingScheduleItemDto[];
+}
+
+export interface BookingDashboardSummaryDto {
+  todayBookings: number;
+  activeBookings: number;
+  completedBookings: number;
+  cancelledBookings: number;
+  todayRevenue: number;
+  pendingRefunds: number;
+}
+
+export interface BookingCalendarHeatmapDto {
+  date: string; // YYYY-MM-DD
+  bookingCount: number;
+  occupancyRate: number;
+  revenue: number;
+}
+
+export interface AddBookingServiceDto {
+  serviceId: string;
+  quantity: number;
 }
 
 // ============================================================================
@@ -154,10 +218,32 @@ export interface CancellationInfoDto {
 export interface BookingListQuery {
   page?: number;
   pageSize?: number;
-  status?: BookingStatus;
+  status?: BookingStatus | BookingStatusName | string;
+  paymentStatus?: InvoicePaymentStatus | InvoicePaymentStatusName | string;
   branchId?: string;
+  courtId?: string;
   customerId?: string;
   date?: string; // YYYY-MM-DD
+  fromDate?: string; // YYYY-MM-DD
+  toDate?: string; // YYYY-MM-DD
   source?: BookingSource;
   search?: string; // Search by customer name, phone, guest info, or booking ID
+  customerKeyword?: string;
+  sortBy?: BookingListSortBy;
+  sortOrder?: SortOrder;
+}
+
+export interface BookingScheduleQuery {
+  branchId?: string;
+  date: string; // YYYY-MM-DD
+}
+
+export interface BookingDashboardSummaryQuery {
+  branchId?: string;
+}
+
+export interface BookingCalendarHeatmapQuery {
+  year?: number;
+  month?: number;
+  branchId?: string;
 }
