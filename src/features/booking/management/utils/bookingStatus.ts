@@ -1,8 +1,8 @@
-import { BookingStatus, InvoicePaymentStatus } from '../../types/booking.types';
+import { BookingStatus, InvoicePaymentStatus } from '../../shared/types/booking.types';
 
 export function getBookingStatusLabel(status: BookingStatus | string | number): string {
   const statusValue = typeof status === 'string' ? BookingStatus[status as keyof typeof BookingStatus] : status;
-  
+
   switch (statusValue) {
     case BookingStatus.PENDING:
       return 'Chưa thanh toán';
@@ -33,7 +33,7 @@ export function getBookingStatusVariant(
   status: BookingStatus | string | number
 ): 'success' | 'warning' | 'error' | 'info' | 'neutral' {
   const statusValue = typeof status === 'string' ? BookingStatus[status as keyof typeof BookingStatus] : status;
-  
+
   switch (statusValue) {
     case BookingStatus.CONFIRMED:
     case BookingStatus.PAID_ONLINE:
@@ -55,7 +55,7 @@ export function getBookingStatusVariant(
 
 export function getPaymentStatusLabel(status: InvoicePaymentStatus | string | number): string {
   const statusValue = typeof status === 'string' ? InvoicePaymentStatus[status as keyof typeof InvoicePaymentStatus] : status;
-  
+
   switch (statusValue) {
     case InvoicePaymentStatus.UNPAID:
       return 'Chưa thanh toán';
@@ -74,7 +74,7 @@ export function getPaymentStatusVariant(
   status: InvoicePaymentStatus | string | number
 ): 'success' | 'warning' | 'error' | 'info' | 'neutral' {
   const statusValue = typeof status === 'string' ? InvoicePaymentStatus[status as keyof typeof InvoicePaymentStatus] : status;
-  
+
   switch (statusValue) {
     case InvoicePaymentStatus.PAID:
       return 'success';

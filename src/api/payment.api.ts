@@ -9,7 +9,7 @@ import type {
   ConfirmPaymentDto,
   PaymentConfirmationDto,
   RetryPaymentResponseDto,
-} from "../features/booking/types/payment.types";
+} from "../features/booking/shared/types/payment.types";
 
 // ============================================================================
 // VNPay Payment APIs

@@ -6,7 +6,7 @@
 
 "use client";
 
-import type { MyLoyaltyDto } from "@/src/shared/types/loyalty.types";
+import type { MyLoyaltyDto } from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
 import { LoyaltyBadge } from "./LoyaltyBadge";
 import { formatPoints } from "../utils";
 import { getTierCfg } from "@/src/features/benefit/loyalty/owner/LoyaltyTierConfig";
@@ -20,7 +20,7 @@ export function LoyaltyProgress({ loyalty }: LoyaltyProgressProps) {
   const TierIcon = tierConfig.icon;
 
   return (
-    <div 
+    <div
       className={`rounded-xl border ${tierConfig.cardBorder} ${tierConfig.cardBg} p-6 space-y-6 shadow-sm`}
     >
       {/* Header Section */}
@@ -31,9 +31,9 @@ export function LoyaltyProgress({ loyalty }: LoyaltyProgressProps) {
             <div className={`rounded-full p-2 ${tierConfig.pillBg}`}>
               <TierIcon className={`h-6 w-6 ${tierConfig.pillText}`} weight="fill" />
             </div>
-            <LoyaltyBadge 
-              tierName={loyalty.tierName} 
-              discountRate={loyalty.discountRate} 
+            <LoyaltyBadge
+              tierName={loyalty.tierName}
+              discountRate={loyalty.discountRate}
             />
           </div>
         </div>
@@ -44,7 +44,7 @@ export function LoyaltyProgress({ loyalty }: LoyaltyProgressProps) {
           <p className="text-sm text-muted">điểm</p>
         </div>
       </div>
-      
+
       {/* Progress Section */}
       {!loyalty.isMaxTier && loyalty.nextTierName && (
         <div className="space-y-3">
@@ -52,7 +52,7 @@ export function LoyaltyProgress({ loyalty }: LoyaltyProgressProps) {
             <span className="text-muted">Tiến độ lên {loyalty.nextTierName}</span>
             <span className="font-medium text-foreground">{loyalty.progressPercent}%</span>
           </div>
-          
+
           {/* Progress Bar */}
           <div className="relative h-3 w-full overflow-hidden rounded-full bg-surface-2">
             <div
@@ -60,13 +60,13 @@ export function LoyaltyProgress({ loyalty }: LoyaltyProgressProps) {
               style={{ width: `${loyalty.progressPercent || 0}%` }}
             />
           </div>
-          
+
           <p className="text-sm text-muted">
             Còn <span className="font-semibold text-foreground">{formatPoints(loyalty.pointsToNextTier || 0)}</span> điểm để lên hạng {loyalty.nextTierName}
           </p>
         </div>
       )}
-      
+
       {/* Max Tier Message */}
       {loyalty.isMaxTier && (
         <div className={`flex items-center gap-3 rounded-lg ${tierConfig.pillBg} p-4`}>

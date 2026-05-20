@@ -3,7 +3,7 @@
  */
 
 import { createOnlineBooking } from "@/src/api/booking.api";
-import type { CourtDto } from "@/src/features/court/types/court.types";
+import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
 interface UseBookingSubmitParams {

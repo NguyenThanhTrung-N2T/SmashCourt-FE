@@ -9,11 +9,11 @@
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { LoyaltyInfoCard } from "../LoyaltyInfoCard";
 import { PromotionSelector } from "../PromotionSelector";
-import type { BranchDto } from "@/src/features/branch/types/branch.types";
-import type { CourtDto } from "@/src/features/court/types/court.types";
+import type { BranchDto } from "@/src/features/branch/shared/types/branch.types";
+import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
-import type { MyLoyaltyDto } from "@/src/shared/types/loyalty.types";
-import type { ApplicablePromotion } from "@/src/shared/types/promotion.types";
+import type { MyLoyaltyDto } from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
+import type { ApplicablePromotion } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 import type { BookingCourtType } from "@/src/features/booking/customer/hooks/useBookingForm";
 
 interface BookingConfirmationStepProps {
@@ -89,7 +89,7 @@ export function BookingConfirmationStep({
   const isEmailReadOnly = preFilledFields.email;
 
   const formatTime = (time: string) => time.substring(0, 5);
-  
+
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString("vi-VN", {
@@ -101,10 +101,8 @@ export function BookingConfirmationStep({
   };
 
   const inputCls = (hasError?: boolean, isReadOnly?: boolean) =>
-    `w-full rounded-xl border ${
-      hasError ? "border-red-500/40 bg-red-500/10" : "border-border bg-surface-2"
-    } px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted ${
-      isReadOnly ? "cursor-not-allowed opacity-70" : "hover:border-primary focus:border-primary focus:bg-surface-1 focus:ring-2 focus:ring-primary/20"
+    `w-full rounded-xl border ${hasError ? "border-red-500/40 bg-red-500/10" : "border-border bg-surface-2"
+    } px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted ${isReadOnly ? "cursor-not-allowed opacity-70" : "hover:border-primary focus:border-primary focus:bg-surface-1 focus:ring-2 focus:ring-primary/20"
     }`;
 
   return (
@@ -112,7 +110,7 @@ export function BookingConfirmationStep({
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-foreground">Xác nhận thông tin</h2>
         <p className="mt-1 text-sm text-muted">
-          {isLoggedIn 
+          {isLoggedIn
             ? "Thông tin của bạn đã được tự động điền. Vui lòng kiểm tra lại trước khi xác nhận."
             : "Vui lòng nhập thông tin liên hệ và kiểm tra lại thông tin đặt sân"}
         </p>
@@ -260,7 +258,7 @@ export function BookingConfirmationStep({
       {isLoggedIn && (
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-foreground">Ưu đãi & Giảm giá</h3>
-          
+
           {/* Loyalty Info */}
           {isLoadingLoyalty && (
             <div className="rounded-xl border border-border bg-surface-2 p-4 text-sm text-muted">
@@ -269,8 +267,8 @@ export function BookingConfirmationStep({
           )}
 
           {!isLoadingLoyalty && loyaltyInfo && (
-            <LoyaltyInfoCard 
-              loyaltyInfo={loyaltyInfo} 
+            <LoyaltyInfoCard
+              loyaltyInfo={loyaltyInfo}
               loyaltyDiscount={loyaltyDiscount}
             />
           )}
@@ -294,7 +292,7 @@ export function BookingConfirmationStep({
         <h3 className="text-xs font-bold uppercase tracking-wider text-muted">
           Chi tiết thanh toán
         </h3>
-        
+
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted">Tiền sân</span>

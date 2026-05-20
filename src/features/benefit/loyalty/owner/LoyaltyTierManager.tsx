@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Warning, CheckCircle, CircleNotch, ArrowClockwise } from "@phosphor-icons/react";
 
 import { fetchAllLoyaltyTiers } from "@/src/api/loyalty-tier.api";
-import type { LoyaltyTier } from "@/src/shared/types/loyalty-tier.types";
+import type { LoyaltyTier } from "@/src/features/benefit/loyalty/shared/types/loyalty-tier.types";
 import { AuthApiError } from "@/src/api/auth.api";
 import { useToast } from "@/src/shared/hooks/useToast";
 

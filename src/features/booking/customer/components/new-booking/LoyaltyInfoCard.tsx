@@ -7,7 +7,7 @@
 "use client";
 
 import { Crown, TrendUp } from "@phosphor-icons/react/dist/ssr";
-import type { MyLoyaltyDto } from "@/src/shared/types/loyalty.types";
+import type { MyLoyaltyDto } from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
 
 interface LoyaltyInfoCardProps {
   loyaltyInfo: MyLoyaltyDto;
@@ -41,7 +41,7 @@ export function LoyaltyInfoCard({ loyaltyInfo, loyaltyDiscount }: LoyaltyInfoCar
           <p className="mt-1 text-sm text-muted">
             Giảm giá: {loyaltyInfo.discountRate}%
           </p>
-          
+
           {!loyaltyInfo.isMaxTier && loyaltyInfo.nextTierName && (
             <div className="mt-3 space-y-1">
               <div className="flex items-center gap-1 text-xs text-muted">

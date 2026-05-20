@@ -1,8 +1,6 @@
 import type {
   CancellationPolicyTone,
-  CancelPolicy,
-  SaveCancelPolicyRequest,
-} from "@/src/shared/types/cancel-policy.types";
+} from "@/src/features/policy/shared/types/cancel-policy.types";
 
 export function sortCancelPolicies<T extends { hoursBefore: number }>(policies: T[]) {
   return [...policies].sort((left, right) => right.hoursBefore - left.hoursBefore);

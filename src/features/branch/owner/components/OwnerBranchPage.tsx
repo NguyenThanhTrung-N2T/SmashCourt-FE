@@ -9,7 +9,7 @@ import { BranchCourtTypesTab } from './tabs/BranchCourtTypesTab';
 import { AddBranchModal } from './dialogs/AddBranchModal';
 import { BranchPageLoading } from './states/BranchPageLoading';
 import { BranchEmptyState } from './states/BranchEmptyState';
-import type { BranchDto, CreateBranchDto } from '@/src/features/branch/types/branch.types';
+import type { BranchDto, CreateBranchDto } from '@/src/features/branch/shared/types/branch.types';
 import { fetchBranches, createBranch } from '@/src/api/branch.api';
 import { handleApiError } from '../utils/error-handling';
 import { useToast } from '@/src/shared/hooks/useToast';

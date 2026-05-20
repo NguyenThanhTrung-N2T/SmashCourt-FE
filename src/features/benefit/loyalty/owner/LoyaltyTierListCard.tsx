@@ -1,5 +1,5 @@
 import { Lightning, Percent } from "@phosphor-icons/react";
-import type { LoyaltyTier } from "@/src/shared/types/loyalty-tier.types";
+import type { LoyaltyTier } from "@/src/features/benefit/loyalty/shared/types/loyalty-tier.types";
 import { getTierCfg } from "./LoyaltyTierConfig";
 
 export function LoyaltyTierListCard({

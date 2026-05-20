@@ -23,7 +23,7 @@ import {
 import type {
     CancelPolicy,
     CancellationPolicyTone,
-} from "@/src/shared/types/cancel-policy.types";
+} from "@/src/features/policy/shared/types/cancel-policy.types";
 
 type CancellationPolicyPreviewProps = {
     anchorId?: string;

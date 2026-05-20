@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { UserCircle, User, Plus, Trash, Warning } from '@phosphor-icons/react';
-import type { BranchManagerDto, AssignManagerDto, UserSearchResultDto } from '@/src/features/branch/types/branch.types';
+import type { BranchManagerDto, AssignManagerDto, UserSearchResultDto } from '@/src/features/branch/shared/types/branch.types';
 import { getCurrentManager, assignManager, removeManager } from '@/src/api/branch.api';
 import { useUserSearch } from '@/src/shared/hooks/useUserSearch';
 import { SearchInput } from '../shared/SearchInput';

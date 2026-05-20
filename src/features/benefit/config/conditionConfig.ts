@@ -1,6 +1,6 @@
-import { ConditionType } from "@/src/shared/types/promotion.types";
+import { ConditionType } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 
-export type ConditionInputType = 
+export type ConditionInputType =
   | "number"
   | "select"
   | "time"
@@ -89,7 +89,7 @@ export const CONDITION_CONFIG: Record<ConditionType, ConditionConfig> = {
 // Helper to get display label for condition values
 export function getConditionValueDisplay(type: ConditionType, value: string): string {
   const config = CONDITION_CONFIG[type];
-  
+
   switch (type) {
     case ConditionType.MIN_BOOKING_AMOUNT:
       return `${Number(value).toLocaleString("vi-VN")} VNĐ`;

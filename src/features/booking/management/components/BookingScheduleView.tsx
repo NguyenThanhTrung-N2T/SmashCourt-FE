@@ -8,8 +8,8 @@ import { CalendarBlank, Buildings } from '@phosphor-icons/react';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Skeleton } from '@/src/shared/components/feedback/Skeleton';
 import { EmptyState } from '@/src/shared/components/layout/EmptyState';
-import type { BookingScheduleCourtDto, BookingScheduleItemDto } from '../../types/booking.types';
-import { BookingStatus } from '../../types/booking.types';
+import type { BookingScheduleCourtDto, BookingScheduleItemDto } from '../../shared/types/booking.types';
+import { BookingStatus } from '../../shared/types/booking.types';
 import { formatTime } from '../utils/bookingStatus';
 
 interface BookingScheduleViewProps {
@@ -26,43 +26,43 @@ const TIME_SLOTS = [
 ];
 
 function getStatusColor(status: string | number): string {
-  const statusValue = typeof status === 'string' 
-    ? BookingStatus[status as keyof typeof BookingStatus] 
+  const statusValue = typeof status === 'string'
+    ? BookingStatus[status as keyof typeof BookingStatus]
     : status;
 
   switch (statusValue) {
-  case BookingStatus.PENDING:
-    return 'bg-amber-500 hover:bg-amber-600 border-amber-600';
+    case BookingStatus.PENDING:
+      return 'bg-amber-500 hover:bg-amber-600 border-amber-600';
 
-  case BookingStatus.CONFIRMED:
-    return 'bg-blue-500 hover:bg-blue-600 border-blue-600';
+    case BookingStatus.CONFIRMED:
+      return 'bg-blue-500 hover:bg-blue-600 border-blue-600';
 
-  case BookingStatus.PAID_ONLINE:
-    return 'bg-sky-500 hover:bg-sky-600 border-sky-600';
+    case BookingStatus.PAID_ONLINE:
+      return 'bg-sky-500 hover:bg-sky-600 border-sky-600';
 
-  case BookingStatus.IN_PROGRESS:
-    return 'bg-indigo-500 hover:bg-indigo-600 border-indigo-600';
+    case BookingStatus.IN_PROGRESS:
+      return 'bg-indigo-500 hover:bg-indigo-600 border-indigo-600';
 
-  case BookingStatus.PENDING_PAYMENT:
-    return 'bg-orange-500 hover:bg-orange-600 border-orange-600';
+    case BookingStatus.PENDING_PAYMENT:
+      return 'bg-orange-500 hover:bg-orange-600 border-orange-600';
 
-  case BookingStatus.COMPLETED:
-    return 'bg-emerald-500 hover:bg-emerald-600 border-emerald-600';
+    case BookingStatus.COMPLETED:
+      return 'bg-emerald-500 hover:bg-emerald-600 border-emerald-600';
 
-  case BookingStatus.CANCELLED:
-    return 'bg-red-500 hover:bg-red-600 border-red-600';
+    case BookingStatus.CANCELLED:
+      return 'bg-red-500 hover:bg-red-600 border-red-600';
 
-  case BookingStatus.CANCELLED_PENDING_REFUND:
-    return 'bg-rose-500 hover:bg-rose-600 border-rose-600';
+    case BookingStatus.CANCELLED_PENDING_REFUND:
+      return 'bg-rose-500 hover:bg-rose-600 border-rose-600';
 
-  case BookingStatus.CANCELLED_REFUNDED:
-    return 'bg-pink-500 hover:bg-pink-600 border-pink-600';
+    case BookingStatus.CANCELLED_REFUNDED:
+      return 'bg-pink-500 hover:bg-pink-600 border-pink-600';
 
-  case BookingStatus.NO_SHOW:
-    return 'bg-slate-500 hover:bg-slate-600 border-slate-600';
+    case BookingStatus.NO_SHOW:
+      return 'bg-slate-500 hover:bg-slate-600 border-slate-600';
 
-  default:
-    return 'bg-gray-500 hover:bg-gray-600 border-gray-600';
+    default:
+      return 'bg-gray-500 hover:bg-gray-600 border-gray-600';
   }
 }
 
@@ -190,7 +190,7 @@ export function BookingScheduleView({
 
       {/* Booking Status Legend */}
       <div className="flex flex-wrap gap-4 justify-center bg-surface-1 border border-border rounded-xl p-4">
-        
+
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-amber-500 border-2 border-amber-600" />
           <span className="text-xs font-medium text-muted">

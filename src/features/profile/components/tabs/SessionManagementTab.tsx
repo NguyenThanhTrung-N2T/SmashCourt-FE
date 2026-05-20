@@ -6,16 +6,16 @@
 
 import { useState } from "react";
 import { Button } from "@/src/shared/components/ui/Button";
-import { 
-  Devices, 
-  Desktop, 
-  DeviceMobile, 
-  SignOut, 
+import {
+  Devices,
+  Desktop,
+  DeviceMobile,
+  SignOut,
   CheckCircle,
   Warning,
   Clock
 } from "@phosphor-icons/react";
-import { useMySessions } from "../../hooks/useProfile";
+import { useMySessions } from "@/src/features/profile/hooks";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import type { ToastState } from "@/src/shared/hooks/useToast";

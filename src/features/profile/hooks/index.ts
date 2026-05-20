@@ -1,10 +1,4 @@
-/**
- * Profile Hooks Exports
- */
-
-export {
-  useMyProfile,
-  useUpdateProfile,
-  useChangePassword,
-  useMySessions,
-} from "./useProfile";
+export { useMyProfile } from "./useMyProfile";
+export { useUpdateProfile } from "./useUpdateProfile";
+export { useChangePassword } from "./useChangePassword";
+export { useMySessions } from "./useMySessions";

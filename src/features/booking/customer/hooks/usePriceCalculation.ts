@@ -4,8 +4,8 @@
 
 import { useState, useEffect } from "react";
 import { calculatePrice } from "@/src/api/pricing.api";
-import type { BranchDto } from "@/src/features/branch/types/branch.types";
-import type { CourtDto } from "@/src/features/court/types/court.types";
+import type { BranchDto } from "@/src/features/branch/shared/types/branch.types";
+import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
 interface UsePriceCalculationParams {
@@ -26,23 +26,23 @@ export function usePriceCalculation({
 
   useEffect(() => {
     let isMounted = true;
-    
+
     async function fetchPrice() {
       if (!selectedBranch || !selectedCourt || !selectedDate || selectedSlots.length === 0) {
         if (isMounted) setTotalAmount(0);
         return;
       }
-      
+
       try {
         if (isMounted) setIsCalculatingPrice(true);
-        
-        const sortedSlots = [...selectedSlots].sort((a, b) => 
+
+        const sortedSlots = [...selectedSlots].sort((a, b) =>
           a.startTime.localeCompare(b.startTime)
         );
-        
+
         const startTime = sortedSlots[0].startTime;
         let endTime = sortedSlots[sortedSlots.length - 1].endTime;
-        
+
         // Handle midnight slot for C# TimeSpan
         if (endTime === "00:00:00") {
           endTime = "24:00:00";
@@ -54,7 +54,7 @@ export function usePriceCalculation({
           startTime,
           endTime,
         });
-        
+
         if (result && isMounted) {
           setTotalAmount(result.courtFee);
         }
@@ -64,9 +64,9 @@ export function usePriceCalculation({
         if (isMounted) setIsCalculatingPrice(false);
       }
     }
-    
+
     const timeoutId = setTimeout(fetchPrice, 300);
-    
+
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);

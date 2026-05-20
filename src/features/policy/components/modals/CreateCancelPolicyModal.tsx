@@ -1,14 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ShieldCheck,
-} from "@phosphor-icons/react";
-import { Button } from "@/src/shared/components/ui/Button";
-import { Input } from "@/src/shared/components/ui/Input";
-import { Modal } from "@/src/shared/components/ui/Modal";
-import { Flex } from "@/src/shared/components/layout/Flex";
-import { Grid } from "@/src/shared/components/layout/Grid";
+import { ShieldCheck } from "@phosphor-icons/react";
+import { Input, Button, Modal } from "@/src/shared/components/ui";
+import { Flex, Grid } from "@/src/shared/components/layout";
 import { createNumericChangeHandler } from "@/src/shared/utils/inputValidation";
 
 export interface CreateCancelPolicyPayload {

@@ -4,8 +4,8 @@
 
 import { useState, useEffect } from "react";
 import { getAuthUser } from "@/src/features/auth/session/sessionStore";
-import type { BranchDto } from "@/src/features/branch/types/branch.types";
-import type { CourtDto } from "@/src/features/court/types/court.types";
+import type { BranchDto } from "@/src/features/branch/shared/types/branch.types";
+import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
 // Simplified court type for booking flow
@@ -61,16 +61,16 @@ export function useBookingForm() {
   useEffect(() => {
     const user = getAuthUser();
     setCurrentUser(user);
-    
+
     if (user) {
       const hasName = !!(user.fullName && user.fullName.trim());
       const hasPhone = !!(user.phone && user.phone.trim());
       const hasEmail = !!(user.email && user.email.trim());
-      
+
       setGuestName(user.fullName || "");
       setGuestPhone(user.phone || "");
       setGuestEmail(user.email || "");
-      
+
       setPreFilledFields({
         name: hasName,
         phone: hasPhone,
@@ -150,7 +150,7 @@ export function useBookingForm() {
     bookingNote,
     validationErrors,
     selectedPromotionId,
-    
+
     // Setters
     setIsSubmitting,
     setError,
@@ -161,7 +161,7 @@ export function useBookingForm() {
     setBookingNote,
     setValidationErrors,
     setSelectedPromotionId,
-    
+
     // Handlers
     handleBranchSelect,
     handleCourtTypeSelect,

@@ -8,7 +8,7 @@
 export * from "./components";
 
 // Hooks
-export * from "./hooks";
+export * from "../shared/hooks";
 
 // Utils
 export * from "./utils/courtStatus";

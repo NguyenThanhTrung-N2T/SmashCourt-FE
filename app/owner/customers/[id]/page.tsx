@@ -1,5 +1,5 @@
-import { CustomerDetailPage } from '@/src/features/customer/owner/components/CustomerDetailPage';
+import { OwnerCustomerDetailPage } from '@/src/features/customer/owner/components/pages/OwnerCustomerDetailPage';
 
 export default function CustomerDetailPageRoute() {
-    return <CustomerDetailPage />;
+    return <OwnerCustomerDetailPage />;
 }

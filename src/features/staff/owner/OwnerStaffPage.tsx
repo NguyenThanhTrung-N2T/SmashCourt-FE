@@ -6,179 +6,57 @@
  * Owner interface for managing all staff (STAFF and BRANCH_MANAGER) across branches
  */
 
-import { useState, useEffect, useCallback } from "react";
-import { fetchUsers, fetchUserById } from "@/src/api/user-management.api";
-import { fetchBranches } from "@/src/api/branch.api";
-import type { StaffUserSummary, StaffUserDetail, StaffUserStatus, StaffUserRole } from "@/src/features/staff/types/user.type";
-import type { PaginatedData } from "@/src/shared/types/api.types";
+import { useStaffManagement } from "@/src/features/staff/shared/hooks/useStaffManagement";
 import { BranchSelector } from "@/src/shared/components/layout/BranchSelector";
-import { PageLoadingState, TableLoadingState, EmptyState, ErrorState } from "../shared/states";
-import { OwnerStaffTable } from "./components/OwnerStaffTable";
-import { OwnerStaffFilters } from "./components/OwnerStaffFilters";
-import { CreateStaffModal } from "./components/CreateStaffModal";
-import { EditStaffModal } from "../manager/components/EditStaffModal";
-import { StaffDetailModal } from "../manager/components/StaffDetailModal";
-import { useToast } from "@/src/shared/hooks/useToast";
+import { PageLoadingState, TableLoadingState, EmptyState, ErrorState } from "../shared/components/states";
+import { StaffTable } from "../shared/components/StaffTable";
+import { StaffFilters } from "../shared/components/StaffFilters";
+import { CreateStaffModal } from "../shared/components/CreateStaffModal";
+import { EditStaffModal } from "../shared/components/EditStaffModal";
+import { StaffDetailModal } from "../shared/components/StaffDetailModal";
 import { Toast } from "@/src/shared/components/ui/Toast";
 import { Button } from "@/src/shared/components/ui/Button";
 import { Plus } from "@phosphor-icons/react";
 
-interface Branch {
-  id: string;
-  name: string;
-  status?: 0 | 1 | 2;
-}
-
 export function OwnerStaffPage() {
-  const { toast, show } = useToast();
-  const [initializing, setInitializing] = useState(true);
-  const [tableLoading, setTableLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [selectedBranchId, setSelectedBranchId] = useState<string>("");
-  const [staffData, setStaffData] = useState<PaginatedData<StaffUserSummary> | null>(null);
-  
-  // Filters
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<StaffUserRole | "">("");
-  const [statusFilter, setStatusFilter] = useState<StaffUserStatus | "">("");
-  const [sortBy, setSortBy] = useState<"createdAt" | "fullName" | "email">("createdAt");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
-  
-  // Modals
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedStaff, setSelectedStaff] = useState<StaffUserDetail | null>(null);
-
-  // Debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      setPage(1);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  // Load branches on mount
-  useEffect(() => {
-    const loadBranches = async () => {
-      try {
-        const branchesData = await fetchBranches(1, 50); // Get first 50 branches
-        const branchList = branchesData.items || [];
-        setBranches(branchList);
-        
-        // Auto-select first branch if available
-        if (branchList.length > 0) {
-          setSelectedBranchId(branchList[0].id);
-        }
-        
-        setInitializing(false);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Không thể tải danh sách chi nhánh");
-        setInitializing(false);
-      }
-    };
-
-    loadBranches();
-  }, []);
-
-  // Load staff list when branch or filters change
-  const loadStaff = useCallback(async () => {
-    if (!selectedBranchId) {
-      setStaffData(null);
-      return;
-    }
-
-    setTableLoading(true);
-    try {
-      const data = await fetchUsers({
-        branchId: selectedBranchId,
-        role: roleFilter || undefined,
-        searchTerm: debouncedSearch || undefined,
-        status: statusFilter || undefined,
-        sortBy,
-        sortOrder,
-        page,
-        pageSize,
-      });
-
-      setStaffData(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Không thể tải danh sách nhân viên");
-      show("error", "Không thể tải danh sách nhân viên");
-    } finally {
-      setTableLoading(false);
-    }
-  }, [selectedBranchId, roleFilter, debouncedSearch, statusFilter, sortBy, sortOrder, page, pageSize, show]);
-
-  useEffect(() => {
-    if (!initializing && selectedBranchId) {
-      loadStaff();
-    }
-  }, [initializing, selectedBranchId, loadStaff]);
-
-  const handleBranchChange = (branchId: string) => {
-    setSelectedBranchId(branchId);
-    setPage(1);
-  };
-
-  const handleClearFilters = () => {
-    setSearchTerm("");
-    setDebouncedSearch("");
-    setRoleFilter("");
-    setStatusFilter("");
-    setSortBy("createdAt");
-    setSortOrder("desc");
-    setPage(1);
-  };
-
-  const handleViewDetail = async (userId: string) => {
-    try {
-      const detail = await fetchUserById(userId);
-      setSelectedStaff(detail);
-      setShowDetailModal(true);
-    } catch {
-      show("error", "Không thể tải thông tin nhân viên");
-    }
-  };
-
-  const handleEdit = async (userId: string) => {
-    try {
-      const detail = await fetchUserById(userId);
-      setSelectedStaff(detail);
-      setShowEditModal(true);
-    } catch {
-      show("error", "Không thể tải thông tin nhân viên");
-    }
-  };
-
-  const handleCreateSuccess = () => {
-    setShowCreateModal(false);
-    show("success", "Tạo nhân viên thành công");
-    loadStaff();
-  };
-
-  const handleEditSuccess = () => {
-    setShowEditModal(false);
-    setSelectedStaff(null);
-    show("success", "Cập nhật nhân viên thành công");
-    loadStaff();
-  };
-
-  const handleActionSuccess = (message: string) => {
-    show("success", message);
-    loadStaff();
-  };
-
-  const handleActionError = (message: string) => {
-    show("error", message);
-  };
+  const {
+    toast,
+    initializing,
+    tableLoading,
+    error,
+    branches,
+    selectedBranchId,
+    staffData,
+    searchTerm,
+    setSearchTerm,
+    roleFilter,
+    setRoleFilter,
+    statusFilter,
+    setStatusFilter,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    page,
+    setPage,
+    showCreateModal,
+    setShowCreateModal,
+    showEditModal,
+    setShowEditModal,
+    showDetailModal,
+    setShowDetailModal,
+    selectedStaff,
+    setSelectedStaff,
+    loadStaff,
+    handleBranchChange,
+    handleClearFilters,
+    handleViewDetail,
+    handleEdit,
+    handleCreateSuccess,
+    handleEditSuccess,
+    handleActionSuccess,
+    handleActionError,
+  } = useStaffManagement({ isOwner: true });
 
   if (initializing) {
     return <PageLoadingState />;
@@ -188,7 +66,7 @@ export function OwnerStaffPage() {
     return <ErrorState message={error} onRetry={() => window.location.reload()} />;
   }
 
-  const hasFilters = debouncedSearch !== "" || roleFilter !== "" || statusFilter !== "";
+  const hasFilters = searchTerm !== "" || roleFilter !== "" || statusFilter !== "";
   const isEmpty = !staffData || staffData.items.length === 0;
 
   return (
@@ -220,7 +98,7 @@ export function OwnerStaffPage() {
 
       {/* Filters */}
       {selectedBranchId && (
-        <OwnerStaffFilters
+        <StaffFilters
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           roleFilter={roleFilter}
@@ -244,7 +122,7 @@ export function OwnerStaffPage() {
       ) : isEmpty ? (
         <EmptyState hasFilters={hasFilters} onClearFilters={handleClearFilters} />
       ) : (
-        <OwnerStaffTable
+        <StaffTable
           data={staffData!}
           page={page}
           onPageChange={setPage}
@@ -252,6 +130,7 @@ export function OwnerStaffPage() {
           onEdit={handleEdit}
           onActionSuccess={handleActionSuccess}
           onActionError={handleActionError}
+          isOwner
         />
       )}
 

@@ -9,7 +9,7 @@ import {
     CaretDown,
 } from "@phosphor-icons/react";
 import { fmt, fmtDate } from "../../../utils";
-import type { CourtType, PriceConfig, PriceRow, PriceVersionDto } from "../../../types/pricing.types";
+import type { CourtType, PriceConfig, PriceRow, PriceVersionDto } from "../../../shared/types/pricing.types";
 
 interface PricingGridTabProps {
     selectedCT: CourtType | undefined;

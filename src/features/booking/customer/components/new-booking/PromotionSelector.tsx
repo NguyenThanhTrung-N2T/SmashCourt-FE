@@ -9,7 +9,7 @@
 import { Tag, Check } from "@phosphor-icons/react/dist/ssr";
 import { formatDiscountDisplay } from "@/src/api/promotion.api";
 import { formatDate } from "@/src/shared/utils/dateFormatter";
-import type { ApplicablePromotion } from "@/src/shared/types/promotion.types";
+import type { ApplicablePromotion } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 
 interface PromotionSelectorProps {
   promotions: ApplicablePromotion[];
@@ -81,11 +81,10 @@ export function PromotionSelector({
       <button
         type="button"
         onClick={() => onSelectPromotion(null)}
-        className={`w-full rounded-xl border p-3 text-left transition-all ${
-          selectedPromotionId === null
+        className={`w-full rounded-xl border p-3 text-left transition-all ${selectedPromotionId === null
             ? "border-primary bg-primary/5 ring-2 ring-primary/20"
             : "border-border bg-surface-2 hover:border-primary/50"
-        }`}
+          }`}
       >
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-foreground">
@@ -103,11 +102,10 @@ export function PromotionSelector({
           key={promotion.id}
           type="button"
           onClick={() => onSelectPromotion(promotion.id)}
-          className={`w-full rounded-xl border p-3 text-left transition-all ${
-            selectedPromotionId === promotion.id
+          className={`w-full rounded-xl border p-3 text-left transition-all ${selectedPromotionId === promotion.id
               ? "border-primary bg-primary/5 ring-2 ring-primary/20"
               : "border-border bg-surface-2 hover:border-primary/50"
-          }`}
+            }`}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 space-y-1">
@@ -119,11 +117,11 @@ export function PromotionSelector({
                   </span>
                 )}
               </div>
-              
+
               {promotion.description && (
                 <p className="text-xs text-muted">{promotion.description}</p>
               )}
-              
+
               <div className="flex items-center gap-3 text-xs text-muted">
                 <span>Giảm: {formatDiscountDisplay(promotion)}</span>
                 <span>•</span>

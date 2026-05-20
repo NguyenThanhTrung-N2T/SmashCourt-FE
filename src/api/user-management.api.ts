@@ -15,7 +15,7 @@ import type {
   LockUserRequest,
   ResetPasswordRequest,
   UpdateUserBranchRequest,
-} from "@/src/features/staff/types/user.type";
+} from "@/src/features/staff/shared/types/user.type";
 
 /**
  * Get paginated list of users with filtering and sorting

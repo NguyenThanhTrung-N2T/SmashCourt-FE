@@ -2,7 +2,7 @@
 
 import { MagnifyingGlass, Funnel } from "@phosphor-icons/react";
 import { Input } from "@/src/shared/components/ui/Input";
-import type { CustomerListQuery } from "../../types/customer.types";
+import type { CustomerListQuery } from "../types/customer.types";
 
 interface CustomerFiltersProps {
     filters: CustomerListQuery;
@@ -11,8 +11,8 @@ interface CustomerFiltersProps {
     loyaltyTiers?: Array<{ id: string; name: string }>;
 }
 
-export function CustomerFilters({ 
-    filters, 
+export function CustomerFilters({
+    filters,
     onFiltersChange,
     branches = [],
     loyaltyTiers = []
@@ -26,11 +26,11 @@ export function CustomerFilters({
     };
 
     const handleLoyaltyTierChange = (value: string) => {
-        onFiltersChange({ 
-            ...filters, 
+        onFiltersChange({
+            ...filters,
             loyaltyTierId: value || undefined,
             loyaltyTier: value || undefined,
-            page: 1 
+            page: 1
         });
     };
 

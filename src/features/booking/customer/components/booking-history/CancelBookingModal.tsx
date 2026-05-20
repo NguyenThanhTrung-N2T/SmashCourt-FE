@@ -11,7 +11,7 @@ import { Modal } from "@/src/shared/components/ui/Modal";
 import { Button } from "@/src/shared/components/ui/Button";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { useCancelPolicies } from "../../hooks/useCancelPolicies";
-import type { BookingDto } from "../../../types/booking.types";
+import type { BookingDto } from "../../../shared/types/booking.types";
 import {
   formatCurrency,
   formatDate,
@@ -37,15 +37,15 @@ export function CancelBookingModal({
   const { policies, isLoading: isPoliciesLoading } = useCancelPolicies();
   const finalTotal = booking.finalTotal ?? booking.invoice?.finalTotal ?? 0;
   const firstCourt = booking.courts[0];
-  
+
   // Calculate refund info using dynamic policies
   const refundInfo = firstCourt
     ? calculateRefundInfo(
-        booking.bookingDate,
-        firstCourt.startTime,
-        finalTotal,
-        policies
-      )
+      booking.bookingDate,
+      firstCourt.startTime,
+      finalTotal,
+      policies
+    )
     : { refundPercent: 0, refundAmount: 0, canCancel: false };
 
   const handleConfirm = async () => {
@@ -79,17 +79,17 @@ export function CancelBookingModal({
               Mã đặt sân: {booking.bookingCode || (booking.id || booking.bookingId)?.substring(0, 8).toUpperCase()}
             </span>
           </div>
-          
+
           <div className="flex items-center gap-2 text-sm">
             <MapPin className="h-4 w-4 text-muted" />
             <span className="text-foreground">{booking.branchName}</span>
           </div>
-          
+
           <div className="flex items-center gap-2 text-sm">
             <CalendarBlank className="h-4 w-4 text-muted" />
             <span className="text-foreground">{formatDate(booking.bookingDate)}</span>
           </div>
-          
+
           {firstCourt && (
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-muted" />
@@ -127,7 +127,7 @@ export function CancelBookingModal({
               <CurrencyCircleDollar className="h-5 w-5 text-muted" />
               <h3 className="font-bold text-foreground">Thông tin hoàn tiền</h3>
             </div>
-            
+
             {refundInfo.refundAmount > 0 ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -136,21 +136,21 @@ export function CancelBookingModal({
                     {formatCurrency(finalTotal)}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted">Tỷ lệ hoàn tiền</span>
                   <span className="font-semibold text-primary">
                     {refundInfo.refundPercent}%
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between pt-2 border-t border-border">
                   <span className="font-bold text-foreground">Số tiền hoàn lại</span>
                   <span className="text-xl font-bold text-green-600">
                     {formatCurrency(refundInfo.refundAmount)}
                   </span>
                 </div>
-                
+
                 <Alert variant="info" className="mt-3">
                   <p className="text-xs">
                     * Nhân viên sẽ xác nhận và hoàn tiền trong vòng 3-5 ngày làm việc

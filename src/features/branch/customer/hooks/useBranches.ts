@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { fetchBranches } from "@/src/api/branch.api";
-import type { BranchDto } from "../../types/branch.types";
+import type { BranchDto } from "../../shared/types/branch.types";
 
 export function useBranches() {
   const [branches, setBranches] = useState<BranchDto[]>([]);

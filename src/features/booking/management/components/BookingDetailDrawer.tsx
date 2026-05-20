@@ -7,8 +7,8 @@
 import { X, SignIn, SignOut, XCircle, CheckCircle, User, Phone, Envelope, CurrencyDollar } from '@phosphor-icons/react';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Badge } from '@/src/shared/components/ui/Badge';
-import type { BookingDto } from '../../types/booking.types';
-import { BookingStatus } from '../../types/booking.types';
+import type { BookingDto } from '../../shared/types/booking.types';
+import { BookingStatus } from '../../shared/types/booking.types';
 import {
   getBookingStatusLabel,
   getBookingStatusVariant,
@@ -55,9 +55,9 @@ export function BookingDetailDrawer({
 
   const canCheckIn = statusValue === BookingStatus.CONFIRMED || statusValue === BookingStatus.PAID_ONLINE;
   const canCheckout = statusValue === BookingStatus.IN_PROGRESS;
-  const canCancel = statusValue === BookingStatus.CONFIRMED || 
-                    statusValue === BookingStatus.PAID_ONLINE || 
-                    statusValue === BookingStatus.PENDING;
+  const canCancel = statusValue === BookingStatus.CONFIRMED ||
+    statusValue === BookingStatus.PAID_ONLINE ||
+    statusValue === BookingStatus.PENDING;
   const canConfirmRefund = statusValue === BookingStatus.CANCELLED_PENDING_REFUND;
 
   return (

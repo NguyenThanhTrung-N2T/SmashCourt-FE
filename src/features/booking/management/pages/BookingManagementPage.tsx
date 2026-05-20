@@ -22,17 +22,35 @@ import { BookingTableView } from '../components/BookingTableView';
 import { BookingScheduleView } from '../components/BookingScheduleView';
 import { BookingCalendarView } from '../components/BookingCalendarView';
 import { BookingDetailDrawer } from '../components/BookingDetailDrawer';
+import {
+  WalkInBookingWorkspace,
+  createDefaultWalkInForm,
+  type WalkInBookingFormState,
+} from '../components/WalkInBookingWorkspace';
 import { useBookingManagement } from '../hooks/useBookingManagement';
 import { useBookingSchedule } from '../hooks/useBookingSchedule';
 import { useBookingCalendar } from '../hooks/useBookingCalendar';
 import { ConfirmationDialog } from '@/src/shared/components/ui/ConfirmationDialog';
+import { Toast } from '@/src/shared/components/ui/Toast';
+import { useToast } from '@/src/shared/hooks/useToast';
 import { fetchBranches } from '@/src/api/branch.api';
-import { fetchCourts } from '@/src/api/court.api';
-import type { BranchDto } from '@/src/features/branch/types/branch.types';
-import type { CourtDto } from '@/src/features/court/types/court.types';
-import { Table, GridNine, Calendar } from '@phosphor-icons/react';
+
+import type { BranchDto } from '@/src/features/branch/shared/types/branch.types';
+
+import type { BookingDto } from '../../shared/types/booking.types';
+import { Table, GridNine, Calendar, Plus, X } from '@phosphor-icons/react';
 
 type ViewTab = 'table' | 'schedule' | 'calendar';
+type WorkspaceId = 'management' | string;
+
+interface WalkInWorkspace {
+  id: string;
+  title: string;
+  form: WalkInBookingFormState;
+  dirty: boolean;
+  branchId: string;
+  branchName: string;
+}
 
 interface BookingManagementPageProps {
   title?: string;
@@ -43,13 +61,13 @@ interface BookingManagementPageProps {
 export function BookingManagementPage({
   title = 'Đặt sân',
   description = 'Quản lý và vận hành việc đặt sân',
-  showCreateWalkIn = false,
+  showCreateWalkIn = true,
 }: BookingManagementPageProps) {
   const [activeView, setActiveView] = useState<ViewTab>('table');
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<WorkspaceId>('management');
+  const [walkInWorkspaces, setWalkInWorkspaces] = useState<WalkInWorkspace[]>([]);
   const [branches, setBranches] = useState<BranchDto[]>([]);
-  const [courts, setCourts] = useState<CourtDto[]>([]);
-  const [loadingBranches, setLoadingBranches] = useState(true);
-  const [loadingCourts, setLoadingCourts] = useState(false);
+  const { toast, show: showToast } = useToast();
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -66,13 +84,10 @@ export function BookingManagementPage({
   useEffect(() => {
     const loadBranches = async () => {
       try {
-        setLoadingBranches(true);
         const data = await fetchBranches(1, 50); // Get first 50 branches
         setBranches(data.items || []);
       } catch (error) {
         console.error('Failed to load branches:', error);
-      } finally {
-        setLoadingBranches(false);
       }
     };
 
@@ -95,33 +110,11 @@ export function BookingManagementPage({
     handleCheckout,
     handleCancel,
     handleConfirmRefund,
+    refresh,
   } = useBookingManagement(undefined, activeView === 'table');
 
   const schedule = useBookingSchedule(branchId, activeView === 'schedule');
   const calendar = useBookingCalendar(branchId, activeView === 'calendar');
-
-  // Load courts when branch changes
-  useEffect(() => {
-    const loadCourts = async () => {
-      if (!branchId) {
-        setCourts([]);
-        return;
-      }
-
-      try {
-        setLoadingCourts(true);
-        const data = await fetchCourts(branchId);
-        setCourts(data || []);
-      } catch (error) {
-        console.error('Failed to load courts:', error);
-        setCourts([]);
-      } finally {
-        setLoadingCourts(false);
-      }
-    };
-
-    loadCourts();
-  }, [branchId]);
 
   const handleCheckInWithConfirm = (bookingId: string) => {
     setConfirmDialog({
@@ -201,9 +194,89 @@ export function BookingManagementPage({
   }, [updateTableFilters]);
 
   const handleCreateWalkIn = () => {
-    // TODO: Implement walk-in booking modal
-    console.log('Create walk-in booking');
+    if (!branchId) {
+      showToast('error', 'Select a branch before creating a walk-in booking');
+      return;
+    }
+
+    if (walkInWorkspaces.length >= 5) {
+      showToast('error', 'Close an existing walk-in workspace before opening another one');
+      return;
+    }
+
+    const workspace: WalkInWorkspace = {
+      id: `walk-in-${Date.now()}`,
+      title: 'Walk-in booking',
+      form: createDefaultWalkInForm(),
+      dirty: false,
+      branchId,
+      branchName: selectedBranch?.name || ""
+    };
+
+    setWalkInWorkspaces((prev) => [...prev, workspace]);
+    setActiveWorkspaceId(workspace.id);
   };
+
+  const updateWalkInWorkspace = useCallback(
+    (workspaceId: string, patch: Partial<WalkInWorkspace>) => {
+      setWalkInWorkspaces((prev) =>
+        prev.map((workspace) => {
+          if (workspace.id !== workspaceId) return workspace;
+
+          const nextWorkspace = {
+            ...workspace,
+            ...patch,
+          };
+
+          const unchanged =
+            JSON.stringify(workspace) === JSON.stringify(nextWorkspace);
+
+          return unchanged ? workspace : nextWorkspace;
+        }),
+      );
+    },
+    [],
+  );
+
+  const closeWalkInWorkspace = (workspaceId: string) => {
+    setWalkInWorkspaces((prev) => prev.filter((workspace) => workspace.id !== workspaceId));
+    setActiveWorkspaceId((current) => (current === workspaceId ? 'management' : current));
+  };
+
+  const requestCloseWalkInWorkspace = (workspace: WalkInWorkspace) => {
+    if (!workspace.dirty) {
+      closeWalkInWorkspace(workspace.id);
+      return;
+    }
+
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Close walk-in workspace',
+      message: 'This walk-in booking has unsaved changes. Close it anyway?',
+      onConfirm: () => {
+        closeWalkInWorkspace(workspace.id);
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
+  };
+
+  const handleWalkInCreated = async (workspaceId: string, booking: BookingDto) => {
+    showToast('success', 'Walk-in booking created successfully');
+    await refresh();
+    closeWalkInWorkspace(workspaceId);
+    setActiveWorkspaceId('management');
+    setActiveView('table');
+
+    const bookingId = booking.id || booking.bookingId;
+    if (bookingId) {
+      openBookingDetail(bookingId);
+    }
+  };
+
+  const selectedBranch = branches.find((branch) => branch.id === branchId);
+  const activeWalkInWorkspace = walkInWorkspaces.find(
+    (workspace) => workspace.id === activeWorkspaceId,
+  );
 
   return (
     <div className="space-y-6 animate-slide-up w-full px-8 pt-6 pb-10">
@@ -232,133 +305,197 @@ export function BookingManagementPage({
                 boxShadow: "0 4px 14px rgba(27, 94, 56, 0.35)",
               }}
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
+              <Plus className="h-4 w-4" />
               Walk-in Booking
             </button>
           )}
         </div>
       </div>
 
-      {/* Branch Selector */}
-      {branches.length > 0 && (
-        <div className="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-          <BookingBranchSelector
+      {/* Workspace Tabs */}
+      <div className="booking-workspace-tabs">
+        <button
+          onClick={() => setActiveWorkspaceId('management')}
+          className={`booking-workspace-tab ${activeWorkspaceId === 'management' ? 'booking-workspace-tab-active' : ''}`}
+        >
+          Bookings
+        </button>
+        {walkInWorkspaces.map((workspace) => (
+          <button
+            key={workspace.id}
+            onClick={() => setActiveWorkspaceId(workspace.id)}
+            className={`booking-workspace-tab group ${activeWorkspaceId === workspace.id ? 'booking-workspace-tab-active' : ''}`}
+          >
+            <span className="max-w-44 truncate">{workspace.title}</span>
+            {workspace.dirty && <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
+            <span
+              role="button"
+              tabIndex={0}
+              aria-label={`Close ${workspace.title}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                requestCloseWalkInWorkspace(workspace);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  requestCloseWalkInWorkspace(workspace);
+                }
+              }}
+              className="flex h-5 w-5 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-3 hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </span>
+          </button>
+        ))}
+        {showCreateWalkIn && (
+          <button
+            onClick={handleCreateWalkIn}
+            className="booking-workspace-add"
+            aria-label="Open walk-in booking workspace"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      {activeWorkspaceId === 'management' && (
+        <>
+          {/* Branch Selector */}
+          {branches.length > 0 && (
+            <div className="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+              <BookingBranchSelector
+                branches={branches}
+                selectedBranchId={branchId}
+                onBranchChange={updateBranchId}
+                label="Chi nhánh"
+                placeholder="-- Chọn chi nhánh --"
+                showAllOption={true}
+                className="!bg-transparent !border-0 !shadow-none !p-0"
+              />
+            </div>
+          )}
+
+          {/* Summary Cards */}
+          <BookingSummaryCards summary={summary} loading={loading} />
+
+          {/* Dynamic Filter Toolbar - Changes based on active view */}
+          <BookingFilterToolbar
+            viewMode={activeView}
+            // Table view props
+            tableFilters={tableFilters}
+            onTableFilterChange={updateTableFilters}
+            onCreateWalkIn={undefined} // Moved to header
+            // courts={courts.map(c => ({ id: c.id, name: c.name }))}
+            // Schedule view props
+            scheduleDate={schedule.selectedDate}
+            onScheduleDateChange={schedule.setSelectedDate}
+            onSchedulePreviousDay={schedule.goToPreviousDay}
+            onScheduleNextDay={schedule.goToNextDay}
+            // Calendar view props
+            calendarYear={calendar.selectedYear}
+            calendarMonth={calendar.selectedMonth}
+            onCalendarPreviousMonth={calendar.goToPreviousMonth}
+            onCalendarNextMonth={calendar.goToNextMonth}
+            // Shared props
             branches={branches}
-            selectedBranchId={branchId}
-            onBranchChange={updateBranchId}
-            label="Chi nhánh"
-            placeholder="-- Chọn chi nhánh --"
-            showAllOption={true}
-            className="!bg-transparent !border-0 !shadow-none !p-0"
           />
-        </div>
+
+          {/* View Tabs */}
+          <div className="rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            {/* Tab Navigation */}
+            <div className="border-b border-border bg-surface-1 border-1">
+              <nav className="flex gap-2 overflow-x-auto">
+                <button
+                  onClick={() => handleTabChange('table')}
+                  className={`flex items-center gap-2 px-6 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${activeView === 'table'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted hover:text-foreground hover:border-border'
+                    }`}
+                >
+                  <Table className="h-5 w-5" />
+                  Bảng
+                </button>
+                <button
+                  onClick={() => handleTabChange('schedule')}
+                  className={`flex items-center gap-2 px-6 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${activeView === 'schedule'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted hover:text-foreground hover:border-border'
+                    }`}
+                >
+                  <GridNine className="h-5 w-5" />
+                  Lịch đặt sân
+                </button>
+                <button
+                  onClick={() => handleTabChange('calendar')}
+                  className={`flex items-center gap-2 px-6 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${activeView === 'calendar'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted hover:text-foreground hover:border-border'
+                    }`}
+                >
+                  <Calendar className="h-5 w-5" />
+                  Lịch biểu
+                </button>
+              </nav>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6">
+              {/* Table View */}
+              {activeView === 'table' && (
+                <BookingTableView
+                  bookings={bookings}
+                  loading={loading}
+                  onRowClick={openBookingDetail}
+                  onCheckIn={handleCheckInWithConfirm}
+                  onCheckout={handleCheckoutWithConfirm}
+                  onCancel={handleCancelWithConfirm}
+                  onConfirmRefund={handleConfirmRefundWithConfirm}
+                  onPageChange={(page) => updateTableFilters({ page })}
+                />
+              )}
+
+              {/* Schedule View */}
+              {activeView === 'schedule' && (
+                <BookingScheduleView
+                  schedule={schedule.schedule}
+                  loading={schedule.loading}
+                  onBookingClick={openBookingDetail}
+                  hasBranch={schedule.hasBranch}
+                />
+              )}
+
+              {/* Calendar View */}
+              {activeView === 'calendar' && (
+                <BookingCalendarView
+                  heatmapData={calendar.heatmapData}
+                  loading={calendar.loading}
+                  selectedYear={calendar.selectedYear}
+                  selectedMonth={calendar.selectedMonth}
+                  onPreviousMonth={calendar.goToPreviousMonth}
+                  onNextMonth={calendar.goToNextMonth}
+                  onDayClick={handleCalendarDayClick}
+                />
+              )}
+            </div>
+          </div>
+        </>
       )}
 
-      {/* Summary Cards */}
-      <BookingSummaryCards summary={summary} loading={loading} />
-
-      {/* Dynamic Filter Toolbar - Changes based on active view */}
-      <BookingFilterToolbar
-        viewMode={activeView}
-        // Table view props
-        tableFilters={tableFilters}
-        onTableFilterChange={updateTableFilters}
-        onCreateWalkIn={undefined} // Moved to header
-        courts={courts.map(c => ({ id: c.id, name: c.name }))}
-        // Schedule view props
-        scheduleDate={schedule.selectedDate}
-        onScheduleDateChange={schedule.setSelectedDate}
-        onSchedulePreviousDay={schedule.goToPreviousDay}
-        onScheduleNextDay={schedule.goToNextDay}
-        // Calendar view props
-        calendarYear={calendar.selectedYear}
-        calendarMonth={calendar.selectedMonth}
-        onCalendarPreviousMonth={calendar.goToPreviousMonth}
-        onCalendarNextMonth={calendar.goToNextMonth}
-        // Shared props
-        branches={branches}
-      />
-
-      {/* View Tabs */}
-      <div className="rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-        {/* Tab Navigation */}
-        <div className="border-b border-border bg-surface-1 border-1">
-          <nav className="flex gap-2 overflow-x-auto">
-            <button
-              onClick={() => handleTabChange('table')}
-              className={`flex items-center gap-2 px-6 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${activeView === 'table'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted hover:text-foreground hover:border-border'
-                }`}
-            >
-              <Table className="h-5 w-5" />
-              Bảng
-            </button>
-            <button
-              onClick={() => handleTabChange('schedule')}
-              className={`flex items-center gap-2 px-6 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${activeView === 'schedule'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted hover:text-foreground hover:border-border'
-                }`}
-            >
-              <GridNine className="h-5 w-5" />
-              Lịch đặt sân
-            </button>
-            <button
-              onClick={() => handleTabChange('calendar')}
-              className={`flex items-center gap-2 px-6 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${activeView === 'calendar'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted hover:text-foreground hover:border-border'
-                }`}
-            >
-              <Calendar className="h-5 w-5" />
-              Lịch biểu
-            </button>
-          </nav>
-        </div>
-
-        {/* Tab Content */}
-        <div className="p-6">
-          {/* Table View */}
-          {activeView === 'table' && (
-            <BookingTableView
-              bookings={bookings}
-              loading={loading}
-              onRowClick={openBookingDetail}
-              onCheckIn={handleCheckInWithConfirm}
-              onCheckout={handleCheckoutWithConfirm}
-              onCancel={handleCancelWithConfirm}
-              onConfirmRefund={handleConfirmRefundWithConfirm}
-              onPageChange={(page) => updateTableFilters({ page })}
-            />
-          )}
-
-          {/* Schedule View */}
-          {activeView === 'schedule' && (
-            <BookingScheduleView
-              schedule={schedule.schedule}
-              loading={schedule.loading}
-              onBookingClick={openBookingDetail}
-              hasBranch={schedule.hasBranch}
-            />
-          )}
-
-          {/* Calendar View */}
-          {activeView === 'calendar' && (
-            <BookingCalendarView
-              heatmapData={calendar.heatmapData}
-              loading={calendar.loading}
-              selectedYear={calendar.selectedYear}
-              selectedMonth={calendar.selectedMonth}
-              onPreviousMonth={calendar.goToPreviousMonth}
-              onNextMonth={calendar.goToNextMonth}
-              onDayClick={handleCalendarDayClick}
-            />
-          )}
-        </div>
-      </div>
+      {activeWalkInWorkspace && (
+        <WalkInBookingWorkspace
+          key={activeWalkInWorkspace.id}
+          branchId={activeWalkInWorkspace.branchId}
+          branchName={activeWalkInWorkspace.branchName}
+          form={activeWalkInWorkspace.form}
+          onChange={(form) => updateWalkInWorkspace(activeWalkInWorkspace.id, { form })}
+          onDirtyChange={(dirty) => updateWalkInWorkspace(activeWalkInWorkspace.id, { dirty })}
+          onTitleChange={(title) => updateWalkInWorkspace(activeWalkInWorkspace.id, { title })}
+          onCreated={(booking) => handleWalkInCreated(activeWalkInWorkspace.id, booking)}
+          onError={(message) => showToast('error', message)}
+        />
+      )}
 
       {/* Booking Detail Drawer */}
       <BookingDetailDrawer
@@ -379,6 +516,7 @@ export function BookingManagementPage({
         onConfirm={confirmDialog.onConfirm}
         onCancel={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
       />
+      <Toast toast={toast} />
     </div>
   );
 }

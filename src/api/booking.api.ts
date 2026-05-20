@@ -21,7 +21,7 @@ import type {
   BookingScheduleCourtDto,
   BookingScheduleQuery,
   CancellationInfoDto,
-} from "../features/booking/types/booking.types";
+} from "../features/booking/shared/types/booking.types";
 
 function appendBookingListParams(params: URLSearchParams, query: BookingListQuery): void {
   if (query.status !== undefined) params.append("status", query.status.toString());

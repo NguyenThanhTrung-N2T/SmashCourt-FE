@@ -4,7 +4,7 @@ import type { PaginatedData } from "@/src/shared/types/api.types";
 import type {
   Service,
   SaveServiceRequest,
-} from "@/src/shared/types/service.types";
+} from "@/src/features/service/shared/types/service.types";
 
 // ─── API functions ────────────────────────────────────────────────────────────
 

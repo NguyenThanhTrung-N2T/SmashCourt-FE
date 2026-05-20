@@ -8,7 +8,7 @@
 
 import { MapPin, Phone, Clock } from "@phosphor-icons/react";
 import { useBranches } from "@/src/features/branch/customer/hooks/useBranches";
-import type { BranchDto } from "@/src/features/branch/types/branch.types";
+import type { BranchDto } from "@/src/features/branch/shared/types/branch.types";
 import { SmartImage } from "@/src/shared/components/ui";
 import { BranchSelectionLoading, BookingErrorState, BookingEmptyState } from "../../states";
 

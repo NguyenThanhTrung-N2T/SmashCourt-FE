@@ -7,11 +7,10 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { Stack } from "@phosphor-icons/react";
 import { Spinner } from "@/src/shared/components/feedback/Spinner";
 import { useTimeGrid } from "@/src/features/timeslot/hooks/useTimeGrid";
 import { TimeSlotStatus } from "@/src/features/timeslot/types";
-import type { CourtDto } from "@/src/features/court/types/court.types";
+import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
 const START_HOUR = 6;
@@ -55,11 +54,11 @@ export function CourtTrack({
   // Create a map of block index to slot for quick lookup
   const blockToSlotMap = useMemo(() => {
     const map = new Map<number, TimeGridSlotDto>();
-    
+
     const now = new Date();
     const [year, month, day] = selectedDate.split("-").map(Number);
     const selectedDateObj = new Date(year, month - 1, day);
-    
+
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const isToday = selectedDateObj.getTime() === today.getTime();
     const isPastDate = selectedDateObj < today;
@@ -67,29 +66,29 @@ export function CourtTrack({
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
     const currentTotalMinutes = currentHour * 60 + currentMinute;
-    
+
     slots.forEach((slot) => {
       const [startHours, startMinutes] = slot.startTime.split(":").map(Number);
       const [endHours, endMinutes] = slot.endTime.split(":").map(Number);
-      
+
       const startTotalMinutes = startHours * 60 + startMinutes;
       const endTotalMinutes = endHours * 60 + endMinutes;
       const startMinutesBase = START_HOUR * 60;
-      
+
       let effectiveStatus = slot.status;
       if (isPastDate) {
         effectiveStatus = TimeSlotStatus.IN_USE;
       } else if (isToday && startTotalMinutes < currentTotalMinutes) {
         effectiveStatus = TimeSlotStatus.IN_USE;
       }
-      
+
       const effectiveSlot = { ...slot, status: effectiveStatus };
 
       // Each slot may span multiple 30-min blocks — map all of them
       const slotDurationMinutes = endTotalMinutes - startTotalMinutes;
       const numBlocks = slotDurationMinutes / SLOT_STEP_MINUTES;
       const startBlockIdx = Math.floor((startTotalMinutes - startMinutesBase) / SLOT_STEP_MINUTES);
-      
+
       for (let i = 0; i < numBlocks; i++) {
         const blockIdx = startBlockIdx + i;
         if (blockIdx >= 0 && blockIdx < totalBlocks) {
@@ -97,7 +96,7 @@ export function CourtTrack({
         }
       }
     });
-    
+
     return map;
   }, [slots, totalBlocks, selectedDate]);
 
@@ -105,11 +104,11 @@ export function CourtTrack({
   const blockedSlotRanges = useMemo(() => {
     const ranges: Array<{ startIdx: number; endIdx: number; slot: TimeGridSlotDto }> = [];
     const processedSlots = new Set<TimeGridSlotDto>();
-    
+
     blockToSlotMap.forEach((slot, idx) => {
       if (slot.status !== TimeSlotStatus.AVAILABLE && !processedSlots.has(slot)) {
         processedSlots.add(slot);
-        
+
         // Find all blocks for this slot
         const slotBlocks: number[] = [];
         blockToSlotMap.forEach((s, i) => {
@@ -117,7 +116,7 @@ export function CourtTrack({
             slotBlocks.push(i);
           }
         });
-        
+
         if (slotBlocks.length > 0) {
           slotBlocks.sort((a, b) => a - b);
           ranges.push({
@@ -128,7 +127,7 @@ export function CourtTrack({
         }
       }
     });
-    
+
     return ranges;
   }, [blockToSlotMap]);
 
@@ -156,12 +155,12 @@ export function CourtTrack({
   // Convert dragging to overlay
   const draggingOverlay = useMemo(() => {
     if (!dragging) return null;
-    
+
     const isForward = dragging.endIdx >= dragging.originIdx;
     const step = isForward ? 1 : -1;
-    
+
     const slotSet = new Set<TimeGridSlotDto>();
-    
+
     for (let idx = dragging.originIdx; isForward ? idx <= dragging.endIdx : idx >= dragging.endIdx; idx += step) {
       const slot = blockToSlotMap.get(idx);
       if (!slot || slot.status !== TimeSlotStatus.AVAILABLE) {
@@ -169,12 +168,12 @@ export function CourtTrack({
       }
       slotSet.add(slot);
     }
-    
+
     if (slotSet.size === 0) return null;
 
     let expandedMinIdx = 9999;
     let expandedMaxIdx = -1;
-    
+
     blockToSlotMap.forEach((slot, idx) => {
       if (slotSet.has(slot)) {
         expandedMinIdx = Math.min(expandedMinIdx, idx);
@@ -193,31 +192,54 @@ export function CourtTrack({
   // Handle dragging to select slots (updates in real-time during drag)
   useEffect(() => {
     if (!dragging || !isSelected) return;
-    
+
     const isForward = dragging.endIdx >= dragging.originIdx;
     const step = isForward ? 1 : -1;
-    
+
     const slotSet = new Set<TimeGridSlotDto>();
-    for (let idx = dragging.originIdx; isForward ? idx <= dragging.endIdx : idx >= dragging.endIdx; idx += step) {
+
+    for (
+      let idx = dragging.originIdx;
+      isForward ? idx <= dragging.endIdx : idx >= dragging.endIdx;
+      idx += step
+    ) {
       const slot = blockToSlotMap.get(idx);
+
       if (!slot || slot.status !== TimeSlotStatus.AVAILABLE) {
         break;
       }
+
       slotSet.add(slot);
     }
 
-    const selectedSlotsList = Array.from(slotSet).sort((a, b) =>
+    const nextSlots = Array.from(slotSet).sort((a, b) =>
       a.startTime.localeCompare(b.startTime)
     );
 
-    onSlotsChange(selectedSlotsList);
-  }, [dragging?.originIdx, dragging?.endIdx, isSelected, blockToSlotMap, onSlotsChange]);
+    const same =
+      nextSlots.length === selectedSlots.length &&
+      nextSlots.every(
+        (slot, index) =>
+          slot.startTime === selectedSlots[index]?.startTime &&
+          slot.endTime === selectedSlots[index]?.endTime
+      );
+
+    if (same) return;
+
+    onSlotsChange(nextSlots);
+  }, [
+    dragging?.originIdx,
+    dragging?.endIdx,
+    isSelected,
+    blockToSlotMap,
+    selectedSlots,
+    onSlotsChange,
+  ]);
 
   return (
     <div className="flex items-center gap-4">
       <div className="w-[150px] rounded-2xl border border-border bg-surface-1 px-4 py-3.5 text-[15px] font-semibold text-foreground shadow-sm">
         <div className="flex items-center gap-2">
-          <Stack className="h-5 w-5 text-muted" />
           <span>{court.name}</span>
         </div>
       </div>
@@ -246,9 +268,8 @@ export function CourtTrack({
           return (
             <div
               key={key}
-              className={`pointer-events-none absolute inset-y-1 rounded-lg transition-all ${
-                isLocked ? "bg-amber-500/70" : "bg-muted/50"
-              }`}
+              className={`pointer-events-none absolute inset-y-1 rounded-lg transition-all ${isLocked ? "bg-amber-500/70" : "bg-muted/50"
+                }`}
               style={{
                 left: `${(range.startIdx / totalBlocks) * 100}%`,
                 width: `${((range.endIdx - range.startIdx + 1) / totalBlocks) * 100}%`,

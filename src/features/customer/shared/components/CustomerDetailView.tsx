@@ -2,11 +2,10 @@
 
 import { ArrowLeft, Lock, LockOpen } from '@phosphor-icons/react';
 import { PageHeader } from '@/src/shared/components/layout/PageHeader';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Badge } from '@/src/shared/components/ui/Badge';
+import { Button, Badge } from '@/src/shared/components/ui';
 import { formatDate } from '@/src/shared/utils/date';
 import { getTierCfg } from '@/src/features/benefit/loyalty/owner/LoyaltyTierConfig';
-import type { CustomerDetailDto } from '../../types/customer.types';
+import type { CustomerDetailDto } from '../types/customer.types';
 
 interface CustomerDetailViewProps {
     customer: CustomerDetailDto;
@@ -80,7 +79,7 @@ export function CustomerDetailView({
                     {/* Basic Information */}
                     <div className="rounded-2xl border border-border bg-surface-1 p-6 shadow-sm">
                         <h3 className="text-lg font-bold text-foreground mb-6">Thông tin cơ bản</h3>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
                             <div>
                                 <label className="text-xs font-medium text-muted uppercase tracking-wide">Họ và tên</label>
@@ -162,7 +161,7 @@ export function CustomerDetailView({
                 {/* Loyalty Card */}
                 <div className={`rounded-2xl border ${cfg.cardBorder} ${cfg.cardBg} p-6 shadow-sm`}>
                     <h3 className="text-lg font-bold text-foreground mb-6">Thông tin thành viên</h3>
-                    
+
                     <div className="space-y-5">
                         <div>
                             <label className="text-xs font-medium text-muted uppercase tracking-wide">Hạng thành viên</label>
@@ -200,7 +199,7 @@ export function CustomerDetailView({
             {/* Statistics Card */}
             <div className="rounded-2xl border border-border bg-surface-1 p-6 shadow-sm">
                 <h3 className="text-lg font-bold text-foreground mb-6">Thống kê</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                     {isOwner && customer.statistics.totalRevenue !== undefined && (
                         <div className="p-4 rounded-xl bg-success/5 border border-success/20">

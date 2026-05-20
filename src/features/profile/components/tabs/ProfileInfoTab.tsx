@@ -7,11 +7,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Input } from "@/src/shared/components/ui/Input";
-import { Button } from "@/src/shared/components/ui/Button";
+import { Input, Button } from "@/src/shared/components/ui";
 import { User, Phone } from "@phosphor-icons/react";
-import { useUpdateProfile } from "../../hooks/useProfile";
-import type { UserProfile } from "@/src/shared/types/profile.types";
+import { useUpdateProfile } from "@/src/features/profile/hooks";
+import type { UserProfile } from "@/src/features/profile/types/profile.types";
 import type { ToastState } from "@/src/shared/hooks/useToast";
 
 interface ProfileInfoTabProps {
@@ -36,7 +35,7 @@ export function ProfileInfoTab({ profile, onUpdate, showToast }: ProfileInfoTabP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const result = await updateProfile({
       fullName: formData.fullName.trim(),
       phone: formData.phone.trim(),
@@ -51,22 +50,22 @@ export function ProfileInfoTab({ profile, onUpdate, showToast }: ProfileInfoTabP
     }
   };
 
-  const hasChanges = 
+  const hasChanges =
     formData.fullName !== profile.fullName ||
     formData.phone !== (profile.phone || "");
 
   return (
     <div className="max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Error Message */}
-          {error && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-300 text-sm">
-              {error}
-            </div>
-          )}
+        {/* Error Message */}
+        {error && (
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-300 text-sm">
+            {error}
+          </div>
+        )}
 
         {/* Info Note about Avatar */}
-        
+
 
         {/* Full Name */}
         <Input

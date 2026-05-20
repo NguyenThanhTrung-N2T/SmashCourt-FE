@@ -10,7 +10,7 @@ import {
     formatPolicyHours,
     getPolicyRangeLabel,
 } from "@/src/features/policy/utils/cancellationPolicy";
-import type { CancelPolicy } from "@/src/shared/types/cancel-policy.types";
+import type { CancelPolicy } from "@/src/features/policy/shared/types/cancel-policy.types";
 import { createNumericChangeHandler } from "@/src/shared/utils/inputValidation";
 
 type EditableCancelPolicy = CancelPolicy & {

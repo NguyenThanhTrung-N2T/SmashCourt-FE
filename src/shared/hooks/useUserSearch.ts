@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { searchUsers } from '@/src/api/branch.api';
 import type { PaginatedData } from '@/src/shared/types/api.types';
-import type { UserSearchResultDto, UserSearchQuery } from '@/src/features/branch/types/branch.types';
+import type { UserSearchResultDto, UserSearchQuery } from '@/src/features/branch/shared/types/branch.types';
 import { handleApiError } from '@/src/features/branch/owner/utils/error-handling';
 
 export function useUserSearch(initialQuery: UserSearchQuery = {}) {

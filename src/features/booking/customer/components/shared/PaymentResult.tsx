@@ -14,7 +14,7 @@ import { Spinner } from "@/src/shared/components/feedback/Spinner";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { usePaymentConfirmation } from "../../hooks/usePaymentConfirmation";
 import { formatCurrency } from "../../utils/bookingStatus";
-import type { VNPayCallbackParams } from "../../../types/payment.types";
+import type { VNPayCallbackParams } from "../../../shared/types/payment.types";
 
 export function PaymentResult() {
   const router = useRouter();

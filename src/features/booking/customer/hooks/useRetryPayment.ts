@@ -6,7 +6,7 @@
 
 import { useState, useCallback } from "react";
 import { retryBookingPayment } from "@/src/api/payment.api";
-import type { RetryPaymentResponseDto } from "../../types/payment.types";
+import type { RetryPaymentResponseDto } from "../../shared/types/payment.types";
 
 /**
  * Map backend error messages to user-friendly Vietnamese messages
@@ -22,23 +22,23 @@ function getErrorMessage(error: unknown): string {
   if (message.includes("không tìm thấy") || message.includes("not found")) {
     return "Không tìm thấy đơn đặt sân";
   }
-  
+
   if (message.includes("không có quyền") || message.includes("forbidden")) {
     return "Bạn không có quyền thực hiện thao tác này";
   }
-  
+
   if (message.includes("đã hết hạn") || message.includes("expired")) {
     return "Đơn đặt sân đã hết hạn. Vui lòng tạo đơn mới.";
   }
-  
+
   if (message.includes("đã được đặt") || message.includes("already booked")) {
     return "Sân đã được đặt bởi người khác. Vui lòng tạo đơn mới.";
   }
-  
+
   if (message.includes("đang trong quá trình thanh toán") || message.includes("locked")) {
     return "Sân đang trong quá trình thanh toán. Vui lòng thử lại sau vài phút.";
   }
-  
+
   if (message.includes("cancelled") || message.includes("đã hủy")) {
     return "Không thể thanh toán lại đơn đã hủy. Vui lòng tạo đơn mới.";
   }

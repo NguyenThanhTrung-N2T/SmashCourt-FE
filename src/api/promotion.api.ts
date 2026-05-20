@@ -7,8 +7,8 @@ import type {
   PromotionDiscountType,
   Promotion,
   SavePromotionRequest,
-} from "@/src/shared/types/promotion.types";
-import { DiscountType } from "@/src/shared/types/promotion.types";
+} from "@/src/features/benefit/promotion/shared/types/promotion.types";
+import { DiscountType } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 
 // ─── API functions ────────────────────────────────────────────────────────────
 

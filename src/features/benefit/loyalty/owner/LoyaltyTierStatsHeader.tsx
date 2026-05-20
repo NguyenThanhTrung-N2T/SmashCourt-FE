@@ -1,6 +1,6 @@
 import { Trophy, Percent, Lightning, Users, ArrowClockwise } from "@phosphor-icons/react";
 import { Button } from "@/src/shared/components/ui/Button";
-import type { LoyaltyTier } from "@/src/shared/types/loyalty-tier.types";
+import type { LoyaltyTier } from "@/src/features/benefit/loyalty/shared/types/loyalty-tier.types";
 
 export function LoyaltyTierStatsHeader({
     tiers,

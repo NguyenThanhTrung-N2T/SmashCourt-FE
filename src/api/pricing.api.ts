@@ -9,7 +9,7 @@ import type {
     DeleteBranchPriceDto,
     CalculatePriceDto,
     CalculatePriceResultDto,
-} from "@/src/features/pricing/types/pricing.types";
+} from "@/src/features/pricing/shared/types/pricing.types";
 
 // ─── SYSTEM PRICE APIs ───────────────────────────────────────────────────────
 

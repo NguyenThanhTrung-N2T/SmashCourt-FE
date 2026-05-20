@@ -17,10 +17,10 @@ import {
     deleteService,
     fetchAllServices,
 } from "@/src/api/service.api";
-import { ServiceStatus } from "@/src/shared/types/service.types";
+import { ServiceStatus } from "@/src/features/service/shared/types/service.types";
 import type {
     Service,
-} from "@/src/shared/types/service.types";
+} from "@/src/features/service/shared/types/service.types";
 import { AuthApiError } from "@/src/api/auth.api";
 import { useToast } from "@/src/shared/hooks/useToast";
 

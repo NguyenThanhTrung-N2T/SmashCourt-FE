@@ -1,4 +1,4 @@
-import { PromotionStatus } from "@/src/shared/types/promotion.types";
+import { PromotionStatus } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 
 export type StatusCfg = {
     label: string;

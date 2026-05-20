@@ -5,7 +5,7 @@
  */
 
 import { authFetch, authProtectedFetch } from "./core";
-import type { CourtDto, CourtListQuery } from "../features/court/types/court.types";
+import type { CourtDto, CourtListQuery } from "../features/court/shared/types/court.types";
 
 // ============================================================================
 // Court Endpoints

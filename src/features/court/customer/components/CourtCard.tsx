@@ -8,7 +8,7 @@
 
 import { CheckCircle, Circle } from "@phosphor-icons/react";
 import { SmartImage, Badge } from "@/src/shared/components/ui";
-import type { CourtDto } from "../../types/court.types";
+import type { CourtDto } from "../../shared/types/court.types";
 import { getCourtStatusConfig, canBookCourt } from "../utils/courtStatus";
 
 interface CourtCardProps {

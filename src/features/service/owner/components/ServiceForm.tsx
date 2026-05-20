@@ -7,7 +7,7 @@ import { Input } from "@/src/shared/components/ui/Input";
 import { Textarea } from "@/src/shared/components/ui/Textarea";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { Button } from "@/src/shared/components/ui/Button";
-import type { SaveServiceRequest } from "@/src/shared/types/service.types";
+import type { SaveServiceRequest } from "@/src/features/service/shared/types/service.types";
 import {
   createNumericChangeHandler,
   createTrimOnBlurHandler,

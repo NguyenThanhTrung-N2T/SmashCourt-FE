@@ -3,7 +3,7 @@ import { authProtectedFetch } from "@/src/api/auth.api";
 import type {
   LoyaltyTier,
   UpdateLoyaltyTierRequest,
-} from "@/src/shared/types/loyalty-tier.types";
+} from "@/src/features/benefit/loyalty/shared/types/loyalty-tier.types";
 
 // ─── API functions ────────────────────────────────────────────────────────────
 

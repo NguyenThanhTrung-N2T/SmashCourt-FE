@@ -17,4 +17,4 @@ export { usePriceCalculation } from "./usePriceCalculation";
 export { useBookingSubmit } from "./useBookingSubmit";
 export { useLoyaltyAndPromotions } from "./useLoyaltyAndPromotions";
 export { useDiscountCalculation } from "./useDiscountCalculation";
-export { useBranchCourtTypes } from "./useBranchCourtTypes";
+export { useBranchCourtTypes } from "../../../court-type/shared/hooks/useBranchCourtTypes";

@@ -6,12 +6,12 @@ import { Grid } from "@/src/shared/components/layout/Grid";
 import { Button } from "@/src/shared/components/ui/Button";
 import { SmartImage } from "@/src/shared/components/ui/SmartImage";
 import { useImageUpload } from "@/src/shared/hooks/useImageUpload";
-import { DiscountType, ConditionType, type PromotionCondition } from "@/src/shared/types/promotion.types";
+import { DiscountType, ConditionType, type PromotionCondition } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 import { CONDITION_CONFIG, getConditionValueDisplay } from "../../../config/conditionConfig";
 import { fetchBranches } from "@/src/api/branch.api";
 import { fetchCourts } from "@/src/api/court.api";
-import type { BranchDto } from "@/src/features/branch/types/branch.types";
-import type { CourtDto } from "@/src/features/court/types/court.types";
+import type { BranchDto } from "@/src/features/branch/shared/types/branch.types";
+import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import {
   createValidatedChangeHandler,
   createValidatedTransformHandler,
@@ -84,11 +84,11 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
   const [endDate, setEndDate] = useState(initialData?.endDate || "");
   const [conditions, setConditions] = useState<PromotionCondition[]>(initialData?.conditions || []);
   const [uploadedImageUrl, setUploadedImageUrl] = useState(initialData?.promoDisplayUrl || "");
-  
+
   // Condition builder state
   const [selectedConditionType, setSelectedConditionType] = useState<ConditionType | "">("");
   const [conditionValue, setConditionValue] = useState("");
-  
+
   // Data for selects
   const [branches, setBranches] = useState<BranchDto[]>([]);
   const [courts, setCourts] = useState<CourtDto[]>([]);
@@ -363,11 +363,10 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
             <button
               type="button"
               onClick={() => setDiscountType(DiscountType.PERCENT)}
-              className={`relative rounded-xl border-2 p-4 text-left transition-all ${
-                discountType === DiscountType.PERCENT
-                  ? "border-primary bg-primary/10 shadow-md ring-2 ring-primary/20"
-                  : "border-border bg-surface-1 hover:border-primary/50 hover:bg-primary/5"
-              }`}
+              className={`relative rounded-xl border-2 p-4 text-left transition-all ${discountType === DiscountType.PERCENT
+                ? "border-primary bg-primary/10 shadow-md ring-2 ring-primary/20"
+                : "border-border bg-surface-1 hover:border-primary/50 hover:bg-primary/5"
+                }`}
             >
               {/* Checkmark indicator */}
               {discountType === DiscountType.PERCENT && (
@@ -375,26 +374,24 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
                   <CheckCircle className="h-5 w-5 text-primary" weight="fill" />
                 </div>
               )}
-              
+
               {/* Text */}
               <div className="font-bold text-foreground text-base mb-1">Phần trăm (%)</div>
-              <div className={`text-xs transition-colors ${
-                discountType === DiscountType.PERCENT
-                  ? "text-primary"
-                  : "text-muted"
-              }`}>
+              <div className={`text-xs transition-colors ${discountType === DiscountType.PERCENT
+                ? "text-primary"
+                : "text-muted"
+                }`}>
                 VD: Giảm 20% giá trị đơn hàng
               </div>
             </button>
-            
+
             <button
               type="button"
               onClick={() => setDiscountType(DiscountType.FIXED)}
-              className={`relative rounded-xl border-2 p-4 text-left transition-all ${
-                discountType === DiscountType.FIXED
-                  ? "border-primary bg-primary/10 shadow-md ring-2 ring-primary/20"
-                  : "border-border bg-surface-1 hover:border-primary/50 hover:bg-primary/5"
-              }`}
+              className={`relative rounded-xl border-2 p-4 text-left transition-all ${discountType === DiscountType.FIXED
+                ? "border-primary bg-primary/10 shadow-md ring-2 ring-primary/20"
+                : "border-border bg-surface-1 hover:border-primary/50 hover:bg-primary/5"
+                }`}
             >
               {/* Checkmark indicator */}
               {discountType === DiscountType.FIXED && (
@@ -402,14 +399,13 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
                   <CheckCircle className="h-5 w-5 text-primary" weight="fill" />
                 </div>
               )}
-              
+
               {/* Text */}
               <div className="font-bold text-foreground text-base mb-1">Số tiền cố định</div>
-              <div className={`text-xs transition-colors ${
-                discountType === DiscountType.FIXED
-                  ? "text-primary"
-                  : "text-muted"
-              }`}>
+              <div className={`text-xs transition-colors ${discountType === DiscountType.FIXED
+                ? "text-primary"
+                : "text-muted"
+                }`}>
                 VD: Giảm 50,000 VNĐ
               </div>
             </button>
@@ -426,19 +422,19 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
             onChange={
               discountType === DiscountType.PERCENT
                 ? createValidatedChangeHandler(
-                    (val) => {
-                      setDiscountValue(val);
-                      setErrors({ ...errors, discountValue: undefined });
-                    },
-                    ValidationRules.percentage
-                  )
+                  (val) => {
+                    setDiscountValue(val);
+                    setErrors({ ...errors, discountValue: undefined });
+                  },
+                  ValidationRules.percentage
+                )
                 : createNumericChangeHandler(
-                    (val) => {
-                      setDiscountValue(val);
-                      setErrors({ ...errors, discountValue: undefined });
-                    },
-                    { min: 0, allowDecimal: false }
-                  )
+                  (val) => {
+                    setDiscountValue(val);
+                    setErrors({ ...errors, discountValue: undefined });
+                  },
+                  { min: 0, allowDecimal: false }
+                )
             }
             error={errors.discountValue}
             rightIcon={<span className="text-sm font-bold text-slate-400">{discountType === DiscountType.PERCENT ? "%" : "VNĐ"}</span>}

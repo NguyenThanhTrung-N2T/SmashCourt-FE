@@ -6,9 +6,9 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { fetchBookingSchedule } from '@/src/api/booking.api';
-import type { BookingScheduleCourtDto } from '../../types/booking.types';
-import type { ScheduleFilters } from '../../types/filter.types';
-import { DEFAULT_SCHEDULE_FILTERS } from '../../types/filter.types';
+import type { BookingScheduleCourtDto } from '../../shared/types/booking.types';
+import type { ScheduleFilters } from '../../shared/types/filter.types';
+import { DEFAULT_SCHEDULE_FILTERS } from '../../shared/types/filter.types';
 
 export function useBookingSchedule(branchId?: string, enabled = true) {
   const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ export function useBookingSchedule(branchId?: string, enabled = true) {
       setSchedule([]);
       return;
     }
-    
+
     setLoading(true);
     try {
       const data = await fetchBookingSchedule({

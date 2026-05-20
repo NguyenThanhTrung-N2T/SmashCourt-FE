@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { fetchCustomerBookingById } from "@/src/api/booking.api";
-import type { BookingDto } from "../../types/booking.types";
+import type { BookingDto } from "../../shared/types/booking.types";
 
 export function useBookingDetail(bookingId: string | null) {
   const [booking, setBooking] = useState<BookingDto | null>(null);

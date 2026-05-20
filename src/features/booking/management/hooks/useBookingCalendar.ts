@@ -6,9 +6,9 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { fetchBookingCalendarHeatmap } from '@/src/api/booking.api';
-import type { BookingCalendarHeatmapDto } from '../../types/booking.types';
-import type { CalendarFilters } from '../../types/filter.types';
-import { DEFAULT_CALENDAR_FILTERS } from '../../types/filter.types';
+import type { BookingCalendarHeatmapDto } from '../../shared/types/booking.types';
+import type { CalendarFilters } from '../../shared/types/filter.types';
+import { DEFAULT_CALENDAR_FILTERS } from '../../shared/types/filter.types';
 
 export function useBookingCalendar(branchId?: string, enabled = true) {
   const [loading, setLoading] = useState(false);
@@ -17,7 +17,7 @@ export function useBookingCalendar(branchId?: string, enabled = true) {
 
   const loadHeatmap = useCallback(async () => {
     if (!enabled) return;
-    
+
     setLoading(true);
     try {
       const data = await fetchBookingCalendarHeatmap({

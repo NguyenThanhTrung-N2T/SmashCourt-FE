@@ -4,7 +4,7 @@
  * Helper functions for booking status display and logic.
  */
 
-import { BookingStatus, InvoicePaymentStatus } from "../../types/booking.types";
+import { BookingStatus, InvoicePaymentStatus } from "../../shared/types/booking.types";
 
 export interface StatusConfig {
   label: string;
@@ -73,7 +73,7 @@ export function getPaymentStatusConfig(status: any): StatusConfig {
 export function canCancelBooking(status: BookingStatus | number | string): boolean {
   // Handle different status formats
   let statusValue: number;
-  
+
   if (typeof status === "string") {
     // If it's a string like "CONFIRMED" or "PAID_ONLINE"
     const statusStr = status.toUpperCase();
@@ -89,7 +89,7 @@ export function canCancelBooking(status: BookingStatus | number | string): boole
   } else {
     statusValue = status as number;
   }
-  
+
   return [
     BookingStatus.CONFIRMED,
     BookingStatus.PAID_ONLINE,
@@ -116,17 +116,17 @@ export function calculateRefundInfo(
   cancelPolicies: Array<{ hoursBefore: number; refundPercent: number }>
 ): RefundInfo {
   const hoursUntilStart = calculateHoursUntil(bookingDate, startTime);
-  
+
   // Find the applicable policy based on hours until start
   // Policies should be sorted by hoursBefore in descending order
   let refundPercent = 0;
-  
+
   if (cancelPolicies && cancelPolicies.length > 0) {
     // Find the first policy where hoursUntilStart >= hoursBefore
     const applicablePolicy = cancelPolicies.find(
       policy => hoursUntilStart >= policy.hoursBefore
     );
-    
+
     if (applicablePolicy) {
       refundPercent = applicablePolicy.refundPercent;
     }
@@ -140,10 +140,10 @@ export function calculateRefundInfo(
       refundPercent = 25;
     }
   }
-  
+
   const refundAmount = Math.round(totalAmount * refundPercent / 100);
   const canCancel = hoursUntilStart > 0;
-  
+
   return { refundPercent, refundAmount, canCancel };
 }
 
@@ -158,7 +158,7 @@ function calculateHoursUntil(bookingDate: string, startTime: string): number {
     // - "12/05/2026" (DD/MM/YYYY)
     // - "2026-05-12" (ISO format)
     let dateStr = bookingDate;
-    
+
     // Handle "12 05 2026 07:00:00" format (space-separated with timestamp)
     if (bookingDate.includes(' ') && !bookingDate.includes('-') && !bookingDate.includes('/')) {
       const parts = bookingDate.split(' ');
@@ -180,20 +180,20 @@ function calculateHoursUntil(bookingDate: string, startTime: string): number {
         dateStr = `${year}-${month}-${day}`;
       }
     }
-    
+
     const bookingDateTime = new Date(`${dateStr}T${startTime}`);
     const now = new Date();
-    
+
     // Validate the parsed date
     if (isNaN(bookingDateTime.getTime())) {
       console.error("Invalid date parsed:", { bookingDate, startTime, dateStr, bookingDateTime });
       return 0;
     }
-    
+
     // Calculate difference in hours
     const diffMs = bookingDateTime.getTime() - now.getTime();
     const diffHours = diffMs / (1000 * 60 * 60);
-    
+
     return diffHours;
   } catch (e) {
     console.error("Error in calculateHoursUntil:", e);

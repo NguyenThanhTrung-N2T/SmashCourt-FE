@@ -7,7 +7,7 @@
 import { CalendarBlank, Clock, MapPin, Receipt, CreditCard } from "@phosphor-icons/react";
 import { Badge } from "@/src/shared/components/ui/Badge";
 import { Button } from "@/src/shared/components/ui/Button";
-import type { BookingDto } from "../../../types/booking.types";
+import type { BookingDto } from "../../../shared/types/booking.types";
 import {
   getBookingStatusConfig,
   formatCurrency,
@@ -26,10 +26,10 @@ export function BookingCard({ booking, onViewDetail, onPayNow }: BookingCardProp
   const displayCode = booking.bookingCode || (booking.id || booking.bookingId)?.substring(0, 8).toUpperCase() || "Không xác định";
   const finalTotal = booking.finalTotal ?? booking.invoice?.finalTotal;
   const paymentStatus = booking.paymentStatus ?? booking.invoice?.paymentStatus;
-  
+
   // Check if payment is pending (UNPAID = 0) and booking is pending
-  const isPendingPayment = (paymentStatus === 0 || paymentStatus === "UNPAID") && 
-                          (booking.status === 0 || booking.status === "PENDING");
+  const isPendingPayment = (paymentStatus === 0 || paymentStatus === "UNPAID") &&
+    (booking.status === 0 || booking.status === "PENDING");
 
   return (
     <div className="rounded-xl border-2 border-border bg-surface-1 p-4 shadow-sm transition-all hover:shadow-md">

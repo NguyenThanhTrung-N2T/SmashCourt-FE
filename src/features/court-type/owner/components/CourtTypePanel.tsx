@@ -22,7 +22,7 @@ import type {
     CourtType,
     CreateCourtTypeRequest,
     UpdateCourtTypeRequest,
-} from "@/src/shared/types/court-type.types";
+} from "@/src/features/court-type/shared/types/court-type.types";
 import { AuthApiError } from "@/src/api/auth.api";
 import { useToast } from "@/src/shared/hooks/useToast";
 import { Flex } from "@/src/shared/components/layout/Flex";

@@ -6,7 +6,7 @@
 
 import { useState, useCallback } from "react";
 import { confirmVNPayPayment } from "@/src/api/payment.api";
-import type { VNPayCallbackParams, PaymentConfirmationDto } from "../../types/payment.types";
+import type { VNPayCallbackParams, PaymentConfirmationDto } from "../../shared/types/payment.types";
 
 export function usePaymentConfirmation() {
   const [isLoading, setIsLoading] = useState(false);

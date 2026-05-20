@@ -18,7 +18,7 @@ import { BookingHistoryLoading, BookingErrorState } from "../states";
 import { useCustomerBookings } from "../../hooks/useCustomerBookings";
 import { useBookingDetail } from "../../hooks/useBookingDetail";
 import { useRetryPayment } from "../../hooks/useRetryPayment";
-import type { BookingListQuery } from "../../../types/booking.types";
+import type { BookingListQuery } from "../../../shared/types/booking.types";
 
 export function BookingHistoryList() {
   const { bookings, isLoading, error, updateQuery, query, refetch } = useCustomerBookings({

@@ -1,9 +1,8 @@
 "use client";
 
 import { Lock, LockOpen, Phone, EnvelopeSimple } from "@phosphor-icons/react";
-import { Button } from "@/src/shared/components/ui/Button";
-import { Badge } from "@/src/shared/components/ui/Badge";
-import type { CustomerListDto } from "../../types/customer.types";
+import { Button, Badge } from "@/src/shared/components/ui";
+import type { CustomerListDto } from "../types/customer.types";
 import { formatDate } from "@/src/shared/utils/date";
 import { getTierCfg } from "@/src/features/benefit/loyalty/owner/LoyaltyTierConfig";
 
@@ -39,7 +38,7 @@ export function CustomerTable({
 
     const getLoyaltyTierBadge = (tierName: string) => {
         const cfg = getTierCfg(tierName);
-        
+
         return (
             <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${cfg.pillBg} border ${cfg.cardBorder}`}>
                 <span className={`text-xs font-bold ${cfg.pillText}`}>

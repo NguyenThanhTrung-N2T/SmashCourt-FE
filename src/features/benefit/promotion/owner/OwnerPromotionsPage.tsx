@@ -15,8 +15,8 @@ import {
 } from "@phosphor-icons/react";
 
 import { fetchAllPromotions, deletePromotion, formatDiscountDisplay } from "@/src/api/promotion.api";
-import { PromotionStatus } from "@/src/shared/types/promotion.types";
-import type { Promotion } from "@/src/shared/types/promotion.types";
+import { PromotionStatus } from "@/src/features/benefit/promotion/shared/types/promotion.types";
+import type { Promotion } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 import { AuthApiError } from "@/src/api/auth.api";
 import { useToast } from "@/src/shared/hooks/useToast";
 

@@ -6,7 +6,7 @@
 
 import { useState, useCallback } from "react";
 import { fetchBranchById, updateBranch, suspendBranch, activateBranch } from "@/src/api/branch.api";
-import type { BranchDto, UpdateBranchDto } from "../../types/branch.types";
+import type { BranchDto, UpdateBranchDto } from "../../shared/types/branch.types";
 
 export function useBranchManagement(branchId: string) {
   const [branch, setBranch] = useState<BranchDto | null>(null);

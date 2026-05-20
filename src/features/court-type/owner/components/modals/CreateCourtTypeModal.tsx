@@ -7,7 +7,7 @@ import {
 import { Modal } from "@/src/shared/components/ui/Modal";
 import { CourtTypeForm } from "./CourtTypeForm";
 import { createCourtType } from "@/src/api/court-type.api";
-import type { CourtType, CreateCourtTypeRequest } from "@/src/shared/types/court-type.types";
+import type { CourtType, CreateCourtTypeRequest } from "@/src/features/court-type/shared/types/court-type.types";
 import { AuthApiError } from "@/src/api/auth.api";
 
 export function CreateCourtTypeModal({ onClose, onCreated }: { onClose: () => void; onCreated: (c: CourtType) => void }) {

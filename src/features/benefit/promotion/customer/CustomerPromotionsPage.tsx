@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CalendarBlank, Ticket, Tag } from "@phosphor-icons/react";
 import { fetchActivePromotion, formatDiscountDisplay } from "@/src/api/promotion.api";
-import { type Promotion } from "@/src/shared/types/promotion.types";
+import { type Promotion } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 import { SmartImage } from "@/src/shared/components/ui/SmartImage";
 import {
   PromotionsPageLoading,

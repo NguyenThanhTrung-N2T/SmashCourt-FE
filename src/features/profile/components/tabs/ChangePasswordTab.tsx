@@ -7,13 +7,12 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/src/shared/components/ui/Input";
-import { Button } from "@/src/shared/components/ui/Button";
+import { Input, Button } from "@/src/shared/components/ui";
 import { Lock, Eye, EyeSlash, CheckCircle, Warning } from "@phosphor-icons/react";
-import { useChangePassword } from "../../hooks/useProfile";
+import { useChangePassword } from "@/src/features/profile/hooks";
 import { useRouter } from "next/navigation";
-import type { UserProfile } from "@/src/shared/types/profile.types";
-import type { ChangePasswordRequest } from "@/src/shared/types/profile.types";
+import type { UserProfile } from "@/src/features/profile/types/profile.types";
+import type { ChangePasswordRequest } from "@/src/features/profile/types/profile.types";
 import type { ToastState } from "@/src/shared/hooks/useToast";
 
 interface ChangePasswordTabProps {
@@ -85,13 +84,13 @@ export function ChangePasswordTab({ profile, showToast }: ChangePasswordTabProps
       setValidationError("Mật khẩu mới phải khác mật khẩu hiện tại");
       return;
     }
-    
+
     const request: ChangePasswordRequest = {
       currentPassword: formData.currentPassword,
       newPassword: formData.newPassword,
       confirmPassword: formData.confirmPassword
     };
-    
+
     const result = await changePassword(request);
 
     if (result.success) {

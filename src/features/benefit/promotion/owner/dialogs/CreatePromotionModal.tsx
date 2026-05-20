@@ -8,7 +8,7 @@ import { Modal } from "@/src/shared/components/ui/Modal";
 import { Flex } from "@/src/shared/components/layout/Flex";
 import { createPromotion } from "@/src/api/promotion.api";
 import { AuthApiError } from "@/src/api/auth.api";
-import type { Promotion, SavePromotionRequest } from "@/src/shared/types/promotion.types";
+import type { Promotion, SavePromotionRequest } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 import { PromotionForm, type PromotionFormData, type PromotionFormErrors, type PromotionFormHandle } from "../forms/PromotionForm";
 import { toIsoDateString } from "@/src/features/benefit/utils";
 

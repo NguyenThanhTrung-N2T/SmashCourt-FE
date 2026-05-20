@@ -11,7 +11,7 @@ import { Cursor, Info, CheckCircle } from "@phosphor-icons/react";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { formatTime, formatDuration, calculateDuration } from "@/src/features/timeslot/utils";
 import { CourtTrack } from "./CourtTrack";
-import type { CourtDto } from "@/src/features/court/types/court.types";
+import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
 const START_HOUR = 6;
@@ -43,7 +43,7 @@ export function InteractiveTimeGrid({
     startIdx: number;
     endIdx: number;
   } | null>(null);
-  
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const courtTrackRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -139,7 +139,7 @@ export function InteractiveTimeGrid({
       </div>
 
       {/* Time Grid */}
-      <div 
+      <div
         ref={scrollContainerRef}
         className="overflow-x-auto custom-scrollbar rounded-3xl border border-border bg-gradient-to-b from-surface-1 to-surface-2 p-5 shadow-inner"
       >

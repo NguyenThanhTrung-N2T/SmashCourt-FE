@@ -9,7 +9,7 @@ import type {
   UpdateProfileRequest,
   ChangePasswordRequest,
   UserSession,
-} from "@/src/shared/types/profile.types";
+} from "@/src/features/profile/types/profile.types";
 
 import { authProtectedFetch, withResponseMeta } from "./core";
 

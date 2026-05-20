@@ -12,31 +12,31 @@ import { CalendarBlank, CaretLeft, CaretRight, X, ArrowCounterClockwise } from '
 import { Input } from '@/src/shared/components/ui/Input';
 import { Select } from '@/src/shared/components/ui/Select';
 import { Button } from '@/src/shared/components/ui/Button';
-import { BookingStatus, InvoicePaymentStatus } from '../../types/booking.types';
-import type { BookingTableFilters } from '../../types/filter.types';
+import { BookingStatus, InvoicePaymentStatus } from '../../shared/types/booking.types';
+import type { BookingTableFilters } from '../../shared/types/filter.types';
 
 type ViewMode = 'table' | 'schedule' | 'calendar';
 
 interface BookingFilterToolbarProps {
   viewMode: ViewMode;
-  
+
   // Table view props
   tableFilters?: BookingTableFilters;
   onTableFilterChange?: (filters: Partial<BookingTableFilters>) => void;
   onCreateWalkIn?: () => void;
-  
+
   // Schedule view props
   scheduleDate?: string;
   onScheduleDateChange?: (date: string) => void;
   onSchedulePreviousDay?: () => void;
   onScheduleNextDay?: () => void;
-  
+
   // Calendar view props
   calendarYear?: number;
   calendarMonth?: number;
   onCalendarPreviousMonth?: () => void;
   onCalendarNextMonth?: () => void;
-  
+
   // Shared props
   branches?: Array<{ id: string; name: string }>;
   courts?: Array<{ id: string; name: string }>;
@@ -77,7 +77,7 @@ export function BookingFilterToolbar({
   // Debounce search (table view only)
   useEffect(() => {
     if (viewMode !== 'table' || !tableFilters || !onTableFilterChange) return;
-    
+
     const timeoutId = setTimeout(() => {
       if (searchTerm !== tableFilters.customerKeyword) {
         onTableFilterChange({ customerKeyword: searchTerm || undefined });
@@ -89,13 +89,13 @@ export function BookingFilterToolbar({
 
   const handleDatePresetChange = (preset: string) => {
     if (!onTableFilterChange) return;
-    
+
     setDatePreset(preset);
     const today = new Date();
-    
+
     switch (preset) {
       case 'today':
-        onTableFilterChange({ 
+        onTableFilterChange({
           date: today.toISOString().split('T')[0],
           fromDate: undefined,
           toDate: undefined,
@@ -104,7 +104,7 @@ export function BookingFilterToolbar({
       case 'tomorrow':
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
-        onTableFilterChange({ 
+        onTableFilterChange({
           date: tomorrow.toISOString().split('T')[0],
           fromDate: undefined,
           toDate: undefined,
@@ -115,7 +115,7 @@ export function BookingFilterToolbar({
         weekStart.setDate(today.getDate() - today.getDay());
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 6);
-        onTableFilterChange({ 
+        onTableFilterChange({
           date: undefined,
           fromDate: weekStart.toISOString().split('T')[0],
           toDate: weekEnd.toISOString().split('T')[0],
@@ -124,14 +124,14 @@ export function BookingFilterToolbar({
       case 'month':
         const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
         const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        onTableFilterChange({ 
+        onTableFilterChange({
           date: undefined,
           fromDate: monthStart.toISOString().split('T')[0],
           toDate: monthEnd.toISOString().split('T')[0],
         });
         break;
       case 'all':
-        onTableFilterChange({ 
+        onTableFilterChange({
           date: undefined,
           fromDate: undefined,
           toDate: undefined,
@@ -142,21 +142,21 @@ export function BookingFilterToolbar({
 
   const formatScheduleDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('vi', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('vi', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
 
   // ============================================================================
   // TABLE VIEW FILTERS
   // ============================================================================
-  
+
   if (viewMode === 'table') {
     if (!tableFilters || !onTableFilterChange) return null;
-    
+
     return (
       <div className="rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 sticky top-0 z-10 shadow-sm space-y-3">
         {/* Primary Filters Row */}
@@ -288,8 +288,8 @@ export function BookingFilterToolbar({
                       // Reset toDate if invalid
                       toDate:
                         tableFilters.toDate &&
-                        newFromDate &&
-                        tableFilters.toDate < newFromDate
+                          newFromDate &&
+                          tableFilters.toDate < newFromDate
                           ? undefined
                           : tableFilters.toDate,
                     });
@@ -334,7 +334,7 @@ export function BookingFilterToolbar({
                 </label>
                 <Select
                   value={tableFilters.sortBy || 'bookingDate'}
-                  onChange={(value) => onTableFilterChange({ 
+                  onChange={(value) => onTableFilterChange({
                     sortBy: value as BookingTableFilters['sortBy']
                   })}
                 >
@@ -353,7 +353,7 @@ export function BookingFilterToolbar({
                 </label>
                 <Select
                   value={tableFilters.sortOrder || 'desc'}
-                  onChange={(value) => onTableFilterChange({ 
+                  onChange={(value) => onTableFilterChange({
                     sortOrder: value as 'asc' | 'desc'
                   })}
                 >
@@ -400,12 +400,12 @@ export function BookingFilterToolbar({
   // ============================================================================
   // SCHEDULE VIEW FILTERS
   // ============================================================================
-  
+
   if (viewMode === 'schedule') {
     if (!scheduleDate || !onScheduleDateChange || !onSchedulePreviousDay || !onScheduleNextDay) {
       return null;
     }
-    
+
     return (
       <div className="bg-surface-1 border border-border rounded-xl p-4 sticky top-0 z-10 shadow-sm">
         <div className="flex items-center justify-between gap-4">
@@ -418,14 +418,14 @@ export function BookingFilterToolbar({
             >
               <CaretLeft className="h-4 w-4" weight="bold" />
             </Button>
-            
+
             <div className="flex items-center gap-2 min-w-[280px]">
               <CalendarBlank className="h-5 w-5 text-primary" weight="bold" />
               <span className="text-sm font-semibold text-foreground">
                 {formatScheduleDate(scheduleDate)}
               </span>
             </div>
-            
+
             <Button
               variant="secondary"
               size="sm"
@@ -450,17 +450,17 @@ export function BookingFilterToolbar({
   // ============================================================================
   // CALENDAR VIEW FILTERS
   // ============================================================================
-  
+
   if (viewMode === 'calendar') {
     if (
-      calendarYear === undefined || 
-      calendarMonth === undefined || 
-      !onCalendarPreviousMonth || 
+      calendarYear === undefined ||
+      calendarMonth === undefined ||
+      !onCalendarPreviousMonth ||
       !onCalendarNextMonth
     ) {
       return null;
     }
-    
+
     return (
       <div className="bg-surface-1 border border-border rounded-xl p-4 sticky top-0 z-10 shadow-sm">
         <div className="flex items-center justify-center gap-4">
@@ -471,14 +471,14 @@ export function BookingFilterToolbar({
           >
             <CaretLeft className="h-4 w-4" weight="bold" />
           </Button>
-          
+
           <div className="flex items-center gap-2 min-w-[200px] justify-center">
             <CalendarBlank className="h-5 w-5 text-primary" weight="bold" />
             <span className="text-lg font-bold text-foreground">
               {MONTH_NAMES[calendarMonth - 1]} {calendarYear}
             </span>
           </div>
-          
+
           <Button
             variant="secondary"
             size="sm"

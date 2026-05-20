@@ -7,7 +7,7 @@
 "use client";
 
 import { ArrowUp, ArrowDown } from "@phosphor-icons/react";
-import type { LoyaltyTransactionDto } from "@/src/shared/types/loyalty.types";
+import type { LoyaltyTransactionDto } from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
 import { formatPoints, getTransactionTypeLabel } from "../utils";
 
 interface TransactionListProps {
@@ -39,8 +39,8 @@ export function TransactionList({ transactions }: TransactionListProps) {
   return (
     <div className="space-y-3">
       {transactions.map((tx) => (
-        <div 
-          key={tx.id} 
+        <div
+          key={tx.id}
           className="flex items-center justify-between p-4 rounded-lg border border-border bg-surface-1 hover:bg-surface-2 transition-colors"
         >
           <div className="flex items-center gap-4">
@@ -54,7 +54,7 @@ export function TransactionList({ transactions }: TransactionListProps) {
                 <ArrowDown className="h-5 w-5 text-red-600 dark:text-red-400" weight="bold" />
               </div>
             )}
-            
+
             {/* Transaction Info */}
             <div className="space-y-1">
               <p className="font-medium text-foreground">
@@ -73,14 +73,13 @@ export function TransactionList({ transactions }: TransactionListProps) {
               )}
             </div>
           </div>
-          
+
           {/* Points */}
           <div className="text-right space-y-1">
-            <p className={`text-lg font-bold ${
-              tx.type === "EARN" 
-                ? "text-green-600 dark:text-green-400" 
+            <p className={`text-lg font-bold ${tx.type === "EARN"
+                ? "text-green-600 dark:text-green-400"
                 : "text-red-600 dark:text-red-400"
-            }`}>
+              }`}>
               {tx.points > 0 ? "+" : ""}{formatPoints(tx.points)}
             </p>
             <p className="text-xs text-muted">

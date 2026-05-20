@@ -12,7 +12,7 @@ import type {
   MyLoyaltyDto,
   LoyaltyTransactionDto,
   LoyaltyTransactionQuery,
-} from "@/src/shared/types/loyalty.types";
+} from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
 import type { PaginatedData } from "@/src/shared/types/api.types";
 
 /**

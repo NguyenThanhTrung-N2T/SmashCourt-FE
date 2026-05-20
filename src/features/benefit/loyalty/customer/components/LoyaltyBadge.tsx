@@ -4,7 +4,7 @@
  * Displays tier name and discount rate in a colored badge.
  */
 
-import type { TierName } from "@/src/shared/types/loyalty.types";
+import type { TierName } from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
 import { getTierCfg } from "@/src/features/benefit/loyalty/owner/LoyaltyTierConfig";
 
 interface LoyaltyBadgeProps {

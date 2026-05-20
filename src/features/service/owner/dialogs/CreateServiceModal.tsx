@@ -8,7 +8,7 @@ import { ServiceForm } from "../components/ServiceForm";
 
 import { createService } from "@/src/api/service.api";
 import { AuthApiError } from "@/src/api/auth.api";
-import type { SaveServiceRequest, Service } from "@/src/shared/types/service.types";
+import type { SaveServiceRequest, Service } from "@/src/features/service/shared/types/service.types";
 
 export function CreateServiceModal({
   onCreated,

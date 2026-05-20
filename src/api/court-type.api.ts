@@ -4,7 +4,7 @@ import type {
   CourtType,
   CreateCourtTypeRequest,
   UpdateCourtTypeRequest,
-} from "@/src/shared/types/court-type.types";
+} from "@/src/features/court-type/shared/types/court-type.types";
 
 // ─── API functions ────────────────────────────────────────────────────────────
 
@@ -17,12 +17,12 @@ export async function fetchAllCourtTypes(): Promise<CourtType[]> {
     "/api/court-types",
     { method: "GET" },
   );
-  
+
   // Ensure we always return an array
   const data = response.data;
   if (!data) return [];
   if (Array.isArray(data)) return data;
-  
+
   // If data is an object with an array property, extract it
   if (typeof data === 'object' && 'items' in data) {
     const dataWithItems = data as { items: unknown };
@@ -36,7 +36,7 @@ export async function fetchAllCourtTypes(): Promise<CourtType[]> {
       return dataWithData.data as CourtType[];
     }
   }
-  
+
   return [];
 }
 

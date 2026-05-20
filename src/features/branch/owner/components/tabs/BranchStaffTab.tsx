@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Users, User, Plus, Trash, MagnifyingGlass, Warning } from '@phosphor-icons/react';
-import type { BranchStaffDto, AddStaffDto, UserSearchResultDto, UserBranchRole } from '@/src/features/branch/types/branch.types';
-import { useStaffManagement } from '@/src/shared/hooks/useStaffManagement';
+import type { BranchStaffDto, AddStaffDto, UserSearchResultDto, UserBranchRole } from '@/src/features/branch/shared/types/branch.types';
+import { useStaffManagement } from '@/src/features/branch/owner/hooks/useStaffManagement';
 import { useUserSearch } from '@/src/shared/hooks/useUserSearch';
 import { SearchInput } from '../shared/SearchInput';
 import { Pagination } from "@/src/shared/components/ui/Pagination";

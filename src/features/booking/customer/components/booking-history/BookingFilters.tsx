@@ -13,7 +13,7 @@ import { Select } from "@/src/shared/components/ui/Select";
 import { Input } from "@/src/shared/components/ui/Input";
 import { Badge } from "@/src/shared/components/ui/Badge";
 import { BranchSelector } from "@/src/features/branch/customer/components/BranchSelector";
-import { BookingStatus } from "../../../types/booking.types";
+import { BookingStatus } from "../../../shared/types/booking.types";
 import { getBookingStatusConfig } from "../../utils/bookingStatus";
 
 type BookingStatusFilter = BookingStatus | string;

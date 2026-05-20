@@ -6,7 +6,7 @@
 "use client"
 import { useState, useEffect, useCallback } from "react";
 import { fetchCustomerBookings } from "@/src/api/booking.api";
-import type { BookingDto, BookingListQuery } from "../../types/booking.types";
+import type { BookingDto, BookingListQuery } from "../../shared/types/booking.types";
 import type { PaginatedData } from "@/src/shared/types/api.types";
 
 export function useCustomerBookings(initialQuery: BookingListQuery = {}) {

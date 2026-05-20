@@ -6,7 +6,7 @@
  */
 
 import { CalendarCheck, Clock, CheckCircle, CurrencyDollar, ArrowCounterClockwise } from '@phosphor-icons/react';
-import type { BookingDashboardSummaryDto } from '../../types/booking.types';
+import type { BookingDashboardSummaryDto } from '../../shared/types/booking.types';
 import { formatCurrency } from '../utils/bookingStatus';
 
 interface BookingSummaryCardsProps {
@@ -54,8 +54,8 @@ export function BookingSummaryCards({ summary, loading }: BookingSummaryCardsPro
     return (
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {[...Array(5)].map((_, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm border border-slate-200 dark:border-slate-700 animate-pulse"
           >
             <div className="h-7 w-7 bg-slate-200 dark:bg-slate-700 rounded-full mb-3" />
@@ -75,11 +75,10 @@ export function BookingSummaryCards({ summary, loading }: BookingSummaryCardsPro
         return (
           <div
             key={card.label}
-            className={`relative rounded-2xl p-6 shadow-sm transition-all duration-200 hover:shadow-md overflow-hidden ${
-              card.isPrimary
+            className={`relative rounded-2xl p-6 shadow-sm transition-all duration-200 hover:shadow-md overflow-hidden ${card.isPrimary
                 ? "text-white"
                 : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
-            }`}
+              }`}
             style={
               card.isPrimary
                 ? { background: "linear-gradient(145deg, #2D7A50 0%, #1B5E38 100%)" }
@@ -88,19 +87,17 @@ export function BookingSummaryCards({ summary, loading }: BookingSummaryCardsPro
           >
             <div className="flex items-start justify-between">
               <p
-                className={`text-xs font-semibold uppercase tracking-wide ${
-                  card.isPrimary ? "text-green-200" : "text-slate-500 dark:text-slate-400"
-                }`}
+                className={`text-xs font-semibold uppercase tracking-wide ${card.isPrimary ? "text-green-200" : "text-slate-500 dark:text-slate-400"
+                  }`}
               >
                 {card.label}
               </p>
               {/* Arrow circle */}
               <button
-                className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${
-                  card.isPrimary
+                className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${card.isPrimary
                     ? "border-white/30 text-white hover:bg-white/10"
                     : "border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"
-                }`}
+                  }`}
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -109,18 +106,16 @@ export function BookingSummaryCards({ summary, loading }: BookingSummaryCardsPro
             </div>
 
             <p
-              className={`mt-3 text-4xl font-extrabold tracking-tight leading-none ${
-                card.isPrimary ? "text-white" : "text-slate-900 dark:text-white"
-              } ${card.isAmount ? 'text-2xl' : ''}`}
+              className={`mt-3 text-4xl font-extrabold tracking-tight leading-none ${card.isPrimary ? "text-white" : "text-slate-900 dark:text-white"
+                } ${card.isAmount ? 'text-2xl' : ''}`}
             >
               {card.value}
             </p>
 
             <div className="mt-4 flex items-center gap-1.5">
               <span
-                className={`text-[11px] font-medium ${
-                  card.isPrimary ? "text-green-200/90" : "text-slate-400 dark:text-slate-500"
-                }`}
+                className={`text-[11px] font-medium ${card.isPrimary ? "text-green-200/90" : "text-slate-400 dark:text-slate-500"
+                  }`}
               >
                 {card.sub}
               </span>

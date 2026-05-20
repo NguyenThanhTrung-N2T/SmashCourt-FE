@@ -4,26 +4,26 @@ import { ActionMenu } from '@/src/shared/components/ui/ActionMenu';
 import { Pagination } from '@/src/shared/components/ui/Pagination';
 import { TableSkeleton } from '@/src/shared/components/feedback/TableSkeleton';
 import { EmptyState } from '@/src/shared/components/layout/EmptyState';
-import { 
-  SignIn, 
-  SignOut, 
-  DotsThree, 
-  XCircle, 
+import {
+  SignIn,
+  SignOut,
+  DotsThree,
+  XCircle,
   CheckCircle,
   Receipt,
   MagnifyingGlass,
 } from '@phosphor-icons/react';
-import type { BookingDto } from '../../types/booking.types';
+import type { BookingDto } from '../../shared/types/booking.types';
 import type { PaginatedData } from '@/src/shared/types/api.types';
-import { 
-  getBookingStatusLabel, 
+import {
+  getBookingStatusLabel,
   getBookingStatusVariant,
   getPaymentStatusLabel,
   getPaymentStatusVariant,
   formatCurrency,
   formatTime
 } from '../utils/bookingStatus';
-import { BookingStatus } from '../../types/booking.types';
+import { BookingStatus } from '../../shared/types/booking.types';
 import { formatDate } from '@/src/shared/utils/date';
 interface BookingTableViewProps {
   bookings: PaginatedData<BookingDto>;
@@ -84,9 +84,9 @@ export function BookingTableView({
 
   const canCancel = (booking: BookingDto) => {
     const status = getStatusValue(booking.status);
-    return status === BookingStatus.CONFIRMED || 
-           status === BookingStatus.PAID_ONLINE || 
-           status === BookingStatus.PENDING;
+    return status === BookingStatus.CONFIRMED ||
+      status === BookingStatus.PAID_ONLINE ||
+      status === BookingStatus.PENDING;
   };
 
   const canConfirmRefund = (booking: BookingDto) => {
@@ -111,7 +111,7 @@ export function BookingTableView({
                   Sân
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-muted uppercase tracking-wider">
-                  Ngày 
+                  Ngày
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-muted uppercase tracking-wider">
                   Thời gian
@@ -135,7 +135,7 @@ export function BookingTableView({
                 const bookingId = getBookingId(booking);
                 const startTime = booking.courts[0]?.startTime || '';
                 const endTime = booking.courts[booking.courts.length - 1]?.endTime || booking.courts[0]?.endTime || '';
-                
+
                 return (
                   <tr
                     key={bookingId}

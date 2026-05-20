@@ -5,11 +5,11 @@
 import { useState, useEffect } from "react";
 import { fetchMyLoyalty } from "@/src/api/loyalty.api";
 import { fetchApplicablePromotions } from "@/src/api/promotion.api";
-import type { BranchDto } from "@/src/features/branch/types/branch.types";
-import type { CourtDto } from "@/src/features/court/types/court.types";
+import type { BranchDto } from "@/src/features/branch/shared/types/branch.types";
+import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
-import type { MyLoyaltyDto } from "@/src/shared/types/loyalty.types";
-import type { ApplicablePromotion } from "@/src/shared/types/promotion.types";
+import type { MyLoyaltyDto } from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
+import type { ApplicablePromotion } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 
 interface UseLoyaltyAndPromotionsParams {
   isLoggedIn: boolean;

@@ -8,7 +8,7 @@
 
 import { Envelope, Phone, ShieldCheck } from "@phosphor-icons/react";
 import { AvatarUploader } from "./AvatarUploader";
-import type { UserProfile } from "@/src/shared/types/profile.types";
+import type { UserProfile } from "@/src/features/profile/types/profile.types";
 
 interface ProfileHeaderProps {
   profile: UserProfile;

@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchCancelPolicies } from "@/src/api/cancel-policy.api";
-import type { CancelPolicy } from "@/src/shared/types/cancel-policy.types";
+import type { CancelPolicy } from "@/src/features/policy/shared/types/cancel-policy.types";
 
 interface UseCancelPoliciesResult {
   policies: CancelPolicy[];

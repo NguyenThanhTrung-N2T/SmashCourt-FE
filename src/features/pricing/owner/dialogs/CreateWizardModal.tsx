@@ -9,7 +9,7 @@ import {
     X,
 } from "@phosphor-icons/react";
 import { fmt, fmtDate, todayStr } from "../../utils";
-import type { CourtType, TimeSlot, WizardSlotPrice, SavePriceDto } from "../../types/pricing.types";
+import type { CourtType, TimeSlot, WizardSlotPrice, SavePriceDto } from "../../shared/types/pricing.types";
 
 
 interface CreateWizardModalProps {

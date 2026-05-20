@@ -4,7 +4,7 @@
  * Helper functions for court status display and logic.
  */
 
-import { CourtStatus } from "../../types/court.types";
+import { CourtStatus } from "../../shared/types/court.types";
 
 export interface StatusConfig {
   label: string;

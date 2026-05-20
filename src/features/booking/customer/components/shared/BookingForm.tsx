@@ -14,7 +14,7 @@ import { Textarea } from "@/src/shared/components/ui/Textarea";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { useCreateBooking } from "../../hooks/useCreateBooking";
 import { formatCurrency, formatDate, formatTime } from "../../utils/bookingStatus";
-import type { CourtSlotDto } from "../../../types/booking.types";
+import type { CourtSlotDto } from "../../../shared/types/booking.types";
 import {
   createValidatedChangeHandler,
   createTrimOnBlurHandler,

@@ -19,10 +19,10 @@ import type {
   BookingDto,
   BookingListQuery,
   BookingDashboardSummaryDto,
-} from '../../types/booking.types';
+} from '../../shared/types/booking.types';
 import type { PaginatedData } from '@/src/shared/types/api.types';
-import type { BookingTableFilters } from '../../types/filter.types';
-import { DEFAULT_TABLE_FILTERS } from '../../types/filter.types';
+import type { BookingTableFilters } from '../../shared/types/filter.types';
+import { DEFAULT_TABLE_FILTERS } from '../../shared/types/filter.types';
 
 export function useBookingManagement(initialBranchId?: string, enabled = true) {
   const { show: showToast } = useToast();
@@ -51,7 +51,7 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
   // Load bookings
   const loadBookings = useCallback(async () => {
     if (!enabled) return;
-    
+
     setLoading(true);
     try {
       // Combine shared and table filters for API call

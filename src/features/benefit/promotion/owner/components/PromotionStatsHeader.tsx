@@ -1,8 +1,8 @@
 import { ArrowClockwise, Plus, Tag, Sparkle, TrendUp } from "@phosphor-icons/react";
 import { Button } from "@/src/shared/components/ui/Button";
 import { Flex } from "@/src/shared/components/layout/Flex";
-import { PromotionStatus } from "@/src/shared/types/promotion.types";
-import type { Promotion } from "@/src/shared/types/promotion.types";
+import { PromotionStatus } from "@/src/features/benefit/promotion/shared/types/promotion.types";
+import type { Promotion } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 
 export function PromotionStatsHeader({
     promotions,

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Lightning, Percent, PencilSimpleLine, ArrowCounterClockwise, FloppyDisk } from "@phosphor-icons/react";
 import { updateLoyaltyTier } from "@/src/api/loyalty-tier.api";
-import type { LoyaltyTier } from "@/src/shared/types/loyalty-tier.types";
+import type { LoyaltyTier } from "@/src/features/benefit/loyalty/shared/types/loyalty-tier.types";
 import { AuthApiError } from "@/src/api/auth.api";
 import { Button } from "@/src/shared/components/ui/Button";
 import { Input } from "@/src/shared/components/ui/Input";

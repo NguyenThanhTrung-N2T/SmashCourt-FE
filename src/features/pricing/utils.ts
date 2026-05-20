@@ -1,4 +1,4 @@
-import type { CourtType, CurrentPriceDto, EffectivePriceDto, PriceConfig, PriceRow, TimeSlot } from "./types/pricing.types";
+import type { CourtType, CurrentPriceDto, EffectivePriceDto, PriceConfig, PriceRow, TimeSlot } from "./shared/types/pricing.types";
 
 export function fmt(n: number): string {
     return n.toLocaleString("vi-VN") + "đ";
@@ -16,28 +16,28 @@ export function todayStr(): string {
 
 export function normalizeDateString(dateStr: string): string {
     if (!dateStr) return "";
-    
+
     if (dateStr.includes("T")) {
         return dateStr.split("T")[0];
     }
-    
+
     if (dateStr.includes(" ")) {
         const parts = dateStr.split(" ");
         if (parts.length >= 3 && parts[2].length === 4) {
-             return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
         }
         if (parts[0].includes("-") && parts[0].length === 10) {
-             return parts[0];
+            return parts[0];
         }
     }
-    
+
     if (dateStr.includes("/")) {
         const parts = dateStr.split(" ")[0].split("/");
         if (parts.length === 3 && parts[2].length === 4) {
-             return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
         }
     }
-    
+
     return dateStr.split(" ")[0];
 }
 

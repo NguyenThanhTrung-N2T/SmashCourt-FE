@@ -14,9 +14,9 @@ import { Alert } from "@/src/shared/components/ui/Alert";
 import { Spinner } from "@/src/shared/components/feedback/Spinner";
 import { EmptyState } from "@/src/shared/components/layout/EmptyState";
 import { CourtCard } from "./CourtCard";
-import { useCourts } from "../hooks/useCourts";
+import { useCourts } from "../../shared/hooks/useCourts";
 import { formatCurrency } from "@/src/features/booking/customer/utils/bookingStatus";
-import type { CourtDto } from "../../types/court.types";
+import type { CourtDto } from "../../shared/types/court.types";
 
 interface SelectedCourtSlot {
   court: CourtDto;

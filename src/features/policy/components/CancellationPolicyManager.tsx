@@ -23,7 +23,7 @@ import { sortCancelPolicies } from "@/src/features/policy/utils/cancellationPoli
 import type {
     CancelPolicy,
     SaveCancelPolicyRequest,
-} from "@/src/shared/types/cancel-policy.types";
+} from "@/src/features/policy/shared/types/cancel-policy.types";
 import { useToast } from "@/src/shared/hooks/useToast";
 
 import { Button } from "@/src/shared/components/ui/Button";
@@ -446,8 +446,8 @@ export default function CancellationPolicyManager() {
                 <div className="fixed bottom-8 right-8 z-[100] transition-all duration-300 animate-slide-up">
                     <div
                         className={`flex items-start gap-3 rounded-xl border-2 px-5 py-4 shadow-2xl backdrop-blur-sm ${toast.tone === "success"
-                                ? "border-emerald-500/30 bg-emerald-500/10"
-                                : "border-red-500/30 bg-red-500/10"
+                            ? "border-emerald-500/30 bg-emerald-500/10"
+                            : "border-red-500/30 bg-red-500/10"
                             }`}
                     >
                         {toast.tone === "success" ? (

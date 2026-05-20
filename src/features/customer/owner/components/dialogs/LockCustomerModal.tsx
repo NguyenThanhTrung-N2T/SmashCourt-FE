@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { X, Lock, WarningCircle } from '@phosphor-icons/react';
 import { Button } from '@/src/shared/components/ui/Button';
-import type { LockCustomerDto } from '../../../types/customer.types';
+import type { LockCustomerDto } from '../../../shared/types/customer.types';
 
 interface LockCustomerModalProps {
     customerName: string;
@@ -79,9 +79,8 @@ export function LockCustomerModal({ customerName, onClose, onConfirm }: LockCust
                             }}
                             placeholder="Nhập lý do khóa tài khoản (ví dụ: Vi phạm chính sách, hành vi không phù hợp...)"
                             rows={4}
-                            className={`w-full rounded-xl border ${
-                                error ? 'border-red-500/40 bg-red-500/10' : 'border-border bg-surface-2'
-                            } px-4 py-3 text-sm text-foreground outline-none transition-colors hover:border-primary focus:border-primary focus:bg-surface-1 focus:ring-2 focus:ring-primary/20 placeholder:text-muted resize-none`}
+                            className={`w-full rounded-xl border ${error ? 'border-red-500/40 bg-red-500/10' : 'border-border bg-surface-2'
+                                } px-4 py-3 text-sm text-foreground outline-none transition-colors hover:border-primary focus:border-primary focus:bg-surface-1 focus:ring-2 focus:ring-primary/20 placeholder:text-muted resize-none`}
                         />
                         {error && (
                             <p className="mt-1 text-xs text-red-500">{error}</p>

@@ -10,7 +10,7 @@ import type {
   CustomerListQuery,
   CustomerBookingQuery,
   LoyaltyTransactionQuery,
-} from "../features/customer/types/customer.types";
+} from "../features/customer/shared/types/customer.types";
 
 // ============================================================================
 // 1. Customer List Endpoint

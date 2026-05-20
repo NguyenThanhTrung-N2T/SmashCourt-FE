@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { CourtBasketball, Plus, Trash, Warning } from '@phosphor-icons/react';
-import type { BranchCourtTypeDto, AddCourtTypeToBranchDto } from '@/src/features/branch/types/branch.types';
+import type { BranchCourtTypeDto, AddCourtTypeToBranchDto } from '@/src/features/branch/shared/types/branch.types';
 import { fetchBranchCourtTypes, addCourtTypeToBranch, removeCourtTypeFromBranch } from '@/src/api/branch.api';
 import { ConfirmationDialog } from '@/src/shared/components/ui';
 import { BranchCourtTypesLoading } from '../states';

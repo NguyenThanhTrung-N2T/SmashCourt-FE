@@ -6,7 +6,7 @@
 
 import { useState, useCallback } from "react";
 import { createOnlineBooking } from "@/src/api/booking.api";
-import type { CreateOnlineBookingDto, OnlineBookingResponseDto } from "../../types/booking.types";
+import type { CreateOnlineBookingDto, OnlineBookingResponseDto } from "../../shared/types/booking.types";
 
 export function useCreateBooking() {
   const [isLoading, setIsLoading] = useState(false);

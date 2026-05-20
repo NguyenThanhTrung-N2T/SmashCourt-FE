@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Storefront, MapPin, Phone, Clock, User, Warning } from '@phosphor-icons/react';
 import { ImageUploader } from '@/src/shared/components/ui/ImageUploader';
-import type { BranchDto, UpdateBranchDto } from '@/src/features/branch/types/branch.types';
+import type { BranchDto, UpdateBranchDto } from '@/src/features/branch/shared/types/branch.types';
 import { useBranchManagement } from '@/src/features/branch/owner/hooks/useBranchManagement';
 import { validateBranchForm } from '../../utils/validation';
 import { ConfirmationDialog } from '@/src/shared/components/ui';

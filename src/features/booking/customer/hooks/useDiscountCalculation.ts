@@ -4,8 +4,8 @@
 
 import { useMemo } from "react";
 import { calculateDiscountAmount } from "@/src/api/promotion.api";
-import type { MyLoyaltyDto } from "@/src/shared/types/loyalty.types";
-import type { ApplicablePromotion } from "@/src/shared/types/promotion.types";
+import type { MyLoyaltyDto } from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
+import type { ApplicablePromotion } from "@/src/features/benefit/promotion/shared/types/promotion.types";
 
 interface UseDiscountCalculationParams {
   courtFee: number;

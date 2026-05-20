@@ -7,16 +7,15 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useMyProfile, useUpdateProfile } from "../hooks/useProfile";
+import { useMyProfile, useUpdateProfile } from "@/src/features/profile/hooks";
 import { ProfileHeader } from "./ProfileHeader";
 import { ProfileTabNav, type ProfileTabId } from "./ProfileTabNav";
 import { ProfileInfoTab } from "./tabs/ProfileInfoTab";
 import { ChangePasswordTab } from "./tabs/ChangePasswordTab";
 import { SessionManagementTab } from "./tabs/SessionManagementTab";
-import { Toast } from "@/src/shared/components/ui/Toast";
+import { Toast, Button } from "@/src/shared/components/ui";
 import { useToast } from "@/src/shared/hooks/useToast";
 import { User, Lock, Devices, Warning } from "@phosphor-icons/react";
-import { Button } from "@/src/shared/components/ui/Button";
 
 const TABS = [
   { id: "info" as ProfileTabId, label: "Thông tin cá nhân", icon: User },
@@ -33,13 +32,13 @@ export function ProfilePageContent() {
   // Handle avatar upload from header
   const handleAvatarUpdate = useCallback(async (url: string) => {
     if (!profile) return;
-    
+
     await updateProfile({
       fullName: profile.fullName,
       phone: profile.phone || "",
       avatarUrl: url,
     });
-    
+
     // Refresh profile to show new avatar
     refetch();
   }, [profile, updateProfile, refetch]);
@@ -82,32 +81,32 @@ export function ProfilePageContent() {
     <>
       <Toast toast={toast} />
       <div className="min-h-screen bg-background">
-      {/* Profile Header */}
-      <ProfileHeader profile={profile} onAvatarUpdate={handleAvatarUpdate} />
+        {/* Profile Header */}
+        <ProfileHeader profile={profile} onAvatarUpdate={handleAvatarUpdate} />
 
-      {/* Tab Navigation */}
-      <div className="sticky top-0 z-10 bg-surface-1 shadow-sm">
-        <div className="container max-w-7xl mx-auto">
-          <ProfileTabNav
-            tabs={TABS}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
+        {/* Tab Navigation */}
+        <div className="sticky top-0 z-10 bg-surface-1 shadow-sm">
+          <div className="container max-w-7xl mx-auto">
+            <ProfileTabNav
+              tabs={TABS}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Tab Content */}
-      <div className="container max-w-7xl mx-auto px-4 py-8">
-        {activeTab === "info" && (
-          <ProfileInfoTab profile={profile} onUpdate={refetch} showToast={show} />
-        )}
-        {activeTab === "password" && (
-          <ChangePasswordTab profile={profile} showToast={show} />
-        )}
-        {activeTab === "sessions" && (
-          <SessionManagementTab showToast={show} />
-        )}
-      </div>
+        {/* Tab Content */}
+        <div className="container max-w-7xl mx-auto px-4 py-8">
+          {activeTab === "info" && (
+            <ProfileInfoTab profile={profile} onUpdate={refetch} showToast={show} />
+          )}
+          {activeTab === "password" && (
+            <ChangePasswordTab profile={profile} showToast={show} />
+          )}
+          {activeTab === "sessions" && (
+            <SessionManagementTab showToast={show} />
+          )}
+        </div>
       </div>
     </>
   );

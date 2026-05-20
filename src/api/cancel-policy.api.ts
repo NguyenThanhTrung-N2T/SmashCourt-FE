@@ -3,7 +3,7 @@ import { sortCancelPolicies } from "@/src/features/policy/utils/cancellationPoli
 import type {
   CancelPolicy,
   SaveCancelPolicyRequest,
-} from "@/src/shared/types/cancel-policy.types";
+} from "@/src/features/policy/shared/types/cancel-policy.types";
 
 import type { ApiEnvelope } from "@/src/shared/types/api.types";
 

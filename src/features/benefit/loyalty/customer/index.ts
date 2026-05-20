@@ -20,4 +20,4 @@ export type {
   MyLoyaltyDto,
   LoyaltyTransactionDto,
   LoyaltyTransactionQuery,
-} from "@/src/shared/types/loyalty.types";
+} from "@/src/features/benefit/loyalty/shared/types/loyalty.types";

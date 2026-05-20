@@ -3,9 +3,9 @@ import { Input } from "@/src/shared/components/ui/Input";
 import { Select } from "@/src/shared/components/ui/Select";
 import { CONDITION_CONFIG } from "../../../config/conditionConfig";
 import { createNumericChangeHandler } from "@/src/shared/utils/inputValidation";
-import type { ConditionType } from "@/src/shared/types/promotion.types";
-import type { BranchDto } from "@/src/features/branch/types/branch.types";
-import type { CourtDto } from "@/src/features/court/types/court.types";
+import type { ConditionType } from "@/src/features/benefit/promotion/shared/types/promotion.types";
+import type { BranchDto } from "@/src/features/branch/shared/types/branch.types";
+import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 
 export interface ConditionInputRendererProps {
   selectedConditionType: ConditionType | "";

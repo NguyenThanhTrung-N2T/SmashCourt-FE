@@ -10,7 +10,7 @@ import type {
   MyLoyaltyDto,
   LoyaltyTransactionDto,
   LoyaltyTransactionQuery,
-} from "../shared/types/loyalty.types";
+} from "../features/benefit/loyalty/shared/types/loyalty.types";
 
 /**
  * Get current user's loyalty tier information and progress
