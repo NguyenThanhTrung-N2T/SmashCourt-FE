@@ -1,7 +1,7 @@
 /**
  * Parse backend date format "DD MM YYYY HH:mm:ss" to Date object
  */
-function parseBackendDate(dateString: string): Date | null {
+export function parseBackendDate(dateString: string): Date | null {
   try {
     // Backend format: "12 05 2026 23:42:37" (DD MM YYYY HH:mm:ss)
     const parts = dateString.trim().split(' ');

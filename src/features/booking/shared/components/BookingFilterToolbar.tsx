@@ -9,11 +9,9 @@
 
 import { useState, useEffect } from 'react';
 import { CalendarBlank, CaretLeft, CaretRight, X, ArrowCounterClockwise } from '@phosphor-icons/react';
-import { Input } from '@/src/shared/components/ui/Input';
-import { Select } from '@/src/shared/components/ui/Select';
-import { Button } from '@/src/shared/components/ui/Button';
-import { BookingStatus, InvoicePaymentStatus } from '../../shared/types/booking.types';
-import type { BookingTableFilters } from '../../shared/types/filter.types';
+import { Select, Button, Input } from '@/src/shared/components/ui';
+import { BookingStatus, InvoicePaymentStatus } from '../types/booking.types';
+import type { BookingTableFilters } from '@/src/features/booking/shared/types/filter.types';
 
 type ViewMode = 'table' | 'schedule' | 'calendar';
 

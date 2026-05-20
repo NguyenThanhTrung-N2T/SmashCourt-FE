@@ -1,4 +1,4 @@
-import { BookingStatus, InvoicePaymentStatus } from '../../shared/types/booking.types';
+import { BookingStatus, InvoicePaymentStatus } from '@/src/features/booking/shared/types/booking.types';
 
 export function getBookingStatusLabel(status: BookingStatus | string | number): string {
   const statusValue = typeof status === 'string' ? BookingStatus[status as keyof typeof BookingStatus] : status;

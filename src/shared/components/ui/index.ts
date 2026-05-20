@@ -3,6 +3,8 @@ export { Badge } from './Badge';
 export { IconContainer } from './IconContainer';
 export { Select } from './Select';
 export { Input } from './Input';
+export { Checkbox } from './Checkbox';
+export { Textarea } from './Textarea';
 export { Modal } from './Modal';
 export { Pagination } from './Pagination';
 export { ActionMenu } from './ActionMenu';

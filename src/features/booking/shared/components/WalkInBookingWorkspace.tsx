@@ -10,15 +10,11 @@ import {
   User,
 } from "@phosphor-icons/react";
 import { createWalkInBooking } from "@/src/api/booking.api";
-import { Button } from "@/src/shared/components/ui/Button";
-import { Checkbox } from "@/src/shared/components/ui/Checkbox";
-import { Input } from "@/src/shared/components/ui/Input";
-import { Select } from "@/src/shared/components/ui/Select";
-import { Textarea } from "@/src/shared/components/ui/Textarea";
+import { Button, Checkbox, Input, Select, Textarea } from "@/src/shared/components/ui";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
-import type { BookingDto, CreateWalkInBookingDto } from "../../shared/types/booking.types";
+import type { BookingDto, CreateWalkInBookingDto } from "@/src/features/booking/shared/types/booking.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
-import { InteractiveTimeGrid } from "../../customer/components/new-booking/InteractiveTimeGrid";
+import { InteractiveTimeGrid } from "@/src/features/booking/shared/components";
 import { fetchCourts } from '@/src/api/court.api';
 
 export type WalkInBookingFormState = {
@@ -51,6 +47,8 @@ interface WalkInBookingWorkspaceProps {
   branchId: string;
   branchName?: string;
   form: WalkInBookingFormState;
+  selectedCourtTypeId: string;
+  onCourtTypeChange: (value: string) => void;
   onChange: (form: WalkInBookingFormState) => void;
   onDirtyChange: (dirty: boolean) => void;
   onTitleChange: (title: string) => void;
@@ -72,15 +70,17 @@ function formatWorkspaceTitle(form: WalkInBookingFormState, courts: CourtDto[]):
   const courtName = selectedCourtName(courts, form.courtId);
   const time = form.startTime || "new";
 
-  if (courtName && form.startTime) return `Walk-in - ${courtName} - ${time}`;
-  if (courtName) return `Walk-in - ${courtName}`;
-  return "Walk-in booking";
+  if (courtName && form.startTime) return `Tại quầy - ${courtName} - ${time}`;
+  if (courtName) return `Tại quầy - ${courtName}`;
+  return "Đặt tại quầy";
 }
 
 export function WalkInBookingWorkspace({
   branchId,
   branchName,
   form,
+  selectedCourtTypeId,
+  onCourtTypeChange,
   onChange,
   onDirtyChange,
   onTitleChange,
@@ -89,7 +89,7 @@ export function WalkInBookingWorkspace({
 }: WalkInBookingWorkspaceProps) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
-  const [selectedCourtTypeId, setSelectedCourtTypeId] = useState<string>("all");
+
   const [loadingCourts, setLoadingCourts] = useState(false);
   const [courts, setCourts] = useState<CourtDto[]>([]);
 
@@ -139,16 +139,15 @@ export function WalkInBookingWorkspace({
   const validate = (): FormErrors => {
     const nextErrors: FormErrors = {};
 
-    if (!form.bookingDate) nextErrors.bookingDate = "Booking date is required";
-    if (!form.courtId) nextErrors.courtId = "Court is required";
-    if (!form.startTime) nextErrors.startTime = "Start time is required";
-    if (!form.endTime) nextErrors.endTime = "End time is required";
+    if (!form.bookingDate) nextErrors.bookingDate = "Ngày đặt sân là bắt buộc";
+    if (!form.courtId) nextErrors.courtId = "Vui lòng chọn sân";
+    if (!form.startTime) nextErrors.startTime = "Thời gian bắt đầu vào chơi là bắt buộc";
+    if (!form.endTime) nextErrors.endTime = "Thời gian kết thúc là bắt buộc";
     if (form.startTime && form.endTime && form.endTime <= form.startTime) {
-      nextErrors.endTime = "End time must be after start time";
+      nextErrors.endTime = "Thời gian kết thúc phải sau thời gian bắt đầu";
     }
-    if (!form.guestName.trim() && !form.guestPhone.trim()) {
-      nextErrors.guestName = "Enter a guest name or phone";
-      nextErrors.guestPhone = "Enter a guest name or phone";
+    if (!form.guestName.trim()) {
+      nextErrors.guestName = "Vui lòng nhập tên khách hàng"; //TODO
     }
 
     return nextErrors;
@@ -170,11 +169,11 @@ export function WalkInBookingWorkspace({
           endTime: toApiTime(form.endTime),
         },
       ],
-      customerId: null,
+      customerId: null, // TODO
       guestName: form.guestName.trim() || null,
       guestPhone: form.guestPhone.trim() || null,
       guestEmail: form.guestEmail.trim() || null,
-      promotionId: null,
+      promotionId: null, // TODO
       note: form.note.trim() || null,
       payNow: form.payNow,
     };
@@ -185,8 +184,8 @@ export function WalkInBookingWorkspace({
       onDirtyChange(false);
       onCreated(booking);
     } catch (error) {
-      console.error("Create walk-in booking error:", error);
-      onError("Failed to create walk-in booking");
+      console.error("Đã xảy ra lỗi khi đặt sân:", error);
+      onError("Đã xảy ra lỗi khi đặt sân");
     } finally {
       setSubmitting(false);
     }
@@ -200,16 +199,16 @@ export function WalkInBookingWorkspace({
             <CourtBasketball className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-foreground">Scheduler</h2>
+            <h2 className="text-lg font-bold text-foreground">Lịch trình</h2>
             <p className="text-sm font-medium text-muted">
-              {branchName || "Selected branch"} court and time window
+              Sân và khung giờ {branchName || "Chi nhánh được chọn"}
             </p>
           </div>
         </div>
 
         <div className="mb-5 grid max-w-2xl gap-4 md:grid-cols-2">
           <Input
-            label="Booking date"
+            label="Ngày đặt sân"
             type="date"
             min={new Date().toISOString().split("T")[0]}
             value={form.bookingDate}
@@ -226,7 +225,7 @@ export function WalkInBookingWorkspace({
               <Select
                 value={selectedCourtTypeId}
                 onChange={(val) => {
-                  setSelectedCourtTypeId(val);
+                  onCourtTypeChange(val);
                   if (val !== "all" && form.courtId) {
                     const court = courts.find(c => c.id === form.courtId);
                     if (court && court.courtTypeId !== val) {
@@ -247,7 +246,7 @@ export function WalkInBookingWorkspace({
         {branchId ? (
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-muted">
-              Court & Time <span className="text-red-500">*</span>
+              Sân và khung giờ <span className="text-red-500">*</span>
             </label>
             <InteractiveTimeGrid
               branchId={branchId}
@@ -282,44 +281,44 @@ export function WalkInBookingWorkspace({
               <User className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground">Customer info</h2>
-              <p className="text-sm font-medium text-muted">Guest details for counter booking</p>
+              <h2 className="text-lg font-bold text-foreground">Thông tin khách hàng</h2>
+              <p className="text-sm font-medium text-muted">Thông tin khách đặt tại quầy</p>
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <Input
-              label="Guest name"
+              label="Tên khách hàng"
               value={form.guestName}
               onChange={(event) => updateForm({ guestName: event.target.value })}
-              placeholder="Customer name"
+              placeholder="Tên khách hàng"
               error={errors.guestName}
             />
             <Input
-              label="Guest phone"
+              label="Số điện thoại"
               value={form.guestPhone}
               onChange={(event) => updateForm({ guestPhone: event.target.value })}
-              placeholder="Phone number"
+              placeholder="Số điện thoại"
               error={errors.guestPhone}
             />
           </div>
 
           <div className="mt-4">
             <Input
-              label="Guest email"
+              label="Email"
               type="email"
               value={form.guestEmail}
               onChange={(event) => updateForm({ guestEmail: event.target.value })}
-              placeholder="Email optional"
+              placeholder="guestname@email.com"
             />
           </div>
 
           <div className="mt-4">
             <Textarea
-              label="Note"
+              label="Lưu ý"
               value={form.note}
               onChange={(event) => updateForm({ note: event.target.value })}
-              placeholder="Staff note, special request, or payment detail"
+              placeholder="Ghi chú nhân viên, yêu cầu đặc biệt, hoặc những lưu ý khác"
             />
           </div>
         </section>
@@ -346,10 +345,11 @@ export function WalkInBookingWorkspace({
             <div className="rounded-xl border border-border bg-surface-2 p-4">
               <p className="text-xs font-bold uppercase tracking-wider text-muted">Xác nhận</p>
               <p className="mt-2 text-sm font-semibold text-foreground">
-                {selectedCourt?.name || "No court selected"}
+                {selectedCourt?.name || "Không có sân và khung giờ nào được chọn"}
               </p>
               <p className="mt-1 text-sm text-muted">
-                {form.bookingDate || "No date"} {form.startTime && form.endTime ? `${form.startTime} - ${form.endTime}` : ""}
+                {new Intl.DateTimeFormat("en-GB").format(new Date(form.bookingDate)) || "Không có ngày nào được chọn"}
+                {form.startTime && form.endTime ? `${form.startTime} - ${form.endTime}` : ""}
               </p>
             </div>
           </div>
@@ -361,7 +361,7 @@ export function WalkInBookingWorkspace({
           <CheckCircle className="h-5 w-5 text-primary" />
           Tạo đơn khi đã có lịch sân, thông tin khách hàng và thanh toán
         </div>
-        <Button type="submit" isLoading={submitting} disabled={loadingCourts || courts.length === 0 || form.selectedSlots.length === 0}>
+        <Button type="submit" isLoading={submitting} disabled={loadingCourts || courts.length === 0 || form.selectedSlots.length === 0 || !form.guestName.trim()}>
           Tạo đơn đặt tại quầy
         </Button>
       </div>

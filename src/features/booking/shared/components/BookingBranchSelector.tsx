@@ -5,8 +5,7 @@
  */
 
 import { Storefront } from '@phosphor-icons/react';
-import { IconContainer } from '@/src/shared/components/ui/IconContainer';
-import { Select } from '@/src/shared/components/ui/Select';
+import { IconContainer, Select } from '@/src/shared/components/ui';
 
 interface Branch {
   id: string;

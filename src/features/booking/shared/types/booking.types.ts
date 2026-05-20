@@ -137,6 +137,7 @@ export interface BookingDto {
   id?: string;
   bookingId?: string;
   bookingCode?: string;
+  invoiceCode?: string;
   bookingDate: string; // ISO 8601
   status: BookingStatus | BookingStatusName | string;
   source?: BookingSource | BookingSourceName | string;
@@ -157,7 +158,7 @@ export interface BookingDto {
   loyaltyDiscountAmount?: number;
   promotionDiscountAmount?: number;
   finalTotal?: number;
-  paymentStatus?: InvoicePaymentStatus | InvoicePaymentStatusName | string;
+  paymentStatus?: InvoicePaymentStatusName | string;
   createdAt?: string; // ISO 8601
   expiresAt?: string; // ISO 8601
 }
@@ -227,8 +228,9 @@ export interface BookingListQuery {
   fromDate?: string; // YYYY-MM-DD
   toDate?: string; // YYYY-MM-DD
   source?: BookingSource;
-  search?: string; // Search by customer name, phone, guest info, or booking ID
+  search?: string; // Search by customer name, phone, guest info, or booking code
   customerKeyword?: string;
+  bookingCode?: string;
   sortBy?: BookingListSortBy;
   sortOrder?: SortOrder;
 }

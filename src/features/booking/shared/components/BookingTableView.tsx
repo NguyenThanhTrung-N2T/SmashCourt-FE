@@ -1,8 +1,5 @@
-import { Badge } from '@/src/shared/components/ui/Badge';
-import { Button } from '@/src/shared/components/ui/Button';
-import { ActionMenu } from '@/src/shared/components/ui/ActionMenu';
-import { Pagination } from '@/src/shared/components/ui/Pagination';
-import { TableSkeleton } from '@/src/shared/components/feedback/TableSkeleton';
+import { Badge, Button, Pagination, ActionMenu } from '@/src/shared/components/ui';
+import { TableSkeleton } from '@/src/shared/components/feedback';
 import { EmptyState } from '@/src/shared/components/layout/EmptyState';
 import {
   SignIn,
@@ -13,7 +10,7 @@ import {
   Receipt,
   MagnifyingGlass,
 } from '@phosphor-icons/react';
-import type { BookingDto } from '../../shared/types/booking.types';
+import type { BookingDto } from '@/src/features/booking/shared/types/booking.types';
 import type { PaginatedData } from '@/src/shared/types/api.types';
 import {
   getBookingStatusLabel,
@@ -23,8 +20,14 @@ import {
   formatCurrency,
   formatTime
 } from '../utils/bookingStatus';
-import { BookingStatus } from '../../shared/types/booking.types';
 import { formatDate } from '@/src/shared/utils/date';
+import {
+  canCheckIn,
+  canCheckout,
+  canCancel,
+  canConfirmRefund
+} from '@/src/features/booking/shared/utils/bookingRules';
+
 interface BookingTableViewProps {
   bookings: PaginatedData<BookingDto>;
   loading: boolean;
@@ -62,36 +65,6 @@ export function BookingTableView({
 
   const getBookingId = (booking: BookingDto) => {
     return booking.id || booking.bookingId || booking.bookingCode || '';
-  };
-
-  const getStatusValue = (status: any): number => {
-    if (typeof status === 'number') return status;
-    if (typeof status === 'string') {
-      return BookingStatus[status as keyof typeof BookingStatus] ?? 0;
-    }
-    return 0;
-  };
-
-  const canCheckIn = (booking: BookingDto) => {
-    const status = getStatusValue(booking.status);
-    return status === BookingStatus.CONFIRMED || status === BookingStatus.PAID_ONLINE;
-  };
-
-  const canCheckout = (booking: BookingDto) => {
-    const status = getStatusValue(booking.status);
-    return status === BookingStatus.IN_PROGRESS;
-  };
-
-  const canCancel = (booking: BookingDto) => {
-    const status = getStatusValue(booking.status);
-    return status === BookingStatus.CONFIRMED ||
-      status === BookingStatus.PAID_ONLINE ||
-      status === BookingStatus.PENDING;
-  };
-
-  const canConfirmRefund = (booking: BookingDto) => {
-    const status = getStatusValue(booking.status);
-    return status === BookingStatus.CANCELLED_PENDING_REFUND;
   };
 
   return (
@@ -179,9 +152,9 @@ export function BookingTableView({
                       </Badge>
                     </td>
                     <td className="px-4 py-3">
-                      {booking.invoice?.paymentStatus !== undefined && (
-                        <Badge variant={getPaymentStatusVariant(booking.invoice.paymentStatus)} size="sm">
-                          {getPaymentStatusLabel(booking.invoice.paymentStatus)}
+                      {booking.paymentStatus !== undefined && (
+                        <Badge variant={getPaymentStatusVariant(booking.paymentStatus)} size="sm">
+                          {getPaymentStatusLabel(booking.paymentStatus)}
                         </Badge>
                       )}
                     </td>

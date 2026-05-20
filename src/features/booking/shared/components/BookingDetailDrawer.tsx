@@ -1,24 +1,21 @@
-/**
- * Booking Detail Drawer
- * 
- * Right-side drawer showing comprehensive booking details.
- */
-
 import { X, SignIn, SignOut, XCircle, CheckCircle, User, Phone, Envelope, CurrencyDollar } from '@phosphor-icons/react';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Badge } from '@/src/shared/components/ui/Badge';
-import type { BookingDto } from '../../shared/types/booking.types';
-import { BookingStatus } from '../../shared/types/booking.types';
+import { Button, Badge } from '@/src/shared/components/ui';
+import type { BookingDto } from '@/src/features/booking/shared/types/booking.types';
+import {
+  canCheckIn,
+  canCheckout,
+  canCancel,
+  canConfirmRefund
+} from '@/src/features/booking/shared/utils/bookingRules';
 import {
   getBookingStatusLabel,
   getBookingStatusVariant,
   getPaymentStatusLabel,
   getPaymentStatusVariant,
   formatCurrency,
-  formatTime,
-  formatDate,
-  formatDateTime,
+  formatTime
 } from '../utils/bookingStatus';
+import { formatDate, formatDateTime } from '@/src/shared/utils/date';
 
 interface BookingDetailDrawerProps {
   isOpen: boolean;
@@ -43,22 +40,10 @@ export function BookingDetailDrawer({
 
   const bookingId = booking.id || booking.bookingId || booking.bookingCode || '';
 
-  const getStatusValue = (status: any): number => {
-    if (typeof status === 'number') return status;
-    if (typeof status === 'string') {
-      return BookingStatus[status as keyof typeof BookingStatus] ?? 0;
-    }
-    return 0;
-  };
-
-  const statusValue = getStatusValue(booking.status);
-
-  const canCheckIn = statusValue === BookingStatus.CONFIRMED || statusValue === BookingStatus.PAID_ONLINE;
-  const canCheckout = statusValue === BookingStatus.IN_PROGRESS;
-  const canCancel = statusValue === BookingStatus.CONFIRMED ||
-    statusValue === BookingStatus.PAID_ONLINE ||
-    statusValue === BookingStatus.PENDING;
-  const canConfirmRefund = statusValue === BookingStatus.CANCELLED_PENDING_REFUND;
+  const checkInAllowed = canCheckIn(booking);
+  const checkoutAllowed = canCheckout(booking);
+  const cancelAllowed = canCancel(booking);
+  const confirmRefundAllowed = canConfirmRefund(booking);
 
   return (
     <>
@@ -127,9 +112,9 @@ export function BookingDetailDrawer({
               </div>
               <div>
                 <p className="text-xs text-muted mb-1">Thanh toán</p>
-                {booking.invoice?.paymentStatus !== undefined && (
-                  <Badge variant={getPaymentStatusVariant(booking.invoice.paymentStatus)}>
-                    {getPaymentStatusLabel(booking.invoice.paymentStatus)}
+                {booking.paymentStatus !== undefined && (
+                  <Badge variant={getPaymentStatusVariant(booking.paymentStatus)}>
+                    {getPaymentStatusLabel(booking.paymentStatus)}
                   </Badge>
                 )}
               </div>
@@ -296,7 +281,7 @@ export function BookingDetailDrawer({
 
           {/* Actions */}
           <div className="flex flex-wrap gap-3">
-            {canCheckIn && (
+            {checkInAllowed && (
               <Button
                 onClick={() => onCheckIn(bookingId)}
                 className="flex-1"
@@ -305,7 +290,7 @@ export function BookingDetailDrawer({
                 Xác nhận đến
               </Button>
             )}
-            {canCheckout && (
+            {checkoutAllowed && (
               <Button
                 onClick={() => onCheckout(bookingId)}
                 className="flex-1"
@@ -314,7 +299,7 @@ export function BookingDetailDrawer({
                 Rời sân
               </Button>
             )}
-            {canCancel && (
+            {cancelAllowed && (
               <Button
                 variant="danger"
                 onClick={() => onCancel(bookingId)}
@@ -324,7 +309,7 @@ export function BookingDetailDrawer({
                 Hủy đơn
               </Button>
             )}
-            {canConfirmRefund && (
+            {confirmRefundAllowed && (
               <Button
                 variant="secondary"
                 onClick={() => onConfirmRefund(bookingId)}

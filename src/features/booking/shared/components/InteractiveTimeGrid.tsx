@@ -7,10 +7,10 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Cursor, Info, CheckCircle } from "@phosphor-icons/react";
+import { Cursor, CheckCircle } from "@phosphor-icons/react";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { formatTime, formatDuration, calculateDuration } from "@/src/features/timeslot/utils";
-import { CourtTrack } from "./CourtTrack";
+import { CourtTrack } from "@/src/features/booking/shared/components";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
@@ -233,7 +233,6 @@ export function InteractiveTimeGrid({
       {!selectedCourtId && (
         <Alert variant="info" title="Hướng dẫn">
           <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 shrink-0" />
             <span>
               Kéo trên thanh timeline của sân để chọn khoảng giờ. Hệ thống sẽ tự động snap theo khung 30 phút.
             </span>

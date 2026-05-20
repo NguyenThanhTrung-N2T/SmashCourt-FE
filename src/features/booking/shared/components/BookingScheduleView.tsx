@@ -8,8 +8,8 @@ import { CalendarBlank, Buildings } from '@phosphor-icons/react';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Skeleton } from '@/src/shared/components/feedback/Skeleton';
 import { EmptyState } from '@/src/shared/components/layout/EmptyState';
-import type { BookingScheduleCourtDto, BookingScheduleItemDto } from '../../shared/types/booking.types';
-import { BookingStatus } from '../../shared/types/booking.types';
+import type { BookingScheduleCourtDto, BookingScheduleItemDto } from '../types/booking.types';
+import { BookingStatus } from '../types/booking.types';
 import { formatTime } from '../utils/bookingStatus';
 
 interface BookingScheduleViewProps {

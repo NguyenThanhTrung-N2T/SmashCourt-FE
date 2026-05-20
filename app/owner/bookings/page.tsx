@@ -1,6 +1,9 @@
-﻿"use client";
-import { BookingManagementPage } from '@/src/features/booking/management/pages/BookingManagementPage';
+"use client";
+
+import { OwnerBookingPage } from '@/src/features/booking/owner/OwnerBookingPage';
 
 export default function OwnerBookingsPage() {
-  return <BookingManagementPage />;
+  return <OwnerBookingPage />;
 }
+
+

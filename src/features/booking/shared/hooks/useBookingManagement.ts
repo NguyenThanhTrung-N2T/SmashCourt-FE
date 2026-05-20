@@ -19,13 +19,13 @@ import type {
   BookingDto,
   BookingListQuery,
   BookingDashboardSummaryDto,
-} from '../../shared/types/booking.types';
+} from '@/src/features/booking/shared/types/booking.types';
 import type { PaginatedData } from '@/src/shared/types/api.types';
-import type { BookingTableFilters } from '../../shared/types/filter.types';
-import { DEFAULT_TABLE_FILTERS } from '../../shared/types/filter.types';
+import type { BookingTableFilters } from '../types/filter.types';
+import { DEFAULT_TABLE_FILTERS } from '../types/filter.types';
 
 export function useBookingManagement(initialBranchId?: string, enabled = true) {
-  const { show: showToast } = useToast();
+  const { toast, show: showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [bookings, setBookings] = useState<PaginatedData<BookingDto>>({
     items: [],
@@ -201,5 +201,7 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
     handleCancel,
     handleConfirmRefund,
     refresh: loadBookings,
+    toast,
+    showToast,
   };
 }

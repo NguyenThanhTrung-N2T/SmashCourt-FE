@@ -6,7 +6,7 @@
  */
 
 import { CalendarCheck, Clock, CheckCircle, CurrencyDollar, ArrowCounterClockwise } from '@phosphor-icons/react';
-import type { BookingDashboardSummaryDto } from '../../shared/types/booking.types';
+import type { BookingDashboardSummaryDto } from '../types/booking.types';
 import { formatCurrency } from '../utils/bookingStatus';
 
 interface BookingSummaryCardsProps {
@@ -76,8 +76,8 @@ export function BookingSummaryCards({ summary, loading }: BookingSummaryCardsPro
           <div
             key={card.label}
             className={`relative rounded-2xl p-6 shadow-sm transition-all duration-200 hover:shadow-md overflow-hidden ${card.isPrimary
-                ? "text-white"
-                : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+              ? "text-white"
+              : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
               }`}
             style={
               card.isPrimary
@@ -95,8 +95,8 @@ export function BookingSummaryCards({ summary, loading }: BookingSummaryCardsPro
               {/* Arrow circle */}
               <button
                 className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${card.isPrimary
-                    ? "border-white/30 text-white hover:bg-white/10"
-                    : "border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"
+                  ? "border-white/30 text-white hover:bg-white/10"
+                  : "border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"
                   }`}
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

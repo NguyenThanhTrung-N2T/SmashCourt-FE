@@ -1,44 +1,24 @@
 "use client";
 
 /**
- * Booking Management Page
+ * Booking Management Base Presenter
  * 
- * Comprehensive booking management with table, schedule, and calendar views.
- * Used by OWNER, MANAGER, and STAFF roles.
- * 
- * Filter Strategy:
- * - Shared filters (branchId) persist across all tabs
- * - Table filters (status, payment, search, pagination) only apply to table view
- * - Schedule filters (date) only apply to schedule view
- * - Calendar filters (year, month) only apply to calendar view
- * - Smart tab switching: converts date context when switching between views
+ * Reusable presenter for booking dashboard. Used by both OwnerBookingPage and ManagerBookingPage.
  */
 
-import { useState, useCallback, useEffect } from 'react';
-import { BookingBranchSelector } from '../components/BookingBranchSelector';
-import { BookingSummaryCards } from '../components/BookingSummaryCards';
-import { BookingFilterToolbar } from '../components/BookingFilterToolbar';
-import { BookingTableView } from '../components/BookingTableView';
-import { BookingScheduleView } from '../components/BookingScheduleView';
-import { BookingCalendarView } from '../components/BookingCalendarView';
-import { BookingDetailDrawer } from '../components/BookingDetailDrawer';
+import { useState, useCallback } from 'react';
+import { BookingDetailDrawer, BookingTableView, BookingScheduleView, BookingCalendarView, BookingFilterToolbar, BookingBranchSelector, BookingSummaryCards } from '@/src/features/booking/shared/components';
 import {
   WalkInBookingWorkspace,
   createDefaultWalkInForm,
   type WalkInBookingFormState,
 } from '../components/WalkInBookingWorkspace';
-import { useBookingManagement } from '../hooks/useBookingManagement';
-import { useBookingSchedule } from '../hooks/useBookingSchedule';
-import { useBookingCalendar } from '../hooks/useBookingCalendar';
-import { ConfirmationDialog } from '@/src/shared/components/ui/ConfirmationDialog';
-import { Toast } from '@/src/shared/components/ui/Toast';
-import { useToast } from '@/src/shared/hooks/useToast';
-import { fetchBranches } from '@/src/api/branch.api';
-
+import { useBookingManagement, useBookingSchedule, useBookingCalendar } from '@/src/features/booking/shared/hooks';
+import { Toast, ConfirmationDialog, Button } from '@/src/shared/components/ui';
+import { PageHeader } from '@/src/shared/components/layout';
 import type { BranchDto } from '@/src/features/branch/shared/types/branch.types';
-
-import type { BookingDto } from '../../shared/types/booking.types';
-import { Table, GridNine, Calendar, Plus, X } from '@phosphor-icons/react';
+import type { BookingDto } from '@/src/features/booking/shared/types/booking.types';
+import { Table, GridNine, Calendar, Plus, X, FileText } from '@phosphor-icons/react';
 
 type ViewTab = 'table' | 'schedule' | 'calendar';
 type WorkspaceId = 'management' | string;
@@ -50,24 +30,33 @@ interface WalkInWorkspace {
   dirty: boolean;
   branchId: string;
   branchName: string;
+  selectedCourtTypeId: string;
 }
 
-interface BookingManagementPageProps {
+interface BookingManagementBaseProps {
+  isOwner: boolean;
+  initialBranchId?: string;
+  branchName?: string;
+  branches?: BranchDto[];
   title?: string;
   description?: string;
   showCreateWalkIn?: boolean;
 }
 
-export function BookingManagementPage({
+const MAX_WALK_IN_TAB_COUNT = 5;
+
+export function BookingManagementBase({
+  isOwner,
+  initialBranchId,
+  branchName,
+  branches = [],
   title = 'Đặt sân',
   description = 'Quản lý và vận hành việc đặt sân',
   showCreateWalkIn = true,
-}: BookingManagementPageProps) {
+}: BookingManagementBaseProps) {
   const [activeView, setActiveView] = useState<ViewTab>('table');
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<WorkspaceId>('management');
   const [walkInWorkspaces, setWalkInWorkspaces] = useState<WalkInWorkspace[]>([]);
-  const [branches, setBranches] = useState<BranchDto[]>([]);
-  const { toast, show: showToast } = useToast();
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -79,20 +68,6 @@ export function BookingManagementPage({
     message: '',
     onConfirm: () => { },
   });
-
-  // Load branches on mount
-  useEffect(() => {
-    const loadBranches = async () => {
-      try {
-        const data = await fetchBranches(1, 50); // Get first 50 branches
-        setBranches(data.items || []);
-      } catch (error) {
-        console.error('Failed to load branches:', error);
-      }
-    };
-
-    loadBranches();
-  }, []);
 
   const {
     bookings,
@@ -111,7 +86,9 @@ export function BookingManagementPage({
     handleCancel,
     handleConfirmRefund,
     refresh,
-  } = useBookingManagement(undefined, activeView === 'table');
+    toast,
+    showToast,
+  } = useBookingManagement(initialBranchId, activeView === 'table');
 
   const schedule = useBookingSchedule(branchId, activeView === 'schedule');
   const calendar = useBookingCalendar(branchId, activeView === 'calendar');
@@ -193,24 +170,28 @@ export function BookingManagementPage({
     setActiveView('table');
   }, [updateTableFilters]);
 
+  const selectedBranch = branches.find((branch) => branch.id === branchId);
+  const activeBranchName = isOwner ? (selectedBranch?.name || "") : (branchName || "");
+
   const handleCreateWalkIn = () => {
     if (!branchId) {
-      showToast('error', 'Select a branch before creating a walk-in booking');
+      showToast('error', 'Chọn chi nhánh trước khi tạo đơn tại quầy');
       return;
     }
 
-    if (walkInWorkspaces.length >= 5) {
-      showToast('error', 'Close an existing walk-in workspace before opening another one');
+    if (walkInWorkspaces.length >= MAX_WALK_IN_TAB_COUNT) {
+      showToast('error', 'Đóng một tab tạo đơn tại quầy trước khi mở một tab mới.');
       return;
     }
 
     const workspace: WalkInWorkspace = {
       id: `walk-in-${Date.now()}`,
-      title: 'Walk-in booking',
+      title: 'Đặt tại quầy',
       form: createDefaultWalkInForm(),
       dirty: false,
       branchId,
-      branchName: selectedBranch?.name || ""
+      branchName: activeBranchName,
+      selectedCourtTypeId: "all"
     };
 
     setWalkInWorkspaces((prev) => [...prev, workspace]);
@@ -251,8 +232,8 @@ export function BookingManagementPage({
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Close walk-in workspace',
-      message: 'This walk-in booking has unsaved changes. Close it anyway?',
+      title: 'Đóng tab tạo đơn tại quầy',
+      message: 'Tạo đơn tại quầy chưa hoàn thành. Bạn vẫn muốn đóng?',
       onConfirm: () => {
         closeWalkInWorkspace(workspace.id);
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
@@ -261,7 +242,7 @@ export function BookingManagementPage({
   };
 
   const handleWalkInCreated = async (workspaceId: string, booking: BookingDto) => {
-    showToast('success', 'Walk-in booking created successfully');
+    showToast('success', 'Tạo đơn đặt sân tại quầy thành công');
     await refresh();
     closeWalkInWorkspace(workspaceId);
     setActiveWorkspaceId('management');
@@ -273,7 +254,6 @@ export function BookingManagementPage({
     }
   };
 
-  const selectedBranch = branches.find((branch) => branch.id === branchId);
   const activeWalkInWorkspace = walkInWorkspaces.find(
     (workspace) => workspace.id === activeWorkspaceId,
   );
@@ -282,43 +262,39 @@ export function BookingManagementPage({
     <div className="space-y-6 animate-slide-up w-full px-8 pt-6 pb-10">
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-slate-900 dark:text-white">
-            {title}
-          </h1>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-            {description}
-          </p>
-        </div>
+        <PageHeader
+          title={title}
+          description={description}
+        />
         <div className="flex items-center gap-3 shrink-0">
           {/* Export Button */}
-          <button className="inline-flex items-center gap-2 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+          <Button
+            onClick={() => { }} // TODO
+            variant="secondary"
+            size="md"
+            leftIcon={<FileText className="h-4 w-4" />}>
             Xuất dữ liệu
-          </button>
+          </Button>
           {/* Create Walk-in Button */}
           {showCreateWalkIn && (
-            <button
+            <Button
               onClick={handleCreateWalkIn}
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-95"
-              style={{
-                background: "linear-gradient(135deg, #2A9D5C 0%, #1B5E38 100%)",
-                boxShadow: "0 4px 14px rgba(27, 94, 56, 0.35)",
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              Walk-in Booking
-            </button>
+              variant="primary"
+              size="md"
+              leftIcon={<Plus className="h-4 w-4" />}>
+              Đặt tại quầy
+            </Button>
           )}
         </div>
       </div>
 
       {/* Workspace Tabs */}
-      <div className="booking-workspace-tabs">
+      <div className="booking-workspace-tabs overflow-x-auto custom-scrollbar">
         <button
           onClick={() => setActiveWorkspaceId('management')}
           className={`booking-workspace-tab ${activeWorkspaceId === 'management' ? 'booking-workspace-tab-active' : ''}`}
         >
-          Bookings
+          Trang chủ
         </button>
         {walkInWorkspaces.map((workspace) => (
           <button
@@ -362,8 +338,8 @@ export function BookingManagementPage({
 
       {activeWorkspaceId === 'management' && (
         <>
-          {/* Branch Selector */}
-          {branches.length > 0 && (
+          {/* Branch Selector or Banner */}
+          {isOwner && branches.length > 0 ? (
             <div className="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm border border-slate-200 dark:border-slate-700">
               <BookingBranchSelector
                 branches={branches}
@@ -375,6 +351,15 @@ export function BookingManagementPage({
                 className="!bg-transparent !border-0 !shadow-none !p-0"
               />
             </div>
+          ) : (
+            !isOwner && activeBranchName && (
+              <div className="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Chi nhánh đang quản lý:</span>
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{activeBranchName}</span>
+                </div>
+              </div>
+            )
           )}
 
           {/* Summary Cards */}
@@ -489,6 +474,12 @@ export function BookingManagementPage({
           branchId={activeWalkInWorkspace.branchId}
           branchName={activeWalkInWorkspace.branchName}
           form={activeWalkInWorkspace.form}
+          selectedCourtTypeId={activeWalkInWorkspace.selectedCourtTypeId}
+          onCourtTypeChange={(selectedCourtTypeId) =>
+            updateWalkInWorkspace(activeWalkInWorkspace.id, {
+              selectedCourtTypeId,
+            })
+          }
           onChange={(form) => updateWalkInWorkspace(activeWalkInWorkspace.id, { form })}
           onDirtyChange={(dirty) => updateWalkInWorkspace(activeWalkInWorkspace.id, { dirty })}
           onTitleChange={(title) => updateWalkInWorkspace(activeWalkInWorkspace.id, { title })}
