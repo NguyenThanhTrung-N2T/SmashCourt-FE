@@ -238,7 +238,7 @@ export function CourtTrack({
 
   return (
     <div className="flex items-center gap-4">
-      <div className="w-[150px] rounded-2xl border border-border bg-surface-1 px-4 py-3.5 text-[15px] font-semibold text-foreground shadow-sm">
+      <div className="w-37.5 rounded-2xl border border-border bg-surface-1 px-4 py-3.5 text-[15px] font-semibold text-foreground shadow-sm">
         <div className="flex items-center gap-2">
           <span>{court.name}</span>
         </div>

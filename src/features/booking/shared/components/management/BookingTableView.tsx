@@ -19,7 +19,7 @@ import {
   getPaymentStatusVariant,
   formatCurrency,
   formatTime
-} from '../utils/bookingStatus';
+} from '../../utils/bookingStatus';
 import { formatDate } from '@/src/shared/utils/date';
 import {
   canCheckIn,

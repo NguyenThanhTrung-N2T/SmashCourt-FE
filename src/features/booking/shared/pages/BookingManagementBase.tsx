@@ -7,12 +7,17 @@
  */
 
 import { useState, useCallback } from 'react';
-import { BookingDetailDrawer, BookingTableView, BookingScheduleView, BookingCalendarView, BookingFilterToolbar, BookingBranchSelector, BookingSummaryCards } from '@/src/features/booking/shared/components';
 import {
-  WalkInBookingWorkspace,
+  BookingDetailDrawer, BookingTableView,
+  BookingScheduleView, BookingCalendarView,
+  BookingFilterToolbar, BookingBranchSelector,
+  BookingSummaryCards
+} from '@/src/features/booking/shared/components/management';
+import {
   createDefaultWalkInForm,
   type WalkInBookingFormState,
-} from '../components/WalkInBookingWorkspace';
+} from '@/src/features/booking/shared/types';
+import { WalkInBookingWorkspace } from '@/src/features/booking/shared/components/new';
 import { useBookingManagement, useBookingSchedule, useBookingCalendar } from '@/src/features/booking/shared/hooks';
 import { Toast, ConfirmationDialog, Button } from '@/src/shared/components/ui';
 import { PageHeader } from '@/src/shared/components/layout';
@@ -166,7 +171,7 @@ export function BookingManagementBase({
 
   // Calendar day click: switch to table view with selected date
   const handleCalendarDayClick = useCallback((date: string) => {
-    updateTableFilters({ date, fromDate: undefined, toDate: undefined });
+    updateTableFilters({ date, fromDate: date, toDate: date });
     setActiveView('table');
   }, [updateTableFilters]);
 
@@ -288,79 +293,80 @@ export function BookingManagementBase({
         </div>
       </div>
 
-      {/* Workspace Tabs */}
-      <div className="booking-workspace-tabs overflow-x-auto custom-scrollbar">
-        <button
-          onClick={() => setActiveWorkspaceId('management')}
-          className={`booking-workspace-tab ${activeWorkspaceId === 'management' ? 'booking-workspace-tab-active' : ''}`}
-        >
-          Trang chủ
-        </button>
-        {walkInWorkspaces.map((workspace) => (
+      {/* Workspace Tabs + Branch Selector (same row) */}
+      <div className="flex items-center justify-between gap-4">
+        {/* Tabs – left side */}
+        <div className="booking-workspace-tabs overflow-x-auto custom-scrollbar flex-1 min-w-0">
           <button
-            key={workspace.id}
-            onClick={() => setActiveWorkspaceId(workspace.id)}
-            className={`booking-workspace-tab group ${activeWorkspaceId === workspace.id ? 'booking-workspace-tab-active' : ''}`}
+            onClick={() => setActiveWorkspaceId('management')}
+            className={`booking-workspace-tab ${activeWorkspaceId === 'management' ? 'booking-workspace-tab-active' : ''}`}
           >
-            <span className="max-w-44 truncate">{workspace.title}</span>
-            {workspace.dirty && <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
-            <span
-              role="button"
-              tabIndex={0}
-              aria-label={`Close ${workspace.title}`}
-              onClick={(event) => {
-                event.stopPropagation();
-                requestCloseWalkInWorkspace(workspace);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
+            Trang chủ
+          </button>
+          {walkInWorkspaces.map((workspace) => (
+            <button
+              key={workspace.id}
+              onClick={() => setActiveWorkspaceId(workspace.id)}
+              className={`booking-workspace-tab group ${activeWorkspaceId === workspace.id ? 'booking-workspace-tab-active' : ''}`}
+            >
+              <span className="max-w-44 truncate">{workspace.title}</span>
+              {workspace.dirty && <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
+              <span
+                role="button"
+                tabIndex={0}
+                aria-label={`Close ${workspace.title}`}
+                onClick={(event) => {
                   event.stopPropagation();
                   requestCloseWalkInWorkspace(workspace);
-                }
-              }}
-              className="flex h-5 w-5 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-3 hover:text-foreground"
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    requestCloseWalkInWorkspace(workspace);
+                  }
+                }}
+                className="flex h-5 w-5 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-3 hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </span>
+            </button>
+          ))}
+          {showCreateWalkIn && (
+            <button
+              onClick={handleCreateWalkIn}
+              className="booking-workspace-add"
+              aria-label="Open walk-in booking workspace"
             >
-              <X className="h-3.5 w-3.5" />
-            </span>
-          </button>
-        ))}
-        {showCreateWalkIn && (
-          <button
-            onClick={handleCreateWalkIn}
-            className="booking-workspace-add"
-            aria-label="Open walk-in booking workspace"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+              <Plus className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Branch Selector – right side */}
+        {isOwner && branches.length > 0 ? (
+          <div className="shrink-0 min-w-64 max-w-xs">
+            <BookingBranchSelector
+              branches={branches}
+              selectedBranchId={branchId}
+              onBranchChange={updateBranchId}
+              label="Chi nhánh"
+              placeholder="-- Chọn chi nhánh --"
+              showAllOption={true}
+            />
+          </div>
+        ) : (
+          !isOwner && activeBranchName && (
+            <div className="shrink-0 flex items-center gap-2">
+              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Chi nhánh:</span>
+              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{activeBranchName}</span>
+            </div>
+          )
         )}
       </div>
 
       {activeWorkspaceId === 'management' && (
         <>
-          {/* Branch Selector or Banner */}
-          {isOwner && branches.length > 0 ? (
-            <div className="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-              <BookingBranchSelector
-                branches={branches}
-                selectedBranchId={branchId}
-                onBranchChange={updateBranchId}
-                label="Chi nhánh"
-                placeholder="-- Chọn chi nhánh --"
-                showAllOption={true}
-                className="!bg-transparent !border-0 !shadow-none !p-0"
-              />
-            </div>
-          ) : (
-            !isOwner && activeBranchName && (
-              <div className="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Chi nhánh đang quản lý:</span>
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{activeBranchName}</span>
-                </div>
-              </div>
-            )
-          )}
 
           {/* Summary Cards */}
           <BookingSummaryCards summary={summary} loading={loading} />

@@ -113,14 +113,14 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
   const handleCheckIn = useCallback(async (bookingId: string) => {
     try {
       await checkInBooking(bookingId);
-      showToast('success', 'Booking checked in successfully');
+      showToast('success', 'Check-in thành công');
       await loadBookings();
       await loadSummary();
       if (selectedBooking?.id === bookingId || selectedBooking?.bookingId === bookingId) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {
-      showToast('error', 'Failed to check in booking');
+      showToast('error', 'Check-in thất bại');
       console.error('Check-in error:', error);
     }
   }, [loadBookings, loadSummary, selectedBooking, openBookingDetail, showToast]);
@@ -129,14 +129,14 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
   const handleCheckout = useCallback(async (bookingId: string) => {
     try {
       await checkoutBooking(bookingId);
-      showToast('success', 'Booking checked out successfully');
+      showToast('success', 'Checkout thành công');
       await loadBookings();
       await loadSummary();
       if (selectedBooking?.id === bookingId || selectedBooking?.bookingId === bookingId) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {
-      showToast('error', 'Failed to checkout booking');
+      showToast('error', 'Checkout thất bại');
       console.error('Checkout error:', error);
     }
   }, [loadBookings, loadSummary, selectedBooking, openBookingDetail, showToast]);
@@ -145,14 +145,14 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
   const handleCancel = useCallback(async (bookingId: string) => {
     try {
       await cancelBookingByStaff(bookingId);
-      showToast('success', 'Booking cancelled successfully');
+      showToast('success', 'Hủy đơn đặt thành công');
       await loadBookings();
       await loadSummary();
       if (selectedBooking?.id === bookingId || selectedBooking?.bookingId === bookingId) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {
-      showToast('error', 'Failed to cancel booking');
+      showToast('error', 'Hủy đơn đặt thất bại');
       console.error('Cancel error:', error);
     }
   }, [loadBookings, loadSummary, selectedBooking, openBookingDetail, showToast]);
@@ -161,14 +161,14 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
   const handleConfirmRefund = useCallback(async (bookingId: string) => {
     try {
       await confirmBookingRefund(bookingId);
-      showToast('success', 'Refund confirmed successfully');
+      showToast('success', 'Xác nhận hoàn tiền thành công');
       await loadBookings();
       await loadSummary();
       if (selectedBooking?.id === bookingId || selectedBooking?.bookingId === bookingId) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {
-      showToast('error', 'Failed to confirm refund');
+      showToast('error', 'Xác nhận hoàn tiền thất bại');
       console.error('Confirm refund error:', error);
     }
   }, [loadBookings, loadSummary, selectedBooking, openBookingDetail, showToast]);

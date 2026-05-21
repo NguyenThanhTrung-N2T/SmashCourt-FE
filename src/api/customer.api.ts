@@ -10,6 +10,8 @@ import type {
   CustomerListQuery,
   CustomerBookingQuery,
   LoyaltyTransactionQuery,
+  CustomerSearchDto,
+  CustomerSearchQuery,
 } from "../features/customer/shared/types/customer.types";
 
 // ============================================================================
@@ -145,4 +147,22 @@ export async function unlockCustomer(customerId: string): Promise<void> {
     `/api/customers/${customerId}/unlock`,
     { method: "POST" }
   );
+}
+
+// ============================================================================
+// 8. Customer Search Endpoint (for autocomplete)
+// ============================================================================
+export async function searchCustomers(query: CustomerSearchQuery): Promise<CustomerSearchDto[]> {
+  const params = new URLSearchParams();
+
+  if (query.searchTerm) params.append('searchTerm', query.searchTerm);
+  if (query.limit) params.append('limit', query.limit.toString());
+  const response = await authProtectedFetch<CustomerSearchDto[]>(
+    `/api/customers/search?${params}`,
+    {
+      method: "GET",
+    }
+  );
+
+  return response.data || [];
 }

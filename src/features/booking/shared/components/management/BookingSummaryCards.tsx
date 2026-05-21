@@ -6,8 +6,8 @@
  */
 
 import { CalendarCheck, Clock, CheckCircle, CurrencyDollar, ArrowCounterClockwise } from '@phosphor-icons/react';
-import type { BookingDashboardSummaryDto } from '../types/booking.types';
-import { formatCurrency } from '../utils/bookingStatus';
+import type { BookingDashboardSummaryDto } from '../../types/booking.types';
+import { formatCurrency } from '../../utils/bookingStatus';
 
 interface BookingSummaryCardsProps {
   summary: BookingDashboardSummaryDto | null;

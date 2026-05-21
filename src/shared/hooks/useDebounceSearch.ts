@@ -1,26 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 
 export function useDebounceSearch<T>(
-  searchFn: (term: string) => Promise<{ items: T[] }>,
+  searchFn: (term: string) => Promise<T[]>,
   delay = 300
 ) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!searchTerm.trim()) {
+    const trimmed = searchTerm.trim();
+
+    if (!trimmed) {
       setResults([]);
       return;
     }
 
     const timeoutId = setTimeout(async () => {
-      setLoading(true);
       try {
-        const searchResults = await searchFn(searchTerm);
-        setResults(searchResults.items);
+        setLoading(true);
+
+        const searchResults = await searchFn(trimmed);
+
+        setResults(searchResults);
       } catch (error) {
-        console.error('Search failed:', error);
+        console.error("Search failed:", error);
         setResults([]);
       } finally {
         setLoading(false);
@@ -30,5 +34,11 @@ export function useDebounceSearch<T>(
     return () => clearTimeout(timeoutId);
   }, [searchTerm, searchFn, delay]);
 
-  return { searchTerm, setSearchTerm, results, loading };
+  return {
+    searchTerm,
+    setSearchTerm,
+    results,
+    loading,
+    clearResults: () => setResults([]),
+  };
 }

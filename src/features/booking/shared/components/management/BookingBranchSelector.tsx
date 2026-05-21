@@ -4,8 +4,7 @@
  * Branch selector with "All Branches" option for booking management.
  */
 
-import { Storefront } from '@phosphor-icons/react';
-import { IconContainer, Select } from '@/src/shared/components/ui';
+import { Select } from '@/src/shared/components/ui';
 
 interface Branch {
   id: string;
@@ -43,9 +42,6 @@ export function BookingBranchSelector({
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <IconContainer variant="secondary">
-        <Storefront className="h-5 w-5 text-slate-500 dark:text-slate-400" />
-      </IconContainer>
       <div className="flex-1">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1.5">
           {label}
@@ -61,7 +57,7 @@ export function BookingBranchSelector({
             )}
             {branches.map((branch) => (
               <option key={branch.id} value={branch.id}>
-                {branch.name} {branch.status === 1 ? "(Suspended)" : ""}
+                {branch.name} {branch.status === 1 ? "(Đã khóa)" : ""}
               </option>
             ))}
           </Select>

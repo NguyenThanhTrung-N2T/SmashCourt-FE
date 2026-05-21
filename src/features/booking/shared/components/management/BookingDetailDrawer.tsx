@@ -14,7 +14,7 @@ import {
   getPaymentStatusVariant,
   formatCurrency,
   formatTime
-} from '../utils/bookingStatus';
+} from '../../utils/bookingStatus';
 import { formatDate, formatDateTime } from '@/src/shared/utils/date';
 
 interface BookingDetailDrawerProps {
@@ -56,7 +56,7 @@ export function BookingDetailDrawer({
       {/* Drawer */}
       <div className="fixed right-0 top-0 bottom-0 w-full max-w-2xl bg-surface-1 shadow-2xl z-50 animate-slide-in-right overflow-y-auto custom-scrollbar">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-[#1B5E38] to-[#2A9D5C] px-6 py-5 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-linear-to-r from-[#1B5E38] to-[#2A9D5C] px-6 py-5 flex items-center justify-between z-10">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-white/70">
               Chi tiết đơn

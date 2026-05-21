@@ -68,6 +68,13 @@ export interface CustomerStatisticsDto {
   lastBookingDate?: string;
 }
 
+export interface CustomerSearchDto {
+  id: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+}
+
 // ============================================================================
 // Customer Bookings Types
 // ============================================================================
@@ -122,6 +129,11 @@ export interface CustomerListQuery {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface CustomerSearchQuery {
+  searchTerm?: string;
+  limit?: number;
+}
+
 export interface CustomerBookingQuery {
   page?: number;
   pageSize?: number;
@@ -137,3 +149,4 @@ export interface LoyaltyTransactionQuery {
   fromDate?: string;
   toDate?: string;
 }
+

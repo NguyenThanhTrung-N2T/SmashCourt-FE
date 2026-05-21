@@ -10,7 +10,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { Cursor, CheckCircle } from "@phosphor-icons/react";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { formatTime, formatDuration, calculateDuration } from "@/src/features/timeslot/utils";
-import { CourtTrack } from "@/src/features/booking/shared/components";
+import { CourtTrack } from "@/src/features/booking/shared/components/new/CourtTrack";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
@@ -141,12 +141,12 @@ export function InteractiveTimeGrid({
       {/* Time Grid */}
       <div
         ref={scrollContainerRef}
-        className="overflow-x-auto custom-scrollbar rounded-3xl border border-border bg-gradient-to-b from-surface-1 to-surface-2 p-5 shadow-inner"
+        className="overflow-x-auto custom-scrollbar rounded-3xl border border-border bg-linear-to-b from-surface-1 to-surface-2 p-5 shadow-inner"
       >
-        <div className="min-w-[1200px]">
+        <div className="min-w-300">
           {/* Hour markers */}
           <div className="mb-3 flex items-end gap-4">
-            <div className="w-[150px]" />
+            <div className="w-37.5" />
             <div className="relative h-8 flex-1">
               {hourMarks.map((hour) => {
                 // Calculate the block index for this hour

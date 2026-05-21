@@ -9,7 +9,7 @@
 import { Calendar, Lightning } from "@phosphor-icons/react";
 import { Spinner } from "@/src/shared/components/feedback/Spinner";
 import { useCourts } from "@/src/features/court/shared/hooks/useCourts";
-import { InteractiveTimeGrid } from '@/src/features/booking/shared/components';
+import { InteractiveTimeGrid } from '@/src/features/booking/shared/components/new';
 import { CourtSelectionLoading, BookingErrorState, BookingEmptyState } from "../../states";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
