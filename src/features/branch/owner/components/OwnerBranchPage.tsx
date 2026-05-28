@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { Info, UserCircle, Users, CourtBasketball, Plus } from '@phosphor-icons/react';
+import { Info, UserCircle, Users, CourtBasketball, Plus, Coffee } from '@phosphor-icons/react';
 import { BranchInfoTab } from './tabs/BranchInfoTab';
 import { BranchManagerTab } from './tabs/BranchManagerTab';
 import { BranchStaffTab } from './tabs/BranchStaffTab';
@@ -16,16 +16,17 @@ import { useToast } from '@/src/shared/hooks/useToast';
 import { PageHeader } from '@/src/shared/components/layout/PageHeader';
 import { BranchSelector } from '@/src/shared/components/layout/BranchSelector';
 import { BranchTabNav } from './layout/BranchTabNav';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Toast } from '@/src/shared/components/ui/Toast';
+import { Button, Toast } from '@/src/shared/components/ui';
+import { BranchServicesTab } from './tabs/BranchServicesTab';
 
-type TabId = 'info' | 'manager' | 'staff' | 'courts';
+type TabId = 'info' | 'manager' | 'staff' | 'courts' | 'services';
 
 const TABS = [
     { id: 'info' as TabId, label: 'Thông tin chi nhánh', icon: Info },
     { id: 'manager' as TabId, label: 'Quản lý chi nhánh', icon: UserCircle },
     { id: 'staff' as TabId, label: 'Nhân viên', icon: Users },
     { id: 'courts' as TabId, label: 'Loại sân', icon: CourtBasketball },
+    { id: 'services' as TabId, label: 'Dịch vụ', icon: Coffee }
 ];
 
 export function OwnerBranchPage() {
@@ -107,6 +108,7 @@ export function OwnerBranchPage() {
                         {activeTab === 'manager' && <BranchManagerTab key={`manager-${selectedBranchId}`} branchId={selectedBranchId} onToast={showToast} />}
                         {activeTab === 'staff' && <BranchStaffTab key={`staff-${selectedBranchId}`} branchId={selectedBranchId} onToast={showToast} />}
                         {activeTab === 'courts' && <BranchCourtTypesTab key={`courts-${selectedBranchId}`} branchId={selectedBranchId} onToast={showToast} />}
+                        {activeTab === 'services' && <BranchServicesTab key={`services-${selectedBranchId}`} branchId={selectedBranchId} onToast={showToast} />}
                     </div>
                 </>
             )}

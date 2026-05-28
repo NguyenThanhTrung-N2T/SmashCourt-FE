@@ -49,11 +49,11 @@ export function EditServiceModal({
           description: service.description || "",
           unit: service.unit,
           defaultPrice: String(service.defaultPrice),
+          serviceDisplayUrl: service.serviceDisplayUrl,
         }}
         onSubmit={handleSubmit}
         onCancel={onClose}
         submitText="Lưu thay đổi"
-        submitIcon={<CheckCircle className="h-4 w-4" />}
         generalError={generalError}
       />
     </Modal>

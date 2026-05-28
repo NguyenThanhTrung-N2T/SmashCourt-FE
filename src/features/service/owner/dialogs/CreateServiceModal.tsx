@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Lightning } from "@phosphor-icons/react";
+import { Plus } from "@phosphor-icons/react";
 
 import { Modal } from "@/src/shared/components/ui/Modal";
 import { ServiceForm } from "../components/ServiceForm";
@@ -36,7 +36,7 @@ export function CreateServiceModal({
       isOpen={true}
       onClose={onClose}
       title="Tạo dịch vụ mới"
-      subtitle="MỞ BÁN SẢN PHẨM"
+      subtitle="MỞ BÁN DỊCH VỤ"
       icon={<Plus className="h-5 w-5" />}
       maxWidth="xl"
       headerGradient="from-[#1B5E38] to-[#2A9D5C]"
@@ -44,8 +44,7 @@ export function CreateServiceModal({
       <ServiceForm
         onSubmit={handleSubmit}
         onCancel={onClose}
-        submitText="Lưu và Kinh doanh"
-        submitIcon={<Lightning className="h-4 w-4" />}
+        submitText="Tạo dịch vụ"
         generalError={generalError}
       />
     </Modal>

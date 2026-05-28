@@ -1,5 +1,4 @@
-import { Alert } from "@/src/shared/components/ui/Alert";
-import { Button } from "@/src/shared/components/ui/Button";
+import { Alert, Button } from "@/src/shared/components/ui";
 import { ArrowClockwise } from "@phosphor-icons/react";
 
 interface ServiceErrorStateProps {

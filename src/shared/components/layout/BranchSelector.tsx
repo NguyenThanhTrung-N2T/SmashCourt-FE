@@ -1,5 +1,3 @@
-import { Storefront } from '@phosphor-icons/react';
-import { IconContainer } from '../ui/IconContainer';
 import { Select } from '../ui/Select';
 
 interface Branch {
@@ -27,9 +25,7 @@ export function BranchSelector({
 }: BranchSelectorProps) {
   return (
     <div className={`flex items-center gap-3 bg-surface-1 p-4 rounded-2xl border border-border shadow-sm ${className}`}>
-      <IconContainer variant="secondary">
-        <Storefront className="h-5 w-5 text-muted" />
-      </IconContainer>
+
       <div className="flex-1">
         <p className="text-xs font-bold text-muted uppercase tracking-wide">
           {label}

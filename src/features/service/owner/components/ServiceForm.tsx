@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { Plus, Lightning } from "@phosphor-icons/react";
 import { Grid } from "@/src/shared/components/layout/Grid";
 import { Flex } from "@/src/shared/components/layout/Flex";
 import { Input } from "@/src/shared/components/ui/Input";
 import { Textarea } from "@/src/shared/components/ui/Textarea";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { Button } from "@/src/shared/components/ui/Button";
+import { ImageUploader } from "@/src/shared/components/ui/ImageUploader";
 import type { SaveServiceRequest } from "@/src/features/service/shared/types/service.types";
 import {
   createNumericChangeHandler,
   createTrimOnBlurHandler,
-  createValidatedChangeHandler,
-  ValidationRules,
 } from "@/src/shared/utils/inputValidation";
 
 interface ServiceFormProps {
@@ -21,11 +21,11 @@ interface ServiceFormProps {
     description: string;
     unit: string;
     defaultPrice: string;
+    serviceDisplayUrl?: string;
   };
   onSubmit: (data: SaveServiceRequest) => Promise<void>;
   onCancel: () => void;
   submitText: string;
-  submitIcon: React.ReactNode;
   generalError?: string | null;
 }
 
@@ -34,14 +34,15 @@ export function ServiceForm({
   onSubmit,
   onCancel,
   submitText,
-  submitIcon,
   generalError,
 }: ServiceFormProps) {
   const [name, setName] = useState(initialData?.name || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [unit, setUnit] = useState(initialData?.unit || "");
   const [defaultPrice, setDefaultPrice] = useState(initialData?.defaultPrice || "");
+  const [serviceDisplayUrl, setServiceDisplayUrl] = useState(initialData?.serviceDisplayUrl || "");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<{
     name?: string;
     unit?: string;
@@ -77,14 +78,23 @@ export function ServiceForm({
         description: description.trim() || null,
         unit: unit.trim(),
         defaultPrice: Number(defaultPrice),
+        serviceDisplayUrl: serviceDisplayUrl || undefined,
       });
     } catch (err) {
-      // Error is caught here just to prevent unhandled promise rejection if parent throws
-      // The parent will handle displaying the general error
+      // Error is handled by parent
     } finally {
       setSaving(false);
     }
   }
+
+  const isChanged =
+    name.trim() !== (initialData?.name || "") ||
+    description.trim() !== (initialData?.description || "") ||
+    unit.trim() !== (initialData?.unit || "") ||
+    defaultPrice !== (initialData?.defaultPrice || "") ||
+    serviceDisplayUrl !== (initialData?.serviceDisplayUrl || "");
+
+  const canSubmit = isChanged && !uploading && !saving;
 
   return (
     <>
@@ -96,6 +106,15 @@ export function ServiceForm({
         )}
 
         <Grid cols={1} spacing="lg">
+          {/* Image Upload Section */}
+          <ImageUploader
+            label="Hình ảnh minh họa"
+            value={serviceDisplayUrl}
+            onChange={setServiceDisplayUrl}
+            onUploadingChange={setUploading}
+            folder="services"
+          />
+
           <Input
             label="Tên mặt hàng/dịch vụ *"
             type="text"
@@ -136,7 +155,7 @@ export function ServiceForm({
                 placeholder="VD: 10000"
                 error={errors.defaultPrice}
                 rightIcon={<span className="text-sm font-bold text-slate-400">đ</span>}
-                className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
+                className="text-base shadow-sm focus:border-primary focus:ring-primary/10"
               />
             </div>
             <div>
@@ -151,7 +170,7 @@ export function ServiceForm({
                 onBlur={createTrimOnBlurHandler(setUnit)}
                 placeholder="VD: Chai, Lượt..."
                 error={errors.unit}
-                className="text-base shadow-sm focus:border-[#1B5E38] focus:ring-[#1B5E38]/10"
+                className="text-base shadow-sm focus:border-primary focus:ring-primary/10"
               />
             </div>
           </Grid>
@@ -159,14 +178,17 @@ export function ServiceForm({
       </div>
 
       <Flex align="center" justify="end" spacing="md" className="border-t border-border px-8 py-5 bg-surface-2 rounded-b-2xl">
-        <Button onClick={onCancel} disabled={saving} variant="ghost">
+        <button
+          onClick={onCancel}
+          disabled={saving || uploading}
+          className="px-4 py-2 text-sm font-bold text-muted hover:text-foreground transition-colors disabled:opacity-50"
+        >
           Hủy bỏ
-        </Button>
+        </button>
         <Button
           onClick={handleSubmit}
-          disabled={saving}
+          disabled={!canSubmit}
           isLoading={saving}
-          leftIcon={submitIcon}
           variant="primary"
         >
           {submitText}

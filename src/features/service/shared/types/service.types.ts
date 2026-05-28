@@ -12,6 +12,7 @@ export interface Service {
   status: ServiceStatus;
   createdAt: string;
   updatedAt: string;
+  serviceDisplayUrl?: string;
 }
 
 export interface SaveServiceRequest {
@@ -19,4 +20,5 @@ export interface SaveServiceRequest {
   description?: string | null;
   unit: string;
   defaultPrice: number;
+  serviceDisplayUrl?: string;
 }
