@@ -8,11 +8,9 @@
 
 import { useState } from "react";
 import { CalendarBlank, Clock, Plus, Trash, MapPin } from "@phosphor-icons/react";
-import { Button } from "@/src/shared/components/ui/Button";
-import { Input } from "@/src/shared/components/ui/Input";
-import { Alert } from "@/src/shared/components/ui/Alert";
+import { Button, Input, Alert } from "@/src/shared/components/ui";
 import { Spinner } from "@/src/shared/components/feedback/Spinner";
-import { EmptyState } from "@/src/shared/components/layout/EmptyState";
+import { EmptyState } from "@/src/shared/components/layout";
 import { CourtCard } from "./CourtCard";
 import { useCourts } from "../../shared/hooks/useCourts";
 import { formatCurrency } from "@/src/features/booking/customer/utils/bookingStatus";

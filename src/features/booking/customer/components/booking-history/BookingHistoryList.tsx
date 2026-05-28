@@ -9,7 +9,7 @@
 import { useState } from "react";
 import { CalendarBlank } from "@phosphor-icons/react";
 import { Pagination } from "@/src/shared/components/ui/Pagination";
-import { EmptyState } from "@/src/shared/components/layout/EmptyState";
+import { EmptyState } from "@/src/shared/components/layout";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { BookingCard } from "./BookingCard";
 import { BookingDetailModal } from "./BookingDetailModal";

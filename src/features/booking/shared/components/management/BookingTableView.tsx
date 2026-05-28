@@ -1,6 +1,6 @@
 import { Badge, Button, Pagination, ActionMenu } from '@/src/shared/components/ui';
 import { TableSkeleton } from '@/src/shared/components/feedback';
-import { EmptyState } from '@/src/shared/components/layout/EmptyState';
+import { EmptyState } from '@/src/shared/components/layout';
 import {
   SignIn,
   SignOut,

@@ -26,8 +26,16 @@
 
   /* Page-level & inverse */
   --page-bg: #EBEBEB;
-  --inverse: #0f172a;
+  --inverse: #ffffff;
   --surface-inverse: #0f172a;
+
+  /* Insights */
+  --insight-green-bg: #E1F5EE;
+  --insight-green-icon: #085041;
+  --insight-blue-bg: #E6F1FB;
+  --insight-blue-icon: #042C53;
+  --insight-yellow-bg: #FAEEDA;
+  --insight-yellow-icon: #633806;
 }
 
 .dark {
@@ -48,6 +56,14 @@
   --page-bg: #0f172a;
   --inverse: #e2e8f0;
   --surface-inverse: #1e293b;
+
+  /* Insights */
+  --insight-green-bg: rgba(52, 211, 153, 0.1);
+  --insight-green-icon: #34d399;
+  --insight-blue-bg: rgba(56, 189, 248, 0.1);
+  --insight-blue-icon: #38bdf8;
+  --insight-yellow-bg: rgba(251, 191, 36, 0.1);
+  --insight-yellow-icon: #fbbf24;
 }
 
 @theme inline {
