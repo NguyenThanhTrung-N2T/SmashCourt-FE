@@ -9,6 +9,7 @@ import type {
   AddServiceToBranchDto,
   UpdateBranchServiceDto,
   BranchServiceDto,
+  BranchBasicDto,
 } from "../features/branch/shared/types/branch.types";
 import type {
   BranchManagerDto,
@@ -44,6 +45,24 @@ export async function fetchBranchById(id: string): Promise<BranchDto> {
     { method: "GET" }
   );
   if (!response.data) throw new Error("Failed to fetch branch details");
+  return response.data;
+}
+
+export async function fetchBasicBranches(page = 1, pageSize = 10): Promise<PaginatedData<BranchBasicDto>> {
+  const response = await authProtectedFetch<PaginatedData<BranchBasicDto>>(
+    `/api/branches/basic?Page=${page}&PageSize=${pageSize}`,
+    { method: "GET" }
+  );
+  if (!response.data) throw new Error("Failed to fetch basic branches");
+  return response.data;
+}
+
+export async function fetchBasicBranchById(id: string): Promise<BranchBasicDto> {
+  const response = await authProtectedFetch<BranchBasicDto>(
+    `/api/branches/basic/${id}`,
+    { method: "GET" }
+  );
+  if (!response.data) throw new Error("Failed to fetch basic branch details");
   return response.data;
 }
 

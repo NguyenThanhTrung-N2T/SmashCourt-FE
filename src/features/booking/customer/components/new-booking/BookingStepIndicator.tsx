@@ -1,9 +1,3 @@
-/**
- * BookingStepIndicator Component
- * 
- * Visual indicator showing the current step in the booking process.
- */
-
 "use client";
 
 import { Fragment } from "react";

@@ -6,10 +6,11 @@
 
 "use client";
 
+import { User, Phone, EnvelopeSimple, NotePencil, CheckCircle, Warning, Info } from "@phosphor-icons/react";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import { LoyaltyInfoCard } from "../LoyaltyInfoCard";
 import { PromotionSelector } from "../PromotionSelector";
-import type { BranchDto } from "@/src/features/branch/shared/types/branch.types";
+import type { BranchBasicDto } from "@/src/features/branch/shared/types/branch.types";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 import type { MyLoyaltyDto } from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
@@ -17,7 +18,7 @@ import type { ApplicablePromotion } from "@/src/features/benefit/promotion/share
 import type { BookingCourtType } from "@/src/features/booking/customer/hooks/useBookingForm";
 
 interface BookingConfirmationStepProps {
-  branch: BranchDto;
+  branch: BranchBasicDto;
   courtType: BookingCourtType;
   court: CourtDto;
   date: string;
@@ -100,115 +101,164 @@ export function BookingConfirmationStep({
     });
   };
 
-  const inputCls = (hasError?: boolean, isReadOnly?: boolean) =>
-    `w-full rounded-xl border ${hasError ? "border-red-500/40 bg-red-500/10" : "border-border bg-surface-2"
-    } px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted ${isReadOnly ? "cursor-not-allowed opacity-70" : "hover:border-primary focus:border-primary focus:bg-surface-1 focus:ring-2 focus:ring-primary/20"
+  const inputWrapperCls = (hasError?: boolean, isReadOnly?: boolean, hasValue?: boolean) =>
+    `relative flex items-center rounded-xl border transition-all duration-200 ${hasError
+      ? "border-red-500/50 bg-red-500/5 ring-2 ring-red-500/10"
+      : isReadOnly
+        ? "border-border bg-surface-2 opacity-80"
+        : hasValue
+          ? "border-primary/50 bg-surface-1 shadow-sm ring-1 ring-primary/10"
+          : "border-border bg-surface-2 hover:border-primary/40 focus-within:border-primary focus-within:bg-surface-1 focus-within:ring-2 focus-within:ring-primary/20"
+    }`;
+
+  const inputElementCls = (isReadOnly?: boolean) =>
+    `w-full bg-transparent px-4 py-3.5 pl-11 text-sm font-medium text-foreground outline-none placeholder:font-normal placeholder:text-muted/60 ${isReadOnly ? "cursor-not-allowed" : ""
     }`;
 
   return (
     <div className="space-y-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-foreground">Xác nhận thông tin</h2>
-        <p className="mt-1 text-sm text-muted">
-          {isLoggedIn
-            ? "Thông tin của bạn đã được tự động điền. Vui lòng kiểm tra lại trước khi xác nhận."
-            : "Vui lòng nhập thông tin liên hệ và kiểm tra lại thông tin đặt sân"}
-        </p>
+        <div className="mt-2 flex items-center gap-2 text-sm text-muted">
+          <Info className="h-4 w-4 text-primary" weight="fill" />
+          <p>
+            {isLoggedIn
+              ? "Thông tin của bạn đã được tự động điền. Vui lòng kiểm tra lại trước khi xác nhận."
+              : "Vui lòng nhập thông tin liên hệ và kiểm tra lại thông tin đặt sân"}
+          </p>
+        </div>
       </div>
 
       {/* Guest Information Form */}
-      <div className="rounded-xl border border-border bg-surface-2 p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
-            Thông tin liên hệ
-          </h3>
+      <div className="rounded-2xl border border-border bg-surface-1 p-6 md:p-8 shadow-sm">
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-1 rounded-full bg-primary" />
+            <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">
+              Thông tin khách hàng
+            </h3>
+          </div>
           {isLoggedIn && (
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+            <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-tight text-primary">
+              <CheckCircle className="h-3.5 w-3.5" weight="fill" />
               Đã đăng nhập
-            </span>
+            </div>
           )}
         </div>
-        <div className="space-y-4">
-          <div>
-            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted">
-              Họ và tên *
+
+        <div className="grid gap-6 sm:grid-cols-2">
+          {/* Name Field */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              Họ và tên
+              <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              value={guestName}
-              onChange={(e) => onGuestNameChange(e.target.value)}
-              placeholder="Nguyễn Văn A"
-              className={inputCls(!!validationErrors.name, isNameReadOnly)}
-              readOnly={isNameReadOnly}
-              required
-            />
+            <div className={inputWrapperCls(!!validationErrors.name, isNameReadOnly, !!guestName)}>
+              <User className={`absolute left-4 h-5 w-5 ${guestName ? "text-primary" : "text-muted"}`} weight={guestName ? "bold" : "regular"} />
+              <input
+                type="text"
+                value={guestName}
+                onChange={(e) => onGuestNameChange(e.target.value)}
+                placeholder="Nhập họ và tên..."
+                className={inputElementCls(isNameReadOnly)}
+                readOnly={isNameReadOnly}
+                required
+              />
+            </div>
             {isNameReadOnly && (
-              <p className="mt-1 text-xs text-muted">
-                Thông tin từ tài khoản của bạn
+              <p className="flex items-center gap-1 text-[10px] italic text-muted">
+                <CheckCircle className="h-3 w-3 text-primary" weight="fill" />
+                Lấy từ tài khoản người dùng
               </p>
             )}
             {validationErrors.name && (
-              <p className="mt-1 text-xs text-red-500">{validationErrors.name}</p>
+              <p className="flex items-center gap-1 text-xs font-medium text-red-500">
+                <Warning className="h-3.5 w-3.5" />
+                {validationErrors.name}
+              </p>
             )}
           </div>
 
-          <div>
-            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted">
-              Số điện thoại *
+          {/* Phone Field */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              Số điện thoại
+              <span className="text-red-500">*</span>
             </label>
-            <input
-              type="tel"
-              value={guestPhone}
-              onChange={(e) => onGuestPhoneChange(e.target.value)}
-              placeholder="0901234567"
-              className={inputCls(!!validationErrors.phone, isPhoneReadOnly)}
-              readOnly={isPhoneReadOnly}
-              required
-            />
+            <div className={inputWrapperCls(!!validationErrors.phone, isPhoneReadOnly, !!guestPhone)}>
+              <Phone className={`absolute left-4 h-5 w-5 ${guestPhone ? "text-primary" : "text-muted"}`} weight={guestPhone ? "bold" : "regular"} />
+              <input
+                type="tel"
+                value={guestPhone}
+                onChange={(e) => onGuestPhoneChange(e.target.value)}
+                placeholder="Ví dụ: 0901234567"
+                className={inputElementCls(isPhoneReadOnly)}
+                readOnly={isPhoneReadOnly}
+                required
+              />
+            </div>
             {isPhoneReadOnly && (
-              <p className="mt-1 text-xs text-muted">
-                Thông tin từ tài khoản của bạn
+              <p className="flex items-center gap-1 text-[10px] italic text-muted">
+                <CheckCircle className="h-3 w-3 text-primary" weight="fill" />
+                Lấy từ tài khoản người dùng
               </p>
             )}
             {validationErrors.phone && (
-              <p className="mt-1 text-xs text-red-500">{validationErrors.phone}</p>
+              <p className="flex items-center gap-1 text-xs font-medium text-red-500">
+                <Warning className="h-3.5 w-3.5" />
+                {validationErrors.phone}
+              </p>
             )}
           </div>
 
-          <div>
-            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted">
-              Email *
+          {/* Email Field */}
+          <div className="sm:col-span-2 space-y-2">
+            <label className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              Địa chỉ Email
+              <span className="text-red-500">*</span>
             </label>
-            <input
-              type="email"
-              value={guestEmail}
-              onChange={(e) => onGuestEmailChange(e.target.value)}
-              placeholder="example@email.com"
-              className={inputCls(!!validationErrors.email, isEmailReadOnly)}
-              readOnly={isEmailReadOnly}
-              required
-            />
+            <div className={inputWrapperCls(!!validationErrors.email, isEmailReadOnly, !!guestEmail)}>
+              <EnvelopeSimple className={`absolute left-4 h-5 w-5 ${guestEmail ? "text-primary" : "text-muted"}`} weight={guestEmail ? "bold" : "regular"} />
+              <input
+                type="email"
+                value={guestEmail}
+                onChange={(e) => onGuestEmailChange(e.target.value)}
+                placeholder="example@email.com"
+                className={inputElementCls(isEmailReadOnly)}
+                readOnly={isEmailReadOnly}
+                required
+              />
+            </div>
             {isEmailReadOnly && (
-              <p className="mt-1 text-xs text-muted">
-                Thông tin từ tài khoản của bạn
+              <p className="flex items-center gap-1 text-[10px] italic text-muted">
+                <CheckCircle className="h-3 w-3 text-primary" weight="fill" />
+                Lấy từ tài khoản người dùng
               </p>
             )}
             {validationErrors.email && (
-              <p className="mt-1 text-xs text-red-500">{validationErrors.email}</p>
+              <p className="flex items-center gap-1 text-xs font-medium text-red-500">
+                <Warning className="h-3.5 w-3.5" />
+                {validationErrors.email}
+              </p>
             )}
           </div>
 
-          <div>
-            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted">
-              Ghi chú (tùy chọn)
+          {/* Note Field */}
+          <div className="sm:col-span-2 space-y-2">
+            <label className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              Ghi chú cho sân
+              <span className="text-muted/50 font-normal">(Tùy chọn)</span>
             </label>
-            <textarea
-              value={bookingNote}
-              onChange={(e) => onBookingNoteChange(e.target.value)}
-              placeholder="Nhập ghi chú cho đặt sân..."
-              rows={3}
-              className={`${inputCls()} resize-none`}
-            />
+            <div className={inputWrapperCls(false, false, !!bookingNote)}>
+              <NotePencil className={`absolute left-4 top-3.5 h-5 w-5 ${bookingNote ? "text-primary" : "text-muted"}`} weight={bookingNote ? "bold" : "regular"} />
+              <textarea
+                value={bookingNote}
+                onChange={(e) => onBookingNoteChange(e.target.value)}
+                placeholder="Bạn có yêu cầu gì thêm không? Ví dụ: Mượn vợt, mua nước..."
+                rows={3}
+                className="w-full bg-transparent px-4 py-3.5 pl-11 text-sm font-medium text-foreground outline-none placeholder:font-normal placeholder:text-muted/60 resize-none"
+              />
+            </div>
           </div>
         </div>
       </div>

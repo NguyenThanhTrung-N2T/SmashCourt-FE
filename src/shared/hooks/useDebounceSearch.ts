@@ -1,38 +1,64 @@
 import { useEffect, useState } from "react";
 
+/**
+ * Generic debounce hook for debouncing any value.
+ * Returns the debounced value and a pending state.
+ */
+export function useDebounce<T>(value: T, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  const [isPending, setIsPending] = useState(false);
+
+  useEffect(() => {
+    if (value === debouncedValue) {
+      setIsPending(false);
+      return;
+    }
+
+    setIsPending(true);
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+      setIsPending(false);
+    }, delay);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay, debouncedValue]);
+
+  return { debouncedValue, isPending };
+}
+
+/**
+ * Specialized hook for asynchronous searching with debouncing.
+ */
 export function useDebounceSearch<T>(
   searchFn: (term: string) => Promise<T[]>,
   delay = 300
 ) {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<T[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { debouncedValue, isPending: loading } = useDebounce(searchTerm, delay);
 
   useEffect(() => {
-    const trimmed = searchTerm.trim();
+    const trimmed = debouncedValue?.trim();
 
     if (!trimmed) {
       setResults([]);
       return;
     }
 
-    const timeoutId = setTimeout(async () => {
+    const executeSearch = async () => {
       try {
-        setLoading(true);
-
         const searchResults = await searchFn(trimmed);
-
         setResults(searchResults);
       } catch (error) {
         console.error("Search failed:", error);
         setResults([]);
-      } finally {
-        setLoading(false);
       }
-    }, delay);
+    };
 
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm, searchFn, delay]);
+    executeSearch();
+  }, [debouncedValue, searchFn]);
 
   return {
     searchTerm,

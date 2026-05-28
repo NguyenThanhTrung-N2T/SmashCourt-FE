@@ -6,22 +6,26 @@
 
 "use client";
 
+import { useState } from "react";
 import { MapPin, Phone, Clock } from "@phosphor-icons/react";
 import { useBranches } from "@/src/features/branch/customer/hooks/useBranches";
-import type { BranchDto } from "@/src/features/branch/shared/types/branch.types";
-import { SmartImage } from "@/src/shared/components/ui";
+import type { BranchBasicDto } from "@/src/features/branch/shared/types/branch.types";
+import { SmartImage, Pagination } from "@/src/shared/components/ui";
 import { BranchSelectionLoading, BookingErrorState, BookingEmptyState } from "../../states";
+
+const PAGE_SIZE = 9;
 
 interface BranchSelectionStepProps {
   selectedBranchId: string | null;
-  onSelectBranch: (branch: BranchDto) => void;
+  onSelectBranch: (branch: BranchBasicDto) => void;
 }
 
 export function BranchSelectionStep({
   selectedBranchId,
   onSelectBranch,
 }: BranchSelectionStepProps) {
-  const { branches, isLoading, error } = useBranches();
+  const [page, setPage] = useState(1);
+  const { branches, totalItems, totalPages, isLoading, error } = useBranches(page, PAGE_SIZE);
 
   if (isLoading) {
     return <BranchSelectionLoading />;
@@ -123,6 +127,17 @@ export function BranchSelectionStep({
             </button>
           );
         })}
+      </div>
+
+      <div className="mt-8">
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
+          itemLabel="chi nhánh"
+        />
       </div>
     </div>
   );

@@ -13,10 +13,10 @@ export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const variantStyles = {
- error:"border-red-500/30 bg-red-500/10 text-red-600",
- warning:"border-amber-500/30 bg-amber-500/10 text-amber-600",
- success:"border-primary/30 bg-primary/10 text-primary",
- info:"border-indigo-500/30 bg-indigo-500/10 text-indigo-600",
+  error: "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400",
+  warning: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  success: "border-primary/30 bg-primary/10 text-primary",
+  info: "border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
 };
 
 const iconMap = {

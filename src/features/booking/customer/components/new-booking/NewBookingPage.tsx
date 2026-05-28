@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { ArrowLeft, ArrowRight, CheckCircle } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowRight, CheckCircle, Warning } from "@phosphor-icons/react";
 import { Button } from "@/src/shared/components/ui/Button";
 import { Alert } from "@/src/shared/components/ui/Alert";
 import {
@@ -229,45 +229,64 @@ export function NewBookingPage() {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex items-center justify-between gap-4">
-          <Button
-            variant="secondary"
-            onClick={handleBack}
-            disabled={currentStep === 1 || isSubmitting}
-            leftIcon={<ArrowLeft className="h-4 w-4" />}
-          >
-            Quay lại
-          </Button>
-
-          {currentStep < 4 ? (
-            <Button
-              variant="primary"
-              onClick={handleNext}
-              disabled={!canProceedFromStep(currentStep)}
-              className="ml-auto"
-            >
-              Tiếp tục
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              onClick={handleSubmitBooking}
-              disabled={
-                isSubmitting ||
-                !guestName.trim() ||
-                !guestPhone.trim() ||
-                !guestEmail.trim() ||
-                !!validationErrors.phone ||
-                !!validationErrors.email
-              }
-              isLoading={isSubmitting}
-              className="ml-auto"
-              leftIcon={<CheckCircle className="h-5 w-5" />}
-            >
-              Xác nhận đặt sân
-            </Button>
+        <div className="flex flex-col space-y-4 pt-6">
+          {currentStep === 4 && (
+            <div className="flex flex-col space-y-3 font-medium">
+              {(!guestName.trim() || !guestPhone.trim() || !guestEmail.trim()) && (
+                <div className="flex items-center gap-2 rounded-lg bg-orange-500/10 px-4 py-3 text-sm text-orange-600 border border-orange-500/20">
+                  <Warning className="h-5 w-5 shrink-0" weight="fill" />
+                  <span>Vui lòng điền đầy đủ các thông tin bắt buộc (Họ tên, SĐT, Email)</span>
+                </div>
+              )}
+              {(!!validationErrors.phone || !!validationErrors.email) && (
+                <div className="flex items-center gap-2 rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-600 border border-red-500/20">
+                  <Warning className="h-5 w-5 shrink-0" weight="fill" />
+                  <span>Thông tin liên hệ không hợp lệ. Vui lòng kiểm tra lại.</span>
+                </div>
+              )}
+            </div>
           )}
+
+          <div className="flex items-center justify-between gap-4">
+            <Button
+              variant="secondary"
+              onClick={handleBack}
+              disabled={currentStep === 1 || isSubmitting}
+              leftIcon={<ArrowLeft className="h-4 w-4" />}
+            >
+              Quay lại
+            </Button>
+
+            {currentStep < 4 ? (
+              <Button
+                variant="primary"
+                onClick={handleNext}
+                disabled={!canProceedFromStep(currentStep)}
+                className="ml-auto"
+              >
+                Tiếp tục
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                onClick={handleSubmitBooking}
+                disabled={
+                  isSubmitting ||
+                  !guestName.trim() ||
+                  !guestPhone.trim() ||
+                  !guestEmail.trim() ||
+                  !!validationErrors.phone ||
+                  !!validationErrors.email
+                }
+                isLoading={isSubmitting}
+                className="ml-auto px-8"
+                leftIcon={<CheckCircle className="h-5 w-5" weight="bold" />}
+              >
+                Xác nhận đặt sân
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>

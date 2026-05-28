@@ -34,6 +34,7 @@ function appendBookingListParams(params: URLSearchParams, query: BookingListQuer
   if (query.customerKeyword) params.append("customerKeyword", query.customerKeyword);
   if (query.sortBy) params.append("sortBy", query.sortBy);
   if (query.sortOrder) params.append("sortOrder", query.sortOrder);
+  if (query.search) params.append("search", query.search);
 }
 
 // ============================================================================
@@ -251,10 +252,7 @@ export async function fetchCustomerBookings(
     pageSize: (query.pageSize || 12).toString(),
   });
 
-  if (query.status !== undefined) params.append("status", query.status.toString());
-  if (query.branchId) params.append("branchId", query.branchId);
-  if (query.date) params.append("date", query.date);
-  if (query.search) params.append("search", query.search);
+  appendBookingListParams(params, query);
 
   const response = await authProtectedFetch<PaginatedData<BookingDto>>(
     `/api/me/bookings?${params}`,

@@ -4,12 +4,12 @@
 
 import { useState, useEffect } from "react";
 import { calculatePrice } from "@/src/api/pricing.api";
-import type { BranchDto } from "@/src/features/branch/shared/types/branch.types";
+import type { BranchBasicDto } from "@/src/features/branch/shared/types/branch.types";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
 interface UsePriceCalculationParams {
-  selectedBranch: BranchDto | null;
+  selectedBranch: BranchBasicDto | null;
   selectedCourt: CourtDto | null;
   selectedDate: string;
   selectedSlots: TimeGridSlotDto[];

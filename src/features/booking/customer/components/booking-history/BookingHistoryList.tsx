@@ -1,30 +1,41 @@
-/**
- * BookingHistoryList Component
- * 
- * Displays a paginated list of customer bookings.
- */
-
 "use client";
 
-import { useState } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
 import { CalendarBlank } from "@phosphor-icons/react";
-import { Pagination } from "@/src/shared/components/ui/Pagination";
+import { Alert, Pagination } from "@/src/shared/components/ui";
 import { EmptyState } from "@/src/shared/components/layout";
-import { Alert } from "@/src/shared/components/ui/Alert";
 import { BookingCard } from "./BookingCard";
 import { BookingDetailModal } from "./BookingDetailModal";
 import { BookingFilters } from "./BookingFilters";
 import { BookingHistoryLoading, BookingErrorState } from "../states";
-import { useCustomerBookings } from "../../hooks/useCustomerBookings";
-import { useBookingDetail } from "../../hooks/useBookingDetail";
-import { useRetryPayment } from "../../hooks/useRetryPayment";
-import type { BookingListQuery } from "../../../shared/types/booking.types";
+import { useCustomerBookings, useRetryPayment, useBookingDetail } from "@/src/features/booking/customer/hooks";
+import type { BookingListQuery } from "@/src/features/booking/shared/types/booking.types";
+
+const PAGE_SIZE = 12;
 
 export function BookingHistoryList() {
-  const { bookings, isLoading, error, updateQuery, query, refetch } = useCustomerBookings({
-    page: 1,
-    pageSize: 12,
-  });
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Initialize query from URL
+  const getQueryFromUrl = useCallback((): BookingListQuery => {
+    const params = Object.fromEntries(searchParams.entries());
+    return {
+      page: params.page ? parseInt(params.page) : 1,
+      pageSize: PAGE_SIZE,
+      status: params.status,
+      paymentStatus: params.paymentStatus,
+      branchId: params.branchId,
+      date: params.date,
+      fromDate: params.fromDate,
+      toDate: params.toDate,
+      search: params.search,
+    };
+  }, [searchParams]);
+
+  const { bookings, isLoading, error, updateQuery, query, refetch } = useCustomerBookings(getQueryFromUrl());
 
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const { retryPayment, isLoading: isRetryingPayment, error: paymentError, clearError } = useRetryPayment();
@@ -34,6 +45,26 @@ export function BookingHistoryList() {
     isLoading: isLoadingDetail,
     error: detailError,
   } = useBookingDetail(selectedBookingId);
+
+  // Sync state to URL when query changes
+  useEffect(() => {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.set(key, value.toString());
+      }
+    });
+
+    // Use replace to avoid filling history with every keystroke (if debounced)
+    // or push if we want back button to work for filters
+    const queryString = params.toString();
+    const url = queryString ? `${pathname}?${queryString}` : pathname;
+
+    // Only update if URL actually changed to avoid loops
+    if (`${pathname}?${searchParams.toString()}` !== url) {
+      router.replace(url, { scroll: false });
+    }
+  }, [query, pathname, router, searchParams]);
 
   const handleViewDetail = (bookingId: string) => {
     setSelectedBookingId(bookingId);
@@ -52,50 +83,33 @@ export function BookingHistoryList() {
       // Redirect to payment URL
       window.location.href = result.paymentUrl;
     }
-    // Error is handled by the hook and displayed via paymentError state
   };
 
-  const handleCancelSuccess = () => {
-    // Refresh the booking list after successful cancellation
+  const handleCancelSuccess = useCallback(() => {
     refetch();
-  };
+  }, [refetch]);
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     updateQuery({ page });
-  };
+  }, [updateQuery]);
 
-  const handleFilterChange = (filters: Pick<BookingListQuery, "status" | "date" | "search" | "branchId">) => {
+  const handleFilterChange = useCallback((filters: Partial<BookingListQuery>) => {
+    // Merge filters and reset to page 1
     updateQuery({ ...filters, page: 1 });
-  };
-
-  if (isLoading) {
-    return <BookingHistoryLoading />;
-  }
+  }, [updateQuery]);
 
   if (error) {
     return <BookingErrorState message={error} onRetry={refetch} />;
   }
 
-  if (!bookings || bookings.items.length === 0) {
-    return (
-      <EmptyState
-        icon={<CalendarBlank className="h-12 w-12 text-muted" />}
-        title="Chưa có đặt sân nào"
-        description="Bạn chưa có lịch sử đặt sân. Hãy đặt sân ngay để bắt đầu!"
-      />
-    );
-  }
-
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {/* Filters */}
         <BookingFilters
           onFilterChange={handleFilterChange}
-          activeFilters={{
-            status: query.status,
-            date: query.date,
-          }}
+          activeFilters={query}
+          isLoading={isLoading}
         />
 
         {/* Payment Error Alert */}
@@ -105,21 +119,31 @@ export function BookingHistoryList() {
           </Alert>
         )}
 
-        {/* Booking Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {bookings.items.map((booking, index) => (
-            <BookingCard
-              key={booking.bookingId || `booking-${index}`}
-              booking={booking}
-              onViewDetail={handleViewDetail}
-              onPayNow={handlePayNow}
-            />
-          ))}
-        </div>
+        {/* Booking Cards / Loading State */}
+        {isLoading && !bookings ? (
+          <BookingHistoryLoading />
+        ) : !bookings || bookings.items.length === 0 ? (
+          <EmptyState
+            icon={<CalendarBlank className="h-12 w-12 text-muted" />}
+            title="Chưa có đặt sân nào"
+            description="Không tìm thấy lịch sử đặt sân nào phù hợp với bộ lọc của bạn."
+          />
+        ) : (
+          <div className={`grid gap-5 md:grid-cols-2 lg:grid-cols-3 transition-opacity duration-300 ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            {bookings.items.map((booking, index) => (
+              <BookingCard
+                key={booking.bookingId || `booking-${index}`}
+                booking={booking}
+                onViewDetail={handleViewDetail}
+                onPayNow={handlePayNow}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Pagination */}
-        {bookings.totalPages > 1 && (
-          <div className="flex justify-center pt-4">
+        {bookings && bookings.totalPages > 1 && (
+          <div className="flex justify-center pt-6">
             <Pagination
               currentPage={query.page || 1}
               totalPages={bookings.totalPages}

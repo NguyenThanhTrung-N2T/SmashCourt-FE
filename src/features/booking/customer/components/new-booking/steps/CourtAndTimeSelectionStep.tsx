@@ -66,7 +66,6 @@ export function CourtAndTimeSelectionStep({
       <div className="mb-6">
         <h2 className="flex items-center gap-2.5 text-2xl font-bold text-foreground">
           Chọn sân và thời gian
-          <Lightning className="h-6 w-6 text-primary" />
         </h2>
         <p className="mt-2 text-sm text-muted">
           Kéo trực tiếp trên thanh thời gian để chọn khoảng giờ. Hệ thống sẽ tự động snap theo khung 30 phút.

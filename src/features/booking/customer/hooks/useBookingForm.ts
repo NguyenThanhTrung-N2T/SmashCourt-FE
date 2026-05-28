@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from "react";
 import { getAuthUser } from "@/src/features/auth/session/sessionStore";
-import type { BranchDto } from "@/src/features/branch/shared/types/branch.types";
+import type { BranchBasicDto } from "@/src/features/branch/shared/types/branch.types";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
@@ -29,7 +29,7 @@ export function useBookingForm() {
   });
 
   // Step 1: Branch
-  const [selectedBranch, setSelectedBranch] = useState<BranchDto | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<BranchBasicDto | null>(null);
 
   // Step 2: Court Type
   const [selectedCourtType, setSelectedCourtType] = useState<BookingCourtType | null>(null);
@@ -80,7 +80,7 @@ export function useBookingForm() {
   }, []);
 
   // Handlers
-  const handleBranchSelect = (branch: BranchDto) => {
+  const handleBranchSelect = (branch: BranchBasicDto) => {
     setSelectedBranch(branch);
     setSelectedCourtType(null);
     setSelectedCourt(null);

@@ -75,6 +75,18 @@ export interface BranchDto {
   managerId?: string; // UUID
 }
 
+export interface BranchBasicDto {
+  id: string; // UUID
+  name: string;
+  address: string;
+  latitude?: number;
+  longitude?: number;
+  phone?: string;
+  avatarUrl?: string;
+  openTime: string; // TimeSpan (e.g. "05:00:00")
+  closeTime: string; // TimeSpan
+}
+
 // ============================================================================
 // 2. Branch Court Types
 // ============================================================================

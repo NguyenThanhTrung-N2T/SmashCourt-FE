@@ -5,11 +5,13 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { fetchBranches } from "@/src/api/branch.api";
-import type { BranchDto } from "../../shared/types/branch.types";
+import { fetchBasicBranches } from "@/src/api/branch.api";
+import type { BranchBasicDto } from "../../shared/types/branch.types";
 
-export function useBranches() {
-  const [branches, setBranches] = useState<BranchDto[]>([]);
+export function useBranches(page = 1, pageSize = 50) {
+  const [branches, setBranches] = useState<BranchBasicDto[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,14 +19,16 @@ export function useBranches() {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await fetchBranches(1, 50); // Get all branches
+      const data = await fetchBasicBranches(page, pageSize);
       setBranches(data.items);
+      setTotalItems(data.totalItems);
+      setTotalPages(data.totalPages);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể tải danh sách chi nhánh");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [page, pageSize]);
 
   useEffect(() => {
     loadBranches();
@@ -36,6 +40,8 @@ export function useBranches() {
 
   return {
     branches,
+    totalItems,
+    totalPages,
     isLoading,
     error,
     refetch,
