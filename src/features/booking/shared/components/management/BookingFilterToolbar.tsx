@@ -217,7 +217,7 @@ export function BookingFilterToolbar({
             >
               <option value="">Tất cả</option>
               <option value={InvoicePaymentStatus.UNPAID}>Chưa thanh toán</option>
-              <option value={InvoicePaymentStatus.PAID}>Thanh toán 1 phần</option>
+              <option value={InvoicePaymentStatus.PARTIALLY_PAID}>Thanh toán 1 phần</option>
               <option value={InvoicePaymentStatus.PAID}>Đã thanh toán</option>
               <option value={InvoicePaymentStatus.REFUNDED}>Đã hoàn tiền</option>
             </Select>

@@ -27,7 +27,7 @@ export function useCourts({ branchId, courtTypeId }: UseCourtsParams) {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await fetchCourts(branchId, { courtTypeId });
+      const data = await fetchCourts(branchId, { typeId: courtTypeId });
 
       // Backend now handles court type filtering and public status visibility
       // (AVAILABLE, LOCKED, IN_USE are returned for public users, all others are filtered out)

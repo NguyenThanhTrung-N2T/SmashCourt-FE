@@ -56,8 +56,8 @@ export function canCheckIn(booking: BookingDto): boolean {
 
   const now = new Date();
   const allowedStart = new Date(startDateTime.getTime() - 15 * 60 * 1000); // 15 minutes before startTime
-
-  return now >= allowedStart && now <= endDateTime;
+  const allowdEnd = new Date(startDateTime.getTime() + 15 * 60 * 60 * 1000);
+  return now >= allowedStart && now <= allowdEnd;
 }
 
 /**
@@ -84,4 +84,12 @@ export function canCancel(booking: BookingDto): boolean {
 export function canConfirmRefund(booking: BookingDto): boolean {
   const status = getStatusValue(booking.status);
   return status === BookingStatus.CANCELLED_PENDING_REFUND;
+}
+
+/**
+ * Condition: Allows complete payment if status is PENDING_PAYMENT.
+ */
+export function canCompletePayment(booking: BookingDto): boolean {
+  const status = getStatusValue(booking.status);
+  return status === BookingStatus.PENDING_PAYMENT;
 }

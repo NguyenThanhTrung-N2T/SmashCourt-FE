@@ -1,11 +1,14 @@
-import { X, SignIn, SignOut, XCircle, CheckCircle, User, Phone, Envelope, CurrencyDollar } from '@phosphor-icons/react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { X, SignIn, SignOut, XCircle, CheckCircle, User, Phone, Envelope, CurrencyDollar, CreditCard } from '@phosphor-icons/react';
 import { Button, Badge } from '@/src/shared/components/ui';
 import type { BookingDto } from '@/src/features/booking/shared/types/booking.types';
 import {
   canCheckIn,
   canCheckout,
   canCancel,
-  canConfirmRefund
+  canConfirmRefund,
+  canCompletePayment
 } from '@/src/features/booking/shared/utils/bookingRules';
 import {
   getBookingStatusLabel,
@@ -25,6 +28,7 @@ interface BookingDetailDrawerProps {
   onCheckout: (bookingId: string) => void;
   onCancel: (bookingId: string) => void;
   onConfirmRefund: (bookingId: string) => void;
+  onCompletePayment: (bookingId: string) => void;
 }
 
 export function BookingDetailDrawer({
@@ -35,8 +39,17 @@ export function BookingDetailDrawer({
   onCheckout,
   onCancel,
   onConfirmRefund,
+  onCompletePayment,
 }: BookingDetailDrawerProps) {
-  if (!isOpen || !booking) return null;
+  // Prevent SSR hydration mismatch issues in Next.js
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!isOpen || !booking || !mounted) return null;
 
   const bookingId = booking.id || booking.bookingId || booking.bookingCode || '';
 
@@ -44,17 +57,19 @@ export function BookingDetailDrawer({
   const checkoutAllowed = canCheckout(booking);
   const cancelAllowed = canCancel(booking);
   const confirmRefundAllowed = canConfirmRefund(booking);
+  const completePaymentAllowed = canCompletePayment(booking);
 
-  return (
+  // Render the drawer elements outside the animated tree into document.body
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 animate-fade-in"
+        className="fixed inset-0 bg-slate-900/70 z-50 animate-fade-in"
         onClick={onClose}
       />
 
-      {/* Drawer */}
-      <div className="fixed right-0 top-0 bottom-0 w-full max-w-2xl bg-surface-1 shadow-2xl z-50 animate-slide-in-right overflow-y-auto custom-scrollbar">
+      {/* Drawer Container */}
+      <div className="fixed right-0 top-0 bottom-0 w-full max-w-2xl bg-surface-2 shadow-2xl z-55 animate-slide-in-right overflow-y-auto custom-scrollbar">
         {/* Header */}
         <div className="sticky top-0 bg-linear-to-r from-[#1B5E38] to-[#2A9D5C] px-6 py-5 flex items-center justify-between z-10">
           <div>
@@ -76,7 +91,7 @@ export function BookingDetailDrawer({
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Booking Info */}
-          <section className="bg-surface-2 rounded-xl p-4 space-y-3">
+          <section className="bg-surface-1 rounded-xl p-4 space-y-3 shadow-xs">
             <h3 className="text-sm font-bold text-muted uppercase tracking-wide">
               Thông tin đơn đặt sân
             </h3>
@@ -130,7 +145,7 @@ export function BookingDetailDrawer({
           </section>
 
           {/* Customer Info */}
-          <section className="bg-surface-2 rounded-xl p-4 space-y-3">
+          <section className="bg-surface-1 rounded-xl p-4 space-y-3 shadow-xs">
             <h3 className="text-sm font-bold text-muted uppercase tracking-wide">
               Thông tin khách hàng
             </h3>
@@ -161,7 +176,7 @@ export function BookingDetailDrawer({
           </section>
 
           {/* Courts */}
-          <section className="bg-surface-2 rounded-xl p-4 space-y-3">
+          <section className="bg-surface-1 rounded-xl p-4 space-y-3 shadow-xs">
             <h3 className="text-sm font-bold text-muted uppercase tracking-wide">
               Sân
             </h3>
@@ -169,7 +184,7 @@ export function BookingDetailDrawer({
               {booking.courts.map((court, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between bg-surface-1 rounded-lg p-3"
+                  className="flex items-center justify-between bg-surface-2 rounded-lg p-3"
                 >
                   <div>
                     <p className="text-sm font-bold text-foreground">{court.courtName}</p>
@@ -192,7 +207,7 @@ export function BookingDetailDrawer({
 
           {/* Services */}
           {booking.services && booking.services.length > 0 && (
-            <section className="bg-surface-2 rounded-xl p-4 space-y-3">
+            <section className="bg-surface-1 rounded-xl p-4 space-y-3 shadow-xs">
               <h3 className="text-sm font-bold text-muted uppercase tracking-wide">
                 Dịch vụ
               </h3>
@@ -200,7 +215,7 @@ export function BookingDetailDrawer({
                 {booking.services.map((service, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between bg-surface-1 rounded-lg p-3"
+                    className="flex items-center justify-between bg-surface-2 rounded-lg p-3"
                   >
                     <div>
                       <p className="text-sm font-bold text-foreground">{service.serviceName}</p>
@@ -217,7 +232,7 @@ export function BookingDetailDrawer({
 
           {/* Financial Summary */}
           {booking.invoice && (
-            <section className="bg-surface-2 rounded-xl p-4 space-y-3">
+            <section className="bg-surface-1 rounded-xl p-4 space-y-3 shadow-xs">
               <h3 className="text-sm font-bold text-muted uppercase tracking-wide flex items-center gap-2">
                 <CurrencyDollar className="h-4 w-4" />
                 Tính tiền
@@ -271,7 +286,7 @@ export function BookingDetailDrawer({
 
           {/* Note */}
           {booking.note && (
-            <section className="bg-surface-2 rounded-xl p-4 space-y-2">
+            <section className="bg-surface-1 rounded-xl p-4 space-y-2 shadow-xs">
               <h3 className="text-sm font-bold text-muted uppercase tracking-wide">
                 Ghi chú
               </h3>
@@ -319,9 +334,20 @@ export function BookingDetailDrawer({
                 Xác nhận hoàn tiền
               </Button>
             )}
+            {completePaymentAllowed && (
+              <Button
+                variant="primary"
+                onClick={() => onCompletePayment(bookingId)}
+                className="flex-1"
+              >
+                <CreditCard className="h-4 w-4" weight="bold" />
+                Hoàn tất thanh toán
+              </Button>
+            )}
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }

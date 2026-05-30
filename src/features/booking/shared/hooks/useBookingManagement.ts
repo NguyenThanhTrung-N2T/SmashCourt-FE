@@ -12,6 +12,7 @@ import {
   fetchBookingById,
   checkInBooking,
   checkoutBooking,
+  completePaymentBooking,
   cancelBookingByStaff,
   confirmBookingRefund,
 } from '@/src/api/booking.api';
@@ -173,6 +174,22 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
     }
   }, [loadBookings, loadSummary, selectedBooking, openBookingDetail, showToast]);
 
+  // Complete payment action
+  const handleCompletePayment = useCallback(async (bookingId: string) => {
+    try {
+      await completePaymentBooking(bookingId);
+      showToast('success', 'Thanh toán thành công');
+      await loadBookings();
+      await loadSummary();
+      if (selectedBooking?.id === bookingId || selectedBooking?.bookingId === bookingId) {
+        await openBookingDetail(bookingId);
+      }
+    } catch (error) {
+      showToast('error', 'Thanh toán thất bại');
+      console.error('Complete payment error:', error);
+    }
+  }, [loadBookings, loadSummary, selectedBooking, openBookingDetail, showToast]);
+
   // Load on mount and filter changes (only if enabled)
   useEffect(() => {
     if (enabled) {
@@ -198,6 +215,7 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
     closeDrawer,
     handleCheckIn,
     handleCheckout,
+    handleCompletePayment,
     handleCancel,
     handleConfirmRefund,
     refresh: loadBookings,

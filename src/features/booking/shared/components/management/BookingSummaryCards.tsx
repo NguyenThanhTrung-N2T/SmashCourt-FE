@@ -12,9 +12,10 @@ import { formatCurrency } from '../../utils/bookingStatus';
 interface BookingSummaryCardsProps {
   summary: BookingDashboardSummaryDto | null;
   loading?: boolean;
+  onPendingRefundClick?: () => void;
 }
 
-export function BookingSummaryCards({ summary, loading }: BookingSummaryCardsProps) {
+export function BookingSummaryCards({ summary, loading, onPendingRefundClick }: BookingSummaryCardsProps) {
   const cards = [
     {
       label: 'Đơn đặt sân hôm nay',
@@ -72,6 +73,8 @@ export function BookingSummaryCards({ summary, loading }: BookingSummaryCardsPro
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
       {cards.map((card, index) => {
         const Icon = card.icon;
+        const isPendingRefund = card.sub === 'Chờ hoàn tiền' || card.label === 'Chờ hoàn tiền';
+        const isClickable = isPendingRefund && typeof onPendingRefundClick === 'function';
         return (
           <div
             key={card.label}
@@ -84,6 +87,10 @@ export function BookingSummaryCards({ summary, loading }: BookingSummaryCardsPro
                 ? { background: "linear-gradient(145deg, #2D7A50 0%, #1B5E38 100%)" }
                 : {}
             }
+            onClick={isClickable ? onPendingRefundClick : undefined}
+            role={isClickable ? 'button' : undefined}
+            tabIndex={isClickable ? 0 : undefined}
+            onKeyDown={isClickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPendingRefundClick && onPendingRefundClick(); } } : undefined}
           >
             <div className="flex items-start justify-between">
               <p
@@ -98,6 +105,7 @@ export function BookingSummaryCards({ summary, loading }: BookingSummaryCardsPro
                   ? "border-white/30 text-white hover:bg-white/10"
                   : "border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"
                   }`}
+                onClick={isClickable ? onPendingRefundClick : undefined}
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

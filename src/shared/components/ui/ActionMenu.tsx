@@ -30,7 +30,7 @@ export function ActionMenu({ items, size = "sm", trigger }: ActionMenuProps) {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        menuRef.current && 
+        menuRef.current &&
         !menuRef.current.contains(event.target as Node) &&
         buttonRef.current &&
         !buttonRef.current.contains(event.target as Node) &&
@@ -50,37 +50,58 @@ export function ActionMenu({ items, size = "sm", trigger }: ActionMenuProps) {
     };
   }, [isOpen]);
 
-  // Calculate position when menu opens
+  // Dynamically calculate precise position when menu opens, handles resize & scroll
   useEffect(() => {
-    if (isOpen) {
-      const element = trigger ? triggerRef.current : buttonRef.current;
-      if (!element) return;
-      
+    if (!isOpen) return;
+
+    const element = trigger ? triggerRef.current : buttonRef.current;
+    if (!element) return;
+
+    const updatePosition = () => {
       const buttonRect = element.getBoundingClientRect();
-      const menuWidth = 200;
-      const menuHeight = 200; // Approximate
-      
+
+      // Measure the real element dimensions if rendered, otherwise fall back safely
+      const menuElement = menuRef.current;
+      const menuWidth = menuElement?.getBoundingClientRect().width || 200;
+      const menuHeight = menuElement?.getBoundingClientRect().height || 44;
+
       let top = buttonRect.bottom + 4;
       let left = buttonRect.right - menuWidth;
-      
-      // Check if menu would go below viewport
+
+      // Check if menu would go below viewport -> Flip upwards safely using actual height
       if (top + menuHeight > window.innerHeight) {
         top = buttonRect.top - menuHeight - 4;
       }
-      
+
       // Check if menu would go off left edge
       if (left < 8) {
         left = 8;
       }
-      
+
       // Check if menu would go off right edge
       if (left + menuWidth > window.innerWidth - 8) {
         left = window.innerWidth - menuWidth - 8;
       }
 
       setMenuPosition({ top, left, right: "auto" });
-    }
-  }, [isOpen, trigger]);
+    };
+
+    // Initial positioning run
+    updatePosition();
+
+    // Extra frame check ensures portal has fully injected and settled heights
+    const frameId = requestAnimationFrame(updatePosition);
+
+    // Keep it locked to the button during scrolls or window layout shifts
+    window.addEventListener("scroll", updatePosition, { passive: true });
+    window.addEventListener("resize", updatePosition);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener("scroll", updatePosition);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [isOpen, trigger, items]);
 
   const visibleItems = items.filter((item) => !item.hidden);
 
@@ -125,7 +146,7 @@ export function ActionMenu({ items, size = "sm", trigger }: ActionMenuProps) {
           />
 
           {/* Menu */}
-          <div 
+          <div
             ref={menuRef}
             className="fixed z-[9999] min-w-[200px] rounded-xl border border-border bg-surface-1 shadow-xl py-1"
             style={{

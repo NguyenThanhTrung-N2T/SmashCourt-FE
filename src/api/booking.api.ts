@@ -185,6 +185,15 @@ export async function checkoutBooking(id: string): Promise<void> {
 }
 
 /**
+ * Complete payment for a booking.
+ */
+export async function completePaymentBooking(id: string): Promise<void> {
+  await authProtectedFetch<null>(`/api/bookings/${id}/complete-payment`, {
+    method: "POST",
+  });
+}
+
+/**
  * Add service usage to a booking.
  */
 export async function addServiceToBooking(

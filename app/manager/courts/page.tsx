@@ -1,1 +1,7 @@
-﻿export default function Page() { return null; }
+﻿"use client";
+
+import { CourtManagementPage } from "@/src/features/court/manager/CourtMangementPage";
+
+export default function ManagerCourtsPage() {
+    return <CourtManagementPage />;
+}

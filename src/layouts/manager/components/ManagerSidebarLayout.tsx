@@ -40,7 +40,7 @@ export default function ManagerSidebarLayout({ user: initialUser, children, bran
 
         // Listen for storage events (from other tabs/windows)
         window.addEventListener("storage", handleStorageChange);
-        
+
         // Also check periodically for same-tab updates
         const interval = setInterval(handleStorageChange, 1000);
 

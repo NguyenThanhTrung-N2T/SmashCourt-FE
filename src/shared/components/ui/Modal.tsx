@@ -51,13 +51,13 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in" 
-        onClick={onClose} 
+      <div
+        className="absolute inset-0 bg-slate-900/70 animate-fade-in"
+        onClick={onClose}
       />
-      
+
       {/* Content */}
-      <div 
+      <div
         className={cn(
           "relative w-full animate-slide-up rounded-2xl border-2 border-white/40 bg-surface-1 shadow-2xl flex flex-col max-h-[90vh]",
           shadowBorders[maxWidth],
@@ -77,15 +77,15 @@ export function Modal({
               <h2 className="text-lg font-bold text-white">{title}</h2>
             </div>
           </div>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-white transition-all hover:bg-white/30 active:scale-95"
             aria-label="Close modal"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        
+
         {/* Body */}
         <div className="overflow-y-auto w-full flex-1 custom-scrollbar">
           {children}

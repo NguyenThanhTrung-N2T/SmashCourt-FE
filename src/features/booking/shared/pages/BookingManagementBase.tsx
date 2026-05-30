@@ -11,7 +11,7 @@ import {
   BookingDetailDrawer, BookingTableView,
   BookingScheduleView, BookingCalendarView,
   BookingFilterToolbar, BookingBranchSelector,
-  BookingSummaryCards
+  BookingSummaryCards, RefundConfirmDrawer
 } from '@/src/features/booking/shared/components/management';
 import {
   createDefaultWalkInForm,
@@ -24,6 +24,9 @@ import { PageHeader } from '@/src/shared/components/layout';
 import type { BranchDto } from '@/src/features/branch/shared/types/branch.types';
 import type { BookingDto } from '@/src/features/booking/shared/types/booking.types';
 import { Table, GridNine, Calendar, Plus, X, FileText } from '@phosphor-icons/react';
+import { useEffect } from 'react';
+import { consumePrefill, WalkInPrefill } from '@/src/lib/walkInPrefill';
+import { addHours, format, parseISO } from 'date-fns';
 
 type ViewTab = 'table' | 'schedule' | 'calendar';
 type WorkspaceId = 'management' | string;
@@ -88,12 +91,15 @@ export function BookingManagementBase({
     closeDrawer,
     handleCheckIn,
     handleCheckout,
+    handleCompletePayment,
     handleCancel,
     handleConfirmRefund,
     refresh,
     toast,
     showToast,
   } = useBookingManagement(initialBranchId, activeView === 'table');
+
+  const [refundDrawerOpen, setRefundDrawerOpen] = useState(false);
 
   const schedule = useBookingSchedule(branchId, activeView === 'schedule');
   const calendar = useBookingCalendar(branchId, activeView === 'calendar');
@@ -117,6 +123,18 @@ export function BookingManagementBase({
       message: 'Bạn có chắc chắn muốn xác nhận khách đã chơi xong?',
       onConfirm: () => {
         handleCheckout(bookingId);
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
+  };
+
+  const handleCompletePaymentWithConfirm = (bookingId: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Xác nhận hoàn tất thanh toán',
+      message: 'Bạn có chắc chắn muốn xác nhận thanh toán cho đơn này?',
+      onConfirm: () => {
+        handleCompletePayment(bookingId);
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
       },
     });
@@ -178,9 +196,11 @@ export function BookingManagementBase({
   const selectedBranch = branches.find((branch) => branch.id === branchId);
   const activeBranchName = isOwner ? (selectedBranch?.name || "") : (branchName || "");
 
-  const handleCreateWalkIn = () => {
+  const handleCreateWalkIn = useCallback((prefill?: WalkInPrefill) => {
     if (!branchId) {
-      showToast('error', 'Chọn chi nhánh trước khi tạo đơn tại quầy');
+      if (!prefill) {
+        showToast('error', 'Chọn chi nhánh trước khi tạo đơn tại quầy');
+      }
       return;
     }
 
@@ -189,10 +209,18 @@ export function BookingManagementBase({
       return;
     }
 
+    const form = createDefaultWalkInForm();
+    if (prefill) {
+      if (prefill.bookingDate) form.bookingDate = prefill.bookingDate;
+      if (prefill.courtId) form.courtId = prefill.courtId;
+      if (prefill.startTime) form.startTime = prefill.startTime;
+      if (prefill.endTime) form.endTime = prefill.endTime;
+    }
+
     const workspace: WalkInWorkspace = {
       id: `walk-in-${Date.now()}`,
       title: 'Đặt tại quầy',
-      form: createDefaultWalkInForm(),
+      form,
       dirty: false,
       branchId,
       branchName: activeBranchName,
@@ -201,7 +229,15 @@ export function BookingManagementBase({
 
     setWalkInWorkspaces((prev) => [...prev, workspace]);
     setActiveWorkspaceId(workspace.id);
-  };
+  }, [branchId, walkInWorkspaces.length, activeBranchName, showToast]);
+
+  // Handle Walk-in Prefill on Mount
+  useEffect(() => {
+    const prefill = consumePrefill();
+    if (prefill && branchId) {
+      handleCreateWalkIn(prefill);
+    }
+  }, [branchId, handleCreateWalkIn]);
 
   const updateWalkInWorkspace = useCallback(
     (workspaceId: string, patch: Partial<WalkInWorkspace>) => {
@@ -283,7 +319,7 @@ export function BookingManagementBase({
           {/* Create Walk-in Button */}
           {showCreateWalkIn && (
             <Button
-              onClick={handleCreateWalkIn}
+              onClick={() => handleCreateWalkIn()}
               variant="primary"
               size="md"
               leftIcon={<Plus className="h-4 w-4" />}>
@@ -334,7 +370,7 @@ export function BookingManagementBase({
           ))}
           {showCreateWalkIn && (
             <button
-              onClick={handleCreateWalkIn}
+              onClick={() => handleCreateWalkIn()}
               className="booking-workspace-add"
               aria-label="Open walk-in booking workspace"
             >
@@ -369,7 +405,7 @@ export function BookingManagementBase({
         <>
 
           {/* Summary Cards */}
-          <BookingSummaryCards summary={summary} loading={loading} />
+          <BookingSummaryCards summary={summary} loading={loading} onPendingRefundClick={() => setRefundDrawerOpen(true)} />
 
           {/* Dynamic Filter Toolbar - Changes based on active view */}
           <BookingFilterToolbar
@@ -441,6 +477,7 @@ export function BookingManagementBase({
                   onRowClick={openBookingDetail}
                   onCheckIn={handleCheckInWithConfirm}
                   onCheckout={handleCheckoutWithConfirm}
+                  onCompletePayment={handleCompletePaymentWithConfirm}
                   onCancel={handleCancelWithConfirm}
                   onConfirmRefund={handleConfirmRefundWithConfirm}
                   onPageChange={(page) => updateTableFilters({ page })}
@@ -501,8 +538,17 @@ export function BookingManagementBase({
         onClose={closeDrawer}
         onCheckIn={handleCheckInWithConfirm}
         onCheckout={handleCheckoutWithConfirm}
+        onCompletePayment={handleCompletePaymentWithConfirm}
         onCancel={handleCancelWithConfirm}
         onConfirmRefund={handleConfirmRefundWithConfirm}
+      />
+
+      {/* Refund Confirmation Drawer (opened from summary card) */}
+      <RefundConfirmDrawer
+        isOpen={refundDrawerOpen}
+        branchId={branchId}
+        onClose={() => setRefundDrawerOpen(false)}
+        onConfirmRefund={handleConfirmRefund}
       />
 
       {/* Confirmation Dialog */}

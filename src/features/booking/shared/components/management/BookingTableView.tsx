@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Receipt,
   MagnifyingGlass,
+  CreditCard,
 } from '@phosphor-icons/react';
 import type { BookingDto } from '@/src/features/booking/shared/types/booking.types';
 import type { PaginatedData } from '@/src/shared/types/api.types';
@@ -25,7 +26,8 @@ import {
   canCheckIn,
   canCheckout,
   canCancel,
-  canConfirmRefund
+  canConfirmRefund,
+  canCompletePayment
 } from '@/src/features/booking/shared/utils/bookingRules';
 
 interface BookingTableViewProps {
@@ -36,6 +38,7 @@ interface BookingTableViewProps {
   onCheckout: (bookingId: string) => void;
   onCancel: (bookingId: string) => void;
   onConfirmRefund: (bookingId: string) => void;
+  onCompletePayment: (bookingId: string) => void;
   onPageChange: (page: number) => void;
 }
 
@@ -47,6 +50,7 @@ export function BookingTableView({
   onCheckout,
   onCancel,
   onConfirmRefund,
+  onCompletePayment,
   onPageChange,
 }: BookingTableViewProps) {
   if (loading) {
@@ -207,6 +211,11 @@ export function BookingTableView({
                               label: 'Xác nhận hoàn tiền',
                               icon: <CheckCircle className="h-4 w-4" />,
                               onClick: () => onConfirmRefund(bookingId),
+                            }] : []),
+                            ...(canCompletePayment(booking) ? [{
+                              label: 'Hoàn tất thanh toán',
+                              icon: <CreditCard className="h-4 w-4" />,
+                              onClick: () => onCompletePayment(bookingId),
                             }] : []),
                           ]}
                         />
