@@ -4,8 +4,11 @@ import type { PaginatedData } from "@/src/shared/types/api.types";
 import type {
   Service,
   SaveServiceRequest,
+  BranchService,
+  AddServiceToBranchRequest,
+  UpdateBranchServicePriceRequest
 } from "@/src/features/service/shared/types/service.types";
-
+import { buildQuery } from "@/src/api/helpers/helpers";
 // ─── API functions ────────────────────────────────────────────────────────────
 
 /**
@@ -91,4 +94,50 @@ export async function deleteService(id: string): Promise<void> {
   await authProtectedFetch<null>(`/api/services/${id}`, {
     method: "DELETE",
   });
+}
+
+export async function getBranchServices(branchId?: string, page = 1, pageSize = 50): Promise<PaginatedData<BranchService>> {
+  const response = await authProtectedFetch<PaginatedData<BranchService>>(
+    `/api/services/branch/` + buildQuery({ branchId, page: page.toString(), pageSize: pageSize.toString() }),
+    { method: "GET" },
+  );
+  if (!response.data) {
+    return {
+      items: [],
+      page,
+      pageSize,
+      totalItems: 0,
+      totalPages: 0,
+      hasNext: false,
+      hasPrev: false,
+    };
+  }
+  return response.data;
+}
+
+export async function addServiceToBranch(dto: AddServiceToBranchRequest, branchId?: string): Promise<BranchService> {
+  const response = await authProtectedFetch<BranchService>(
+    `/api/services/branch` + buildQuery({ branchId }),
+    { method: "POST", body: { serviceId: dto.serviceId, price: dto.price } }
+  );
+  if (!response.data) {
+    throw new Error("Không thể thêm dịch vụ vào chi nhánh");
+  }
+  return response.data;
+}
+export async function updateServicePriceInBranch(serviceId: string, dto: UpdateBranchServicePriceRequest, branchId?: string): Promise<BranchService> {
+  const response = await authProtectedFetch<BranchService>(
+    `/api/services/branch/${serviceId}` + buildQuery({ branchId }),
+    { method: "PUT", body: { price: dto.price } }
+  );
+  if (!response.data) {
+    throw new Error("Không thể cập nhật giá dịch vụ trong chi nhánh");
+  }
+  return response.data;
+}
+export async function DisableBranchService(serviceId: string, branchId?: string): Promise<void> {
+  await authProtectedFetch<null>(
+    `/api/services/branch/${serviceId}` + buildQuery({ branchId }),
+    { method: "DELETE" }
+  );
 }

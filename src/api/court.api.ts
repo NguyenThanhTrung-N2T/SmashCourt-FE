@@ -16,16 +16,7 @@ import type {
   CourtManagementTimelineDto,
   PagedResult,
 } from "../features/court/shared/types/court.types";
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function buildQuery(params: Record<string, string | undefined>): string {
-  const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== "");
-  if (entries.length === 0) return "";
-  return "?" + entries.map(([k, v]) => `${k}=${encodeURIComponent(v!)}`).join("&");
-}
+import { buildQuery } from "@/src/api/helpers/helpers";
 
 // ============================================================================
 // Public / Authenticated Endpoints

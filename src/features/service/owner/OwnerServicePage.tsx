@@ -32,6 +32,7 @@ import { ServiceLoadingState } from "./components/states/ServiceLoadingState";
 import { ServiceErrorState } from "./components/states/ServiceErrorState";
 import { ServiceEmptyState } from "./components/states/ServiceEmptyState";
 import { SmartImage } from "@/src/shared/components/ui/SmartImage";
+import { PageHeader } from "@/src/shared/components/layout/PageHeader";
 // Helper to check if service is active
 function isActive(status: ServiceStatus): boolean {
     return status === ServiceStatus.ACTIVE;
@@ -86,19 +87,14 @@ export default function OwnerServicePage() {
     }
 
     const activeCount = services.filter((s) => isActive(s.status)).length;
-
     return (
         <div className="space-y-6 animate-slide-up w-full px-8 pt-6 pb-10">
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-[2rem] leading-tight font-extrabold tracking-tight text-foreground">
-                        Dịch vụ
-                    </h1>
-                    <p className="text-sm font-medium text-muted mt-1">
-                        Quản lý mặt hàng bán lẻ và dịch vụ thuê dụng cụ tại sân.
-                    </p>
-                </div>
+                <PageHeader
+                    title="Dịch vụ"
+                    description="Quản lý mặt hàng bán lẻ và dịch vụ thuê dụng cụ tại sân."
+                />
                 <div className="flex items-center gap-3 shrink-0">
                     <Button
                         variant="secondary"
