@@ -35,7 +35,7 @@ export function CancelBookingModal({
   isLoading = false,
 }: CancelBookingModalProps) {
   const { policies, isLoading: isPoliciesLoading } = useCancelPolicies();
-  const finalTotal = booking.finalTotal ?? booking.invoice?.finalTotal ?? 0;
+  const finalTotal = booking.finalTotal ?? booking.finalTotal ?? 0;
   const firstCourt = booking.courts[0];
 
   // Calculate refund info using dynamic policies
@@ -76,7 +76,7 @@ export function CancelBookingModal({
           <div className="flex items-center gap-2 text-sm">
             <Receipt className="h-4 w-4 text-muted" />
             <span className="font-bold text-foreground">
-              Mã đặt sân: {booking.bookingCode || (booking.id || booking.bookingId)?.substring(0, 8).toUpperCase()}
+              Mã đặt sân: {booking.bookingCode || (booking.id)?.substring(0, 8).toUpperCase()}
             </span>
           </div>
 

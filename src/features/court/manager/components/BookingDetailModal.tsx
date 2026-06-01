@@ -5,6 +5,7 @@ import { User, Phone, Calendar, Clock, CurrencyCircleDollar, Warning, Check, X, 
 import { Modal, Button, Badge, Toast } from "@/src/shared/components/ui";
 import { fetchBookingById, checkInBooking, checkoutBooking, cancelBookingByStaff } from "@/src/api/booking.api";
 import { BookingStatus, type BookingDto } from "@/src/features/booking/shared/types/booking.types";
+import { toBookingStatusValue } from "@/src/features/booking/shared/utils/bookingStatus";
 
 function formatCurrency(n: number) {
     return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(n);
@@ -17,7 +18,7 @@ interface BookingDetailModalProps {
     onRefresh: () => void;
 }
 
-const STATUS_STYLE: Record<number, { label: string; variant: "success" | "info" | "warning" | "error" | "neutral" }> = {
+const STATUS_STYLE: Record<string, { label: string; variant: "success" | "info" | "warning" | "error" | "neutral" }> = {
     [BookingStatus.PENDING]: { label: "Chờ xác nhận", variant: "warning" },
     [BookingStatus.CONFIRMED]: { label: "Đã xác nhận", variant: "info" },
     [BookingStatus.PAID_ONLINE]: { label: "Đã thanh toán (Online)", variant: "success" },
@@ -64,7 +65,8 @@ export function BookingDetailModal({ isOpen, bookingId, onClose, onRefresh }: Bo
     if (!isOpen) return null;
 
     const initials = booking?.customerName ? booking.customerName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "??";
-    const status = typeof booking?.status === 'number' ? booking.status : BookingStatus.PENDING;
+    const statusValue = toBookingStatusValue(booking?.status) ?? BookingStatus.PENDING;
+    const status = statusValue;
     const style = STATUS_STYLE[status] || { label: "Không xác định", variant: "neutral" };
 
     return (

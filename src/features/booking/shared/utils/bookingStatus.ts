@@ -1,7 +1,69 @@
-import { BookingStatus, InvoicePaymentStatus } from '@/src/features/booking/shared/types/booking.types';
+import {
+  BookingStatus,
+  InvoicePaymentStatus,
+  type BookingCourtDto,
+  type BookingStatusKey,
+  type BookingStatusValue,
+  type InvoicePaymentStatusKey,
+  type InvoicePaymentStatusValue,
+} from '@/src/features/booking/shared/types/booking.types';
 
-export function getBookingStatusLabel(status: BookingStatus | string | number): string {
-  const statusValue = typeof status === 'string' ? BookingStatus[status as keyof typeof BookingStatus] : status;
+export type BookingStatusInput = BookingStatusKey | BookingStatusValue | string | number | null | undefined;
+export type InvoicePaymentStatusInput =
+  | InvoicePaymentStatusKey
+  | InvoicePaymentStatusValue
+  | string
+  | number
+  | null
+  | undefined;
+
+function isEnumValue<T extends Record<string, number>>(
+  map: T,
+  value: unknown,
+): value is T[keyof T] {
+  return typeof value === 'number' && Object.values(map).includes(value);
+}
+
+export function toBookingStatusValue(status: BookingStatusInput): BookingStatusValue | undefined {
+  if (isEnumValue(BookingStatus, status)) return status;
+
+  if (typeof status === 'string') {
+    const normalizedStatus = status.trim();
+    if (!normalizedStatus) return undefined;
+
+    if (normalizedStatus in BookingStatus) {
+      return BookingStatus[normalizedStatus as BookingStatusKey];
+    }
+
+    const numericStatus = Number(normalizedStatus);
+    if (isEnumValue(BookingStatus, numericStatus)) return numericStatus;
+  }
+
+  return undefined;
+}
+
+export function toInvoicePaymentStatusValue(
+  status: InvoicePaymentStatusInput,
+): InvoicePaymentStatusValue | undefined {
+  if (isEnumValue(InvoicePaymentStatus, status)) return status;
+
+  if (typeof status === 'string') {
+    const normalizedStatus = status.trim();
+    if (!normalizedStatus) return undefined;
+
+    if (normalizedStatus in InvoicePaymentStatus) {
+      return InvoicePaymentStatus[normalizedStatus as InvoicePaymentStatusKey];
+    }
+
+    const numericStatus = Number(normalizedStatus);
+    if (isEnumValue(InvoicePaymentStatus, numericStatus)) return numericStatus;
+  }
+
+  return undefined;
+}
+
+export function getBookingStatusLabel(status: BookingStatusInput): string {
+  const statusValue = toBookingStatusValue(status);
 
   switch (statusValue) {
     case BookingStatus.PENDING:
@@ -30,9 +92,9 @@ export function getBookingStatusLabel(status: BookingStatus | string | number): 
 }
 
 export function getBookingStatusVariant(
-  status: BookingStatus | string | number
+  status: BookingStatusInput
 ): 'success' | 'warning' | 'error' | 'info' | 'neutral' {
-  const statusValue = typeof status === 'string' ? BookingStatus[status as keyof typeof BookingStatus] : status;
+  const statusValue = toBookingStatusValue(status);
 
   switch (statusValue) {
     case BookingStatus.CONFIRMED:
@@ -53,8 +115,8 @@ export function getBookingStatusVariant(
   }
 }
 
-export function getPaymentStatusLabel(status: InvoicePaymentStatus | string | number): string {
-  const statusValue = typeof status === 'string' ? InvoicePaymentStatus[status as keyof typeof InvoicePaymentStatus] : status;
+export function getPaymentStatusLabel(status: InvoicePaymentStatusInput): string {
+  const statusValue = toInvoicePaymentStatusValue(status);
 
   switch (statusValue) {
     case InvoicePaymentStatus.UNPAID:
@@ -71,9 +133,9 @@ export function getPaymentStatusLabel(status: InvoicePaymentStatus | string | nu
 }
 
 export function getPaymentStatusVariant(
-  status: InvoicePaymentStatus | string | number
+  status: InvoicePaymentStatusInput
 ): 'success' | 'warning' | 'error' | 'info' | 'neutral' {
-  const statusValue = typeof status === 'string' ? InvoicePaymentStatus[status as keyof typeof InvoicePaymentStatus] : status;
+  const statusValue = toInvoicePaymentStatusValue(status);
 
   switch (statusValue) {
     case InvoicePaymentStatus.PAID:
@@ -99,6 +161,30 @@ export function formatCurrency(amount: number): string {
 export function formatTime(time: string): string {
   // Assumes time is in HH:mm:ss format
   return time.substring(0, 5); // Returns HH:mm
+}
+
+export function getCourtTotal(court: BookingCourtDto): number {
+  return court.priceItems.reduce((total, item) => total + item.subTotal, 0);
+}
+
+export function getCourtDurationMinutes(court: BookingCourtDto): number | null {
+  const [startHour, startMinute] = court.startTime.split(':').map(Number);
+  const [endHour, endMinute] = court.endTime.split(':').map(Number);
+
+  if (
+    Number.isNaN(startHour) ||
+    Number.isNaN(startMinute) ||
+    Number.isNaN(endHour) ||
+    Number.isNaN(endMinute)
+  ) {
+    return null;
+  }
+
+  const startTotal = startHour * 60 + startMinute;
+  const endTotal = endHour * 60 + endMinute;
+  const duration = endTotal - startTotal;
+
+  return duration >= 0 ? duration : duration + 24 * 60;
 }
 
 export function formatDate(date: string): string {

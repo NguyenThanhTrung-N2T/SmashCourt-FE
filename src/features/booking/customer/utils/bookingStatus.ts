@@ -4,7 +4,16 @@
  * Helper functions for booking status display and logic.
  */
 
-import { BookingStatus, InvoicePaymentStatus } from "../../shared/types/booking.types";
+import {
+  BookingStatus,
+  InvoicePaymentStatus,
+} from "../../shared/types/booking.types";
+import {
+  toBookingStatusValue,
+  toInvoicePaymentStatusValue,
+  type BookingStatusInput,
+  type InvoicePaymentStatusInput,
+} from "../../shared/utils/bookingStatus";
 
 export interface StatusConfig {
   label: string;
@@ -12,88 +21,63 @@ export interface StatusConfig {
   dot?: boolean;
 }
 
-export function getBookingStatusConfig(status: any): StatusConfig {
-  const statusStr = typeof status === "number" ? BookingStatus[status] : String(status);
-  switch (statusStr?.toUpperCase()) {
-    case "PENDING":
-    case "0":
+export function getBookingStatusConfig(status: BookingStatusInput): StatusConfig {
+  switch (toBookingStatusValue(status)) {
+    case BookingStatus.PENDING:
       return { label: "Chờ thanh toán", variant: "warning", dot: true };
-    case "CONFIRMED":
-    case "1":
+
+    case BookingStatus.CONFIRMED:
       return { label: "Đã xác nhận", variant: "info", dot: true };
-    case "PAID_ONLINE":
-    case "2":
+
+    case BookingStatus.PAID_ONLINE:
       return { label: "Đã thanh toán", variant: "success", dot: true };
-    case "IN_PROGRESS":
-    case "3":
+
+    case BookingStatus.IN_PROGRESS:
       return { label: "Đang chơi", variant: "info", dot: true };
-    case "PENDING_PAYMENT":
-    case "4":
+
+    case BookingStatus.PENDING_PAYMENT:
       return { label: "Chờ thanh toán", variant: "warning", dot: true };
-    case "COMPLETED":
-    case "5":
+
+    case BookingStatus.COMPLETED:
       return { label: "Hoàn thành", variant: "success", dot: true };
-    case "CANCELLED":
-    case "6":
+
+    case BookingStatus.CANCELLED:
       return { label: "Đã hủy", variant: "error", dot: true };
-    case "CANCELLED_PENDING_REFUND":
-    case "7":
+
+    case BookingStatus.CANCELLED_PENDING_REFUND:
       return { label: "Chờ hoàn tiền", variant: "warning", dot: true };
-    case "CANCELLED_REFUNDED":
-    case "8":
+
+    case BookingStatus.CANCELLED_REFUNDED:
       return { label: "Đã hoàn tiền", variant: "neutral", dot: true };
-    case "NO_SHOW":
-    case "9":
+
+    case BookingStatus.NO_SHOW:
       return { label: "Không đến", variant: "error", dot: true };
+
     default:
       return { label: "Không xác định", variant: "neutral" };
   }
 }
 
-export function getPaymentStatusConfig(status: any): StatusConfig {
-  const statusStr = typeof status === "number" ? InvoicePaymentStatus[status] : String(status);
-  switch (statusStr?.toUpperCase()) {
-    case "UNPAID":
-    case "0":
+export function getPaymentStatusConfig(status: InvoicePaymentStatusInput): StatusConfig {
+  switch (toInvoicePaymentStatusValue(status)) {
+    case InvoicePaymentStatus.UNPAID:
       return { label: "Chưa thanh toán", variant: "error" };
-    case "PARTIALLY_PAID":
-    case "1":
+    case InvoicePaymentStatus.PARTIALLY_PAID:
       return { label: "Thanh toán một phần", variant: "warning" };
-    case "PAID":
-    case "2":
+    case InvoicePaymentStatus.PAID:
       return { label: "Đã thanh toán", variant: "success" };
-    case "REFUNDED":
-    case "3":
+    case InvoicePaymentStatus.REFUNDED:
       return { label: "Đã hoàn tiền", variant: "neutral" };
+    case InvoicePaymentStatus.EXPIRED:
+      return { label: "Hết hạn", variant: "neutral" };
     default:
       return { label: "Không xác định", variant: "neutral" };
   }
 }
 
-export function canCancelBooking(status: BookingStatus | number | string): boolean {
-  // Handle different status formats
-  let statusValue: number;
-
-  if (typeof status === "string") {
-    // If it's a string like "CONFIRMED" or "PAID_ONLINE"
-    const statusStr = status.toUpperCase();
-    if (statusStr === "CONFIRMED" || statusStr === "1") {
-      statusValue = BookingStatus.CONFIRMED;
-    } else if (statusStr === "PAID_ONLINE" || statusStr === "2") {
-      statusValue = BookingStatus.PAID_ONLINE;
-    } else {
-      return false;
-    }
-  } else if (typeof status === "number") {
-    statusValue = status;
-  } else {
-    statusValue = status as number;
-  }
-
-  return [
-    BookingStatus.CONFIRMED,
-    BookingStatus.PAID_ONLINE,
-  ].includes(statusValue);
+export function canCancelBooking(status: BookingStatusInput): boolean {
+  const statusValue = toBookingStatusValue(status);
+  return statusValue === BookingStatus.CONFIRMED || statusValue === BookingStatus.PAID_ONLINE;
 }
 
 interface RefundInfo {

@@ -45,7 +45,7 @@ export function CourtTimelineView({
     const [loading, setLoading] = useState(true);
     const [currentTime, setCurrentTime] = useState(new Date());
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-
+    const hasAutoScrolledRef = useRef(false);
     const handleSlotClick = (courtId: string, time: string) => {
         onSlotClick?.(courtId, time);
     };
@@ -70,8 +70,67 @@ export function CourtTimelineView({
         const timer = setInterval(() => {
             setCurrentTime(new Date());
         }, 60000);
+
         return () => clearInterval(timer);
     }, []);
+
+    // Reset auto-scroll when switching date
+    useEffect(() => {
+        hasAutoScrolledRef.current = false;
+    }, [date]);
+
+    // Auto-scroll timeline to current time
+    useEffect(() => {
+        if (
+            hasAutoScrolledRef.current ||
+            !data ||
+            !scrollContainerRef.current
+        ) {
+            return;
+        }
+
+        const isToday =
+            date === new Date().toISOString().split("T")[0];
+
+        if (!isToday) return;
+
+        const dayStartMinutes = parseTimeToMinutes(
+            data.operatingHours.open
+        );
+
+        const dayEndMinutes = parseTimeToMinutes(
+            data.operatingHours.close
+        );
+
+        const now = new Date();
+
+        const nowMinutes =
+            now.getHours() * 60 + now.getMinutes();
+
+        if (
+            nowMinutes < dayStartMinutes ||
+            nowMinutes > dayEndMinutes
+        ) {
+            return;
+        }
+
+        hasAutoScrolledRef.current = true;
+
+        const nowPosition =
+            (nowMinutes - dayStartMinutes) * 2;
+
+        const container = scrollContainerRef.current;
+
+        const targetScrollLeft =
+            COURT_COLUMN_WIDTH +
+            nowPosition -
+            container.clientWidth / 2;
+
+        container.scrollTo({
+            left: Math.max(0, targetScrollLeft),
+            behavior: "smooth",
+        });
+    }, [data, date]);
 
     if (loading) {
         return (
@@ -104,26 +163,35 @@ export function CourtTimelineView({
     for (let m = dayStartMinutes; m <= dayEndMinutes; m += 30) {
         const hours = Math.floor(m / 60);
         const minutes = m % 60;
-        const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+        const timeStr = `${hours.toString().padStart(2, "0")}:${minutes
+            .toString()
+            .padStart(2, "0")}`;
+
         hourMarkers.push({
             time: timeStr,
             left: (m - dayStartMinutes) * 2,
-            isFullHour: minutes === 0
+            isFullHour: minutes === 0,
         });
     }
 
     const isToday = date === new Date().toISOString().split("T")[0];
     const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-    const showNowIndicator = isToday && nowMinutes >= dayStartMinutes && nowMinutes <= dayEndMinutes;
+
+    const showNowIndicator =
+        isToday &&
+        nowMinutes >= dayStartMinutes &&
+        nowMinutes <= dayEndMinutes;
+
     const nowPosition = (nowMinutes - dayStartMinutes) * 2;
 
-    const getBookingStyles = (status: string | null) => {
+    const getBookingStyles = (status: CourtTimelineSlotStatus) => {
         switch (status) {
-            case "PLAYING":
+            case CourtTimelineSlotStatus.PLAYING:
                 return "bg-[#9FE1CB] text-[#085041] border-[#7BCDB3]";
-            case "PENDING":
-                return "bg-[#FAC775] text-[#633806] border-[#E5B562]";
-            case "CONFIRMED":
+            case CourtTimelineSlotStatus.COMPLETED:
+                return "bg-[#C0DD97] text-[#27500A] border-[#A8C97A]";
+            case CourtTimelineSlotStatus.BOOKED:
             default:
                 return "bg-[#B5D4F4] text-[#0C447C] border-[#92BEEB]";
         }
@@ -264,9 +332,12 @@ export function CourtTimelineView({
                                         return (
                                             <div
                                                 key={idx}
+                                                title={slot.isEarlyCheckout
+                                                    ? `Trả sân sớm — kết thúc ${slot.actualEndTime}, dự kiến ${slot.endTime}`
+                                                    : undefined}
                                                 className={clsx(
                                                     "absolute top-[7px] bottom-[7px] border rounded-lg px-3 flex items-center justify-between cursor-pointer transition-all shadow-sm hover:z-50 hover:scale-[1.01] hover:shadow-md overflow-hidden z-10",
-                                                    getBookingStyles(slot.bookingStatus)
+                                                    getBookingStyles(slot.status)
                                                 )}
                                                 style={{ left, width }}
                                                 onClick={(e) => {
@@ -277,9 +348,16 @@ export function CourtTimelineView({
                                                 <span className="text-[11px] font-black truncate mr-1">
                                                     {slot.playerName || "Khách vãng lai"}
                                                 </span>
-                                                <span className="text-[10px] font-bold opacity-70 shrink-0">
-                                                    {formatTime(slot.startTime)}
-                                                </span>
+                                                <div className="flex items-center gap-1 shrink-0">
+                                                    {slot.isEarlyCheckout && (
+                                                        <span className="text-[9px] font-black opacity-60 border border-current rounded px-1">
+                                                            Sớm
+                                                        </span>
+                                                    )}
+                                                    <span className="text-[10px] font-bold opacity-70">
+                                                        {formatTime(slot.startTime)}
+                                                    </span>
+                                                </div>
                                             </div>
                                         );
                                     })}

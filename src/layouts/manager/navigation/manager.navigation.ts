@@ -29,12 +29,6 @@ export const MANAGER_NAV: NavItem[] = [
     hint: "Quản lý đặt sân",
   },
   {
-    label: "Khung giờ",
-    href: "/manager/time-grid",
-    icon: SquaresFour,
-    hint: "Lịch sân theo giờ",
-  },
-  {
     label: "Sân",
     href: "/manager/courts",
     icon: CourtBasketball,

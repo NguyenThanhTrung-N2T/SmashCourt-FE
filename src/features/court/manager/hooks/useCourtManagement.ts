@@ -31,13 +31,28 @@ export function useCourtManagement() {
     const [loadingCourts, setLoadingCourts] = useState(true);
 
     // Filters & Pagination
-    const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
-    const [search, setSearch] = useState("");
-    const [typeId, setTypeId] = useState("");
+    const [date, setDateState] = useState<string>(new Date().toISOString().split("T")[0]);
+    const [search, setSearchState] = useState("");
+    const [typeId, setTypeIdState] = useState("");
     const [page, setPage] = useState(1);
     const pageSize = 12;
 
     const { debouncedValue: debouncedSearch } = useDebounce(search, 300);
+
+    const setDate = useCallback((nextDate: string) => {
+        setDateState(nextDate);
+        setPage(1);
+    }, []);
+
+    const setSearch = useCallback((nextSearch: string) => {
+        setSearchState(nextSearch);
+        setPage(1);
+    }, []);
+
+    const setTypeId = useCallback((nextTypeId: string) => {
+        setTypeIdState(nextTypeId);
+        setPage(1);
+    }, []);
 
     // Drawer & Modals
     const [drawerCourtId, setDrawerCourtId] = useState<string | null>(null);

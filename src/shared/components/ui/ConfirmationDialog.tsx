@@ -69,7 +69,7 @@ export function ConfirmationDialog({
     const IconComponent = styles.iconComponent;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 animate-fade-in">
             <div className="bg-surface-1 rounded-3xl shadow-2xl border border-border w-full max-w-md mx-4 animate-slide-up">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-border">

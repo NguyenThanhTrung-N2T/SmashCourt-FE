@@ -49,7 +49,7 @@ export function BookingDetailModal({
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const { cancelBooking, isLoading: isCancelling, error: cancelError } = useCancelBooking();
   const { policies, isLoading: isPoliciesLoading } = useCancelPolicies();
-  const { retryPayment, isLoading: isRetryingPayment, error: paymentError, clearError } = useRetryPayment();
+  const { retryPayment, isLoading: isRetryingPayment, error: paymentError } = useRetryPayment();
 
   const handleCancelClick = () => {
     setShowCancelConfirmation(true);
@@ -60,9 +60,9 @@ export function BookingDetailModal({
   };
 
   const handleRetryPayment = async () => {
-    if (!booking?.id && !booking?.bookingId) return;
+    if (!booking?.id) return;
 
-    const result = await retryPayment(booking.id || booking.bookingId || "");
+    const result = await retryPayment(booking.id || "");
 
     if (result) {
       // Redirect to payment URL
@@ -72,14 +72,14 @@ export function BookingDetailModal({
   };
 
   const handleCancelConfirm = async () => {
-    if (!booking?.id && !booking?.bookingId) return;
+    if (!booking?.id) return;
 
     try {
-      await cancelBooking(booking.id || booking.bookingId || "");
+      await cancelBooking(booking.id || "");
       setShowCancelConfirmation(false);
       onClose();
       onCancelSuccess?.();
-    } catch (err) {
+    } catch {
       // Error is handled by the hook
     }
   };
@@ -109,14 +109,15 @@ export function BookingDetailModal({
         )}
 
         {booking && !isLoading && !error && !showCancelConfirmation && (() => {
-          const displayCode = booking.bookingCode || (booking.id || booking.bookingId)?.substring(0, 8).toUpperCase() || "Không xác định";
-          const courtFee = booking.courtFee ?? booking.invoice?.courtFee ?? 0;
-          const serviceFee = booking.serviceFee ?? booking.invoice?.serviceFee ?? 0;
-          const loyaltyDiscount = booking.loyaltyDiscountAmount ?? booking.invoice?.loyaltyDiscount ?? 0;
-          const promotionDiscount = booking.promotionDiscountAmount ?? booking.invoice?.promotionDiscount ?? 0;
-          const finalTotal = booking.finalTotal ?? booking.invoice?.finalTotal ?? 0;
-          const paymentStatus = booking.paymentStatus ?? booking.invoice?.paymentStatus;
+          const displayCode = booking.bookingCode || (booking.id)?.substring(0, 8).toUpperCase() || "Không xác định";
+          const courtFee = booking.courtFee ?? booking.courtFee ?? 0;
+          const serviceFee = booking.serviceFee ?? booking.serviceFee ?? 0;
+          const loyaltyDiscount = booking.loyaltyDiscountAmount ?? booking.loyaltyDiscountAmount ?? 0;
+          const promotionDiscount = booking.promotionDiscountAmount ?? booking.promotionDiscountAmount ?? 0;
+          const finalTotal = booking.finalTotal ?? booking.finalTotal ?? 0;
+          const paymentStatus = booking.paymentStatus ?? booking.paymentStatus;
           const services = booking.services ?? [];
+
 
           return (
             <div className="space-y-6">
@@ -188,38 +189,48 @@ export function BookingDetailModal({
                 <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-muted">
                   Sân đã đặt
                 </h3>
+
                 <div className="space-y-3">
-                  {booking.courts.map((court, index) => (
-                    <div
-                      key={index}
-                      className="rounded-lg border-2 border-border bg-surface-2 p-3"
-                    >
-                      <div className="mb-2 flex items-center justify-between">
-                        <span className="font-bold text-foreground">
-                          {court.courtName}
-                        </span>
-                        {court.courtTypeName && (
-                          <Badge variant="info" size="sm">
-                            {court.courtTypeName}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2 text-muted">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>
-                            {formatTime(court.startTime)} - {formatTime(court.endTime)}
+                  {booking.courts.map((court, index) => {
+                    const courtHours = court.priceItems.reduce(
+                      (sum, item) => sum + item.hours,
+                      0
+                    );
+
+                    const courtPrice = court.priceItems.map(
+                      (item) => item.unitPrice
+                    ).reduce((sum, unitPrice) => sum + unitPrice, 0);
+
+                    return (
+                      <div
+                        key={index}
+                        className="rounded-lg border-2 border-border bg-surface-2 p-3"
+                      >
+                        <div className="mb-2 flex items-center justify-between">
+                          <span className="font-bold text-foreground">
+                            {court.courtName}
                           </span>
-                          {court.duration && <span>({court.duration} phút)</span>}
                         </div>
-                        {court.price !== undefined && (
+
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2 text-muted">
+                            <Clock className="h-3.5 w-3.5" />
+                            <span>
+                              {formatTime(court.startTime)} - {formatTime(court.endTime)}
+                            </span>
+
+                            {courtHours > 0 && (
+                              <span>({courtHours} giờ)</span>
+                            )}
+                          </div>
+
                           <span className="font-bold text-primary">
-                            {formatCurrency(court.price)}
+                            {formatCurrency(courtPrice)}
                           </span>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -244,7 +255,7 @@ export function BookingDetailModal({
                             <span className="ml-2 text-muted">x{service.quantity}</span>
                           </div>
                           <span className="font-bold text-foreground">
-                            {formatCurrency(service.totalPrice)}
+                            {formatCurrency(service.total)}
                           </span>
                         </div>
                       ))}
@@ -313,7 +324,7 @@ export function BookingDetailModal({
                 </div>
 
                 {/* Payment Pending Alert */}
-                {(paymentStatus === 0 || paymentStatus === "UNPAID") && (booking.status === 0 || booking.status === "PENDING") && (
+                {paymentStatus === "UNPAID" && booking.status === "PENDING" && (
                   <Alert variant="warning" className="mt-3">
                     <div className="flex items-start gap-2">
                       <CreditCard className="h-4 w-4 shrink-0 mt-0.5" />
@@ -356,7 +367,7 @@ export function BookingDetailModal({
                 </div>
 
                 {/* Pay Now Button - Inline with timestamps */}
-                {(paymentStatus === 0 || paymentStatus === "UNPAID") && (booking.status === 0 || booking.status === "PENDING") && (
+                {paymentStatus === "UNPAID" && booking.status === "PENDING" && (
                   <Button
                     variant="primary"
                     onClick={handleRetryPayment}
@@ -402,7 +413,7 @@ export function BookingDetailModal({
 
         {/* Cancel Confirmation View */}
         {booking && !isLoading && !error && showCancelConfirmation && (() => {
-          const finalTotal = booking.finalTotal ?? booking.invoice?.finalTotal ?? 0;
+          const finalTotal = booking.finalTotal ?? booking.finalTotal ?? 0;
           const firstCourt = booking.courts[0];
 
           // Calculate refund info using dynamic policies
@@ -427,7 +438,7 @@ export function BookingDetailModal({
                 <div className="flex items-center gap-2 text-sm">
                   <Receipt className="h-4 w-4 text-muted" />
                   <span className="font-bold text-foreground">
-                    Mã đặt sân: {booking.bookingCode || (booking.id || booking.bookingId)?.substring(0, 8).toUpperCase()}
+                    Mã đặt sân: {booking.bookingCode || (booking.id)?.substring(0, 8).toUpperCase()}
                   </span>
                 </div>
 

@@ -145,10 +145,6 @@ export function CustomerPromotionsPage() {
           <ul className="space-y-2 text-sm text-muted">
             <li className="flex items-start gap-2">
               <span className="text-primary">•</span>
-              <span>Nhấn vào mã khuyến mãi để sao chép</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary">•</span>
               <span>Áp dụng mã khi đặt sân để nhận ưu đãi</span>
             </li>
             <li className="flex items-start gap-2">

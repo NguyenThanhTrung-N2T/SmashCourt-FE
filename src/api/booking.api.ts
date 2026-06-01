@@ -15,17 +15,17 @@ import type {
   BookingDashboardSummaryQuery,
   CreateOnlineBookingDto,
   CreateWalkInBookingDto,
-  OnlineBookingResponseDto,
+  OnlineBookingResponse,
   BookingDto,
   BookingListQuery,
   BookingScheduleCourtDto,
   BookingScheduleQuery,
-  CancellationInfoDto,
+  CancelTokenInfoDto,
 } from "../features/booking/shared/types/booking.types";
 
 function appendBookingListParams(params: URLSearchParams, query: BookingListQuery): void {
-  if (query.status !== undefined) params.append("status", query.status.toString());
-  if (query.paymentStatus !== undefined) params.append("paymentStatus", query.paymentStatus.toString());
+  if (query.status !== undefined && query.status !== null) params.append("status", query.status.toString());
+  if (query.paymentStatus !== undefined && query.paymentStatus !== null) params.append("paymentStatus", query.paymentStatus.toString());
   if (query.branchId) params.append("branchId", query.branchId);
   if (query.courtId) params.append("courtId", query.courtId);
   if (query.date) params.append("date", query.date);
@@ -34,7 +34,6 @@ function appendBookingListParams(params: URLSearchParams, query: BookingListQuer
   if (query.customerKeyword) params.append("customerKeyword", query.customerKeyword);
   if (query.sortBy) params.append("sortBy", query.sortBy);
   if (query.sortOrder) params.append("sortOrder", query.sortOrder);
-  if (query.search) params.append("search", query.search);
 }
 
 // ============================================================================
@@ -103,7 +102,7 @@ export async function fetchBookingDashboardSummary(
  * Get monthly booking calendar heatmap data.
  */
 export async function fetchBookingCalendarHeatmap(
-  query: BookingCalendarHeatmapQuery = {}
+  query: BookingCalendarHeatmapQuery
 ): Promise<BookingCalendarHeatmapDto[]> {
   const params = new URLSearchParams();
   if (query.year !== undefined) params.append("year", query.year.toString());
@@ -235,11 +234,11 @@ export async function removeServiceFromBooking(
  */
 export async function createOnlineBooking(
   dto: CreateOnlineBookingDto
-): Promise<OnlineBookingResponseDto> {
+): Promise<OnlineBookingResponse> {
   const user = getAuthUser();
   const fetchFn = user ? authProtectedFetch : authFetch;
 
-  const response = await fetchFn<OnlineBookingResponseDto>(
+  const response = await fetchFn<OnlineBookingResponse>(
     "/api/bookings/online",
     {
       method: "POST",
@@ -286,8 +285,8 @@ export async function fetchCustomerBookingById(id: string): Promise<BookingDto> 
 /**
  * Get cancellation info via token (Public)
  */
-export async function fetchCancellationInfo(token: string): Promise<CancellationInfoDto> {
-  const response = await authFetch<CancellationInfoDto>(
+export async function fetchCancellationInfo(token: string): Promise<CancelTokenInfoDto> {
+  const response = await authFetch<CancelTokenInfoDto>(
     `/api/bookings/cancel/${token}`,
     { method: "GET" }
   );

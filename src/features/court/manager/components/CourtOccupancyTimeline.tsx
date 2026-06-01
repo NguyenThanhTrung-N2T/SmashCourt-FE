@@ -26,6 +26,7 @@ function toMinutes(hhmm: string): number {
 
 const STATUS_LABEL: Record<CourtTimelineSlotStatus, string> = {
     [CourtTimelineSlotStatus.AVAILABLE]: "Còn trống",
+    [CourtTimelineSlotStatus.COMPLETED]: "Đã hoàn thành",
     [CourtTimelineSlotStatus.BOOKED]: "Đã đặt",
     [CourtTimelineSlotStatus.PLAYING]: "Đang chơi",
 };
@@ -37,6 +38,8 @@ const STATUS_CLASS: Record<CourtTimelineSlotStatus, string> = {
         "bg-blue-500 dark:bg-blue-600",
     [CourtTimelineSlotStatus.PLAYING]:
         "bg-amber-500",
+    [CourtTimelineSlotStatus.COMPLETED]:
+        "bg-green-500"
 };
 
 const LEGEND_DOT_CLASS: Record<CourtTimelineSlotStatus, string> = {
@@ -46,6 +49,8 @@ const LEGEND_DOT_CLASS: Record<CourtTimelineSlotStatus, string> = {
         "bg-blue-500 border-blue-600 dark:border-blue-400/30",
     [CourtTimelineSlotStatus.PLAYING]:
         "bg-amber-500 border-amber-600 dark:border-amber-400/30",
+    [CourtTimelineSlotStatus.COMPLETED]:
+        "bg-green-500 border-green-600 dark:border-green-400/30"
 };
 
 interface TooltipState {
@@ -78,8 +83,12 @@ export function CourtOccupancyTimeline({ slots }: CourtOccupancyTimelineProps) {
             visible: true,
             x: rect.left + rect.width / 2,
             y: rect.top - 8,
-            label: STATUS_LABEL[slot.status],
-            timeRange: `${slot.startTime} – ${slot.endTime}`,
+            timeRange: slot.isEarlyCheckout
+                ? `${slot.startTime} – ${slot.endTime}`
+                : `${slot.startTime} – ${slot.endTime}`,
+            label: slot.isEarlyCheckout
+                ? "Trả sân sớm"
+                : STATUS_LABEL[slot.status],
         });
     }
 
@@ -135,6 +144,10 @@ export function CourtOccupancyTimeline({ slots }: CourtOccupancyTimelineProps) {
                 <LegendDot
                     status={CourtTimelineSlotStatus.PLAYING}
                     label="Đang chơi"
+                />
+                <LegendDot
+                    status={CourtTimelineSlotStatus.COMPLETED}
+                    label="Hoàn tất"
                 />
             </div>
 

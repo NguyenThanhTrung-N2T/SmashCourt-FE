@@ -1,194 +1,241 @@
-/**
- * Booking Types
- * 
- * Type definitions for booking-related entities and DTOs.
- */
+import type { EnumKey, EnumValue } from "@/src/shared/utils/enum.util";
 
-// ============================================================================
-// Enums
-// ============================================================================
+// ─────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────
 
-export enum BookingStatus {
-  PENDING = 0,
-  CONFIRMED = 1,
-  PAID_ONLINE = 2,
-  IN_PROGRESS = 3,
-  PENDING_PAYMENT = 4,
-  COMPLETED = 5,
-  CANCELLED = 6,
-  CANCELLED_PENDING_REFUND = 7,
-  CANCELLED_REFUNDED = 8,
-  NO_SHOW = 9,
-}
+export const BookingStatus = {
+  PENDING: 0,
+  CONFIRMED: 1,
+  PAID_ONLINE: 2,
+  IN_PROGRESS: 3,
+  PENDING_PAYMENT: 4,
+  COMPLETED: 5,
+  CANCELLED: 6,
+  CANCELLED_PENDING_REFUND: 7,
+  CANCELLED_REFUNDED: 8,
+  NO_SHOW: 9,
+} as const;
 
-export enum BookingSource {
-  ONLINE = 0,
-  WALK_IN = 1,
-}
+export const InvoicePaymentStatus = {
+  UNPAID: 0,
+  PARTIALLY_PAID: 1,
+  PAID: 2,
+  REFUNDED: 3,
+  EXPIRED: 4,
+} as const;
 
-export enum InvoicePaymentStatus {
-  UNPAID = 0,
-  PARTIALLY_PAID = 1,
-  PAID = 2,
-  REFUNDED = 3,
-}
+export const BookingSource = {
+  ONLINE: 0,
+  WALK_IN: 1,
+} as const;
 
-export enum PaymentTiming {
-  PREPAID = 0,
-  POSTPAID = 1,
-}
+export const PaymentTiming = {
+  /** Thanh toán trước – khách thanh toán khi đặt sân */
+  PREPAID: 0,
+  /** Thanh toán sau – khách thanh toán sau khi chơi xong */
+  POSTPAID: 1,
+} as const;
 
-export enum PaymentMethod {
-  CASH = 0,
-  VNPAY = 1,
-}
+export const PaymentTxMethod = {
+  CASH: 0,
+  VNPAY: 1,
+  MOMO: 2,
+} as const;
 
-export enum PaymentStatus {
-  PENDING = 0,
-  SUCCESS = 1,
-  FAILED = 2,
-}
+export const PaymentTxStatus = {
+  PENDING: 0,
+  SUCCESS: 1,
+  FAILED: 2,
+  REFUNDED: 3,
+} as const;
 
-export type BookingStatusName = keyof typeof BookingStatus;
-export type BookingSourceName = keyof typeof BookingSource;
-export type InvoicePaymentStatusName = keyof typeof InvoicePaymentStatus;
-export type SortOrder = "asc" | "desc";
-export type BookingListSortBy =
-  | "createdAt"
-  | "bookingDate"
-  | "date"
-  | "status"
-  | "customerName"
-  | "customer"
-  | "finalTotal"
-  | "total";
+// ─────────────────────────────────────────────
+// Derived types
+//
+//  *Key   → string the API returns   e.g. "IN_PROGRESS"
+//  *Value → number the API expects   e.g. 3
+// ─────────────────────────────────────────────
 
-// ============================================================================
-// DTOs
-// ============================================================================
+export type BookingStatusKey = EnumKey<typeof BookingStatus>;
+export type BookingStatusValue = EnumValue<typeof BookingStatus>;
+
+export type InvoicePaymentStatusKey = EnumKey<typeof InvoicePaymentStatus>;
+export type InvoicePaymentStatusValue = EnumValue<typeof InvoicePaymentStatus>;
+
+export type BookingSourceKey = EnumKey<typeof BookingSource>;
+export type BookingSourceValue = EnumValue<typeof BookingSource>;
+
+export type PaymentTimingKey = EnumKey<typeof PaymentTiming>;
+export type PaymentTimingValue = EnumValue<typeof PaymentTiming>;
+
+export type PaymentTxMethodKey = EnumKey<typeof PaymentTxMethod>;
+export type PaymentTxMethodValue = EnumValue<typeof PaymentTxMethod>;
+
+export type PaymentTxStatusKey = EnumKey<typeof PaymentTxStatus>;
+export type PaymentTxStatusValue = EnumValue<typeof PaymentTxStatus>;
+
+// ─────────────────────────────────────────────
+// Request DTOs
+// ─────────────────────────────────────────────
 
 export interface CourtSlotDto {
   courtId: string;
-  startTime: string; // HH:mm:ss
-  endTime: string;   // HH:mm:ss
+  startTime: string; // "HH:mm:ss"
+  endTime: string;
+}
+
+export interface AddBookingServiceDto {
+  serviceId: string;
+  quantity: number; // 1–100
 }
 
 export interface CreateOnlineBookingDto {
+  bookingDate: string; // ISO datetime
   courts: CourtSlotDto[];
-  bookingDate: string; // ISO 8601
-  promotionId?: string;
-  guestName?: string;
-  guestPhone?: string;
-  guestEmail?: string;
-  note?: string;
+  promotionId?: string | null;
+  guestName?: string | null;
+  guestPhone?: string | null;
+  guestEmail?: string | null;
+  note?: string | null;
+  notifyIfUnavailable?: boolean;
 }
 
 export interface CreateWalkInBookingDto {
+  bookingDate: string; // ISO datetime
   courts: CourtSlotDto[];
-  bookingDate: string; // YYYY-MM-DD
   customerId?: string | null;
   guestName?: string | null;
   guestPhone?: string | null;
   guestEmail?: string | null;
   promotionId?: string | null;
   note?: string | null;
-  payNow: boolean;
+  /** true → PREPAID (pay now), false → POSTPAID (pay later, default) */
+  payNow?: boolean;
 }
 
-export interface OnlineBookingResponseDto {
-  bookingId: string;
-  paymentUrl: string;
-  expiresAt: string; // ISO 8601
-  finalTotal: number;
+// ─────────────────────────────────────────────
+// Query DTOs  (numeric values — sent to the API)
+// ─────────────────────────────────────────────
+
+export interface BookingListQuery {
+  page?: number;
+  pageSize?: number;
+  branchId?: string | null;
+  courtId?: string | null;
+  status?: BookingStatusValue | null;
+  paymentStatus?: InvoicePaymentStatusValue | null;
+  date?: string | null;
+  fromDate?: string | null;
+  toDate?: string | null;
+  customerKeyword?: string | null;
+  bookingCode?: string | null;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
+
+export interface BookingScheduleQuery {
+  branchId?: string | null;
+  date: string;
+}
+
+export interface BookingCalendarHeatmapQuery {
+  year: number;
+  month: number;
+  branchId?: string | null;
+}
+
+export interface BookingDashboardSummaryQuery {
+  branchId?: string | null;
+}
+
+// ─────────────────────────────────────────────
+// Response DTOs  (string keys — received from the API)
+// ─────────────────────────────────────────────
+
+export interface BookingPriceItemDto {
+  startTime: string;
+  endTime: string;
+  unitPrice: number;
+  hours: number;
+  subTotal: number;
 }
 
 export interface BookingCourtDto {
   courtId: string;
   courtName: string;
-  courtTypeName?: string;
-  startTime: string; // HH:mm:ss
-  endTime: string;   // HH:mm:ss
-  duration?: number;  // minutes
-  price?: number;
-  priceItems?: any[];
+  startTime: string;
+  endTime: string;
+  priceItems: BookingPriceItemDto[];
 }
 
 export interface BookingServiceDto {
+  id: string;
   serviceId: string;
   serviceName: string;
-  quantity: number;
+  unit: string;
   unitPrice: number;
-  totalPrice: number;
-}
-
-export interface BookingInvoiceDto {
-  invoiceId: string;
-  courtFee: number;
-  serviceFee: number;
-  subtotal: number;
-  loyaltyDiscount: number;
-  promotionDiscount: number;
-  finalTotal: number;
-  paymentStatus: InvoicePaymentStatus;
-  paymentTiming: PaymentTiming;
+  quantity: number;
+  total: number;
 }
 
 export interface BookingDto {
-  id?: string;
-  bookingId?: string;
-  bookingCode?: string;
-  invoiceCode?: string;
-  bookingDate: string; // ISO 8601
-  status: BookingStatus | BookingStatusName | string;
-  source?: BookingSource | BookingSourceName | string;
-  customerName: string | null;
-  customerPhone?: string | null;
-  customerEmail?: string;
-  guestName?: string;
-  guestPhone?: string;
-  guestEmail?: string;
+  id: string;
+  bookingCode: string;
+  invoiceCode?: string | null;
   branchId: string;
   branchName: string;
-  note?: string;
+  customerId?: string | null;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  guestName?: string | null;
+  guestPhone?: string | null;
+  guestEmail?: string | null;
+  bookingDate: string;
+  status: BookingStatusKey;
+  source: BookingSourceKey;
+  note?: string | null;
+  createdAt: string;
+  updatedAt: string;
+
+  // Invoice
+  courtFee: number;
+  serviceFee: number;
+  loyaltyDiscountAmount: number;
+  promotionDiscountAmount: number;
+  finalTotal: number;
+  paymentStatus: InvoicePaymentStatusKey;
+  expiresAt?: string | null;
+
   courts: BookingCourtDto[];
-  services?: BookingServiceDto[];
-  invoice?: BookingInvoiceDto;
-  courtFee?: number;
-  serviceFee?: number;
-  loyaltyDiscountAmount?: number;
-  promotionDiscountAmount?: number;
-  finalTotal?: number;
-  paymentStatus?: InvoicePaymentStatusName | string;
-  createdAt?: string; // ISO 8601
-  expiresAt?: string; // ISO 8601
+  services: BookingServiceDto[];
 }
 
-export interface CancellationInfoDto {
+export interface OnlineBookingResponse {
   bookingId: string;
-  branchName: string;
-  bookingDate: string;
-  courtNames?: string[];
-  courts?: BookingCourtDto[];
-  startTime?: string;
-  endTime?: string;
-  refundPercent: number;
-  refundAmount: number;
-  status?: BookingStatus | BookingStatusName | string;
-  canCancel?: boolean;
-  cancelTokenUsedAt?: string;
+  paymentUrl: string;
+  expiresAt: string;
+  finalTotal: number;
 }
 
 export interface BookingScheduleItemDto {
   bookingId: string;
-  startTime: string; // HH:mm
-  endTime: string; // HH:mm
-  status: BookingStatus | BookingStatusName | string;
+  startTime: string; // "HH:mm"
+  endTime: string;
+  status: BookingStatusKey;
 }
 
 export interface BookingScheduleCourtDto {
   courtId: string;
   courtName: string;
   bookings: BookingScheduleItemDto[];
+}
+
+export interface BookingCalendarHeatmapDto {
+  date: string; // "yyyy-MM-dd"
+  bookingCount: number;
+  occupancyRate: number; // 0.0–1.0
+  revenue: number;
 }
 
 export interface BookingDashboardSummaryDto {
@@ -200,52 +247,21 @@ export interface BookingDashboardSummaryDto {
   pendingRefunds: number;
 }
 
-export interface BookingCalendarHeatmapDto {
-  date: string; // YYYY-MM-DD
-  bookingCount: number;
-  occupancyRate: number;
-  revenue: number;
+export interface CancelTokenInfoDto {
+  bookingId: string;
+  branchName: string;
+  courtNames: string[];
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  refundAmount: number;
+  refundPercent: number;
+  status: BookingStatusKey;
 }
 
-export interface AddBookingServiceDto {
-  serviceId: string;
-  quantity: number;
-}
-
-// ============================================================================
-// Query Parameters
-// ============================================================================
-
-export interface BookingListQuery {
-  page?: number;
-  pageSize?: number;
-  status?: BookingStatus | BookingStatusName | string;
-  paymentStatus?: InvoicePaymentStatus | InvoicePaymentStatusName | string;
-  branchId?: string;
-  courtId?: string;
-  customerId?: string;
-  date?: string; // YYYY-MM-DD
-  fromDate?: string; // YYYY-MM-DD
-  toDate?: string; // YYYY-MM-DD
-  source?: BookingSource;
-  search?: string; // Search by customer name, phone, guest info, or booking code
-  customerKeyword?: string;
-  bookingCode?: string;
-  sortBy?: BookingListSortBy;
-  sortOrder?: SortOrder;
-}
-
-export interface BookingScheduleQuery {
-  branchId?: string;
-  date: string; // YYYY-MM-DD
-}
-
-export interface BookingDashboardSummaryQuery {
-  branchId?: string;
-}
-
-export interface BookingCalendarHeatmapQuery {
-  year?: number;
-  month?: number;
-  branchId?: string;
+export interface TimeGridSlotDto {
+  startTime: string;
+  endTime: string;
+  status: "AVAILABLE" | "LOCKED" | "IN_USE";
+  lockRemainingSeconds?: number | null;
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { getBranchStaff, addStaff, removeStaff, bulkStaffOperation } from '@/src/api/branch.api';
 import type { PaginatedData } from '@/src/shared/types/api.types';
 import type {
@@ -17,6 +17,7 @@ export function useStaffManagement(branchId: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<StaffFilterQuery>({ page: 1, pageSize: 10 });
+  const previousBranchIdRef = useRef(branchId);
 
   const getCacheKey = useCallback((query: StaffFilterQuery) => {
     return `staff-${branchId}-${JSON.stringify(query)}`;
@@ -105,13 +106,33 @@ export function useStaffManagement(branchId: string) {
   }, [branchId, filters, loadStaff]);
 
   const updateFilters = useCallback((newFilters: StaffFilterQuery) => {
-    setFilters(newFilters);
+    setFilters((prev) => {
+      const filterChanged =
+        prev.searchTerm !== newFilters.searchTerm ||
+        prev.isActive !== newFilters.isActive ||
+        prev.role !== newFilters.role ||
+        prev.pageSize !== newFilters.pageSize;
+
+      return {
+        ...newFilters,
+        page: filterChanged ? 1 : newFilters.page ?? prev.page,
+      };
+    });
   }, []);
 
   useEffect(() => {
-    if (branchId) {
-      loadStaff(filters);
+    if (!branchId) return;
+
+    if (previousBranchIdRef.current !== branchId) {
+      previousBranchIdRef.current = branchId;
+
+      if (filters.page !== 1) {
+        setFilters((prev) => ({ ...prev, page: 1 }));
+        return;
+      }
     }
+
+    loadStaff(filters);
   }, [branchId, filters, loadStaff]);
 
   return {

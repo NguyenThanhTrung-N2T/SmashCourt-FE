@@ -289,7 +289,7 @@ export function BookingManagementBase({
     setActiveWorkspaceId('management');
     setActiveView('table');
 
-    const bookingId = booking.id || booking.bookingId;
+    const bookingId = booking.id;
     if (bookingId) {
       openBookingDetail(bookingId);
     }
@@ -541,6 +541,12 @@ export function BookingManagementBase({
         onCompletePayment={handleCompletePaymentWithConfirm}
         onCancel={handleCancelWithConfirm}
         onConfirmRefund={handleConfirmRefundWithConfirm}
+        onServiceUpdated={(updated) => {
+          // Refresh the booking in drawer and the list
+          refresh();
+          openBookingDetail(updated.id || '');
+        }}
+        onError={(message) => showToast('error', message)}
       />
 
       {/* Refund Confirmation Drawer (opened from summary card) */}

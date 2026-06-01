@@ -84,7 +84,15 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
 
   // Update table filters (resets pagination)
   const updateTableFilters = useCallback((newFilters: Partial<BookingTableFilters>) => {
-    setTableFilters((prev) => ({ ...prev, ...newFilters, page: 1 }));
+    setTableFilters((prev) => {
+      const hasPageChange = Object.prototype.hasOwnProperty.call(newFilters, 'page');
+
+      return {
+        ...prev,
+        ...newFilters,
+        page: hasPageChange ? newFilters.page ?? prev.page : 1,
+      };
+    });
   }, []);
 
   // Update branch filter (shared across tabs)
@@ -117,7 +125,7 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
       showToast('success', 'Check-in thành công');
       await loadBookings();
       await loadSummary();
-      if (selectedBooking?.id === bookingId || selectedBooking?.bookingId === bookingId) {
+      if (selectedBooking?.id === bookingId) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {
@@ -133,7 +141,7 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
       showToast('success', 'Checkout thành công');
       await loadBookings();
       await loadSummary();
-      if (selectedBooking?.id === bookingId || selectedBooking?.bookingId === bookingId) {
+      if (selectedBooking?.id === bookingId) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {
@@ -149,7 +157,7 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
       showToast('success', 'Hủy đơn đặt thành công');
       await loadBookings();
       await loadSummary();
-      if (selectedBooking?.id === bookingId || selectedBooking?.bookingId === bookingId) {
+      if (selectedBooking?.id === bookingId) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {
@@ -165,7 +173,7 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
       showToast('success', 'Xác nhận hoàn tiền thành công');
       await loadBookings();
       await loadSummary();
-      if (selectedBooking?.id === bookingId || selectedBooking?.bookingId === bookingId) {
+      if (selectedBooking?.id === bookingId) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {
@@ -181,7 +189,7 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
       showToast('success', 'Thanh toán thành công');
       await loadBookings();
       await loadSummary();
-      if (selectedBooking?.id === bookingId || selectedBooking?.bookingId === bookingId) {
+      if (selectedBooking?.id === bookingId) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {

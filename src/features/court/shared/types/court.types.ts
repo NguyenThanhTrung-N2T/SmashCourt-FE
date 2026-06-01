@@ -38,8 +38,9 @@ export enum CourtOperationalStatus {
 /** Status of a single merged timeline range slot. */
 export enum CourtTimelineSlotStatus {
   AVAILABLE = 0,
-  BOOKED = 1,
-  PLAYING = 2,
+  COMPLETED = 1,
+  BOOKED = 2,
+  PLAYING = 3
 }
 
 // ============================================================================
@@ -81,6 +82,7 @@ export interface CourtTimelineSlotDto {
   startTime: string; // "HH:mm"
   endTime: string;   // "HH:mm"
   status: CourtTimelineSlotStatus;
+  isEarlyCheckout: boolean;
 }
 
 export interface CourtManagementCardDto {
@@ -113,6 +115,8 @@ export interface CourtTimelineDetailSlotDto {
   bookingId: string | null;
   playerName: string | null;
   bookingStatus: string | null;
+  actualEndTime: string | null; // "HH:mm"
+  isEarlyCheckout: boolean;
 }
 
 export interface CourtManagementTimelineDto {

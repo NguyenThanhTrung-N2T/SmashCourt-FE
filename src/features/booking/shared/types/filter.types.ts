@@ -1,4 +1,4 @@
-import type { BookingStatus, InvoicePaymentStatus } from './booking.types';
+import type { BookingStatusValue, InvoicePaymentStatusValue } from './booking.types';
 
 // ============================================================================
 // Shared Filters (persist across all tabs)
@@ -15,8 +15,8 @@ export interface SharedFilters {
 export interface BookingTableFilters {
   page: number;
   pageSize: number;
-  status?: BookingStatus | string;
-  paymentStatus?: InvoicePaymentStatus | string;
+  status?: BookingStatusValue;
+  paymentStatus?: InvoicePaymentStatusValue;
   courtId?: string;
   customerKeyword?: string;
   date?: string; // YYYY-MM-DD

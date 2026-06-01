@@ -1,16 +1,14 @@
-/**
- * Booking Filter Toolbar
- * 
- * Dynamic filter controls that adapt based on the active view.
- * - Table view: Search, date presets, status, payment filters
- * - Schedule view: Date navigation only (branch selector shown separately)
- * - Calendar view: Month/year navigation only (branch selector shown separately)
- */
-
 import { useState, useEffect } from 'react';
 import { CalendarBlank, CaretLeft, CaretRight, X, ArrowCounterClockwise } from '@phosphor-icons/react';
 import { Select, Button, Input } from '@/src/shared/components/ui';
-import { BookingStatus, InvoicePaymentStatus } from '../../types/booking.types';
+import {
+  BookingStatus,
+  InvoicePaymentStatus,
+} from '../../types/booking.types';
+import {
+  toBookingStatusValue,
+  toInvoicePaymentStatusValue,
+} from '../../utils/bookingStatus';
 import type { BookingTableFilters } from '@/src/features/booking/shared/types/filter.types';
 
 type ViewMode = 'table' | 'schedule' | 'calendar';
@@ -52,6 +50,8 @@ const MONTH_NAMES = [
   'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
   'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
 ];
+const formatDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 export function BookingFilterToolbar({
   viewMode,
@@ -94,7 +94,7 @@ export function BookingFilterToolbar({
     switch (preset) {
       case 'today':
         onTableFilterChange({
-          date: today.toISOString().split('T')[0],
+          date: formatDate(today),
           fromDate: undefined,
           toDate: undefined,
         });
@@ -103,20 +103,23 @@ export function BookingFilterToolbar({
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
         onTableFilterChange({
-          date: tomorrow.toISOString().split('T')[0],
+          date: formatDate(tomorrow),
           fromDate: undefined,
           toDate: undefined,
         });
         break;
       case 'week':
         const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - today.getDay());
+        const day = today.getDay();
+        // convert Sunday (0) → 7 so Monday = 1 ... Sunday = 7
+        const diff = day === 0 ? -6 : 1 - day;
+        weekStart.setDate(today.getDate() + diff);
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 6);
         onTableFilterChange({
           date: undefined,
-          fromDate: weekStart.toISOString().split('T')[0],
-          toDate: weekEnd.toISOString().split('T')[0],
+          fromDate: formatDate(weekStart),
+          toDate: formatDate(weekEnd),
         });
         break;
       case 'month':
@@ -124,8 +127,8 @@ export function BookingFilterToolbar({
         const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
         onTableFilterChange({
           date: undefined,
-          fromDate: monthStart.toISOString().split('T')[0],
-          toDate: monthEnd.toISOString().split('T')[0],
+          fromDate: formatDate(monthStart),
+          toDate: formatDate(monthEnd),
         });
         break;
       case 'all':
@@ -193,7 +196,7 @@ export function BookingFilterToolbar({
           <div className="w-full lg:w-40">
             <Select
               value={tableFilters.status?.toString() || ''}
-              onChange={(value) => onTableFilterChange({ status: value || undefined })}
+              onChange={(value) => onTableFilterChange({ status: toBookingStatusValue(value) })}
             >
               <option value="">Tất cả</option>
               <option value={BookingStatus.PENDING}>Đặt online, chưa thanh toán</option>
@@ -213,7 +216,7 @@ export function BookingFilterToolbar({
           <div className="w-full lg:w-40">
             <Select
               value={tableFilters.paymentStatus?.toString() || ''}
-              onChange={(value) => onTableFilterChange({ paymentStatus: value || undefined })}
+              onChange={(value) => onTableFilterChange({ paymentStatus: toInvoicePaymentStatusValue(value) })}
             >
               <option value="">Tất cả</option>
               <option value={InvoicePaymentStatus.UNPAID}>Chưa thanh toán</option>

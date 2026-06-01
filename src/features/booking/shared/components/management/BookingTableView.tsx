@@ -68,7 +68,7 @@ export function BookingTableView({
   }
 
   const getBookingId = (booking: BookingDto) => {
-    return booking.id || booking.bookingId || booking.bookingCode || '';
+    return booking.id || booking.bookingCode || '';
   };
 
   return (
@@ -163,7 +163,7 @@ export function BookingTableView({
                       )}
                     </td>
                     <td className="px-4 py-3 text-right text-sm font-bold text-foreground">
-                      {formatCurrency(booking.finalTotal || booking.invoice?.finalTotal || 0)}
+                      {formatCurrency(booking.finalTotal || booking.finalTotal || 0)}
                     </td>
                     <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-center gap-2">

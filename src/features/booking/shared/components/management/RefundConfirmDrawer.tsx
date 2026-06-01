@@ -38,7 +38,7 @@ export function RefundConfirmDrawer({ isOpen, branchId, onClose, onConfirmRefund
         setLoading(true);
         try {
             // Fetch pending refund bookings (status = CANCELLED_PENDING_REFUND)
-            const data = await fetchAllBookings({ status: (BookingStatus as any).CANCELLED_PENDING_REFUND, branchId, page: 1, pageSize: 50 });
+            const data = await fetchAllBookings({ status: BookingStatus.CANCELLED_PENDING_REFUND, branchId, page: 1, pageSize: 50 });
             setItems(data.items || []);
         } catch (error) {
             console.error('Failed to load pending refunds', error);
@@ -102,8 +102,8 @@ export function RefundConfirmDrawer({ isOpen, branchId, onClose, onConfirmRefund
                     {!loading && items.length > 0 && (
                         <div className="space-y-3">
                             {items.map((booking) => {
-                                const id = booking.id || booking.bookingId || '';
-                                const total = booking.invoice?.finalTotal ?? booking.finalTotal ?? 0;
+                                const id = booking.id || '';
+                                const total = booking.finalTotal ?? 0;
                                 return (
                                     <div key={id} className="flex items-center justify-between bg-surface-1 rounded-lg p-4">
                                         <div>

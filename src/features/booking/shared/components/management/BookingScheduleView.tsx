@@ -10,7 +10,7 @@ import { Skeleton } from '@/src/shared/components/feedback/Skeleton';
 import { EmptyState } from '@/src/shared/components/layout';
 import type { BookingScheduleCourtDto, BookingScheduleItemDto } from '../../types/booking.types';
 import { BookingStatus } from '../../types/booking.types';
-import { formatTime } from '../../utils/bookingStatus';
+import { formatTime, toBookingStatusValue, type BookingStatusInput } from '../../utils/bookingStatus';
 
 interface BookingScheduleViewProps {
   schedule: BookingScheduleCourtDto[];
@@ -25,11 +25,8 @@ const TIME_SLOTS = [
   '18:00', '19:00', '20:00', '21:00', '22:00', '23:00',
 ];
 
-function getStatusColor(status: string | number): string {
-  const statusValue = typeof status === 'string'
-    ? BookingStatus[status as keyof typeof BookingStatus]
-    : status;
-
+function getStatusColor(status: BookingStatusInput): string {
+  const statusValue = toBookingStatusValue(status);
   switch (statusValue) {
     case BookingStatus.PENDING:
       return 'bg-amber-500 hover:bg-amber-600 border-amber-600';

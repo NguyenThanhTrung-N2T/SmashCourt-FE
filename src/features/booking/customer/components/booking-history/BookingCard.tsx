@@ -14,6 +14,7 @@ import {
   formatDate,
   formatTime,
 } from "../../utils/bookingStatus";
+import { getCourtTotal } from "../../../shared/utils/bookingStatus";
 
 interface BookingCardProps {
   booking: BookingDto;
@@ -23,13 +24,14 @@ interface BookingCardProps {
 
 export function BookingCard({ booking, onViewDetail, onPayNow }: BookingCardProps) {
   const statusConfig = getBookingStatusConfig(booking.status);
-  const displayCode = booking.bookingCode || (booking.id || booking.bookingId)?.substring(0, 8).toUpperCase() || "Không xác định";
-  const finalTotal = booking.finalTotal ?? booking.invoice?.finalTotal;
-  const paymentStatus = booking.paymentStatus ?? booking.invoice?.paymentStatus;
+  const displayCode = booking.bookingCode || (booking.id)?.substring(0, 8).toUpperCase() || "Không xác định";
+  const finalTotal = booking.finalTotal ?? booking.finalTotal;
+  const paymentStatus = booking.paymentStatus;
 
   // Check if payment is pending (UNPAID = 0) and booking is pending
-  const isPendingPayment = (paymentStatus === 0 || paymentStatus === "UNPAID") &&
-    (booking.status === 0 || booking.status === "PENDING");
+  const isPendingPayment =
+    paymentStatus === 'UNPAID' &&
+    booking.status === 'PENDING';
 
   return (
     <div className="rounded-xl border-2 border-border bg-surface-1 p-4 shadow-sm transition-all hover:shadow-md">
@@ -64,7 +66,10 @@ export function BookingCard({ booking, onViewDetail, onPayNow }: BookingCardProp
           Sân đã đặt
         </p>
         <div className="space-y-1.5">
-          {booking.courts.map((court, index) => (
+          {booking.courts.map((court, index) => {
+            const courtTotal = getCourtTotal(court);
+
+            return (
             <div key={`${court.courtId || court.courtName}-${index}`} className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <Clock className="h-3.5 w-3.5 text-muted" />
@@ -75,13 +80,14 @@ export function BookingCard({ booking, onViewDetail, onPayNow }: BookingCardProp
                   ({formatTime(court.startTime)} - {formatTime(court.endTime)})
                 </span>
               </div>
-              {court.price !== undefined && (
+              {courtTotal > 0 && (
                 <span className="font-bold text-primary">
-                  {formatCurrency(court.price)}
+                  {formatCurrency(courtTotal)}
                 </span>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -103,7 +109,7 @@ export function BookingCard({ booking, onViewDetail, onPayNow }: BookingCardProp
             variant="primary"
             size="sm"
             className="flex-1"
-            onClick={() => onPayNow(booking.id || booking.bookingId || "")}
+            onClick={() => onPayNow(booking.id || "")}
             leftIcon={<CreditCard className="h-4 w-4" />}
           >
             Thanh toán
@@ -113,7 +119,7 @@ export function BookingCard({ booking, onViewDetail, onPayNow }: BookingCardProp
           variant="secondary"
           size="sm"
           className={isPendingPayment ? "flex-1" : "w-full"}
-          onClick={() => onViewDetail(booking.id || booking.bookingId || "")}
+          onClick={() => onViewDetail(booking.id || "")}
         >
           Xem chi tiết
         </Button>

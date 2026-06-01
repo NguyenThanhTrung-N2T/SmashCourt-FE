@@ -25,7 +25,7 @@ import { ServiceCard } from "./components/ServiceCard";
 import { AddServicePanel } from "./components/AddServicePanel";
 import { PageHeader } from "@/src/shared/components/layout/PageHeader";
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 12;
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export function ManagerServicePage() {

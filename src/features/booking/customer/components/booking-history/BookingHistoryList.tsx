@@ -11,6 +11,10 @@ import { BookingFilters } from "./BookingFilters";
 import { BookingHistoryLoading, BookingErrorState } from "../states";
 import { useCustomerBookings, useRetryPayment, useBookingDetail } from "@/src/features/booking/customer/hooks";
 import type { BookingListQuery } from "@/src/features/booking/shared/types/booking.types";
+import {
+  toBookingStatusValue,
+  toInvoicePaymentStatusValue,
+} from "@/src/features/booking/shared/utils/bookingStatus";
 
 const PAGE_SIZE = 12;
 
@@ -22,16 +26,17 @@ export function BookingHistoryList() {
   // Initialize query from URL
   const getQueryFromUrl = useCallback((): BookingListQuery => {
     const params = Object.fromEntries(searchParams.entries());
+
     return {
       page: params.page ? parseInt(params.page) : 1,
       pageSize: PAGE_SIZE,
-      status: params.status,
-      paymentStatus: params.paymentStatus,
+      status: toBookingStatusValue(params.status),
+      paymentStatus: toInvoicePaymentStatusValue(params.paymentStatus),
       branchId: params.branchId,
       date: params.date,
       fromDate: params.fromDate,
       toDate: params.toDate,
-      search: params.search,
+      customerKeyword: params.search,
     };
   }, [searchParams]);
 
@@ -132,7 +137,7 @@ export function BookingHistoryList() {
           <div className={`grid gap-5 md:grid-cols-2 lg:grid-cols-3 transition-opacity duration-300 ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
             {bookings.items.map((booking, index) => (
               <BookingCard
-                key={booking.bookingId || `booking-${index}`}
+                key={booking.id || `booking-${index}`}
                 booking={booking}
                 onViewDetail={handleViewDetail}
                 onPayNow={handlePayNow}

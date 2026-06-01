@@ -7,14 +7,15 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Funnel, X, MagnifyingGlass, Calendar, CaretDown, CirclesFour, CreditCard, Storefront } from "@phosphor-icons/react";
+import { X, MagnifyingGlass, Calendar, CirclesFour } from "@phosphor-icons/react";
 import { Button, Select } from "@/src/shared/components/ui";
 import { BranchSelector } from "@/src/features/branch/customer/components/BranchSelector";
-import { BookingStatus, InvoicePaymentStatus, BookingListQuery } from "../../../shared/types/booking.types";
-import { getBookingStatusConfig, getPaymentStatusConfig } from "../../utils/bookingStatus";
+import {
+  BookingStatus,
+  BookingListQuery,
+} from "../../../shared/types/booking.types";
+import { toBookingStatusValue } from "../../../shared/utils/bookingStatus";
 import { useDebounce } from "@/src/shared/hooks/useDebounceSearch";
-
-type BookingStatusFilter = BookingStatus | string;
 
 interface BookingFiltersProps {
   onFilterChange: (filters: Partial<BookingListQuery>) => void;
@@ -38,6 +39,7 @@ const statusOptions = [
   { value: BookingStatus.IN_PROGRESS.toString(), label: "Đang chơi" },
   { value: BookingStatus.COMPLETED.toString(), label: "Hoàn thành" },
   { value: BookingStatus.CANCELLED.toString(), label: "Đã hủy" },
+  { value: BookingStatus.NO_SHOW.toString(), label: "Không đến" },
 ];
 
 export function BookingFilters({ onFilterChange, activeFilters, isLoading }: BookingFiltersProps) {
@@ -73,7 +75,7 @@ export function BookingFilters({ onFilterChange, activeFilters, isLoading }: Boo
   const isActuallyLoading = isLoading || isDebounceSearching;
 
   const handleStatusChange = (value: string) => {
-    onFilterChange({ status: value ? (parseInt(value) as BookingStatus) : undefined });
+    onFilterChange({ status: toBookingStatusValue(value) });
   };
 
   const calculateDateRange = (preset: string) => {

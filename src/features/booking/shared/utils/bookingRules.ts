@@ -1,15 +1,15 @@
-import { BookingDto, BookingStatus } from '../types/booking.types';
+import {
+  BookingDto,
+  BookingStatus,
+} from '../types/booking.types';
+import { toBookingStatusValue, type BookingStatusInput } from './bookingStatus';
 import { parseBackendDate } from '@/src/shared/utils/date';
 
 /**
  * Helper to get numeric status value from booking status.
  */
-export function getStatusValue(status: any): number {
-  if (typeof status === 'number') return status;
-  if (typeof status === 'string') {
-    return BookingStatus[status as keyof typeof BookingStatus] ?? 0;
-  }
-  return 0;
+export function getStatusValue(status: BookingStatusInput): number {
+  return toBookingStatusValue(status) ?? 0;
 }
 
 /**
@@ -92,4 +92,12 @@ export function canConfirmRefund(booking: BookingDto): boolean {
 export function canCompletePayment(booking: BookingDto): boolean {
   const status = getStatusValue(booking.status);
   return status === BookingStatus.PENDING_PAYMENT;
+}
+
+/**
+ * Condition: Allows adding a service if status is IN_PROGRESS or PENDING_PAYMENT.
+ */
+export function canAddService(booking: BookingDto): boolean {
+  const status = getStatusValue(booking.status);
+  return status === BookingStatus.IN_PROGRESS || status === BookingStatus.PENDING_PAYMENT;
 }
