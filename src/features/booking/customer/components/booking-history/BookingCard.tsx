@@ -102,6 +102,33 @@ export function BookingCard({ booking, onViewDetail, onPayNow }: BookingCardProp
         </span>
       </div>
 
+      {/* Refund Amount - Show only for cancelled bookings with refund
+      {booking.refundAmount !== null && booking.refundAmount !== undefined && 
+       (booking.status === 'CANCELLED_REFUNDED' || booking.status === 'CANCELLED_PENDING_REFUND') && (
+        <div className={`mb-3 rounded-lg p-3 ${
+          booking.status === 'CANCELLED_REFUNDED' 
+            ? 'bg-green-50 border border-green-200' 
+            : 'bg-orange-50 border border-orange-200'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className={`text-sm font-bold ${
+              booking.status === 'CANCELLED_REFUNDED' 
+                ? 'text-green-800' 
+                : 'text-orange-800'
+            }`}>
+              {booking.status === 'CANCELLED_REFUNDED' ? 'Đã hoàn tiền' : 'Chờ hoàn tiền'}
+            </span>
+            <span className={`text-lg font-bold ${
+              booking.status === 'CANCELLED_REFUNDED' 
+                ? 'text-green-600' 
+                : 'text-orange-600'
+            }`}>
+              {formatCurrency(booking.refundAmount)}
+            </span>
+          </div>
+        </div>
+      )} */}
+
       {/* Actions */}
       <div className="flex gap-2">
         {isPendingPayment && onPayNow && (

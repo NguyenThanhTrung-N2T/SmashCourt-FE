@@ -321,6 +321,34 @@ export function BookingDetailModal({
                       {getPaymentStatusConfig(paymentStatus).label}
                     </Badge>
                   </div>
+                  
+                  {/* Refund Amount - Show only for cancelled bookings with refund */}
+                  {booking.refundAmount !== null && booking.refundAmount !== undefined && 
+                   (booking.status === 'CANCELLED_REFUNDED' || booking.status === 'CANCELLED_PENDING_REFUND') && (
+                    <>
+                      <Divider />
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-foreground">Số tiền hoàn lại</span>
+                        <span className={`text-xl font-bold ${
+                          booking.status === 'CANCELLED_REFUNDED' 
+                            ? 'text-green-600' 
+                            : 'text-orange-500'
+                        }`}>
+                          {formatCurrency(booking.refundAmount)}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  {booking.status === 'CANCELLED_PENDING_REFUND' && (
+                          <p className="text-xs">
+                            Đơn đã hủy. Nhân viên sẽ xác nhận và hoàn tiền trong vòng 3-5 ngày làm việc.
+                          </p>
+                      )}
+                      {booking.status === 'CANCELLED_REFUNDED' && (
+                          <p className="text-xs">
+                            Đã hoàn tiền thành công.
+                          </p>
+                      )}
                 </div>
 
                 {/* Payment Pending Alert */}

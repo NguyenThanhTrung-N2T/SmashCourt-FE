@@ -209,6 +209,7 @@ export interface BookingDto {
 
   courts: BookingCourtDto[];
   services: BookingServiceDto[];
+  refundAmount: number | null;
 }
 
 export interface OnlineBookingResponse {

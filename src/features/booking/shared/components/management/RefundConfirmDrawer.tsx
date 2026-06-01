@@ -104,9 +104,10 @@ export function RefundConfirmDrawer({ isOpen, branchId, onClose, onConfirmRefund
                             {items.map((booking) => {
                                 const id = booking.id || '';
                                 const total = booking.finalTotal ?? 0;
+                                const refundAmount = booking.refundAmount ?? 0;
                                 return (
                                     <div key={id} className="flex items-center justify-between bg-surface-1 rounded-lg p-4">
-                                        <div>
+                                        <div className="flex-1">
                                             <div className="flex items-center gap-3">
                                                 <div className="rounded-full bg-surface-2 h-9 w-9 flex items-center justify-center text-muted">
                                                     <User className="h-4 w-4" />
@@ -117,8 +118,12 @@ export function RefundConfirmDrawer({ isOpen, branchId, onClose, onConfirmRefund
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="text-sm font-bold text-foreground">{formatCurrency(total)}</div>
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-right">
+                                                <p className="text-xs text-muted mb-1">Tổng tiền</p>
+                                                <p className="text-sm font-bold text-foreground">{formatCurrency(total)}</p>
+                                                <p className="text-xs text-orange-500 font-semibold mt-1">Hoàn: {formatCurrency(refundAmount)}</p>
+                                            </div>
                                             <Button variant="secondary" onClick={() => handleRequestConfirm(id, booking.bookingCode)}>
                                                 <CheckCircle className="h-4 w-4" />
                                                 Xác nhận

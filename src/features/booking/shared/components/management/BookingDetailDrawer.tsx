@@ -307,6 +307,37 @@ export function BookingDetailDrawer({
                     {formatCurrency(booking.finalTotal ?? 0)}
                   </span>
                 </div>
+                
+                {/* Refund Amount - Show only for cancelled bookings with refund */}
+                {booking.refundAmount !== null && booking.refundAmount !== undefined && 
+                 (booking.status === 'CANCELLED_REFUNDED' || booking.status === 'CANCELLED_PENDING_REFUND') && (
+                  <>
+                    <div className="border-t border-border pt-2 flex justify-between">
+                      <span className="font-bold text-foreground">Số tiền hoàn lại</span>
+                      <span className={`text-lg font-extrabold ${
+                        booking.status === 'CANCELLED_REFUNDED' 
+                          ? 'text-green-600' 
+                          : 'text-orange-500'
+                      }`}>
+                        {formatCurrency(booking.refundAmount)}
+                      </span>
+                    </div>
+                    {booking.status === 'CANCELLED_PENDING_REFUND' && (
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                        <p className="text-xs text-orange-800">
+                          Chờ xác nhận hoàn tiền
+                        </p>
+                      </div>
+                    )}
+                    {booking.status === 'CANCELLED_REFUNDED' && (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <p className="text-xs text-green-800">
+                          Đã hoàn tiền thành công
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </section>
           )}
