@@ -63,6 +63,92 @@ export interface ManagerDashboardDto {
     bookingTrend: BookingTrendDto[];
 }
 
+// ============================================================================
+// Operational Manager Dashboard Types (New)
+// ============================================================================
+
+export interface ManagerDashboardKpiDto {
+    revenueToday: number;
+    courtsInUse: number;
+    todayBookingsCount: number;
+    upcomingCheckInsCount: number;
+    needsActionCount: number;
+    pendingPaymentCount: number;
+    pendingRefundCount: number;
+}
+
+export interface LiveCourtAttentionDto {
+    courtId: string;
+    courtName: string;
+    courtStatus: string;
+    attentionStatus: 'PENDING_PAYMENT' | 'UPCOMING_CHECK_IN' | 'NO_SHOW_RISK' | 'PLAYING' | 'AVAILABLE';
+    bookingId: string | null;
+    bookingCode: string | null;
+    customerName: string | null;
+    customerPhone: string | null;
+    startTime: string | null;
+    endTime: string | null;
+    minutesUntilStart: number | null;
+    minutesSinceStart: number | null;
+    amountDue: number | null;
+    paymentStatus: string | null;
+}
+
+export interface DashboardCourtSlotDto {
+    courtId: string;
+    courtName: string;
+    startTime: string;
+    endTime: string;
+}
+
+export interface UpcomingBookingDashboardItemDto {
+    bookingId: string;
+    bookingCode: string;
+    customerName: string;
+    customerPhone: string | null;
+    courts: DashboardCourtSlotDto[];
+    startTime: string;
+    endTime: string;
+    bookingStatus: string;
+    paymentStatus: string;
+    finalTotal: number;
+}
+
+export interface ManagerDashboardActionItemDto {
+    bookingId: string;
+    bookingCode: string;
+    actionType: 'PENDING_PAYMENT' | 'CANCELLED_PENDING_REFUND';
+    customerName: string;
+    customerPhone: string | null;
+    courts: DashboardCourtSlotDto[];
+    startTime: string | null;
+    endTime: string | null;
+    amount: number;
+    createdAt: string;
+}
+
+export interface OccupancyForecastPointDto {
+    time: string;
+    totalCourts: number;
+    occupiedCourts: number;
+    availableCourts: number;
+    bookingCount: number;
+    occupancyRate: number;
+    isPeakRisk: boolean;
+}
+
+export interface OperationalManagerDashboardDto {
+    branchId: string;
+    branchName: string;
+    generatedAt: string;
+    kpis: ManagerDashboardKpiDto;
+    liveCourts: LiveCourtAttentionDto[];
+    totalCourts: number;
+    upcomingBookings: UpcomingBookingDashboardItemDto[];
+    actionQueue: ManagerDashboardActionItemDto[];
+    occupancyForecast: OccupancyForecastPointDto[];
+}
+
 export interface RevenueItemDto {
     period: string;
     revenue: number;

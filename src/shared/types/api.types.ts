@@ -31,3 +31,6 @@ export interface PaginatedData<T> {
   hasNext: boolean;
   hasPrev: boolean;
 }
+export type ApiResult<T> =
+  | { ok: true; data: T; message?: string | null; code?: string | null }
+  | { ok: false; error: ApiErrorPayload };

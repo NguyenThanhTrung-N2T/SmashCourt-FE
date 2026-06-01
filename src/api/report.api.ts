@@ -9,6 +9,7 @@ import {
     ReportFilterDto,
     OwnerDashboardDto,
     ManagerDashboardDto,
+    OperationalManagerDashboardDto,
     RevenueReportDto,
     BookingReportDto,
     CourtUtilizationReportDto,
@@ -59,6 +60,23 @@ export async function fetchManagerDashboard(
         { method: "GET" }
     );
     if (!response.data) throw new Error("Failed to fetch manager dashboard data");
+    return response.data;
+}
+
+/**
+ * Get operational manager dashboard data (real-time operations view).
+ */
+export async function fetchOperationalManagerDashboard(
+    filter: ReportFilterDto = {}
+): Promise<OperationalManagerDashboardDto> {
+    const params = new URLSearchParams();
+    appendReportFilterParams(params, filter);
+
+    const response = await authProtectedFetch<OperationalManagerDashboardDto>(
+        `/api/reports/dashboard/manager?${params}`,
+        { method: "GET" }
+    );
+    if (!response.data) throw new Error("Failed to fetch operational manager dashboard data");
     return response.data;
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { CalendarBlank } from "@phosphor-icons/react";
 import { Alert, Pagination } from "@/src/shared/components/ui";
 import { EmptyState } from "@/src/shared/components/layout";
@@ -23,8 +23,8 @@ export function BookingHistoryList() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Initialize query from URL
-  const getQueryFromUrl = useCallback((): BookingListQuery => {
+  // Initialize query from URL - memoize to prevent unnecessary re-renders
+  const queryFromUrl = useMemo((): BookingListQuery => {
     const params = Object.fromEntries(searchParams.entries());
 
     return {
@@ -40,7 +40,7 @@ export function BookingHistoryList() {
     };
   }, [searchParams]);
 
-  const { bookings, isLoading, error, updateQuery, query, refetch } = useCustomerBookings(getQueryFromUrl());
+  const { bookings, isLoading, error, updateQuery, query, refetch } = useCustomerBookings(queryFromUrl);
 
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const { retryPayment, isLoading: isRetryingPayment, error: paymentError, clearError } = useRetryPayment();
@@ -66,7 +66,8 @@ export function BookingHistoryList() {
     const url = queryString ? `${pathname}?${queryString}` : pathname;
 
     // Only update if URL actually changed to avoid loops
-    if (`${pathname}?${searchParams.toString()}` !== url) {
+    const currentUrl = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname;
+    if (currentUrl !== url) {
       router.replace(url, { scroll: false });
     }
   }, [query, pathname, router, searchParams]);

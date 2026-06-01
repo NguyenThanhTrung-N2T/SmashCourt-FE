@@ -7,6 +7,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import {
   BookingDetailDrawer, BookingTableView,
   BookingScheduleView, BookingCalendarView,
@@ -26,7 +27,6 @@ import type { BookingDto } from '@/src/features/booking/shared/types/booking.typ
 import { Table, GridNine, Calendar, Plus, X, FileText } from '@phosphor-icons/react';
 import { useEffect } from 'react';
 import { consumePrefill, WalkInPrefill } from '@/src/lib/walkInPrefill';
-import { addHours, format, parseISO } from 'date-fns';
 
 type ViewTab = 'table' | 'schedule' | 'calendar';
 type WorkspaceId = 'management' | string;
@@ -76,7 +76,9 @@ export function BookingManagementBase({
     message: '',
     onConfirm: () => { },
   });
-
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const {
     bookings,
     summary,
@@ -98,7 +100,34 @@ export function BookingManagementBase({
     toast,
     showToast,
   } = useBookingManagement(initialBranchId, activeView === 'table');
+  // ── URL helpers ──────────────────────────────────────────
+  const pushParam = useCallback((key: string, value: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) params.set(key, value);
+    else params.delete(key);
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [router, pathname, searchParams]);
+  // ── Wrap openBookingDetail ────────────────────────────────
+  const handleOpenBookingDetail = useCallback((bookingId: string) => {
+    pushParam('bookingId', bookingId);
+    openBookingDetail(bookingId);
+  }, [openBookingDetail, pushParam]);
 
+  // ── Wrap closeDrawer ─────────────────────────────────────
+  const handleCloseDrawer = useCallback(() => {
+    pushParam('bookingId', null);
+    closeDrawer();
+  }, [closeDrawer, pushParam]);
+
+  // ── Restore drawer on page load / back-forward ────────────
+  useEffect(() => {
+    const bookingId = searchParams.get('bookingId');
+    if (bookingId) {
+      openBookingDetail(bookingId);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally run once on mount
   const [refundDrawerOpen, setRefundDrawerOpen] = useState(false);
 
   const schedule = useBookingSchedule(branchId, activeView === 'schedule');
@@ -474,7 +503,7 @@ export function BookingManagementBase({
                 <BookingTableView
                   bookings={bookings}
                   loading={loading}
-                  onRowClick={openBookingDetail}
+                  onRowClick={handleOpenBookingDetail}
                   onCheckIn={handleCheckInWithConfirm}
                   onCheckout={handleCheckoutWithConfirm}
                   onCompletePayment={handleCompletePaymentWithConfirm}
@@ -535,7 +564,7 @@ export function BookingManagementBase({
       <BookingDetailDrawer
         isOpen={drawerOpen}
         booking={selectedBooking}
-        onClose={closeDrawer}
+        onClose={handleCloseDrawer}
         onCheckIn={handleCheckInWithConfirm}
         onCheckout={handleCheckoutWithConfirm}
         onCompletePayment={handleCompletePaymentWithConfirm}

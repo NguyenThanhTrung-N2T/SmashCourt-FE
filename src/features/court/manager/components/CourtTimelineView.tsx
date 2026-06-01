@@ -183,7 +183,8 @@ export function CourtTimelineView({
         nowMinutes >= dayStartMinutes &&
         nowMinutes <= dayEndMinutes;
 
-    const nowPosition = (nowMinutes - dayStartMinutes) * 2;
+    // Calculate position: each minute = 2px, relative to day start
+    const nowPosition = showNowIndicator ? (nowMinutes - dayStartMinutes) * 2 : 0;
 
     const getBookingStyles = (status: CourtTimelineSlotStatus) => {
         switch (status) {
@@ -225,21 +226,30 @@ export function CourtTimelineView({
                 className="flex-1 overflow-auto custom-scrollbar relative"
             >
                 <div className="relative" style={{ width: COURT_COLUMN_WIDTH + timelineWidth }}>
-                    {/* CURRENT TIME INDICATOR (Across header and content) */}
+                    {/* CURRENT TIME INDICATOR */}
                     {showNowIndicator && (
+                    <div
+                        className="absolute top-0 bottom-0 z-[45] pointer-events-none"
+                        style={{ left: COURT_COLUMN_WIDTH + nowPosition }}
+                    >
+                        {/* Pill — sits in header area, centered on line */}
                         <div
-                            className="absolute top-0 bottom-0 z-[45] pointer-events-none flex flex-col items-center"
-                            style={{ left: COURT_COLUMN_WIDTH + nowPosition }}
+                            className="absolute z-[46]"
+                            style={{ top: 48, transform: 'translate(-50%, -50%)' }}
                         >
-                            <div className="sticky top-[24px] z-[46]">
-                                <div className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-md -translate-y-1/2">
-                                    <Clock size={10} weight="fill" />
-                                    {format(currentTime, 'HH:mm')}
-                                </div>
+                            <div className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-md whitespace-nowrap">
+                                <Clock size={10} weight="fill" />
+                                {format(currentTime, 'HH:mm')}
                             </div>
-                            <div className="w-[1.5px] h-full bg-red-500/60" />
                         </div>
-                    )}
+
+                        {/* Line starts BELOW the header (top: 48px = header height) */}
+                        <div
+                            className="absolute left-0 bottom-0 w-[1.5px] bg-red-500/60"
+                            style={{ top: 48 }}
+                        />
+                    </div>
+                )}
 
                     {/* Header Row (Sticky top) */}
                     <div className="sticky top-0 z-40 flex bg-surface-2 border-b border-border">

@@ -17,7 +17,6 @@ import { fetchCourts } from "@/src/api/court.api";
 import { CustomerSearchDto } from "@/src/features/customer/shared/types/customer.types";
 import { FormErrors, WalkInBookingWorkspaceProps, WalkInBookingFormState, CustomerMode } from "@/src/features/booking/shared/types/walkinBooking.types";
 import { ModeSwitch, GuestPane, CustomerPane } from "@/src/features/booking/shared/components/new";
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -182,12 +181,11 @@ export function WalkInBookingWorkspace({
       const booking = await createWalkInBooking(payload);
       onDirtyChange(false);
       onCreated(booking);
-    } catch (error) {
-      console.error("Đã xảy ra lỗi khi đặt sân:", error);
-      onError("Đã xảy ra lỗi khi đặt sân");
-    } finally {
-      setSubmitting(false);
-    }
+    } catch (error: unknown) {
+  onError(error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định");
+} finally {
+  setSubmitting(false);
+}
   };
 
   // ---------------------------------------------------------------------------

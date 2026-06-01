@@ -12,7 +12,6 @@ import {
   setAccessToken,
   type AuthUserSession,
 } from "@/src/features/auth/session/sessionStore";
-import WorkspaceHomeShell from "@/src/layouts/employee/components/WorkspaceHomeShell";
 
 function readSession() {
   try {
@@ -33,6 +32,16 @@ function OwnerRedirect() {
   const router = useRouter();
   useEffect(() => {
     router.replace("/owner");
+  }, [router]);
+  // Use inline style to ensure theme variable is applied
+  return <div className="min-h-screen" style={{ background: 'var(--background)' }} />;
+}
+
+/** Redirect OWNER to /owner (avoids calling router.push during render) */
+function ManagerRedirect() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/manager");
   }, [router]);
   // Use inline style to ensure theme variable is applied
   return <div className="min-h-screen" style={{ background: 'var(--background)' }} />;
@@ -131,7 +140,7 @@ export default function HomeGateClient() {
       return <OwnerRedirect />;
     }
     if (role === "BRANCH_MANAGER" || role === "BRANCH-MANAGER" || role === "STAFF") {
-      return <WorkspaceHomeShell accessToken={accessToken} user={authUser} />;
+      return <ManagerRedirect/>;
     }
     if (role === "CUSTOMER") {
       return <CustomerRedirect />;

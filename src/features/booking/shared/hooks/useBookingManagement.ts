@@ -48,11 +48,9 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
 
   // Shared branch filter
   const [branchId, setBranchId] = useState<string | undefined>(initialBranchId);
-
+  
   // Load bookings
-  const loadBookings = useCallback(async () => {
-    if (!enabled) return;
-
+  const loadBookings = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     try {
       // Combine shared and table filters for API call
@@ -68,7 +66,16 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
     } finally {
       setLoading(false);
     }
-  }, [tableFilters, branchId, showToast, enabled]);
+  }, [tableFilters, branchId, showToast]);
+  
+  useEffect(() => {
+    if (!enabled) return; // ← only gate here
+
+    const controller = new AbortController();
+    loadBookings(controller.signal);
+
+    return () => controller.abort(); // cancel if deps change before it finishes
+}, [loadBookings, enabled]);
 
   // Load dashboard summary
   const loadSummary = useCallback(async () => {
