@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-    fetchOwnerDashboard,
+
     fetchCourtUtilizationReport
 } from "@/src/api/report.api";
+import { fetchOwnerDashboard } from "@/src/api/dashboard.api";
 import {
     OwnerDashboardDto,
     ReportFilterDto,

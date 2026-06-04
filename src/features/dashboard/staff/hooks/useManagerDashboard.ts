@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { fetchOperationalManagerDashboard } from "@/src/api/report.api";
+import { fetchOperationalManagerDashboard } from "@/src/api/dashboard.api";
 import { OperationalManagerDashboardDto, ReportFilterDto } from "@/src/features/report/shared/report.types";
 
 interface UseManagerDashboardResult {
@@ -22,7 +22,7 @@ export function useManagerDashboard(filter: ReportFilterDto = {}): UseManagerDas
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
-    
+
     // Serialize filter to prevent infinite loops from object reference changes
     const filterKey = JSON.stringify(filter);
 
@@ -37,7 +37,7 @@ export function useManagerDashboard(filter: ReportFilterDto = {}): UseManagerDas
         } finally {
             setIsLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filterKey]); // Use serialized filter key instead of filter object
 
     // Initial fetch

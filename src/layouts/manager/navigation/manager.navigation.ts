@@ -12,14 +12,15 @@ import {
   User,
   Gear,
   Question,
-  ShieldCheck
+  ShieldCheck,
+  SpeedometerIcon,
 } from "@phosphor-icons/react";
 
 export const MANAGER_NAV: NavItem[] = [
   {
     label: "Tổng quan",
     href: "/manager",
-    icon: ChartBar,
+    icon: SpeedometerIcon,
     hint: "Tổng quan chi nhánh",
     exact: true,
   },

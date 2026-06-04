@@ -7,6 +7,7 @@
  * base price, occupancy timeline, and action controls.
  */
 
+import React from "react";
 import { CalendarDots, Eye, PencilSimple, Prohibit, CheckCircle, Trash } from "@phosphor-icons/react";
 import { Badge } from "@/src/shared/components/ui/Badge";
 import { Button } from "@/src/shared/components/ui/Button";
@@ -34,10 +35,10 @@ function formatCurrency(amount: number): string {
 interface CourtCardProps {
     court: CourtManagementCardDto;
     onViewDetail: (courtId: string) => void;
-    onEdit: (courtId: string) => void;
-    onSuspend: (courtId: string, name: string) => void;
-    onActivate: (courtId: string, name: string) => void;
-    onDelete: (courtId: string, name: string) => void;
+    onEdit?: (courtId: string) => void;
+    onSuspend?: (courtId: string, name: string) => void;
+    onActivate?: (courtId: string, name: string) => void;
+    onDelete?: (courtId: string, name: string) => void;
 }
 
 export function CourtCard({
@@ -52,33 +53,33 @@ export function CourtCard({
     const isSuspended = court.operationalStatus === CourtOperationalStatus.SUSPENDED;
 
     const menuItems = [
-        {
+        onEdit && {
             label: "Chỉnh sửa",
             icon: <PencilSimple className="h-4 w-4" />,
             onClick: () => onEdit(court.id),
             variant: "default" as const,
         },
-        {
+        onSuspend && {
             label: "Tạm ngưng",
             icon: <Prohibit className="h-4 w-4" />,
             onClick: () => onSuspend(court.id, court.name),
             variant: "default" as const,
             hidden: isSuspended,
         },
-        {
+        onActivate && {
             label: "Kích hoạt",
             icon: <CheckCircle className="h-4 w-4" />,
             onClick: () => onActivate(court.id, court.name),
             variant: "success" as const,
             hidden: !isSuspended,
         },
-        {
+        onDelete && {
             label: "Xóa sân",
             icon: <Trash className="h-4 w-4" />,
             onClick: () => onDelete(court.id, court.name),
             variant: "danger" as const,
         },
-    ];
+    ].filter(Boolean) as React.ComponentProps<typeof ActionMenu>["items"];
 
     return (
         <div className="group relative flex flex-col rounded-2xl bg-surface-1 border border-border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
@@ -126,7 +127,7 @@ export function CourtCard({
                 >
                     Xem chi tiết
                 </Button>
-                <ActionMenu items={menuItems} size="sm" />
+                {menuItems.length > 0 && <ActionMenu items={menuItems} size="sm" />}
             </div>
         </div>
     );

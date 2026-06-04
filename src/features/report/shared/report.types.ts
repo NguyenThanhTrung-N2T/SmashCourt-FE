@@ -2,7 +2,7 @@ export interface ReportFilterDto {
     fromDate?: string; // format YYYY-MM-DD
     toDate?: string;   // format YYYY-MM-DD
     branchId?: string; // Guid
-    groupBy?: 'day' | 'week' | 'month' | 'branch' | 'courtType' | 'paymentMethod' | 'hour' | 'dayOfWeek';
+    groupBy?: 'day' | 'week' | 'month' | 'branch' | 'courtType' | 'paymentMethod' | 'hour' | 'dayOfWeek' | 'court';
 }
 
 export interface DashboardSummaryDto {

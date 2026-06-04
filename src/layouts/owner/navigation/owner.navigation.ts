@@ -11,7 +11,7 @@ import {
     Gear,
     Coffee,
     CalendarDots,
-
+    SpeedometerIcon,
     Tag,
     Question,
 } from "@phosphor-icons/react";
@@ -20,9 +20,15 @@ export const OWNER_NAV: NavItem[] = [
     {
         label: "Tổng quan",
         href: "/owner",
-        icon: ChartBar,
+        icon: SpeedometerIcon,
         hint: "KPI & Báo cáo",
         exact: true,
+    },
+    {
+        label: "Báo cáo",
+        href: "/owner/reports",
+        icon: ChartBar,
+        hint: "Báo cáo chi tiết",
     },
     {
         label: "Chi nhánh",
@@ -42,12 +48,6 @@ export const OWNER_NAV: NavItem[] = [
         icon: Tag,
         hint: "Cấu hình giá theo khung giờ",
     },
-    // {
-    //     label: "Sân",
-    //     href: "/owner/courts",
-    //     icon: SquaresFour,
-    //     hint: "Quản lý sân thi đấu",
-    // },
     {
         label: "Khách hàng",
         href: "/owner/customers",

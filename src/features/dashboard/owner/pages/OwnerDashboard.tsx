@@ -35,6 +35,7 @@ import {
 import { useOwnerDashboard } from "@/src/features/dashboard/owner/hooks/useOwnerDashboard";
 import { getFilterDates, FilterOption, getRevenueGroupBy, getGroupByLabel } from "@/src/features/dashboard/owner/utils/dashboard-filters";
 import { getTierCfg } from "@/src/features/benefit/loyalty/shared/configs/loyalty-tier.config";
+import { formatDisplayPeriod } from "@/src/features/report/shared/utils/reportUtils";
 import { ReportFilterDto } from "@/src/features/dashboard/shared/dashboard.types";
 
 export function OwnerDashboard() {
@@ -127,14 +128,14 @@ export function OwnerDashboard() {
     }, [dashboardData]);
 
     const revenueTrendData = data?.revenueTrend?.map(i => i.revenue) || [];
-    const revenueLabels = data?.revenueTrend?.filter((_, i, arr) => i % Math.max(1, Math.floor(arr.length / 6)) === 0).map(i => i.period.split('-').reverse().slice(0, 2).join('/')) || [];
+    const revenueLabels = data?.revenueTrend?.filter((_, i, arr) => i % Math.max(1, Math.floor(arr.length / 6)) === 0).map(i => formatDisplayPeriod(i.period)) || [];
 
     const bookingTrend = trendData?.map(i => {
         const isHour = !isNaN(Number(i.period));
         return {
             totalCount: i.totalCount,
             completedCount: i.completedCount,
-            label: isHour ? `${i.period}h` : (dayLabels[i.period] || i.period),
+            label: isHour ? `${i.period}h` : (dayLabels[i.period] || formatDisplayPeriod(i.period)),
             isToday: isHour
                 ? Number(i.period) === new Date().getHours()
                 : i.period === new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date())

@@ -22,9 +22,10 @@ import {
 
 interface CourtManagementBaseProps {
     allowManagement: boolean;
+    bookingPath: string;
 }
 
-export function CourtManagementBase({ allowManagement }: CourtManagementBaseProps) {
+export function CourtManagementBase({ allowManagement, bookingPath }: CourtManagementBaseProps) {
     const [viewMode, setViewMode] = useState<"grid" | "timeline">("grid");
     const {
         stats,
@@ -154,7 +155,7 @@ export function CourtManagementBase({ allowManagement }: CourtManagementBaseProp
                                     endTime
                                 });
                                 // Staff or Manager layout?
-                                router.push(`/${allowManagement ? 'manager' : 'staff'}/bookings`);
+                                router.push(bookingPath);
                             }
                         });
                     }}

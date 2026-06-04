@@ -15,11 +15,11 @@ interface CourtCardsGridProps {
     courts: CourtManagementCardDto[];
     loading: boolean;
     onViewDetail: (courtId: string) => void;
-    onEdit: (courtId: string) => void;
-    onSuspend: (courtId: string, name: string) => void;
-    onActivate: (courtId: string, name: string) => void;
-    onDelete: (courtId: string, name: string) => void;
-    onAddCourt: () => void;
+    onEdit?: (courtId: string) => void;
+    onSuspend?: (courtId: string, name: string) => void;
+    onActivate?: (courtId: string, name: string) => void;
+    onDelete?: (courtId: string, name: string) => void;
+    onAddCourt?: () => void;
 }
 
 function CourtCardSkeleton() {

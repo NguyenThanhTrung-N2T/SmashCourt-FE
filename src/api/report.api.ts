@@ -1,15 +1,6 @@
-/**
- * Reports API
- * 
- * API endpoints for report and dashboard data.
- */
-
 import { authProtectedFetch } from "./core";
 import {
     ReportFilterDto,
-    OwnerDashboardDto,
-    ManagerDashboardDto,
-    OperationalManagerDashboardDto,
     RevenueReportDto,
     BookingReportDto,
     CourtUtilizationReportDto,
@@ -18,67 +9,8 @@ import {
     ServicePerformanceReportDto,
     PromotionEffectivenessReportDto
 } from "../features/report/shared/report.types";
+import { appendReportFilterParams } from "./helpers/helpers";
 
-/**
- * Append common report filters to URLSearchParams.
- */
-function appendReportFilterParams(params: URLSearchParams, filter: ReportFilterDto): void {
-    if (filter.fromDate) params.append("fromDate", filter.fromDate);
-    if (filter.toDate) params.append("toDate", filter.toDate);
-    if (filter.branchId) params.append("branchId", filter.branchId);
-    if (filter.groupBy) params.append("groupBy", filter.groupBy);
-}
-
-/**
- * Get owner dashboard data.
- */
-export async function fetchOwnerDashboard(
-    filter: ReportFilterDto = {}
-): Promise<OwnerDashboardDto> {
-    const params = new URLSearchParams();
-    appendReportFilterParams(params, filter);
-
-    const response = await authProtectedFetch<OwnerDashboardDto>(
-        `/api/dashboard/owner?${params}`,
-        { method: "GET" }
-    );
-    if (!response.data) throw new Error("Failed to fetch owner dashboard data");
-    return response.data;
-}
-
-/**
- * Get manager dashboard data.
- */
-// export async function fetchManagerDashboard(
-//     filter: ReportFilterDto = {}
-// ): Promise<ManagerDashboardDto> {
-//     const params = new URLSearchParams();
-//     appendReportFilterParams(params, filter);
-
-//     const response = await authProtectedFetch<ManagerDashboardDto>(
-//         `/api/dashboard/manager?${params}`,
-//         { method: "GET" }
-//     );
-//     if (!response.data) throw new Error("Failed to fetch manager dashboard data");
-//     return response.data;
-// }
-
-/**
- * Get operational manager dashboard data (real-time operations view).
- */
-export async function fetchOperationalManagerDashboard(
-    filter: ReportFilterDto = {}
-): Promise<OperationalManagerDashboardDto> {
-    const params = new URLSearchParams();
-    appendReportFilterParams(params, filter);
-
-    const response = await authProtectedFetch<OperationalManagerDashboardDto>(
-        `/api/dashboard/branch?${params}`,
-        { method: "GET" }
-    );
-    if (!response.data) throw new Error("Failed to fetch operational manager dashboard data");
-    return response.data;
-}
 
 /**
  * Get revenue report data.
@@ -122,6 +54,7 @@ export async function fetchCourtUtilizationReport(
 ): Promise<CourtUtilizationReportDto> {
     const params = new URLSearchParams();
     appendReportFilterParams(params, filter);
+    params.set('groupBy', 'court');
 
     const response = await authProtectedFetch<CourtUtilizationReportDto>(
         `/api/reports/courts/utilization?${params}`,
