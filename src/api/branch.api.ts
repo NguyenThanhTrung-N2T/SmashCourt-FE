@@ -144,52 +144,7 @@ export async function removeCourtTypeFromBranch(branchId: string, courtTypeId: s
 }
 
 // ============================================================================
-// 3. Branch Services Endpoints
-// ============================================================================
-
-export async function fetchBranchServices(branchId: string): Promise<BranchServiceDto[]> {
-  const response = await authProtectedFetch<BranchServiceDto[]>(
-    `/api/branches/${branchId}/services`,
-    { method: "GET" }
-  );
-  return response.data || [];
-}
-
-export async function addServiceToBranch(branchId: string, dto: AddServiceToBranchDto): Promise<void> {
-  await authProtectedFetch<null>(
-    `/api/branches/${branchId}/services`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: dto,
-    }
-  );
-}
-
-export async function updateBranchServicePrice(
-  branchId: string,
-  serviceId: string,
-  dto: UpdateBranchServiceDto
-): Promise<void> {
-  await authProtectedFetch<null>(
-    `/api/branches/${branchId}/services/${serviceId}`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: dto,
-    }
-  );
-}
-
-export async function removeServiceFromBranch(branchId: string, serviceId: string): Promise<void> {
-  await authProtectedFetch<null>(
-    `/api/branches/${branchId}/services/${serviceId}`,
-    { method: "DELETE" }
-  );
-}
-
-// ============================================================================
-// 4. Branch Manager Endpoints
+// 3. Branch Manager Endpoints
 // ============================================================================
 
 export async function getCurrentManager(branchId: string): Promise<BranchManagerDto | null> {

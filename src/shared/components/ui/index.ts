@@ -14,3 +14,4 @@ export { ConfirmationDialog } from './ConfirmationDialog';
 export { ImageUploader } from './ImageUploader';
 export { SmartImage } from './SmartImage';
 export { Toast } from './Toast';
+export { Radio } from './Radio';

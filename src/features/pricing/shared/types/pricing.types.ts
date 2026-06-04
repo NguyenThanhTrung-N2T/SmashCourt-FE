@@ -1,5 +1,9 @@
-export type CourtType = { id: string; name: string };
+// ─── BACKEND API TYPES (FROM pricing-system.md) ────────────────────────────
 
+/**
+ * GET /api/system-prices response
+ * Current effective system prices for a specific date
+ */
 export interface CurrentPriceDto {
     courtTypeId: string;
     courtTypeName: string;
@@ -10,20 +14,83 @@ export interface CurrentPriceDto {
     effectiveFrom: string;
 }
 
-export interface EffectivePriceDto extends CurrentPriceDto {
-    priceSource: "SYSTEM_PRICE" | "BRANCH_OVERRIDE";
-}
-
+/**
+ * Version summary in system and branch price version lists
+ * Used in GET /api/system-prices/versions and GET /api/prices/overrides responses
+ */
 export interface PriceVersionDto {
     effectiveFrom: string;
-    isCurrent: boolean;
+    status: "ACTIVE" | "SCHEDULED" | "EXPIRED";
 }
 
+/**
+ * GET /api/system-prices/versions/{effectiveFrom} response
+ * Exact configuration for a specific system price version
+ */
+export interface SystemPriceVersionDetailDto {
+    courtTypeId: string;
+    courtTypeName: string;
+    effectiveFrom: string;
+    status: "ACTIVE" | "SCHEDULED" | "EXPIRED";
+    slots: {
+        startTime: string;
+        endTime: string;
+        weekdayPrice: number;
+        weekendPrice: number;
+    }[];
+}
+
+/**
+ * GET /api/prices/overrides/{effectiveFrom} response
+ * Exact configuration for a specific branch price override version
+ */
+export interface PriceOverrideVersionDetailDto {
+    branchId: string;
+    courtTypeId: string;
+    courtTypeName: string;
+    effectiveFrom: string;
+    status: "ACTIVE" | "SCHEDULED" | "EXPIRED";
+    slots: {
+        startTime: string;
+        endTime: string;
+        weekdayPrice: number;
+        weekendPrice: number;
+    }[];
+}
+
+/**
+ * GET /api/prices response
+ * Effective pricing snapshot for a branch (system + branch overrides merged)
+ */
+export interface EffectivePricesResponse {
+    branchId: string;
+    date: string;
+    courtTypes: {
+        courtTypeId: string;
+        courtTypeName: string;
+        slots: {
+            startTime: string;
+            endTime: string;
+            weekdayPrice: number;
+            weekendPrice: number;
+            effectiveFrom: string;
+            priceSource: "BRANCH" | "SYSTEM";
+        }[];
+    }[];
+}
+
+/**
+ * PATCH /api/prices/calculate response
+ * Price calculation result with breakdown
+ */
 export interface CalculatePriceResultDto {
     courtFee: number;
     breakdown: PriceBreakdownDto[];
 }
 
+/**
+ * Individual price breakdown item in CalculatePriceResultDto
+ */
 export interface PriceBreakdownDto {
     startTime: string;
     endTime: string;
@@ -33,28 +100,10 @@ export interface PriceBreakdownDto {
     priceSource: "SYSTEM_PRICE" | "BRANCH_OVERRIDE";
 }
 
-export interface SavePriceDto {
-    courtTypeId: string;
-    effectiveFrom: string;
-    prices: {
-        startTime: string;
-        endTime: string;
-        weekdayPrice: number;
-        weekendPrice: number;
-    }[];
-}
-
-export type CreateSystemPriceDto = SavePriceDto;
-
-export type CreateBranchPriceDto = SavePriceDto;
-
-export interface DeleteBranchPriceDto {
-    courtTypeId: string;
-    effectiveFrom: string;
-    startTime: string;
-    endTime: string;
-}
-
+/**
+ * POST /api/prices/calculate request
+ * Calculate total price for a court booking
+ */
 export interface CalculatePriceDto {
     courtId: string;
     bookingDate: string;
@@ -62,41 +111,40 @@ export interface CalculatePriceDto {
     endTime: string;
 }
 
-export type TimeSlot = {
-    id: string;
-    label: string;
-    startTime: string; // "HH:mm:ss"
-    endTime: string;   // "HH:mm:ss"
-};
+/**
+ * DELETE /api/prices/overrides/{effectiveFrom} request body
+ * Delete specific time slots from a branch price override version
+ */
+export interface DeleteBranchPriceDto {
+    courtTypeId: string;
+    effectiveFrom: string;
+    startTime: string;
+    endTime: string;
+}
 
-export type PriceRow = {
-    slotId: string;
-    slotLabel: string;
+/**
+ * PATCH /api/system-prices/versions/{effectiveFrom} request body
+ * Create or update a system price version
+ */
+export interface UpsertSystemPriceItem {
     startTime: string;
     endTime: string;
     weekdayPrice: number;
     weekendPrice: number;
-    priceSource?: "SYSTEM_PRICE" | "BRANCH_OVERRIDE";
-    /** Original system price – present only when branch tab shows an override */
-    systemWeekdayPrice?: number;
-    systemWeekendPrice?: number;
-};
+}
+export interface UpsertSystemPriceRequest {
+    slots: UpsertSystemPriceItem[];
+}
 
-export type PriceConfig = {
-    id: string;
-    courtTypeId: string;
-    courtTypeName: string;
-    effectiveFrom: string; // "YYYY-MM-DD HH:mm:ss"
-    rows: PriceRow[];
-};
-
-export type WizardSlotPrice = {
-    slotId: string;
-    slotLabel: string;
-    startTime: string;
-    endTime: string;
-    weekday: string;
-    weekend: string;
-};
-
-export type TabId = "system" | "branch";
+/**
+ * PATCH /api/prices/overrides/{effectiveFrom} request body
+ * Create or update a branch price override version
+ */
+export interface UpsertPriceOverrideRequest {
+    slots: {
+        startTime: string;
+        endTime: string;
+        weekdayPrice: number;
+        weekendPrice: number;
+    }[];
+}

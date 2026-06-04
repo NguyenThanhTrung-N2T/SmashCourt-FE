@@ -135,7 +135,7 @@ export async function updateServicePriceInBranch(serviceId: string, dto: UpdateB
   }
   return response.data;
 }
-export async function DisableBranchService(serviceId: string, branchId?: string): Promise<void> {
+export async function disableBranchService(serviceId: string, branchId?: string): Promise<void> {
   await authProtectedFetch<null>(
     `/api/services/branch/${serviceId}` + buildQuery({ branchId }),
     { method: "DELETE" }

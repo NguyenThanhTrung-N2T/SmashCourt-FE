@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Trash, Pencil, Check, X, Warning, Coffee, ArrowClockwise } from '@phosphor-icons/react';
-import type { BranchServiceDto, AddServiceToBranchDto, UpdateBranchServiceDto } from '@/src/features/branch/shared/types/branch.types';
-import type { Service } from '@/src/features/service/shared/types/service.types';
-import { fetchBranchServices, addServiceToBranch, updateBranchServicePrice, removeServiceFromBranch } from '@/src/api/branch.api';
+import type { Service, BranchService, AddServiceToBranchRequest, UpdateBranchServicePriceRequest } from '@/src/features/service/shared/types/service.types';
+import { getBranchServices, addServiceToBranch, updateServicePriceInBranch, disableBranchService } from '@/src/api/service.api';
 import { fetchAllServices } from '@/src/api/service.api';
 import { ConfirmationDialog } from '@/src/shared/components/ui';
 import { BranchServicesLoading } from '../states';
@@ -13,18 +12,26 @@ import { handleApiError } from '../../utils/error-handling';
 import { useToast } from '@/src/shared/hooks/useToast';
 import { formatCurrency } from '@/src/shared/utils/date';
 import { SmartImage } from '@/src/shared/components/ui/SmartImage';
-
+import { PaginatedData } from "@/src/shared/types/api.types";
 interface BranchServicesTabProps {
     branchId: string;
     onToast?: (tone: 'success' | 'error', message: string) => void;
 }
 
 export function BranchServicesTab({ branchId, onToast }: BranchServicesTabProps) {
-    const [branchServices, setBranchServices] = useState<BranchServiceDto[]>([]);
+    const [branchServices, setBranchServices] = useState<PaginatedData<BranchService>>({
+        items: [],
+        page: 1,
+        pageSize: 50,
+        totalItems: 0,
+        totalPages: 0,
+        hasNext: false,
+        hasPrev: false
+    });
     const [allServices, setAllServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [serviceToRemove, setServiceToRemove] = useState<BranchServiceDto | null>(null);
+    const [serviceToRemove, setServiceToRemove] = useState<BranchService | null>(null);
     const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
     const [editPrice, setEditPrice] = useState<number>(0);
     const { show: showToast } = useToast();
@@ -36,7 +43,7 @@ export function BranchServicesTab({ branchId, onToast }: BranchServicesTabProps)
         if (!silent) setLoading(true);
         try {
             const [services, appServices] = await Promise.all([
-                fetchBranchServices(branchId),
+                getBranchServices(branchId),
                 fetchAllServices(1, 50)
             ]);
             setBranchServices(services);
@@ -57,11 +64,11 @@ export function BranchServicesTab({ branchId, onToast }: BranchServicesTabProps)
         if (isActionLoading) return;
         setIsActionLoading(true);
         try {
-            const dto: AddServiceToBranchDto = {
+            const dto: AddServiceToBranchRequest = {
                 serviceId,
                 price: defaultPrice
             };
-            await addServiceToBranch(branchId, dto);
+            await addServiceToBranch(dto, branchId);
             toast('success', 'Thêm dịch vụ thành công');
             await loadData(true);
         } catch (err: any) {
@@ -79,10 +86,10 @@ export function BranchServicesTab({ branchId, onToast }: BranchServicesTabProps)
         if (isActionLoading) return;
         setIsActionLoading(true);
         try {
-            const dto: UpdateBranchServiceDto = {
+            const dto: UpdateBranchServicePriceRequest = {
                 price: editPrice
             };
-            await updateBranchServicePrice(branchId, serviceId, dto);
+            await updateServicePriceInBranch(serviceId, dto, branchId);
             toast('success', 'Cập nhật giá thành công');
             setEditingServiceId(null);
             await loadData(true);
@@ -97,7 +104,7 @@ export function BranchServicesTab({ branchId, onToast }: BranchServicesTabProps)
         if (!serviceToRemove || isActionLoading) return;
         setIsActionLoading(true);
         try {
-            await removeServiceFromBranch(branchId, serviceToRemove.serviceId);
+            await disableBranchService(serviceToRemove.serviceId, branchId);
             toast('success', 'Gỡ dịch vụ thành công');
             setServiceToRemove(null);
             await loadData(true);
@@ -108,7 +115,7 @@ export function BranchServicesTab({ branchId, onToast }: BranchServicesTabProps)
         }
     };
 
-    const startEditing = (service: BranchServiceDto) => {
+    const startEditing = (service: BranchService) => {
         setEditingServiceId(service.serviceId);
         setEditPrice(service.effectivePrice);
     };
@@ -118,7 +125,7 @@ export function BranchServicesTab({ branchId, onToast }: BranchServicesTabProps)
     };
 
     const availableServices = allServices.filter(s =>
-        !branchServices.some(bs => bs.serviceId === s.id)
+        !branchServices.items.some(bs => bs.serviceId === s.id)
     );
 
     if (loading) {
@@ -148,9 +155,9 @@ export function BranchServicesTab({ branchId, onToast }: BranchServicesTabProps)
                 </div>
 
                 {/* Branch Services List */}
-                {branchServices.length > 0 ? (
+                {branchServices.items.length > 0 ? (
                     <div className="grid gap-4 md:grid-cols-2">
-                        {branchServices.map((service, index) => {
+                        {branchServices.items.map((service, index) => {
                             const serviceInfo = allServices.find(s => s.id === service.serviceId);
                             return (
                                 <div

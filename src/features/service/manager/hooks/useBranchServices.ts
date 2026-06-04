@@ -5,7 +5,7 @@ import {
     getBranchServices,
     addServiceToBranch,
     updateServicePriceInBranch,
-    DisableBranchService,
+    disableBranchService,
 } from "@/src/api/service.api";
 import { fetchAllServices } from "@/src/api/service.api";
 import { AuthApiError } from "@/src/api/auth.api";
@@ -115,7 +115,7 @@ export function useBranchServices(
     const disableService = useCallback(async (serviceId: string) => {
         setActionLoading(true);
         try {
-            await DisableBranchService(serviceId, branchId);
+            await disableBranchService(serviceId, branchId);
             await load(currentPage);
         } finally {
             setActionLoading(false);

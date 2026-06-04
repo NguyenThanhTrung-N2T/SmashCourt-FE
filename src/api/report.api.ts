@@ -39,7 +39,7 @@ export async function fetchOwnerDashboard(
     appendReportFilterParams(params, filter);
 
     const response = await authProtectedFetch<OwnerDashboardDto>(
-        `/api/reports/dashboard/owner?${params}`,
+        `/api/dashboard/owner?${params}`,
         { method: "GET" }
     );
     if (!response.data) throw new Error("Failed to fetch owner dashboard data");
@@ -49,19 +49,19 @@ export async function fetchOwnerDashboard(
 /**
  * Get manager dashboard data.
  */
-export async function fetchManagerDashboard(
-    filter: ReportFilterDto = {}
-): Promise<ManagerDashboardDto> {
-    const params = new URLSearchParams();
-    appendReportFilterParams(params, filter);
+// export async function fetchManagerDashboard(
+//     filter: ReportFilterDto = {}
+// ): Promise<ManagerDashboardDto> {
+//     const params = new URLSearchParams();
+//     appendReportFilterParams(params, filter);
 
-    const response = await authProtectedFetch<ManagerDashboardDto>(
-        `/api/reports/dashboard/manager?${params}`,
-        { method: "GET" }
-    );
-    if (!response.data) throw new Error("Failed to fetch manager dashboard data");
-    return response.data;
-}
+//     const response = await authProtectedFetch<ManagerDashboardDto>(
+//         `/api/dashboard/manager?${params}`,
+//         { method: "GET" }
+//     );
+//     if (!response.data) throw new Error("Failed to fetch manager dashboard data");
+//     return response.data;
+// }
 
 /**
  * Get operational manager dashboard data (real-time operations view).
@@ -73,7 +73,7 @@ export async function fetchOperationalManagerDashboard(
     appendReportFilterParams(params, filter);
 
     const response = await authProtectedFetch<OperationalManagerDashboardDto>(
-        `/api/reports/dashboard/manager?${params}`,
+        `/api/dashboard/branch?${params}`,
         { method: "GET" }
     );
     if (!response.data) throw new Error("Failed to fetch operational manager dashboard data");

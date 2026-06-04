@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { PageHeader } from "@/src/shared/components/layout";
+import { PageHeader } from "@/src/shared/components/layout/PageHeader";
 import { Toast } from "@/src/shared/components/ui";
 import { useToast } from "@/src/shared/hooks/useToast";
 import { PricingTabNav, PricingTabId } from "../shared/components/PricingTabNav";
 import { SystemPricePage } from "../shared/pages/SystemPricePage";
 import { BranchPricePage } from "../shared/pages/BranchPricePage";
 
-export function OwnerPricingPage() {
+export function ManagerPricingPage() {
     const [activeTab, setActiveTab] = useState<PricingTabId>("system");
     const { toast } = useToast();
 
@@ -16,8 +16,9 @@ export function OwnerPricingPage() {
         <div className="space-y-6 animate-slide-up w-full px-8 pt-6 pb-10">
             <PageHeader
                 title="Bảng giá"
-                description="Quản lý giá thuê sân theo loại và thời gian hiệu lực"
+                description="Xem bảng giá hệ thống và quản lý ghi đè cho chi nhánh của bạn"
             />
+
             <PricingTabNav
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
@@ -25,8 +26,8 @@ export function OwnerPricingPage() {
 
             <div className="min-h-[500px] bg-surface-1 rounded-2xl border border-border overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md">
                 <div className="p-8">
-                    {activeTab === "system" && <SystemPricePage />}
-                    {activeTab === "branches" && <BranchPricePage />}
+                    {activeTab === "system" && <SystemPricePage readOnly={true} />}
+                    {activeTab === "branches" && <BranchPricePage role="manager" />}
                 </div>
             </div>
 

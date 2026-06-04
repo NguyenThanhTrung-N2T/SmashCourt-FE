@@ -7,7 +7,7 @@ import {
   Coffee,
   Users,
   UsersThree,
-  FileText,
+  Tag,
   TrendUp,
   User,
   Gear,
@@ -35,6 +35,12 @@ export const MANAGER_NAV: NavItem[] = [
     hint: "Quản lý sân thi đấu",
   },
   {
+    label: "Giá",
+    href: "/manager/pricing",
+    icon: Tag,
+    hint: "Giá đặt sân",
+  },
+  {
     label: "Dịch vụ",
     href: "/manager/services",
     icon: Coffee,
@@ -51,12 +57,6 @@ export const MANAGER_NAV: NavItem[] = [
     href: "/manager/staff",
     icon: UsersThree,
     hint: "Nhân viên chi nhánh",
-  },
-  {
-    label: "Hóa đơn",
-    href: "/manager/invoices",
-    icon: FileText,
-    hint: "Hóa đơn & thanh toán",
   },
   {
     label: "Báo cáo",
