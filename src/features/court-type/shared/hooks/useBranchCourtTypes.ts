@@ -5,8 +5,8 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { fetchBranchCourtTypes } from "@/src/api/branch.api";
-import type { BranchCourtTypeDto } from "@/src/features/branch/shared/types/branch.types";
+import { fetchBranchCourtTypes } from "@/src/api/court-type.api";
+import type { BranchCourtTypeDto } from "@/src/features/court-type/shared/types/court-type.types";
 
 interface UseBranchCourtTypesParams {
   branchId: string | null;

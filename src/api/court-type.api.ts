@@ -4,6 +4,8 @@ import type {
   CourtType,
   CreateCourtTypeRequest,
   UpdateCourtTypeRequest,
+  AddCourtTypeToBranchDto,
+  BranchCourtTypeDto,
 } from "@/src/features/court-type/shared/types/court-type.types";
 
 // ─── API functions ────────────────────────────────────────────────────────────
@@ -96,6 +98,45 @@ export async function updateCourtType(
  */
 export async function deleteCourtType(id: string): Promise<void> {
   await authProtectedFetch<void>(`/api/court-types/${id}`, {
+    method: "DELETE",
+  });
+}
+
+// ─── Branch-Specific Court Type operations ──────────────────────────────────
+
+/**
+ * GET /api/court-types/branch
+ * Lấy danh sách loại sân tại chi nhánh (hỗ trợ auto branch resolution cho Manager/Staff)
+ */
+export async function fetchBranchCourtTypes(branchId?: string): Promise<BranchCourtTypeDto[]> {
+  const url = branchId ? `/api/court-types/branch?branchId=${branchId}` : "/api/court-types/branch";
+  const response = await authProtectedFetch<BranchCourtTypeDto[]>(url, {
+    method: "GET",
+  });
+  return response.data || [];
+}
+
+/**
+ * POST /api/court-types/branch
+ * Thêm loại sân vào chi nhánh (hỗ trợ auto branch resolution)
+ */
+export async function addCourtTypeToBranch(dto: AddCourtTypeToBranchDto, branchId?: string): Promise<void> {
+  const url = branchId ? `/api/court-types/branch?branchId=${branchId}` : "/api/court-types/branch";
+  await authProtectedFetch<null>(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: dto,
+  });
+}
+
+/**
+ * DELETE /api/court-types/branch/:courtTypeId
+ * Gỡ loại sân khỏi chi nhánh (hỗ trợ auto branch resolution)
+ */
+export async function removeCourtTypeFromBranch(courtTypeId: string, branchId?: string): Promise<void> {
+  const baseUrl = `/api/court-types/branch/${courtTypeId}`;
+  const url = branchId ? `${baseUrl}?branchId=${branchId}` : baseUrl;
+  await authProtectedFetch<null>(url, {
     method: "DELETE",
   });
 }

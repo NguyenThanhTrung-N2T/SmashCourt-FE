@@ -2,7 +2,7 @@ import { Coffee, Plus } from "@phosphor-icons/react";
 import { Button } from "@/src/shared/components/ui";
 
 interface ServiceEmptyStateProps {
-    onCreateClick: () => void;
+    onCreateClick?: () => void;
 }
 
 export function ServiceEmptyState({ onCreateClick }: ServiceEmptyStateProps) {

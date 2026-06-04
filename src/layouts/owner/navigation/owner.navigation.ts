@@ -36,12 +36,6 @@ export const OWNER_NAV: NavItem[] = [
         icon: CalendarDots,
         hint: "Đơn đặt sân & lịch sử",
     },
-    // {
-    //     label: "Thanh toán",
-    //     href: "/owner/payments",
-    //     icon: CreditCard,
-    //     hint: "Quản lý giao dịch",
-    // },
     {
         label: "Bảng giá",
         href: "/owner/pricing",

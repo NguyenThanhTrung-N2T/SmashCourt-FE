@@ -37,7 +37,7 @@ function OwnerRedirect() {
   return <div className="min-h-screen" style={{ background: 'var(--background)' }} />;
 }
 
-/** Redirect OWNER to /owner (avoids calling router.push during render) */
+/** Redirect MANAGER to /manager (avoids calling router.push during render) */
 function ManagerRedirect() {
   const router = useRouter();
   useEffect(() => {
@@ -46,7 +46,15 @@ function ManagerRedirect() {
   // Use inline style to ensure theme variable is applied
   return <div className="min-h-screen" style={{ background: 'var(--background)' }} />;
 }
-
+/** Redirect STAFF to /staff (avoids calling router.push during render) */
+function StaffRedirect() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/staff");
+  }, [router]);
+  // Use inline style to ensure theme variable is applied
+  return <div className="min-h-screen" style={{ background: 'var(--background)' }} />;
+}
 /** Redirect CUSTOMER to /bookings/new (avoids calling router.push during render) */
 function CustomerRedirect() {
   const router = useRouter();
@@ -139,8 +147,11 @@ export default function HomeGateClient() {
     if (role === "OWNER") {
       return <OwnerRedirect />;
     }
-    if (role === "BRANCH_MANAGER" || role === "BRANCH-MANAGER" || role === "STAFF") {
-      return <ManagerRedirect/>;
+    if (role === "BRANCH_MANAGER") {
+      return <ManagerRedirect />;
+    }
+    if (role === "STAFF") {
+      return <StaffRedirect />;
     }
     if (role === "CUSTOMER") {
       return <CustomerRedirect />;

@@ -1,7 +1,7 @@
 ﻿"use client";
 
-import { CourtManagementPage } from "@/src/features/court/manager/CourtMangementPage";
+import { ManagerCourtManagementPage } from "@/src/features/court/manager/ManagerCourtManagementPage";
 
 export default function ManagerCourtsPage() {
-    return <CourtManagementPage />;
+    return <ManagerCourtManagementPage />;
 }

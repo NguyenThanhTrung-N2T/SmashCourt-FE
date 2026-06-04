@@ -252,7 +252,7 @@ function PolicyCard({
     );
 }
 
-export default function CancellationPolicyPreview({
+export function CancellationPolicyPreview({
     anchorId,
 }: CancellationPolicyPreviewProps) {
     const [policies, setPolicies] = useState<CancelPolicy[]>([]);

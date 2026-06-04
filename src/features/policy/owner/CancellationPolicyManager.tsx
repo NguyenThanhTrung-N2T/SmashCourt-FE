@@ -31,7 +31,7 @@ import { Alert } from "@/src/shared/components/ui/Alert";
 import { Flex } from "@/src/shared/components/layout/Flex";
 import { Badge } from "@/src/shared/components/ui/Badge";
 import { PolicyEditorRow } from "./PolicyEditorRow";
-import { CreateCancelPolicyModal, type CreateCancelPolicyPayload } from "./modals/CreateCancelPolicyModal";
+import { CreateCancelPolicyModal, type CreateCancelPolicyPayload } from "../owner/modals/CreateCancelPolicyModal";
 
 // ─────────────────────────────────────────────────────────
 // TYPINGS & UTILS

@@ -17,7 +17,22 @@ type EditableCancelPolicy = CancelPolicy & {
     clientId: string;
     isNew: boolean;
 };
-
+function ReadOnlyField({
+    label,
+    value,
+    className = "",
+}: {
+    label: string;
+    value: string;
+    className?: string;
+}) {
+    return (
+        <div className="flex flex-col gap-1">
+            <span className="text-xs font-semibold text-muted uppercase tracking-wider">{label}</span>
+            <span className={`text-base font-extrabold text-foreground ${className}`}>{value}</span>
+        </div>
+    );
+}
 function getRefundColor(percent: number) {
     if (percent >= 80) {
         return {
@@ -57,6 +72,7 @@ interface PolicyEditorRowProps {
     onRemove: (policyId: string) => void;
     disableRemove: boolean;
     index: number;
+    readOnly?: boolean;
 }
 
 export function PolicyEditorRow({
@@ -66,6 +82,7 @@ export function PolicyEditorRow({
     onRemove,
     disableRemove,
     index,
+    readOnly = false
 }: PolicyEditorRowProps) {
     const color = getRefundColor(policy.refundPercent);
 
@@ -109,63 +126,82 @@ export function PolicyEditorRow({
                         </div>
                     </Flex>
 
-                    <button
-                        type="button"
-                        onClick={() => onRemove(policy.clientId)}
-                        disabled={disableRemove}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-rose-500/10 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-30"
-                        title="Xóa chính sách"
-                    >
-                        <Trash className="h-4 w-4" />
-                    </button>
+                    {!readOnly && (
+                        <button
+                            type="button"
+                            onClick={() => onRemove(policy.clientId)}
+                            disabled={disableRemove}
+                            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-rose-500/10 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-30"
+                            title="Xóa chính sách"
+                        >
+                            <Trash className="h-4 w-4" />
+                        </button>
+                    )}
                 </Flex>
 
+                {/* Replace the inputs grid */}
                 <div className="mt-2 grid grid-cols-1 items-start gap-6 sm:grid-cols-12 lg:grid-cols-12">
                     <div className="col-span-1 sm:col-span-4 lg:col-span-2 xl:col-span-2">
-                        <Input
-                            label="Hủy trước"
-                            type="number"
-                            min={0}
-                            max={720}
-                            step={1}
-                            value={policy.hoursBefore}
-                            onChange={createNumericChangeHandler(
-                                (val) => onChange(policy.clientId, "hoursBefore", Number(val)),
-                                { min: 0, max: 720, allowDecimal: false }
-                            )}
-                            rightIcon={<span className="text-sm font-bold text-slate-400">giờ</span>}
-                            className="text-base font-extrabold shadow-sm focus:border-primary focus:ring-primary/10"
-                        />
+                        {readOnly ? (
+                            <ReadOnlyField label="Hủy trước" value={`${policy.hoursBefore} giờ`} />
+                        ) : (
+                            <Input
+                                label="Hủy trước"
+                                type="number"
+                                min={0}
+                                max={720}
+                                step={1}
+                                value={policy.hoursBefore}
+                                onChange={createNumericChangeHandler(
+                                    (val) => onChange(policy.clientId, "hoursBefore", Number(val)),
+                                    { min: 0, max: 720, allowDecimal: false }
+                                )}
+                                rightIcon={<span className="text-sm font-bold text-slate-400">giờ</span>}
+                                className="text-base font-extrabold shadow-sm focus:border-primary focus:ring-primary/10"
+                            />
+                        )}
                     </div>
 
                     <div className="col-span-1 sm:col-span-4 lg:col-span-2 xl:col-span-2">
-                        <Input
-                            label="Hoàn tiền"
-                            type="number"
-                            min={0}
-                            max={100}
-                            step={0.01}
-                            value={policy.refundPercent}
-                            onChange={createNumericChangeHandler(
-                                (val) => onChange(policy.clientId, "refundPercent", Number(val)),
-                                { min: 0, max: 100, allowDecimal: true }
-                            )}
-                            rightIcon={<span className="text-sm font-extrabold opacity-50">%</span>}
-                            className={`text-base font-extrabold shadow-sm focus:border-primary focus:ring-primary/10 ${color.text} ${color.bg}`}
-                        />
+                        {readOnly ? (
+                            <ReadOnlyField label="Hoàn tiền" value={`${policy.refundPercent}%`} className={color.text} />
+                        ) : (
+                            <Input
+                                label="Hoàn tiền"
+                                type="number"
+                                min={0}
+                                max={100}
+                                step={0.01}
+                                value={policy.refundPercent}
+                                onChange={createNumericChangeHandler(
+                                    (val) => onChange(policy.clientId, "refundPercent", Number(val)),
+                                    { min: 0, max: 100, allowDecimal: true }
+                                )}
+                                rightIcon={<span className="text-sm font-extrabold opacity-50">%</span>}
+                                className={`text-base font-extrabold shadow-sm focus:border-primary focus:ring-primary/10 ${color.text} ${color.bg}`}
+                            />
+                        )}
                     </div>
 
                     <div className="col-span-1 sm:col-span-12 lg:col-span-8 xl:col-span-8">
-                        <Input
-                            label="Ghi chú"
-                            type="text"
-                            value={policy.description ?? ""}
-                            onChange={(event) =>
-                                onChange(policy.clientId, "description", event.target.value)
-                            }
-                            placeholder="VD: Không áp dụng hoàn tiền dịp Lễ Tết..."
-                            className="text-base shadow-sm focus:border-primary focus:ring-primary/10"
-                        />
+                        {readOnly ? (
+                            <ReadOnlyField
+                                label="Ghi chú"
+                                value={policy.description ?? "—"}
+                                className="text-muted"
+                            />
+                        ) : (
+                            <Input
+                                label="Ghi chú"
+                                type="text"
+                                value={policy.description ?? ""}
+                                onChange={(event) =>
+                                    onChange(policy.clientId, "description", event.target.value)
+                                }
+                                placeholder="VD: Không áp dụng hoàn tiền dịp Lễ Tết..."
+                                className="text-base shadow-sm focus:border-primary focus:ring-primary/10"
+                            />
+                        )}
                     </div>
                 </div>
             </div>

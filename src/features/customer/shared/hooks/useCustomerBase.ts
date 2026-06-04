@@ -28,7 +28,7 @@ const DEFAULT_PAGINATION: PaginationState = {
     hasPrev: false,
 };
 
-export function useCustomerBase(rolePath: "manager" | "owner") {
+export function useCustomerBase(rolePath: "manager" | "owner" | "staff") {
     const router = useRouter();
     const { toast, show: showToast } = useToast();
     const isFirstLoad = useRef(true);

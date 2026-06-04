@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, FileText } from "@phosphor-icons/react";
+import { Plus } from "@phosphor-icons/react";
 import { PageHeader } from "@/src/shared/components/layout";
 import { Button, Toast, ConfirmationDialog } from "@/src/shared/components/ui";
 import { Pagination } from "@/src/shared/components/ui/Pagination";
-import { useCourtManagement } from "@/src/features/court/manager/hooks/useCourtManagement";
+import { useCourtManagement } from "@/src/features/court/staff/hooks/useCourtManagement";
 import { useCourtTypes } from "@/src/features/court-type/shared/hooks/useCourtTypes";
 import { setPrefill } from "@/src/lib/walkInPrefill";
 import { useRouter } from "next/navigation";
@@ -18,9 +18,13 @@ import {
     BookingDetailModal,
     CreateCourtModal,
     EditCourtModal,
-} from "@/src/features/court/manager/components";
+} from "@/src/features/court/staff/components";
 
-export function CourtManagementPage() {
+interface CourtManagementBaseProps {
+    allowManagement: boolean;
+}
+
+export function CourtManagementBase({ allowManagement }: CourtManagementBaseProps) {
     const [viewMode, setViewMode] = useState<"grid" | "timeline">("grid");
     const {
         stats,
@@ -65,18 +69,22 @@ export function CourtManagementPage() {
             {/* Header */}
             <PageHeader
                 title="Sân"
-                description="Quản lý trạng thái và lịch sử dụng sân trong ngày"
+                description={allowManagement
+                    ? "Quản lý trạng thái và lịch sử dụng sân trong ngày"
+                    : "Xem trạng thái và lịch sử dụng sân trong ngày"}
                 action={
-                    <>
-                        <Button
-                            variant="primary"
-                            size="md"
-                            leftIcon={<Plus className="h-4 w-4" />}
-                            onClick={() => setShowCreateModal(true)}
-                        >
-                            Thêm sân
-                        </Button>
-                    </>
+                    allowManagement && (
+                        <>
+                            <Button
+                                variant="primary"
+                                size="md"
+                                leftIcon={<Plus className="h-4 w-4" />}
+                                onClick={() => setShowCreateModal(true)}
+                            >
+                                Thêm sân
+                            </Button>
+                        </>
+                    )
                 }
             />
 
@@ -103,10 +111,10 @@ export function CourtManagementPage() {
                         courts={courts}
                         loading={loading}
                         onViewDetail={openDrawer}
-                        onEdit={(courtId) => setEditCourtId(courtId)}
-                        onSuspend={handleSuspend}
-                        onActivate={handleActivate}
-                        onDelete={handleDelete}
+                        onEdit={allowManagement ? (courtId) => setEditCourtId(courtId) : undefined}
+                        onSuspend={allowManagement ? handleSuspend : undefined}
+                        onActivate={allowManagement ? handleActivate : undefined}
+                        onDelete={allowManagement ? handleDelete : undefined}
                         onAddCourt={() => { }}
                     />
 
@@ -135,7 +143,6 @@ export function CourtManagementPage() {
                             onConfirm: () => {
                                 const bookingDate = date;
                                 const startTime = time;
-                                // Default to 1 hour
                                 const [h, m] = time.split(':').map(Number);
                                 const endHours = h + 1;
                                 const endTime = `${endHours.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
@@ -146,7 +153,8 @@ export function CourtManagementPage() {
                                     startTime,
                                     endTime
                                 });
-                                router.push('/manager/bookings');
+                                // Staff or Manager layout?
+                                router.push(`/${allowManagement ? 'manager' : 'staff'}/bookings`);
                             }
                         });
                     }}
@@ -161,7 +169,7 @@ export function CourtManagementPage() {
                 date={date}
             />
 
-            {showCreateModal && (
+            {showCreateModal && allowManagement && (
                 <CreateCourtModal
                     courtTypes={courtTypes}
                     onClose={() => setShowCreateModal(false)}
@@ -173,7 +181,7 @@ export function CourtManagementPage() {
                 />
             )}
 
-            {editCourtId && (
+            {editCourtId && allowManagement && (
                 <EditCourtModal
                     courtId={editCourtId}
                     courtTypes={courtTypes}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
     ChartLineUp,
     Calendar,
@@ -14,6 +14,8 @@ import {
     Faders,
     Money
 } from "@phosphor-icons/react";
+import { BranchSelector } from "@/src/shared/components/layout/BranchSelector";
+import { fetchBasicBranches } from "@/src/api/branch.api";
 import {
     KpiCard,
     InsightCard,
@@ -32,15 +34,32 @@ import {
 } from "@/src/features/dashboard/owner/components";
 import { useOwnerDashboard } from "@/src/features/dashboard/owner/hooks/useOwnerDashboard";
 import { getFilterDates, FilterOption, getRevenueGroupBy, getGroupByLabel } from "@/src/features/dashboard/owner/utils/dashboard-filters";
-import { getTierCfg } from "@/src/features/benefit/loyalty/owner/LoyaltyTierConfig";
+import { getTierCfg } from "@/src/features/benefit/loyalty/shared/configs/loyalty-tier.config";
 import { ReportFilterDto } from "@/src/features/dashboard/shared/dashboard.types";
 
 export function OwnerDashboard() {
     const [filter, setFilter] = useState<FilterOption>("Tháng này");
+    const [branches, setBranches] = useState<any[]>([]);
+    const [selectedBranchId, setSelectedBranchId] = useState<string>("");
+
+    useEffect(() => {
+        const loadBranches = async () => {
+            try {
+                const res = await fetchBasicBranches(1, 50);
+                const allBranches = [{ id: "", name: "Tất cả chi nhánh" }, ...res.items];
+                setBranches(allBranches);
+            } catch (err) {
+                console.error("Failed to fetch branches", err);
+            }
+        };
+        loadBranches();
+    }, []);
+
     const filterDates = useMemo<ReportFilterDto>(() => ({
         ...getFilterDates(filter),
-        groupBy: getRevenueGroupBy(filter)
-    }), [filter]);
+        groupBy: getRevenueGroupBy(filter),
+        branchId: selectedBranchId || undefined
+    }), [filter, selectedBranchId]);
     const groupByLabel = getGroupByLabel(filter);
     const { data, utilization, bookingTrend: trendData, isLoading, error } = useOwnerDashboard(filterDates);
 
@@ -176,9 +195,9 @@ export function OwnerDashboard() {
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-end gap-3 shrink-0">
                     <div className="relative group">
-                        <button className="inline-flex items-center gap-2 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-95">
+                        <button className="inline-flex items-center gap-2 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-95 shrink-0 whitespace-nowrap">
                             <Faders size={18} className="text-slate-400" />
                             {filter}
                             <CaretDown size={18} className="text-slate-400 transition-transform group-hover:rotate-180" />
@@ -195,10 +214,13 @@ export function OwnerDashboard() {
                             ))}
                         </div>
                     </div>
-
-                    <button className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-95" style={{ background: "linear-gradient(135deg, #2A9D5C 0%, #1B5E38 100%)", boxShadow: "0 4px 14px rgba(27, 94, 56, 0.35)" }}>
-                        Báo cáo chi tiết
-                    </button>
+                    <BranchSelector
+                        branches={branches}
+                        selectedBranchId={selectedBranchId}
+                        onBranchChange={setSelectedBranchId}
+                        className="min-w-[240px]"
+                        showCard={false}
+                    />
                 </div>
             </div>
 

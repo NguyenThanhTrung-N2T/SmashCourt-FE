@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { CourtBasketball, Plus, Trash, Warning } from '@phosphor-icons/react';
-import type { BranchCourtTypeDto, AddCourtTypeToBranchDto } from '@/src/features/branch/shared/types/branch.types';
-import { fetchBranchCourtTypes, addCourtTypeToBranch, removeCourtTypeFromBranch } from '@/src/api/branch.api';
+import type { BranchCourtTypeDto, AddCourtTypeToBranchDto } from '@/src/features/court-type/shared/types/court-type.types';
+import { fetchBranchCourtTypes, addCourtTypeToBranch, removeCourtTypeFromBranch } from '@/src/api/court-type.api';
 import { ConfirmationDialog } from '@/src/shared/components/ui';
 import { BranchCourtTypesLoading } from '../states';
 import { EmptyState } from '@/src/shared/components/layout';
@@ -46,7 +46,7 @@ export function BranchCourtTypesTab({ branchId, onToast }: BranchCourtTypesTabPr
             const dto: AddCourtTypeToBranchDto = {
                 courtTypeId,
             };
-            await addCourtTypeToBranch(branchId, dto);
+            await addCourtTypeToBranch(dto, branchId);
             toast('success', 'Thêm loại sân thành công');
             await loadData();
         } catch (err: any) {
@@ -58,7 +58,7 @@ export function BranchCourtTypesTab({ branchId, onToast }: BranchCourtTypesTabPr
     const handleRemoveCourtType = async () => {
         if (!courtTypeToRemove) return;
         try {
-            await removeCourtTypeFromBranch(branchId, courtTypeToRemove.courtTypeId);
+            await removeCourtTypeFromBranch(courtTypeToRemove.courtTypeId, branchId);
             toast('success', 'Gỡ loại sân thành công');
             setCourtTypeToRemove(null);
             await loadData();

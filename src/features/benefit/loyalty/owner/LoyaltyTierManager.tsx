@@ -11,9 +11,9 @@ import { useToast } from "@/src/shared/hooks/useToast";
 import { Button } from "@/src/shared/components/ui/Button";
 import { Flex } from "@/src/shared/components/layout/Flex";
 
-import { LoyaltyTierStatsHeader } from "./LoyaltyTierStatsHeader";
-import { LoyaltyTierListCard } from "./LoyaltyTierListCard";
-import { LoyaltyTierDetailPanel } from "./LoyaltyTierDetailPanel";
+import { LoyaltyTierStatsHeader } from "../shared/components/LoyaltyTierStatsHeader";
+import { LoyaltyTierListCard } from "../shared/components/LoyaltyTierListCard";
+import { LoyaltyTierDetailPanel } from "../shared/components/LoyaltyTierDetailPanel";
 
 export default function LoyaltyTierManager() {
     const [tiers, setTiers] = useState<LoyaltyTier[]>([]);

@@ -5,7 +5,7 @@
  */
 
 import type { TierName } from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
-import { getTierCfg } from "@/src/features/benefit/loyalty/owner/LoyaltyTierConfig";
+import { getTierCfg } from "@/src/features/benefit/loyalty/shared/configs/loyalty-tier.config";
 
 interface LoyaltyBadgeProps {
   tierName: TierName;

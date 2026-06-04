@@ -86,50 +86,6 @@ export interface BranchBasicDto {
   openTime: string; // TimeSpan (e.g. "05:00:00")
   closeTime: string; // TimeSpan
 }
-
-// ============================================================================
-// 2. Branch Court Types
-// ============================================================================
-
-export interface AddCourtTypeToBranchDto {
-  courtTypeId: string; // UUID
-}
-
-export interface BranchCourtTypeDto {
-  id: string; // UUID
-  courtTypeId: string; // UUID
-  courtTypeName: string;
-  courtTypeDescription?: string;
-  isActive: boolean;
-  createdAt: string; // DateTime
-}
-
-// ============================================================================
-// 3. Branch Services
-// ============================================================================
-
-export interface AddServiceToBranchDto {
-  serviceId: string; // UUID
-  price?: number; // Optional, >= 1
-}
-
-export interface UpdateBranchServiceDto {
-  price: number; // Required, >= 1
-}
-
-export interface BranchServiceDto {
-  id: string; // UUID
-  serviceId: string; // UUID
-  serviceName: string;
-  description?: string;
-  unit: string;
-  defaultPrice: number; // System default price
-  effectivePrice: number; // Actual applied price at branch
-  status: "ACTIVE" | "INACTIVE";
-  createdAt: string; // DateTime
-  updatedAt: string; // DateTime
-}
-
 // ============================================================================
 // 4. Branch Manager Types
 // ============================================================================

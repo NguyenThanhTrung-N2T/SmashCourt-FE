@@ -6,10 +6,12 @@ export function LoyaltyTierStatsHeader({
     tiers,
     loading,
     onRefresh,
+    readOnly = false,
 }: {
     tiers: LoyaltyTier[];
     loading: boolean;
     onRefresh: () => void;
+    readOnly?: boolean;
 }) {
     const maxDiscount = tiers.length ? Math.max(...tiers.map((t) => Number(t.discountRate))) : 0;
     const maxPoints = tiers.length ? Math.max(...tiers.map((t) => t.minPoints)) : 0;
@@ -23,20 +25,24 @@ export function LoyaltyTierStatsHeader({
                         Hạng thành viên
                     </h1>
                     <p className="text-sm font-medium text-muted mt-1">
-                        Thiết lập ngưỡng điểm xét hạng và tỷ lệ ưu đãi cho hệ thống.
+                        {readOnly
+                            ? "Xem thông tin ngưỡng điểm và tỷ lệ ưu đãi của hệ thống."
+                            : "Thiết lập ngưỡng điểm xét hạng và tỷ lệ ưu đãi cho hệ thống."}
                     </p>
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
-                    <Button
-                        variant="secondary"
-                        size="md"
-                        onClick={onRefresh}
-                        disabled={loading}
-                        leftIcon={<ArrowClockwise className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
-                    >
-                        Làm mới
-                    </Button>
-                </div>
+                {!readOnly && (
+                    <div className="flex items-center gap-3 shrink-0">
+                        <Button
+                            variant="secondary"
+                            size="md"
+                            onClick={onRefresh}
+                            disabled={loading}
+                            leftIcon={<ArrowClockwise className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />}
+                        >
+                            Làm mới
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {/* Stats Cards — same as dashboard KPI mini-cards */}

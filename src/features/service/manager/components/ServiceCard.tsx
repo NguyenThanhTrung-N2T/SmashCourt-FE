@@ -11,8 +11,9 @@ interface ServiceCardProps {
     actionLoading: boolean;
     onEditStart: (service: BranchService) => void;
     onEditCancel: () => void;
-    onPriceSave: (serviceId: string, price: number) => Promise<void>;
-    onDisable: (service: BranchService) => void;
+    onPriceSave?: (serviceId: string, price: number) => Promise<void>;
+    onDisable?: (service: BranchService) => void;
+    readOnly?: boolean;
 }
 
 export function ServiceCard({
@@ -24,6 +25,7 @@ export function ServiceCard({
     onEditCancel,
     onPriceSave,
     onDisable,
+    readOnly = false,
 }: ServiceCardProps) {
     const active = isEnabled(service.status);
     const isEditing = editingServiceId === service.serviceId;
@@ -60,24 +62,26 @@ export function ServiceCard({
                 </div>
 
                 {/* Hover action overlay */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                    <Button
-                        size="md"
-                        variant="secondary"
-                        onClick={() => onEditStart(service)}
-                        className="rounded-full bg-white text-slate-900 hover:bg-white/90 border-none shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75"
-                    >
-                        <PencilSimpleLine className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        size="md"
-                        variant="danger"
-                        onClick={() => onDisable(service)}
-                        className="rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-150"
-                    >
-                        <Trash className="h-4 w-4" />
-                    </Button>
-                </div>
+                {!readOnly && (
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                        <Button
+                            size="md"
+                            variant="secondary"
+                            onClick={() => onEditStart(service)}
+                            className="rounded-full bg-white text-slate-900 hover:bg-white/90 border-none shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75"
+                        >
+                            <PencilSimpleLine className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            size="md"
+                            variant="danger"
+                            onClick={() => onDisable?.(service)}
+                            className="rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-150"
+                        >
+                            <Trash className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {/* Content */}
@@ -109,7 +113,7 @@ export function ServiceCard({
                         )}
                     </div>
 
-                    {isEditing ? (
+                    {isEditing && onPriceSave ? (
                         <PriceEditInline
                             service={service}
                             actionLoading={actionLoading}
@@ -118,17 +122,19 @@ export function ServiceCard({
                         />
                     ) : (
                         <div
-                            className="flex items-end justify-between cursor-pointer group/price"
-                            onClick={() => onEditStart(service)}
+                            className={`flex items-end justify-between ${!readOnly ? "cursor-pointer group/price" : ""}`}
+                            onClick={() => !readOnly && onEditStart(service)}
                         >
                             <p className="text-xl font-black text-foreground group-hover/price:text-primary transition-colors">
                                 {formatCurrency(service.effectivePrice)}{" "}
                                 <span className="text-xs font-bold text-muted ml-0.5">đ</span>
                             </p>
-                            <span className="opacity-0 group-hover/price:opacity-100 transition-opacity text-[10px] font-bold text-primary flex items-center gap-1">
-                                <PencilSimpleLine className="h-3 w-3" />
-                                Sửa giá
-                            </span>
+                            {!readOnly && (
+                                <span className="opacity-0 group-hover/price:opacity-100 transition-opacity text-[10px] font-bold text-primary flex items-center gap-1">
+                                    <PencilSimpleLine className="h-3 w-3" />
+                                    Sửa giá
+                                </span>
+                            )}
                         </div>
                     )}
                 </div>

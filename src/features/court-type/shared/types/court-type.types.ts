@@ -1,3 +1,4 @@
+// Global court type
 export interface CourtType {
   id: string;
   name: string;
@@ -17,4 +18,19 @@ export interface CreateCourtTypeRequest {
 export interface UpdateCourtTypeRequest {
   name: string;
   description?: string;
+}
+
+// Branch court type
+export interface BranchCourtTypeDto {
+  id: string; // UUID
+  courtTypeId: string; // UUID
+  courtTypeName: string;
+  courtTypeDescription?: string;
+  isActive: boolean;
+  createdAt: string; // DateTime
+  courtCount: number;
+}
+
+export interface AddCourtTypeToBranchDto {
+  courtTypeId: string; // UUID
 }

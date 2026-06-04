@@ -4,7 +4,7 @@ import { Lock, LockOpen, Phone, EnvelopeSimple } from "@phosphor-icons/react";
 import { Button, Badge } from "@/src/shared/components/ui";
 import type { CustomerListDto } from "../types/customer.types";
 import { formatDate } from "@/src/shared/utils/date";
-import { getTierCfg } from "@/src/features/benefit/loyalty/owner/LoyaltyTierConfig";
+import { getTierCfg } from "@/src/features/benefit/loyalty/shared/configs/loyalty-tier.config";
 
 interface CustomerTableProps {
     customers: CustomerListDto[];

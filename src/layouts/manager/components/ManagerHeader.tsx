@@ -104,7 +104,6 @@ export default function ManagerHeader({
 
                 {/* Branch label pill — desktop only */}
                 <div className="hidden lg:flex items-center gap-1.5 rounded-full bg-primary/8 border border-primary/15 px-3 py-1.5">
-                    <Buildings className="h-3.5 w-3.5 text-primary" />
                     <span className="text-xs font-bold text-primary truncate max-w-[140px]">
                         {branchName}
                     </span>
@@ -166,10 +165,10 @@ export default function ManagerHeader({
                                 <p className="text-sm font-bold text-foreground truncate">{user.fullName}</p>
                                 <p className="text-xs text-muted truncate">{user.email}</p>
                                 <span className="inline-flex mt-1 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
-                                    Branch Manager
+                                    Quản lý
                                 </span>
                             </div>
-                            
+
                             {/* Account menu items */}
                             {MANAGER_ACCOUNT_MENU.map((item) => {
                                 const Icon = item.icon;
@@ -185,7 +184,7 @@ export default function ManagerHeader({
                                     </Link>
                                 );
                             })}
-                            
+
                             <button
                                 onClick={() => {
                                     setProfileOpen(false);

@@ -1,7 +1,7 @@
 "use client";
 
-import { ManagerDashboard } from "@/src/features/dashboard/manager";
+import { BranchDashboard } from "@/src/features/dashboard/staff";
 
 export default function ManagerDashboardPage() {
-  return <ManagerDashboard />;
+  return <BranchDashboard />;
 }

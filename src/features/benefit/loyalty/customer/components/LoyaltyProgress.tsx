@@ -9,7 +9,7 @@
 import type { MyLoyaltyDto } from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
 import { LoyaltyBadge } from "./LoyaltyBadge";
 import { formatPoints } from "../utils";
-import { getTierCfg } from "@/src/features/benefit/loyalty/owner/LoyaltyTierConfig";
+import { getTierCfg } from "@/src/features/benefit/loyalty/shared/configs/loyalty-tier.config";
 
 interface LoyaltyProgressProps {
   loyalty: MyLoyaltyDto;

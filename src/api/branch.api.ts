@@ -4,11 +4,6 @@ import type {
   CreateBranchDto,
   UpdateBranchDto,
   BranchDto,
-  AddCourtTypeToBranchDto,
-  BranchCourtTypeDto,
-  AddServiceToBranchDto,
-  UpdateBranchServiceDto,
-  BranchServiceDto,
   BranchBasicDto,
 } from "../features/branch/shared/types/branch.types";
 import type {
@@ -109,36 +104,6 @@ export async function activateBranch(id: string): Promise<void> {
 export async function deleteBranch(id: string): Promise<void> {
   await authProtectedFetch<null>(
     `/api/branches/${id}`,
-    { method: "DELETE" }
-  );
-}
-
-// ============================================================================
-// 2. Branch Court Types Endpoints
-// ============================================================================
-
-export async function fetchBranchCourtTypes(branchId: string): Promise<BranchCourtTypeDto[]> {
-  const response = await authProtectedFetch<BranchCourtTypeDto[]>(
-    `/api/branches/${branchId}/court-types`,
-    { method: "GET" }
-  );
-  return response.data || [];
-}
-
-export async function addCourtTypeToBranch(branchId: string, dto: AddCourtTypeToBranchDto): Promise<void> {
-  await authProtectedFetch<null>(
-    `/api/branches/${branchId}/court-types`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: dto,
-    }
-  );
-}
-
-export async function removeCourtTypeFromBranch(branchId: string, courtTypeId: string): Promise<void> {
-  await authProtectedFetch<null>(
-    `/api/branches/${branchId}/court-types/${courtTypeId}`,
     { method: "DELETE" }
   );
 }

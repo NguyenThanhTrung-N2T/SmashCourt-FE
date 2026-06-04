@@ -13,6 +13,7 @@ interface BranchSelectorProps {
   label?: string;
   placeholder?: string;
   className?: string;
+  showCard?: boolean;
 }
 
 export function BranchSelector({
@@ -22,9 +23,14 @@ export function BranchSelector({
   label = 'Chi nhánh đang quản lý',
   placeholder = '-- Chọn chi nhánh --',
   className = '',
+  showCard = true,
 }: BranchSelectorProps) {
+  const cardClasses = showCard
+    ? 'bg-surface-1 p-4 rounded-2xl border border-border shadow-sm'
+    : '';
+
   return (
-    <div className={`flex items-center gap-3 bg-surface-1 p-4 rounded-2xl border border-border shadow-sm ${className}`}>
+    <div className={`flex items-center gap-3 ${cardClasses} ${className}`}>
 
       <div className="flex-1">
         <p className="text-xs font-bold text-muted uppercase tracking-wide">

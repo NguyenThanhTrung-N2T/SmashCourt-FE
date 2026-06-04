@@ -22,13 +22,13 @@ import {
     DashboardListLoading,
     DashboardChartLoading,
     DashboardError,
-} from "@/src/features/dashboard/manager/components";
+} from "@/src/features/dashboard/staff/components";
 import { PageHeader } from "@/src/shared/components/layout";
-import { useManagerDashboard } from "@/src/features/dashboard/manager/hooks/useManagerDashboard";
-import { sortCourtsByPriority } from "@/src/features/dashboard/manager/utils/dashboard-helpers";
+import { useManagerDashboard } from "@/src/features/dashboard/staff/hooks/useManagerDashboard";
+import { sortCourtsByPriority } from "@/src/features/dashboard/staff/utils/dashboard-helpers";
 import { EmptyState } from "@/src/shared/components/feedback/EmptyState";
 
-export function ManagerDashboard() {
+export function BranchDashboard() {
     const router = useRouter();
     const { data, isLoading, error, refetch } = useManagerDashboard();
 
@@ -36,7 +36,7 @@ export function ManagerDashboard() {
     const kpis = useMemo(() => {
         if (!data) return [];
         const kpiData = data.kpis;
-        
+
         return [
             {
                 label: "Doanh thu hôm nay",
@@ -146,7 +146,7 @@ export function ManagerDashboard() {
                         </h2>
                     </div>
                     {data && data.totalCourts > 0 && (
-                        <button 
+                        <button
                             onClick={() => router.push('/manager/courts')}
                             className="inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-secondary transition-colors"
                         >
@@ -194,7 +194,7 @@ export function ManagerDashboard() {
                                 Lượt đặt sân tiếp theo trong ngày
                             </p>
                         </div>
-                        <button 
+                        <button
                             onClick={() => router.push('/manager/bookings')}
                             className="inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-secondary transition-colors"
                         >

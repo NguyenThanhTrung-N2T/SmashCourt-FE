@@ -5,7 +5,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import CancellationPolicyPreview from "@/src/features/policy/components/CancellationPolicyPreview";
+import { CancellationPolicyPreview } from "@/src/features/policy/customer/CancellationPolicyPreview";
 
 export const metadata = {
   title: "Chính sách hủy | SmashCourt",

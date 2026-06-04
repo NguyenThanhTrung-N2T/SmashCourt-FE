@@ -3,7 +3,7 @@ import {
   ChartBar,
   CalendarDots,
   CourtBasketball,
-  SquaresFour,
+  Gift,
   Coffee,
   Users,
   UsersThree,
@@ -11,7 +11,8 @@ import {
   TrendUp,
   User,
   Gear,
-  Question
+  Question,
+  ShieldCheck
 } from "@phosphor-icons/react";
 
 export const MANAGER_NAV: NavItem[] = [
@@ -47,6 +48,12 @@ export const MANAGER_NAV: NavItem[] = [
     hint: "Dịch vụ & mặt hàng",
   },
   {
+    label: "Loại sân",
+    href: "/manager/court-types",
+    icon: CourtBasketball,
+    hint: "Loại sân tại chi nhánh",
+  },
+  {
     label: "Khách hàng",
     href: "/manager/customers",
     icon: Users,
@@ -57,6 +64,18 @@ export const MANAGER_NAV: NavItem[] = [
     href: "/manager/staff",
     icon: UsersThree,
     hint: "Nhân viên chi nhánh",
+  },
+  {
+    label: "Ưu đãi",
+    href: "/manager/benefits",
+    icon: Gift,
+    hint: "Hạng thành viên & Khuyến mãi",
+  },
+  {
+    label: "Chính sách",
+    href: "/manager/policy",
+    icon: ShieldCheck,
+    hint: "Chính sách hủy & hoàn tiền",
   },
   {
     label: "Báo cáo",

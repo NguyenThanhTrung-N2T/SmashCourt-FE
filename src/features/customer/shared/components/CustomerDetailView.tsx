@@ -4,7 +4,7 @@ import { ArrowLeft, Lock, LockOpen } from '@phosphor-icons/react';
 import { PageHeader } from '@/src/shared/components/layout/PageHeader';
 import { Button, Badge } from '@/src/shared/components/ui';
 import { formatDate } from '@/src/shared/utils/date';
-import { getTierCfg } from '@/src/features/benefit/loyalty/owner/LoyaltyTierConfig';
+import { getTierCfg } from '@/src/features/benefit/loyalty/shared/configs/loyalty-tier.config';
 import type { CustomerDetailDto } from '../types/customer.types';
 
 interface CustomerDetailViewProps {
