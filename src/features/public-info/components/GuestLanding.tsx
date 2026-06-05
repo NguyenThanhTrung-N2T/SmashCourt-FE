@@ -94,44 +94,40 @@ export default function GuestLanding() {
             <a
               href="/"
               onClick={(e) => handleScrollTo(e, "home")}
-              className={`pb-1 transition-all duration-200 cursor-pointer ${
-                activeSection === "home"
+              className={`pb-1 transition-all duration-200 cursor-pointer ${activeSection === "home"
                   ? "text-lime-350 border-b-2 border-lime-350"
                   : "text-slate-350 hover:text-white"
-              }`}
+                }`}
             >
               Trang chủ
             </a>
             <a
               href="#about"
               onClick={(e) => handleScrollTo(e, "about")}
-              className={`pb-1 transition-all duration-200 cursor-pointer ${
-                activeSection === "about"
+              className={`pb-1 transition-all duration-200 cursor-pointer ${activeSection === "about"
                   ? "text-lime-350 border-b-2 border-lime-350"
                   : "text-slate-350 hover:text-white"
-              }`}
+                }`}
             >
               Giới thiệu
             </a>
             <a
               href="#courts"
               onClick={(e) => handleScrollTo(e, "courts")}
-              className={`pb-1 transition-all duration-200 cursor-pointer ${
-                activeSection === "courts"
+              className={`pb-1 transition-all duration-200 cursor-pointer ${activeSection === "courts"
                   ? "text-lime-350 border-b-2 border-lime-350"
                   : "text-slate-350 hover:text-white"
-              }`}
+                }`}
             >
               Sân tập
             </a>
             <a
               href="#policy"
               onClick={(e) => handleScrollTo(e, "policy")}
-              className={`pb-1 transition-all duration-200 cursor-pointer ${
-                activeSection === "policy"
+              className={`pb-1 transition-all duration-200 cursor-pointer ${activeSection === "policy"
                   ? "text-lime-350 border-b-2 border-lime-350"
                   : "text-slate-350 hover:text-white"
-              }`}
+                }`}
             >
               Chính sách
             </a>
@@ -163,7 +159,7 @@ export default function GuestLanding() {
         {/* Background Hero Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/badminton_court_hero.png"
+            src="/images/badminton_court_hero.webp"
             alt="Vợt cầu lông SmashCourt trên sân"
             fill
             priority
