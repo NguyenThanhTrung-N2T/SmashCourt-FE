@@ -9,10 +9,12 @@ import {
   authRegister,
 } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
+import { getRedirectPathByRole } from "../constants";
 import {
   setEmail,
   setRegisterFlashMessage,
   startRegisterVerifySession,
+  getAuthUser,
 } from "@/src/features/auth/session/sessionStore";
 import { isValidPassword } from "@/src/features/auth/validators";
 import { useAuthErrors } from "@/src/features/auth/hooks/useAuthError";
@@ -54,8 +56,15 @@ export default function RegisterPage() {
   const logError = useAuthErrorLogger("register");
 
   useEffect(() => {
+    // Redirect if already authenticated
+    const user = getAuthUser();
+    if (user) {
+      router.replace(getRedirectPathByRole(user.role));
+      return;
+    }
+
     setMounted(true);
-  }, []);
+  }, [router]);
 
   async function onSubmit(e: AuthFormEvent) {
     e.preventDefault();

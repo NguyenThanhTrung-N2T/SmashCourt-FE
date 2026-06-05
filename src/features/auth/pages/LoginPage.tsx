@@ -19,6 +19,7 @@ import {
   hasAuthErrorCode,
 } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
+import { getRedirectPathByRole } from "../constants";
 import {
   consumePostVerifyLoginHint,
   getEmail,
@@ -27,6 +28,7 @@ import {
   setTempToken,
   startPasswordChangeSession,
   startTwoFactorVerifySession,
+  getAuthUser,
 } from "@/src/features/auth/session/sessionStore";
 import { useAuthRedirect } from "@/src/features/auth/hooks/useAuthRedirect";
 import { useAuthErrors } from "@/src/features/auth/hooks/useAuthError";
@@ -101,6 +103,13 @@ export default function LoginPage() {
   const logError = useAuthErrorLogger("login");
 
   useEffect(() => {
+    // Redirect if already authenticated
+    const user = getAuthUser();
+    if (user) {
+      router.replace(getRedirectPathByRole(user.role));
+      return;
+    }
+
     setMounted(true);
     try {
       const hint = consumePostVerifyLoginHint();
@@ -110,7 +119,7 @@ export default function LoginPage() {
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [router]);
 
   async function onSubmit(e: AuthFormEvent) {
     e.preventDefault();
@@ -216,9 +225,8 @@ export default function LoginPage() {
 
   return (
     <div
-      className={`w-full bg-white rounded-[2rem] p-8 sm:p-10 border border-slate-200/50 shadow-xl shadow-slate-900/5 transform transition-all duration-700 ${
-        mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-      }`}
+      className={`w-full bg-white rounded-[2rem] p-8 sm:p-10 border border-slate-200/50 shadow-xl shadow-slate-900/5 transform transition-all duration-700 ${mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+        }`}
     >
       {/* Logo */}
       <div className="flex items-center gap-2 mb-6">
@@ -296,17 +304,8 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Mật khẩu</label>
-            <Link
-              className="text-[10px] font-black uppercase tracking-widest text-[#071F14] hover:underline"
-              href="/auth/forgot-password"
-            >
-              Quên mật khẩu?
-            </Link>
-          </div>
-          <div className="group relative">
+        <div className="flex flex-col gap-1.5">
+          <div className="group relative order-2">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-[#071F14]">
               <Lock size={18} weight="bold" />
             </div>
@@ -328,6 +327,15 @@ export default function LoginPage() {
             >
               {showPassword ? <EyeSlash size={18} weight="bold" /> : <Eye size={18} weight="bold" />}
             </button>
+          </div>
+          <div className="flex items-center justify-between order-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Mật khẩu</label>
+            <Link
+              className="text-[10px] font-black uppercase tracking-widest text-[#071F14] hover:underline"
+              href="/auth/forgot-password"
+            >
+              Quên mật khẩu?
+            </Link>
           </div>
         </div>
 

@@ -126,7 +126,7 @@ export function BookingManagementBase({
     if (bookingId) {
       openBookingDetail(bookingId);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // intentionally run once on mount
   const [refundDrawerOpen, setRefundDrawerOpen] = useState(false);
 
@@ -337,14 +337,14 @@ export function BookingManagementBase({
           description={description}
         />
         <div className="flex items-center gap-3 shrink-0">
-          {/* Export Button */}
+          {/* Export Button
           <Button
             onClick={() => { }} // TODO
             variant="secondary"
             size="md"
             leftIcon={<FileText className="h-4 w-4" />}>
             Xuất dữ liệu
-          </Button>
+          </Button> */}
           {/* Create Walk-in Button */}
           {showCreateWalkIn && (
             <Button

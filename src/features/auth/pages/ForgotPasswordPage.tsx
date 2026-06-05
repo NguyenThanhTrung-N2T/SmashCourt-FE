@@ -11,9 +11,11 @@ import {
   hasAuthErrorCode,
 } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
+import { getRedirectPathByRole } from "../constants";
 import {
   setEmail,
   setForgotPasswordFlashMessage,
+  getAuthUser,
 } from "@/src/features/auth/session/sessionStore";
 import type { AuthFormEvent } from "@/src/features/auth/types/forms";
 
@@ -36,8 +38,15 @@ export default function ForgotPasswordPage() {
   }, [toastError]);
 
   useEffect(() => {
+    // Redirect if already authenticated
+    const user = getAuthUser();
+    if (user) {
+      router.replace(getRedirectPathByRole(user.role));
+      return;
+    }
+
     setMounted(true);
-  }, []);
+  }, [router]);
 
   async function onSubmit(e: AuthFormEvent) {
     e.preventDefault();
