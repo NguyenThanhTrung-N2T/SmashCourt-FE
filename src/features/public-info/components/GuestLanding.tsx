@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -20,11 +20,12 @@ import { CancellationPolicyPreview } from "@/src/features/policy/customer/Cancel
 
 export default function GuestLanding() {
   const [activeSection, setActiveSection] = useState("home");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const sections = ["about", "courts", "policy"];
     const observerOptions = {
-      root: null,
+      root: scrollContainerRef.current,
       rootMargin: "-45% 0px -45% 0px",
       threshold: 0,
     };
@@ -45,33 +46,41 @@ export default function GuestLanding() {
     });
 
     const handleScroll = () => {
-      if (window.scrollY < 100) {
+      if (scrollContainerRef.current && scrollContainerRef.current.scrollTop < 100) {
         setActiveSection("home");
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
 
     return () => {
       observer.disconnect();
-      window.removeEventListener("scroll", handleScroll);
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
     };
   }, []);
 
   const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     setActiveSection(id);
+    if (!scrollContainerRef.current) return;
+
     if (id === "home") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       const element = document.getElementById(id);
       if (element) {
         const offset = 80;
-        const bodyRect = document.body.getBoundingClientRect().top;
+        const containerRect = scrollContainerRef.current.getBoundingClientRect().top;
         const elementRect = element.getBoundingClientRect().top;
-        const elementPosition = elementRect - bodyRect;
-        const offsetPosition = elementPosition - offset;
-        window.scrollTo({
+        const elementPosition = elementRect - containerRect;
+        const offsetPosition = scrollContainerRef.current.scrollTop + elementPosition - offset;
+
+        scrollContainerRef.current.scrollTo({
           top: offsetPosition,
           behavior: "smooth"
         });
@@ -80,7 +89,10 @@ export default function GuestLanding() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F6F2] font-sans text-[#1C2C24]">
+    <div
+      ref={scrollContainerRef}
+      className="h-screen bg-[#F4F6F2] font-sans text-[#1C2C24] overflow-y-auto scroll-smooth custom-scrollbar"
+    >
       {/* Navigation */}
       <header className="sticky top-0 z-50 bg-[#071F14]/90 backdrop-blur-md border-b border-white/5 text-white">
         <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
@@ -95,8 +107,8 @@ export default function GuestLanding() {
               href="/"
               onClick={(e) => handleScrollTo(e, "home")}
               className={`pb-1 transition-all duration-200 cursor-pointer ${activeSection === "home"
-                  ? "text-lime-350 border-b-2 border-lime-350"
-                  : "text-slate-350 hover:text-white"
+                ? "text-lime-350 border-b-2 border-lime-350"
+                : "text-slate-350 hover:text-white"
                 }`}
             >
               Trang chủ
@@ -105,8 +117,8 @@ export default function GuestLanding() {
               href="#about"
               onClick={(e) => handleScrollTo(e, "about")}
               className={`pb-1 transition-all duration-200 cursor-pointer ${activeSection === "about"
-                  ? "text-lime-350 border-b-2 border-lime-350"
-                  : "text-slate-350 hover:text-white"
+                ? "text-lime-350 border-b-2 border-lime-350"
+                : "text-slate-350 hover:text-white"
                 }`}
             >
               Giới thiệu
@@ -115,8 +127,8 @@ export default function GuestLanding() {
               href="#courts"
               onClick={(e) => handleScrollTo(e, "courts")}
               className={`pb-1 transition-all duration-200 cursor-pointer ${activeSection === "courts"
-                  ? "text-lime-350 border-b-2 border-lime-350"
-                  : "text-slate-350 hover:text-white"
+                ? "text-lime-350 border-b-2 border-lime-350"
+                : "text-slate-350 hover:text-white"
                 }`}
             >
               Sân tập
@@ -125,8 +137,8 @@ export default function GuestLanding() {
               href="#policy"
               onClick={(e) => handleScrollTo(e, "policy")}
               className={`pb-1 transition-all duration-200 cursor-pointer ${activeSection === "policy"
-                  ? "text-lime-350 border-b-2 border-lime-350"
-                  : "text-slate-350 hover:text-white"
+                ? "text-lime-350 border-b-2 border-lime-350"
+                : "text-slate-350 hover:text-white"
                 }`}
             >
               Chính sách
