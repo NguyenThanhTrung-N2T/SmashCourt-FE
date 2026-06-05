@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import GuestLanding from "@/app/GuestLanding";
+import GuestLanding from "@/src/features/public-info/components/GuestLanding";
 import { AuthApiError, authRefresh } from "@/src/api/auth.api";
 import {
   clearAuthSession,

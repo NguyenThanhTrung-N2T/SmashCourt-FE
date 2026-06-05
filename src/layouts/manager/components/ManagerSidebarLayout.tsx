@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { type ReactNode, useState, useEffect } from "react";
 
 import { authLogout } from "@/src/api/auth.api";
-import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
+import { Toast } from "@/src/shared/components/ui/Toast";
+import { useToast } from "@/src/shared/hooks/useToast";
 import {
     broadcastLogoutSync,
     clearAuthSession,
@@ -26,6 +27,7 @@ export default function ManagerSidebarLayout({ user: initialUser, children, bran
     const router = useRouter();
     const [loggingOut, setLoggingOut] = useState(false);
     const [redirecting, setRedirecting] = useState(false);
+    const { toast, show: showToast } = useToast();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [user, setUser] = useState<AuthUserSession>(initialUser);
 
@@ -61,6 +63,7 @@ export default function ManagerSidebarLayout({ user: initialUser, children, bran
         broadcastLogoutSync();
         clearAuthSession();
         setRedirecting(true);
+        showToast("success", "Đăng xuất thành công");
         window.setTimeout(() => {
             router.push("/auth/login");
         }, 1200);
@@ -92,11 +95,7 @@ export default function ManagerSidebarLayout({ user: initialUser, children, bran
                 </main>
             </div>
 
-            <AuthStatusToast
-                visible={redirecting}
-                tone="success"
-                message="Đăng xuất thành công"
-            />
+            <Toast toast={toast} />
         </div>
     );
 }

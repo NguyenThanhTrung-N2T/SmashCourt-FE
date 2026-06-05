@@ -86,7 +86,7 @@ export function ProfilePageContent() {
 
         {/* Tab Navigation */}
         <div className="sticky top-0 z-10 bg-surface-1 shadow-sm">
-          <div className="container max-w-7xl mx-auto">
+          <div className="container max-w-6xl mx-auto">
             <ProfileTabNav
               tabs={TABS}
               activeTab={activeTab}
@@ -96,7 +96,7 @@ export function ProfilePageContent() {
         </div>
 
         {/* Tab Content */}
-        <div className="container max-w-7xl mx-auto px-4 py-8">
+        <div className="container max-w-6xl mx-auto px-4 py-8">
           {activeTab === "info" && (
             <ProfileInfoTab profile={profile} onUpdate={refetch} showToast={show} />
           )}

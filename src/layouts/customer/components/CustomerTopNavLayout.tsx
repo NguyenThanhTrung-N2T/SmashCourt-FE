@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import CustomerTopNav from "./CustomerTopNav";
 import MobileNav from "./MobileNav";
 import { authLogout } from "@/src/api/auth.api";
-import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
+import { Toast } from "@/src/shared/components/ui/Toast";
+import { useToast } from "@/src/shared/hooks/useToast";
 import {
   broadcastLogoutSync,
   clearAuthSession,
@@ -27,6 +28,7 @@ export default function CustomerTopNavLayout({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const router = useRouter();
+  const { toast, show: showToast } = useToast();
 
   // Handle mobile drawer toggle
   const handleMobileMenuToggle = () => {
@@ -52,6 +54,7 @@ export default function CustomerTopNavLayout({
     broadcastLogoutSync();
     clearAuthSession();
     setRedirecting(true);
+    showToast("success", "Đăng xuất thành công");
     window.setTimeout(() => {
       router.push("/auth/login");
     }, 1200);
@@ -84,11 +87,7 @@ export default function CustomerTopNavLayout({
       {/* Floating AI Assistant — available on all customer pages */}
       <AIAssistantWidget role="CUSTOMER" />
 
-      <AuthStatusToast
-        visible={redirecting}
-        tone="success"
-        message="Đăng xuất thành công"
-      />
+      <Toast toast={toast} />
     </div>
   );
 }

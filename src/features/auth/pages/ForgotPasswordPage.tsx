@@ -1,0 +1,171 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { AlertCircle, Mail, Send } from "lucide-react";
+
+import {
+  authForgotPassword,
+  getAuthFieldError,
+  hasAuthErrorCode,
+} from "@/src/api/auth.api";
+import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
+import {
+  setEmail,
+  setForgotPasswordFlashMessage,
+} from "@/src/features/auth/session/sessionStore";
+import type { AuthFormEvent } from "@/src/features/auth/types/forms";
+
+export default function ForgotPasswordPage() {
+  const router = useRouter();
+  const [email, setEmailState] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [toastError, setToastError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (!toastError) return;
+
+    const timer = window.setTimeout(() => {
+      setToastError(null);
+    }, 3500);
+
+    return () => clearTimeout(timer);
+  }, [toastError]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  async function onSubmit(e: AuthFormEvent) {
+    e.preventDefault();
+    setError(null);
+    setToastError(null);
+
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail) {
+      setError("Vui lòng nhập email.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const data = await authForgotPassword({ email: trimmedEmail });
+      setEmail(trimmedEmail);
+
+      // Always show the generic success message from backend
+      setForgotPasswordFlashMessage(
+        data.message ?? "Nếu email tồn tại, OTP sẽ được gửi đến hộp thư của bạn",
+      );
+
+      router.push("/auth/forgot-password/verify-otp");
+    } catch (err) {
+      // Only OAuth accounts throw errors
+      if (hasAuthErrorCode(err, "BAD_REQUEST")) {
+        const errorMessage = err instanceof Error ? err.message : "";
+        if (errorMessage.toLowerCase().includes("google")) {
+          setToastError("Tài khoản này đăng nhập bằng Google, không có mật khẩu để đặt lại");
+          return;
+        }
+      }
+
+      const fieldError = getAuthFieldError(err, "email");
+      setToastError(
+        fieldError ??
+        (err instanceof Error
+          ? err.message
+          : "Gửi yêu cầu khôi phục thất bại."),
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section
+      className={`w-full transform transition-all duration-700 motion-reduce:transform-none motion-reduce:transition-none ${mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+        }`}
+    >
+      <div className="mb-10 text-center">
+        <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">
+          Quên mật khẩu
+        </h2>
+        <p className="mt-3 text-base font-medium text-slate-600">
+          Nhập email của bạn để nhận mã OTP khôi phục.
+        </p>
+      </div>
+
+      {error ? (
+        <div className="mb-6 flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4 shadow-sm">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+          <p className="flex-1 text-sm font-bold leading-relaxed text-red-800">
+            {error}
+          </p>
+        </div>
+      ) : null}
+
+      <form className="flex flex-col gap-6" onSubmit={onSubmit}>
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-slate-900">
+            Email
+          </label>
+          <div className="group relative">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-emerald-600">
+              <Mail className="h-5 w-5" />
+            </div>
+            <input
+              className="block w-full rounded-xl border-2 border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 font-medium text-slate-900 outline-none transition-all duration-300 placeholder:font-normal placeholder:text-slate-400 hover:border-emerald-300 hover:shadow-md focus:-translate-y-0.5 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:shadow-lg"
+              placeholder="you@email.com"
+              value={email}
+              onChange={(e) => setEmailState(e.target.value)}
+              type="email"
+              autoComplete="email"
+              required
+              disabled={loading}
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-4 text-base font-extrabold text-white shadow-lg shadow-slate-900/20 transition-all duration-300 hover:-translate-y-1 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-60"
+        >
+          {loading ? (
+            "Đang xác lập..."
+          ) : (
+            <>
+              Gửi mã OTP ngay <Send className="h-5 w-5" />
+            </>
+          )}
+        </button>
+
+        <div className="mt-4 rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
+          <p className="font-semibold text-slate-700 mb-2">Không nhận được OTP?</p>
+          <ul className="space-y-1 list-disc list-inside">
+            <li>Kiểm tra thư mục spam/junk</li>
+            <li>Đảm bảo email đã được xác thực khi đăng ký</li>
+            <li>Chờ 60 giây trước khi gửi lại</li>
+          </ul>
+        </div>
+
+        <p className="mt-8 text-center text-sm font-medium text-slate-600">
+          <Link
+            href="/auth/login"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl px-5 text-base font-bold text-emerald-600 underline-offset-2 transition-colors hover:bg-emerald-50 hover:text-emerald-700 hover:underline"
+          >
+            Quay lại trang đăng nhập
+          </Link>
+        </p>
+      </form>
+
+      <AuthStatusToast
+        visible={!!toastError}
+        tone="danger"
+        message={toastError ?? ""}
+      />
+    </section>
+  );
+}

@@ -1,6 +1,11 @@
 import { Suspense } from "react";
 
-import GoogleOauthCallbackClient from "./GoogleOauthCallbackClient";
+import GoogleOauthCallbackClient from "@/src/features/auth/pages/GoogleOauthCallbackClient";
+
+export const metadata = {
+  title: "Xác thực Google - SmashCourt",
+  description: "Đang kết nối tài khoản Google của bạn với SmashCourt.",
+};
 
 export default function GoogleOauthCallbackPage() {
   return (
@@ -16,4 +21,3 @@ export default function GoogleOauthCallbackPage() {
     </Suspense>
   );
 }
-

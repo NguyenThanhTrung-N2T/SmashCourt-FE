@@ -140,7 +140,7 @@ export function NewBookingPage() {
 
   return (
     <div className="min-h-screen bg-surface-0 p-4 md:p-6">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-6xl">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">Đặt sân mới</h1>
