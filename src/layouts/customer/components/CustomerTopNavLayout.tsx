@@ -12,6 +12,7 @@ import {
   type AuthUserSession,
 } from "@/src/features/auth/session/sessionStore";
 import type { AuthUser } from "@/src/shared/types/auth.types";
+import { AIAssistantWidget } from "@/src/features/ai/shared/components/AIAssistantWidget";
 
 interface CustomerTopNavLayoutProps {
   user: AuthUser;
@@ -79,6 +80,9 @@ export default function CustomerTopNavLayout({
       <main className="w-full">
         {children}
       </main>
+
+      {/* Floating AI Assistant — available on all customer pages */}
+      <AIAssistantWidget role="CUSTOMER" />
 
       <AuthStatusToast
         visible={redirecting}

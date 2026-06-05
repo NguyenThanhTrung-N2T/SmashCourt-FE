@@ -37,6 +37,8 @@ import { getFilterDates, FilterOption, getRevenueGroupBy, getGroupByLabel } from
 import { getTierCfg } from "@/src/features/benefit/loyalty/shared/configs/loyalty-tier.config";
 import { formatDisplayPeriod } from "@/src/features/report/shared/utils/reportUtils";
 import { ReportFilterDto } from "@/src/features/dashboard/shared/dashboard.types";
+import { AIPanelSection } from "@/src/features/ai/shared/components/AIPanelSection";
+import { StrategicInsightsPanel } from "@/src/features/ai/shared/components/StrategicInsightsPanel";
 
 export function OwnerDashboard() {
     const [filter, setFilter] = useState<FilterOption>("Tháng này");
@@ -301,6 +303,14 @@ export function OwnerDashboard() {
                     </div>
                 </div>
             </div>
+
+            <AIPanelSection
+                title="Tầm nhìn chiến lược - AI"
+                accentClass="text-amber-500 border-amber-500/40"
+                maxHeight="780px"
+            >
+                <StrategicInsightsPanel />
+            </AIPanelSection>
         </div>
     );
 }

@@ -13,7 +13,7 @@ import {
     AnalyticsSummaryResponseDto,
     StrategicSuggestionRequestDto,
     StrategicSuggestionResponseDto,
-} from "../features/ai/shared/ai.types";
+} from "@/src/features/ai/shared/types/ai.types";
 
 const BASE_PATH = "/api/AI";
 

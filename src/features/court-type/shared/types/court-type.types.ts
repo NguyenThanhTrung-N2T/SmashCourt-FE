@@ -1,9 +1,14 @@
 // Global court type
+export enum CourtTypeStatus {
+  ACTIVE = 0,
+  INACTIVE = 1,
+}
+
 export interface CourtType {
   id: string;
   name: string;
   description: string | null;
-  status: "ACTIVE" | "INACTIVE";
+  status: CourtTypeStatus;
   createdAt: string;
   updatedAt: string;
   activeBranchCount: number;

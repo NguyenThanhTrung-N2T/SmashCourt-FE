@@ -12,6 +12,8 @@ import { PromotionTab } from '@/src/features/report/shared/components/tabs/Promo
 import { BranchSelector } from '@/src/shared/components/layout/BranchSelector';
 import { useReportBranches } from '@/src/features/report/shared/hooks/useReportBranches';
 import { format, subDays } from 'date-fns';
+import { AIPanelSection } from '@/src/features/ai/shared/components/AIPanelSection';
+import { AnalyticsSummaryPanel } from '@/src/features/ai/shared/components/AnalyticsSummaryPanel';
 
 export default function OwnerReportPage() {
     const router = useRouter();
@@ -49,25 +51,35 @@ export default function OwnerReportPage() {
     };
 
     return (
-        <ReportLayout
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            filter={filter}
-            onFilterChange={setFilter}
-            branchSelector={
-                <BranchSelector
-                    branches={[
-                        { id: '', name: 'Tất cả chi nhánh' },
-                        ...branches.map(b => ({ id: b.id, name: b.name }))
-                    ]}
-                    selectedBranchId={filter.branchId || ''}
-                    onBranchChange={(id) => setFilter({ ...filter, branchId: id })}
-                    label="Chi nhánh"
-                    showCard={false}
-                />
-            }
-        >
-            {renderTabContent()}
-        </ReportLayout>
+        <>
+            <ReportLayout
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                filter={filter}
+                onFilterChange={setFilter}
+                branchSelector={
+                    <BranchSelector
+                        branches={[
+                            { id: '', name: 'Tất cả chi nhánh' },
+                            ...branches.map(b => ({ id: b.id, name: b.name }))
+                        ]}
+                        selectedBranchId={filter.branchId || ''}
+                        onBranchChange={(id) => setFilter({ ...filter, branchId: id })}
+                        label="Chi nhánh"
+                        showCard={false}
+                    />
+                }
+            >
+                {renderTabContent()}
+            </ReportLayout>
+
+            {/* ── AI Panels (collapsible) ────────────────────────── */}
+            <div className="px-6 pb-8 space-y-4">
+                {/* Analytics Summary — for all managers/owners */}
+                <AIPanelSection title="Phân tích tổng hợp - AI" accentClass="text-sky-500 border-sky-500/40">
+                    <AnalyticsSummaryPanel branchId={filter.branchId || undefined} />
+                </AIPanelSection>
+            </div>
+        </>
     );
 }

@@ -11,6 +11,8 @@ import { CustomerTab } from '@/src/features/report/shared/components/tabs/Custom
 import { ServiceTab } from '@/src/features/report/shared/components/tabs/ServiceTab';
 import { PromotionTab } from '@/src/features/report/shared/components/tabs/PromotionTab';
 import { format, subDays } from 'date-fns';
+import { AIPanelSection } from '@/src/features/ai/shared/components/AIPanelSection';
+import { AnalyticsSummaryPanel } from '@/src/features/ai/shared/components/AnalyticsSummaryPanel';
 
 export default function ManagerReportPage() {
     const router = useRouter();
@@ -46,13 +48,22 @@ export default function ManagerReportPage() {
     };
 
     return (
-        <ReportLayout
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            filter={filter}
-            onFilterChange={setFilter}
-        >
-            {renderTabContent()}
-        </ReportLayout>
+        <>
+            <ReportLayout
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                filter={filter}
+                onFilterChange={setFilter}
+            >
+                {renderTabContent()}
+            </ReportLayout>
+
+            {/* ── AI Analytics Summary (collapsible) ─────────────── */}
+            <div className="px-6 pb-8">
+                <AIPanelSection title="Phân tích tổng hợp - AI" accentClass="text-sky-500 border-sky-500/40">
+                    <AnalyticsSummaryPanel />
+                </AIPanelSection>
+            </div>
+        </>
     );
 }

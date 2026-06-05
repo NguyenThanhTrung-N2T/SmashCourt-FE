@@ -1,11 +1,3 @@
-/**
- * AI API Types
- * 
- * Data Transfer Objects for the AI service endpoints.
- */
-
-// --- Shared Types ---
-
 export type GeneratedAt = string; // ISO 8601 datetime string
 export type DateString = string; // "YYYY-MM-DD"
 
@@ -165,7 +157,7 @@ export interface StrategicSuggestionResponseDto {
     demandForecast: {
         summary: string;
         predictions: string[];
-    };
+    } | null;
     model: string;
     generatedAt: GeneratedAt;
 }

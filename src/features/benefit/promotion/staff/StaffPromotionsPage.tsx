@@ -58,7 +58,7 @@ export function StaffPromotionsPage() {
     return (
         <div className="space-y-6 w-full animate-slide-up">
             <PageHeader
-                title="Mã huyến mãi"
+                title="Mã khuyến mãi"
                 description="Danh sách mã khuyến mãi hiện có"
             />
 

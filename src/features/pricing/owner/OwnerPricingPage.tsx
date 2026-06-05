@@ -7,6 +7,8 @@ import { useToast } from "@/src/shared/hooks/useToast";
 import { PricingTabNav, PricingTabId } from "../shared/components/PricingTabNav";
 import { SystemPricePage } from "../shared/pages/SystemPricePage";
 import { BranchPricePage } from "../shared/pages/BranchPricePage";
+import { AIPanelSection } from "@/src/features/ai/shared/components/AIPanelSection";
+import { PricingSuggestionsPanel } from "@/src/features/ai/shared/components/PricingSuggestionsPanel";
 
 export function OwnerPricingPage() {
     const [activeTab, setActiveTab] = useState<PricingTabId>("system");
@@ -31,6 +33,11 @@ export function OwnerPricingPage() {
             </div>
 
             <Toast toast={toast} />
+
+            {/* ── AI Pricing Suggestions (collapsible) ────────────── */}
+            <AIPanelSection title="Gợi ý giá AI" accentClass="text-primary border-primary/40">
+                <PricingSuggestionsPanel />
+            </AIPanelSection>
         </div>
     );
 }

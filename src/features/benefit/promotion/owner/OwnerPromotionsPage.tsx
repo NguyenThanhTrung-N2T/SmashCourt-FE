@@ -32,6 +32,8 @@ import { CreatePromotionModal } from "./dialogs/CreatePromotionModal";
 import { UpdatePromotionModal } from "./dialogs/UpdatePromotionModal";
 import { PromotionCard } from "../shared/components/PromotionCard";
 import { getStatusCfg, formatDate } from "../../utils";
+import { AIPanelSection } from "@/src/features/ai/shared/components/AIPanelSection";
+import { PromotionSuggestionsPanel } from "@/src/features/ai/shared/components/PromotionSuggestionsPanel";
 
 export default function OwnerPromotionsPage() {
     const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -209,6 +211,11 @@ export default function OwnerPromotionsPage() {
                     variant="danger"
                 />
             )}
+
+            {/* ── AI Promotion Suggestions (collapsible) ──────────── */}
+            <AIPanelSection title="AI Promotion Suggestions" accentClass="text-violet-500 border-violet-500/40">
+                <PromotionSuggestionsPanel />
+            </AIPanelSection>
 
             {/* Global Toast */}
             <Toast toast={toast} />
