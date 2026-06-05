@@ -48,7 +48,7 @@ export function usePriceCalculation({
           endTime = "24:00:00";
         }
 
-        const result = await calculatePrice({
+        const result = await calculatePrice(selectedBranch.id, {
           courtId: selectedCourt.id,
           bookingDate: new Date(selectedDate).toISOString(),
           startTime,

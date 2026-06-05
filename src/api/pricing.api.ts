@@ -394,10 +394,11 @@ export async function deleteBranchPriceSlot(
  * ENDPOINT UNCHANGED - Still valid in new API
  */
 export async function calculatePrice(
+    branchId: string,
     dto: CalculatePriceDto,
 ): Promise<CalculatePriceResultDto | null> {
     const response = await authProtectedFetch<CalculatePriceResultDto>(
-        `/api/prices/calculate`,
+        `/api/prices/calculate?branchId=${branchId}`,
         {
             method: "POST",
             headers: {

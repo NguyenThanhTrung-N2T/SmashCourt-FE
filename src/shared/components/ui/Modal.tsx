@@ -3,6 +3,7 @@ import { cn } from "@/src/shared/utils/cn";
 import {
   X,
 } from "@phosphor-icons/react";
+import { Portal } from "./Portal";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -49,48 +50,50 @@ export function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-slate-900/70 animate-fade-in"
-        onClick={onClose}
-      />
+    <Portal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-slate-900/70 animate-fade-in"
+          onClick={onClose}
+        />
 
-      {/* Content */}
-      <div
-        className={cn(
-          "relative w-full animate-slide-up rounded-2xl border-2 border-white/40 bg-surface-1 shadow-2xl flex flex-col max-h-[90vh]",
-          shadowBorders[maxWidth],
-          className
-        )}
-      >
-        {/* Header */}
-        <div className={cn("flex shrink-0 items-center justify-between rounded-t-2xl px-6 py-5 bg-gradient-to-r", headerGradient)}>
-          <div className="flex items-center gap-3">
-            {icon && (
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 text-white">
-                {icon}
+        {/* Content */}
+        <div
+          className={cn(
+            "relative w-full animate-slide-up rounded-2xl border-2 border-white/40 bg-surface-1 shadow-2xl flex flex-col max-h-[90vh]",
+            shadowBorders[maxWidth],
+            className
+          )}
+        >
+          {/* Header */}
+          <div className={cn("flex shrink-0 items-center justify-between rounded-t-2xl px-6 py-5 bg-gradient-to-r", headerGradient)}>
+            <div className="flex items-center gap-3">
+              {icon && (
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 text-white">
+                  {icon}
+                </div>
+              )}
+              <div>
+                {subtitle && <p className="text-xs font-bold uppercase tracking-wider text-white/70">{subtitle}</p>}
+                <h2 className="text-lg font-bold text-white">{title}</h2>
               </div>
-            )}
-            <div>
-              {subtitle && <p className="text-xs font-bold uppercase tracking-wider text-white/70">{subtitle}</p>}
-              <h2 className="text-lg font-bold text-white">{title}</h2>
             </div>
+            <button
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-white transition-all hover:bg-white/30 active:scale-95"
+              aria-label="Close modal"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-white transition-all hover:bg-white/30 active:scale-95"
-            aria-label="Close modal"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
 
-        {/* Body */}
-        <div className="overflow-y-auto w-full flex-1 custom-scrollbar">
-          {children}
+          {/* Body */}
+          <div className="overflow-y-auto w-full flex-1 custom-scrollbar">
+            {children}
+          </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 }

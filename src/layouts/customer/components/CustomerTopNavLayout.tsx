@@ -61,7 +61,7 @@ export default function CustomerTopNavLayout({
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background overflow-y-auto custom-scrollbar">
       {/* Top Navigation */}
       <CustomerTopNav
         user={user}

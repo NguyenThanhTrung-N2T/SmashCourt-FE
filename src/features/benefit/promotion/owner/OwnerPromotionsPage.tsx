@@ -212,8 +212,7 @@ export default function OwnerPromotionsPage() {
                 />
             )}
 
-            {/* ── AI Promotion Suggestions (collapsible) ──────────── */}
-            <AIPanelSection title="AI Promotion Suggestions" accentClass="text-violet-500 border-violet-500/40">
+            <AIPanelSection title="Gợi ý khuyến mãi - AI" accentClass="text-violet-500 border-violet-500/40">
                 <PromotionSuggestionsPanel />
             </AIPanelSection>
 

@@ -139,7 +139,7 @@ export function NewBookingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-0 p-4 md:p-6">
+    <div className="bg-surface-0 p-4 md:p-6">
       <div className="mx-auto max-w-6xl">
         {/* Page Header */}
         <div className="mb-8">

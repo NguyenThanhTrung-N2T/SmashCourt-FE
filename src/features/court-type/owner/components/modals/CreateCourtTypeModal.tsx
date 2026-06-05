@@ -36,7 +36,6 @@ export function CreateCourtTypeModal({ onClose, onCreated }: { onClose: () => vo
       subtitle="Tạo mới"
       icon={<Plus className="h-5 w-5" />}
       maxWidth="lg"
-      headerGradient="from-indigo-500 to-violet-500"
     >
       <CourtTypeForm
         onCancel={onClose}

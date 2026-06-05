@@ -59,7 +59,7 @@ export default function BenefitsLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* ── Page Content ── */}
-      <div className="flex-1 overflow-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full px-8 pt-4 pb-10">
+      <div className="flex-1 overflow-auto custom-scrollbar px-8 pt-4 pb-10">
         {children}
       </div>
     </div>

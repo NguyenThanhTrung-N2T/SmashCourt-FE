@@ -109,15 +109,15 @@ export function BranchPricePage({ role = "owner" }: { role?: "owner" | "manager"
             </div>
 
             {(role !== "owner" || selectedBranchId) && selectedCourtTypeId ? (
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+                <div className={cn("grid grid-cols-1 gap-8 items-start", role !== "staff" && "xl:grid-cols-12")}>
                     {/* Left Panel: Version List & Creation */}
-                    <div className="xl:col-span-4 space-y-6">
-                        <div className="flex items-center justify-between px-1">
-                            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                                <Notepad className="h-5 w-5 text-primary" />
-                                Phiên bản ghi đè
-                            </h3>
-                            {role !== "staff" && (
+                    {role !== "staff" && (
+                        <div className="xl:col-span-4 space-y-6">
+                            <div className="flex items-center justify-between px-1">
+                                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                                    <Notepad className="h-5 w-5 text-primary" />
+                                    Phiên bản ghi đè
+                                </h3>
                                 <Button
                                     size="sm"
                                     variant="primary"
@@ -126,68 +126,68 @@ export function BranchPricePage({ role = "owner" }: { role?: "owner" | "manager"
                                 >
                                     Tạo ghi đè
                                 </Button>
-                            )}
-                        </div>
+                            </div>
 
-                        <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                            {isLoadingVersions ? (
-                                Array(3).fill(0).map((_, i) => (
-                                    <div key={i} className="p-4 rounded-xl border border-border bg-surface-1 space-y-2">
-                                        <Skeleton className="h-4 w-1/2" />
-                                        <Skeleton className="h-3 w-1/3" />
-                                    </div>
-                                ))
-                            ) : versions.length === 0 ? (
-                                <div className="text-center py-10 px-4 bg-surface-2/50 rounded-2xl border border-dashed border-border text-muted">
-                                    <Info className="h-8 w-8 mx-auto mb-3 opacity-20" />
-                                    <p className="text-xs font-medium">Chưa có phiên bản ghi đè nào.</p>
-                                    <p className="text-[10px] mt-1">Chi nhánh đang áp dụng bảng giá hệ thống.</p>
-                                </div>
-                            ) : (
-                                versions.map(v => (
-                                    <div
-                                        key={v.effectiveFrom}
-                                        onClick={() => selectVersion(selectedEffectiveFrom === v.effectiveFrom ? null : v.effectiveFrom)}
-                                        className={cn(
-                                            "group p-4 rounded-xl border-2 transition-all cursor-pointer relative",
-                                            selectedEffectiveFrom === v.effectiveFrom
-                                                ? "border-primary bg-primary/5 shadow-md z-10"
-                                                : "border-transparent bg-surface-2 hover:bg-surface-1 hover:border-primary/30"
-                                        )}
-                                    >
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm font-bold text-foreground">
-                                                {fmtDate(v.effectiveFrom)}
-                                            </span>
-                                            <Badge
-                                                variant={STATUS_MAP[v.status as keyof typeof STATUS_MAP]?.variant}
-                                                size="sm"
-                                            >
-                                                {STATUS_MAP[v.status as keyof typeof STATUS_MAP]?.label}
-                                            </Badge>
+                            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                                {isLoadingVersions ? (
+                                    Array(3).fill(0).map((_, i) => (
+                                        <div key={i} className="p-4 rounded-xl border border-border bg-surface-1 space-y-2">
+                                            <Skeleton className="h-4 w-1/2" />
+                                            <Skeleton className="h-3 w-1/3" />
                                         </div>
-                                        <p className="text-[10px] text-muted font-medium">
-                                            Ngày hiệu lực: {v.effectiveFrom}
-                                        </p>
-                                        {role !== "staff" && v.status === "SCHEDULED" && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDelete(v.effectiveFrom);
-                                                }}
-                                                className="absolute -top-2 -right-2 h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                                            >
-                                                <Trash className="h-3 w-3" weight="bold" />
-                                            </button>
-                                        )}
+                                    ))
+                                ) : versions.length === 0 ? (
+                                    <div className="text-center py-10 px-4 bg-surface-2/50 rounded-2xl border border-dashed border-border text-muted">
+                                        <Info className="h-8 w-8 mx-auto mb-3 opacity-20" />
+                                        <p className="text-xs font-medium">Chưa có phiên bản ghi đè nào.</p>
+                                        <p className="text-[10px] mt-1">Chi nhánh đang áp dụng bảng giá hệ thống.</p>
                                     </div>
-                                ))
-                            )}
+                                ) : (
+                                    versions.map(v => (
+                                        <div
+                                            key={v.effectiveFrom}
+                                            onClick={() => selectVersion(selectedEffectiveFrom === v.effectiveFrom ? null : v.effectiveFrom)}
+                                            className={cn(
+                                                "group p-4 rounded-xl border-2 transition-all cursor-pointer relative",
+                                                selectedEffectiveFrom === v.effectiveFrom
+                                                    ? "border-primary bg-primary/5 shadow-md z-10"
+                                                    : "border-transparent bg-surface-2 hover:bg-surface-1 hover:border-primary/30"
+                                            )}
+                                        >
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm font-bold text-foreground">
+                                                    {fmtDate(v.effectiveFrom)}
+                                                </span>
+                                                <Badge
+                                                    variant={STATUS_MAP[v.status as keyof typeof STATUS_MAP]?.variant}
+                                                    size="sm"
+                                                >
+                                                    {STATUS_MAP[v.status as keyof typeof STATUS_MAP]?.label}
+                                                </Badge>
+                                            </div>
+                                            <p className="text-[10px] text-muted font-medium">
+                                                Ngày hiệu lực: {v.effectiveFrom}
+                                            </p>
+                                            {v.status === "SCHEDULED" && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDelete(v.effectiveFrom);
+                                                    }}
+                                                    className="absolute -top-2 -right-2 h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                                >
+                                                    <Trash className="h-3 w-3" weight="bold" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Right Panel: Detail or Effective Table */}
-                    <div className="xl:col-span-8 space-y-6">
+                    <div className={cn(role === "staff" ? "xl:col-span-12" : "xl:col-span-8", "space-y-6")}>
                         {selectedVersionDetail ? (
                             <div className="bg-surface-1 border-2 border-primary/20 rounded-2xl overflow-hidden shadow-lg animate-in fade-in zoom-in-95 duration-300">
                                 <div className="px-6 py-4 bg-primary/5 border-b border-primary/10 flex items-center justify-between">
