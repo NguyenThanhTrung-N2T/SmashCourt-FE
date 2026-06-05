@@ -9,33 +9,12 @@
 import { ArrowUp, ArrowDown } from "@phosphor-icons/react";
 import type { LoyaltyTransactionDto } from "@/src/features/benefit/loyalty/shared/types/loyalty.types";
 import { formatPoints, getTransactionTypeLabel } from "../utils";
-
+import { formatDate } from "@/src/shared/utils/date";
 interface TransactionListProps {
   transactions: LoyaltyTransactionDto[];
 }
 
 export function TransactionList({ transactions }: TransactionListProps) {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-    if (diffInDays === 0) {
-      return "Hôm nay";
-    } else if (diffInDays === 1) {
-      return "Hôm qua";
-    } else if (diffInDays < 7) {
-      return `${diffInDays} ngày trước`;
-    } else {
-      return date.toLocaleDateString("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
-    }
-  };
-
   return (
     <div className="space-y-3">
       {transactions.map((tx) => (
@@ -66,9 +45,9 @@ export function TransactionList({ transactions }: TransactionListProps) {
               {tx.note && (
                 <p className="text-xs text-muted italic">{tx.note}</p>
               )}
-              {tx.bookingId && (
+              {tx.bookingCode && (
                 <p className="text-xs text-muted">
-                  Mã đặt sân: {tx.bookingId.slice(0, 8)}...
+                  Mã đặt sân: {tx.bookingCode}
                 </p>
               )}
             </div>
@@ -77,8 +56,8 @@ export function TransactionList({ transactions }: TransactionListProps) {
           {/* Points */}
           <div className="text-right space-y-1">
             <p className={`text-lg font-bold ${tx.type === "EARN"
-                ? "text-green-600 dark:text-green-400"
-                : "text-red-600 dark:text-red-400"
+              ? "text-green-600 dark:text-green-400"
+              : "text-red-600 dark:text-red-400"
               }`}>
               {tx.points > 0 ? "+" : ""}{formatPoints(tx.points)}
             </p>

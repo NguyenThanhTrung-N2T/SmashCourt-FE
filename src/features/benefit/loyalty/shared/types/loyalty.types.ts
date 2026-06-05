@@ -19,6 +19,7 @@ export interface MyLoyaltyDto {
 export interface LoyaltyTransactionDto {
   id: string;
   bookingId: string | null;
+  bookingCode: string;
   points: number;
   totalPointsAfter: number;
   type: TransactionType;
