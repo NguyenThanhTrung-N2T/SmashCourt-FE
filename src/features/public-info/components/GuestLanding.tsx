@@ -185,8 +185,8 @@ export default function GuestLanding() {
         <div className="relative z-10 mx-auto max-w-7xl px-6 h-full flex flex-col justify-end pb-20">
           <div className="max-w-4xl">
             <h1 className="text-6xl sm:text-7xl font-black tracking-tight leading-[1.05] drop-shadow-md">
-              Cầu lông <br />
-              Mọi lúc, mọi nơi
+              The Home of<br />
+              Every Badminton Match.
             </h1>
 
             {/* Bottom-left overlay badge with member avatars */}
