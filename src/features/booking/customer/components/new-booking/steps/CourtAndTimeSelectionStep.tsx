@@ -6,7 +6,7 @@
 
 "use client";
 
-import { Calendar, Lightning } from "@phosphor-icons/react";
+import { Calendar } from "@phosphor-icons/react";
 import { Spinner } from "@/src/shared/components/feedback/Spinner";
 import { useCourts } from "@/src/features/court/shared/hooks/useCourts";
 import { InteractiveTimeGrid } from '@/src/features/booking/shared/components/new';
@@ -17,10 +17,11 @@ import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 interface CourtAndTimeSelectionStepProps {
   branchId: string;
   courtTypeId: string;
-  selectedCourtId: string | null;
+  selectedCourtIds: string[];
   selectedDate: string; // YYYY-MM-DD
   selectedSlots: TimeGridSlotDto[];
-  onSelectCourt: (court: CourtDto) => void;
+  onDragCourt: (court: CourtDto) => void;  // was: onSelectCourt
+  onToggleCourt: (court: CourtDto) => void;// new
   onDateChange: (date: string) => void;
   onSlotsChange: (slots: TimeGridSlotDto[]) => void;
   totalAmount?: number;
@@ -30,10 +31,11 @@ interface CourtAndTimeSelectionStepProps {
 export function CourtAndTimeSelectionStep({
   branchId,
   courtTypeId,
-  selectedCourtId,
+  selectedCourtIds,
   selectedDate,
   selectedSlots,
-  onSelectCourt,
+  onDragCourt,
+  onToggleCourt,
   onDateChange,
   onSlotsChange,
   totalAmount = 0,
@@ -92,9 +94,10 @@ export function CourtAndTimeSelectionStep({
         branchId={branchId}
         courts={courts}
         selectedDate={selectedDate}
-        selectedCourtId={selectedCourtId}
+        selectedCourtIds={selectedCourtIds}
         selectedSlots={selectedSlots}
-        onSelectCourt={onSelectCourt}
+        onDragCourt={onDragCourt}
+        onToggleCourt={onToggleCourt}
         onSlotsChange={onSlotsChange}
       />
 
@@ -102,11 +105,10 @@ export function CourtAndTimeSelectionStep({
       {selectedSlots.length > 0 && (
         <div className="mt-6 flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-6 shadow-sm">
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-muted">
-              Tạm tính
-            </h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-muted">Tạm tính</h3>
             <p className="mt-1 font-medium text-foreground">
-              {selectedSlots.length} khung giờ đã chọn
+              {selectedSlots.length} khung giờ ·{" "}
+              {selectedCourtIds.length} sân đã chọn  {/* ← updated */}
             </p>
           </div>
           <div className="text-right">

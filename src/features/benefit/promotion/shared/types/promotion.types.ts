@@ -66,7 +66,6 @@ export interface SavePromotionRequest {
 
 export interface ApplicablePromotionRequest {
   branchId: string;
-  courtId: string;
   bookingDate: string;
   startTime: string;
   endTime: string;

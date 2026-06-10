@@ -7,7 +7,7 @@ import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
 interface UseBookingSubmitParams {
-  selectedCourt: CourtDto | null;
+  selectedCourts: CourtDto[];
   selectedSlots: TimeGridSlotDto[];
   selectedDate: string;
   guestName: string;
@@ -21,7 +21,7 @@ interface UseBookingSubmitParams {
 }
 
 export function useBookingSubmit({
-  selectedCourt,
+  selectedCourts,
   selectedSlots,
   selectedDate,
   guestName,
@@ -34,7 +34,7 @@ export function useBookingSubmit({
   validateGuestInfo,
 }: UseBookingSubmitParams) {
   const handleSubmitBooking = async () => {
-    if (!selectedCourt || selectedSlots.length === 0) return;
+    if (selectedCourts.length === 0 || selectedSlots.length === 0) return;
 
     // Validate guest information
     const validationError = validateGuestInfo(guestName, guestPhone, guestEmail);
@@ -46,15 +46,12 @@ export function useBookingSubmit({
     try {
       setIsSubmitting(true);
       setError(null);
+      const startTime = selectedSlots[0].startTime;
+      const endTime = selectedSlots[selectedSlots.length - 1].endTime;
 
       const booking = await createOnlineBooking({
-        courts: [
-          {
-            courtId: selectedCourt.id,
-            startTime: selectedSlots[0].startTime,
-            endTime: selectedSlots[selectedSlots.length - 1].endTime,
-          },
-        ],
+        // All courts share the same time range in one transaction
+        courts: selectedCourts.map((court) => ({ courtId: court.id, startTime, endTime })),
         bookingDate: new Date(selectedDate).toISOString(),
         promotionId: selectedPromotionId || undefined,
         guestName: guestName.trim(),

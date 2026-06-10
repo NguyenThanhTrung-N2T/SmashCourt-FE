@@ -80,14 +80,13 @@ export interface EffectivePricesResponse {
 }
 
 /**
- * PATCH /api/prices/calculate response
+ * GET /api/prices/calculate response
  * Price calculation result with breakdown
  */
 export interface CalculatePriceResultDto {
-    courtFee: number;
-    breakdown: PriceBreakdownDto[];
+    totalFee: number;
+    courts: CourtPriceResultDto[];
 }
-
 /**
  * Individual price breakdown item in CalculatePriceResultDto
  */
@@ -99,13 +98,18 @@ export interface PriceBreakdownDto {
     subTotal: number;
     priceSource: "SYSTEM_PRICE" | "BRANCH_OVERRIDE";
 }
-
+export interface CourtPriceResultDto {
+    courtId: string;
+    courtName: string;
+    courtFee: number;
+    breakDown: PriceBreakdownDto[];
+}
 /**
- * POST /api/prices/calculate request
+ * GET /api/prices/calculate request
  * Calculate total price for a court booking
  */
 export interface CalculatePriceDto {
-    courtId: string;
+    courts: string[];
     bookingDate: string;
     startTime: string;
     endTime: string;

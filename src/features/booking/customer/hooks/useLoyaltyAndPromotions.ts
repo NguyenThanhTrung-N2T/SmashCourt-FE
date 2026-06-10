@@ -14,7 +14,6 @@ import type { ApplicablePromotion } from "@/src/features/benefit/promotion/share
 interface UseLoyaltyAndPromotionsParams {
   isLoggedIn: boolean;
   selectedBranch: BranchBasicDto | null;
-  selectedCourt: CourtDto | null;
   selectedDate: string;
   selectedSlots: TimeGridSlotDto[];
   totalAmount: number;
@@ -32,7 +31,6 @@ interface UseLoyaltyAndPromotionsResult {
 export function useLoyaltyAndPromotions({
   isLoggedIn,
   selectedBranch,
-  selectedCourt,
   selectedDate,
   selectedSlots,
   totalAmount,
@@ -87,7 +85,6 @@ export function useLoyaltyAndPromotions({
       if (
         !isLoggedIn ||
         !selectedBranch ||
-        !selectedCourt ||
         !selectedDate ||
         selectedSlots.length === 0 ||
         totalAmount <= 0
@@ -124,7 +121,6 @@ export function useLoyaltyAndPromotions({
 
         const data = await fetchApplicablePromotions({
           branchId: selectedBranch.id,
-          courtId: selectedCourt.id,
           bookingDate: `${selectedDate}T${startTime}`,
           startTime,
           endTime,
@@ -151,7 +147,7 @@ export function useLoyaltyAndPromotions({
     return () => {
       isMounted = false;
     };
-  }, [isLoggedIn, selectedBranch, selectedCourt, selectedDate, selectedSlots, totalAmount, loyaltyInfo]);
+  }, [isLoggedIn, selectedBranch, selectedDate, selectedSlots, totalAmount, loyaltyInfo]);
 
   return {
     loyaltyInfo,

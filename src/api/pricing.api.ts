@@ -389,9 +389,8 @@ export async function deleteBranchPriceSlot(
 
 /**
  * POST /api/prices/calculate
- * Calculate the total price for a court booking based on selected time slots.
+ * Calculate the total price for multi-court booking based on selected time slots.
  * 
- * ENDPOINT UNCHANGED - Still valid in new API
  */
 export async function calculatePrice(
     branchId: string,

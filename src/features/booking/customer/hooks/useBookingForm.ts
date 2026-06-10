@@ -35,7 +35,7 @@ export function useBookingForm() {
   const [selectedCourtType, setSelectedCourtType] = useState<BookingCourtType | null>(null);
 
   // Step 3: Court & Time
-  const [selectedCourt, setSelectedCourt] = useState<CourtDto | null>(null);
+  const [selectedCourts, setSelectedCourts] = useState<CourtDto[]>([]);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -87,26 +87,48 @@ export function useBookingForm() {
   const handleBranchSelect = (branch: BranchBasicDto) => {
     setSelectedBranch(branch);
     setSelectedCourtType(null);
-    setSelectedCourt(null);
+    setSelectedCourts([]);
     setSelectedSlots([]);
   };
 
   const handleCourtTypeSelect = (courtType: BookingCourtType) => {
     setSelectedCourtType(courtType);
-    setSelectedCourt(null);
+    setSelectedCourts([]);
     setSelectedSlots([]);
   };
+  /**
+   * Called when a drag gesture starts on a court track (after move threshold).
+   * - Dragging on an already-selected court: keeps the full selection, clears slots for re-drag.
+   * - Dragging on a new court: resets selection to just this court.
+   */
+  const handleCourtDragStart = (court: CourtDto) => {
+    setSelectedCourts((prev) => {
+      const alreadySelected = prev.some((c) => c.id === court.id);
+      return alreadySelected ? prev : [court];
+    });
+  };
 
-  const handleCourtSelect = (court: CourtDto) => {
-    if (selectedCourt?.id !== court.id) {
-      setSelectedCourt(court);
-      setSelectedSlots([]);
+  /**
+   * Called when a court track is clicked (no drag movement).
+   * Toggles the court in/out of the selection.
+   * Adding a court only works when a time range is already set.
+   */
+  const handleCourtToggle = (court: CourtDto) => {
+    const isSelected = selectedCourts.some((c) => c.id === court.id);
+    if (isSelected) {
+      const next = selectedCourts.filter((c) => c.id !== court.id);
+      setSelectedCourts(next);
+      if (next.length === 0) setSelectedSlots([]);
+    } else if (selectedSlots.length > 0) {
+      setSelectedCourts((prev) => [...prev, court]);
     }
+    // If no time range yet, click does nothing — user must drag first
   };
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
     setSelectedSlots([]);
+    setSelectedCourts([]);
   };
 
   const handleNext = () => {
@@ -130,7 +152,7 @@ export function useBookingForm() {
       case 2:
         return selectedCourtType !== null;
       case 3:
-        return selectedCourt !== null && selectedSlots.length > 0;
+        return selectedCourts.length > 0 && selectedSlots.length > 0;
       default:
         return false;
     }
@@ -145,7 +167,7 @@ export function useBookingForm() {
     preFilledFields,
     selectedBranch,
     selectedCourtType,
-    selectedCourt,
+    selectedCourts,
     selectedDate,
     selectedSlots,
     guestName,
@@ -169,7 +191,8 @@ export function useBookingForm() {
     // Handlers
     handleBranchSelect,
     handleCourtTypeSelect,
-    handleCourtSelect,
+    handleCourtDragStart,
+    handleCourtToggle,
     handleDateChange,
     handleNext,
     handleBack,

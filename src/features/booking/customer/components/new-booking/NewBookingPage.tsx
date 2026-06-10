@@ -36,7 +36,7 @@ export function NewBookingPage() {
     preFilledFields,
     selectedBranch,
     selectedCourtType,
-    selectedCourt,
+    selectedCourts,
     selectedDate,
     selectedSlots,
     guestName,
@@ -56,7 +56,8 @@ export function NewBookingPage() {
     setSelectedPromotionId,
     handleBranchSelect,
     handleCourtTypeSelect,
-    handleCourtSelect,
+    handleCourtDragStart,       // was: handleCourtSelect
+    handleCourtToggle,     // new
     handleDateChange,
     handleNext,
     handleBack,
@@ -67,7 +68,7 @@ export function NewBookingPage() {
 
   const { totalAmount, isCalculatingPrice } = usePriceCalculation({
     selectedBranch,
-    selectedCourt,
+    selectedCourts,
     selectedDate,
     selectedSlots,
   });
@@ -81,7 +82,6 @@ export function NewBookingPage() {
   } = useLoyaltyAndPromotions({
     isLoggedIn: currentUser !== null,
     selectedBranch,
-    selectedCourt,
     selectedDate,
     selectedSlots,
     totalAmount,
@@ -108,7 +108,7 @@ export function NewBookingPage() {
   }, [availablePromotions, isLoadingPromotions, selectedPromotionId, setSelectedPromotionId]);
 
   const { handleSubmitBooking } = useBookingSubmit({
-    selectedCourt,
+    selectedCourts,
     selectedSlots,
     selectedDate,
     guestName,
@@ -184,10 +184,11 @@ export function NewBookingPage() {
             <CourtAndTimeSelectionStep
               branchId={selectedBranch.id}
               courtTypeId={selectedCourtType.id}
-              selectedCourtId={selectedCourt?.id || null}
+              selectedCourtIds={selectedCourts.map(c => c.id)}
               selectedDate={selectedDate}
               selectedSlots={selectedSlots}
-              onSelectCourt={handleCourtSelect}
+              onDragCourt={handleCourtDragStart}
+              onToggleCourt={handleCourtToggle}
               onDateChange={handleDateChange}
               onSlotsChange={setSelectedSlots}
               totalAmount={totalAmount}
@@ -199,7 +200,7 @@ export function NewBookingPage() {
             <BookingConfirmationStep
               branch={selectedBranch!}
               courtType={selectedCourtType!}
-              court={selectedCourt!}
+              courts={selectedCourts}
               date={selectedDate}
               slots={selectedSlots}
               guestName={guestName}

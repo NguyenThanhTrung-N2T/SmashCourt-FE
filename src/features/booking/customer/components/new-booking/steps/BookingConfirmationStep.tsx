@@ -20,7 +20,7 @@ import type { BookingCourtType } from "@/src/features/booking/customer/hooks/use
 interface BookingConfirmationStepProps {
   branch: BranchBasicDto;
   courtType: BookingCourtType;
-  court: CourtDto;
+  courts: CourtDto[];
   date: string;
   slots: TimeGridSlotDto[];
   guestName: string;
@@ -59,7 +59,7 @@ interface BookingConfirmationStepProps {
 export function BookingConfirmationStep({
   branch,
   courtType,
-  court,
+  courts,
   date,
   slots,
   guestName,
@@ -114,7 +114,12 @@ export function BookingConfirmationStep({
   const inputElementCls = (isReadOnly?: boolean) =>
     `w-full bg-transparent px-4 py-3.5 pl-11 text-sm font-medium text-foreground outline-none placeholder:font-normal placeholder:text-muted/60 ${isReadOnly ? "cursor-not-allowed" : ""
     }`;
-
+  const courtsByType = Object.entries(
+    courts.reduce<Record<string, CourtDto[]>>((acc, court) => {
+      (acc[court.courtTypeName] ??= []).push(court);
+      return acc;
+    }, {})
+  );
   return (
     <div className="space-y-6">
       <div className="mb-6">
@@ -276,11 +281,32 @@ export function BookingConfirmationStep({
 
         {/* Court Info */}
         <div className="rounded-xl border border-border bg-surface-2 p-4">
-          <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted">
-            Sân
+          <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted">
+            {courts.length > 1 ? `Sân (${courts.length})` : "Sân"}
           </h3>
-          <p className="text-lg font-bold text-foreground">{court.name}</p>
-          <p className="mt-1 text-sm text-muted">Loại sân: {courtType.name}</p>
+
+          <div className={courtsByType.length > 1 ? "divide-y divide-border" : ""}>
+            {courtsByType.map(([typeName, typeCourts]) => (
+              <div
+                key={typeName}
+                className={courtsByType.length > 1 ? "py-2.5 first:pt-0 last:pb-0" : ""}
+              >
+                {/* Only show type label as a sub-header when there are multiple types */}
+                {courtsByType.length > 1 && (
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted/70">
+                    {typeName}
+                  </p>
+                )}
+                <p className="text-lg font-bold text-foreground">
+                  {typeCourts.map((c) => c.name).join(", ")}
+                </p>
+                {/* Single type: show inline like before */}
+                {courtsByType.length === 1 && (
+                  <p className="mt-1 text-sm text-muted">Loại sân: {typeName}</p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Date & Time Info */}

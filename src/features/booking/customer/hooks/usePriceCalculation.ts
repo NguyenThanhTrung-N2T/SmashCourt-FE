@@ -10,25 +10,26 @@ import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
 interface UsePriceCalculationParams {
   selectedBranch: BranchBasicDto | null;
-  selectedCourt: CourtDto | null;
+  selectedCourts: CourtDto[];
   selectedDate: string;
   selectedSlots: TimeGridSlotDto[];
 }
 
 export function usePriceCalculation({
   selectedBranch,
-  selectedCourt,
+  selectedCourts,
   selectedDate,
   selectedSlots,
 }: UsePriceCalculationParams) {
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [isCalculatingPrice, setIsCalculatingPrice] = useState(false);
-
+  // Stringify IDs for a stable dep value — avoids re-running on mere array reference changes
+  const courtIds = selectedCourts.map((c) => c.id).join(",");
   useEffect(() => {
     let isMounted = true;
 
     async function fetchPrice() {
-      if (!selectedBranch || !selectedCourt || !selectedDate || selectedSlots.length === 0) {
+      if (!selectedBranch || !courtIds || !selectedDate || selectedSlots.length === 0) {
         if (isMounted) setTotalAmount(0);
         return;
       }
@@ -49,14 +50,14 @@ export function usePriceCalculation({
         }
 
         const result = await calculatePrice(selectedBranch.id, {
-          courtId: selectedCourt.id,
+          courts: selectedCourts.map((c) => c.id),
           bookingDate: new Date(selectedDate).toISOString(),
           startTime,
           endTime,
         });
 
         if (result && isMounted) {
-          setTotalAmount(result.courtFee);
+          setTotalAmount(result.totalFee);
         }
       } catch (err) {
         console.error("Failed to calculate price:", err);
@@ -71,7 +72,7 @@ export function usePriceCalculation({
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [selectedBranch, selectedCourt, selectedDate, selectedSlots]);
+  }, [selectedBranch, courtIds, selectedDate, selectedSlots]);
 
   return {
     totalAmount,
