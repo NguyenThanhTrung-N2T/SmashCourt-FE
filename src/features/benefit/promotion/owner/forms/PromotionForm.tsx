@@ -136,6 +136,32 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
     }
   }, [discountType]);
 
+  const loadBranches = async () => {
+    try {
+      const data = await fetchBranches(1, 50);
+      setBranches(data.items);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        showToast("error", err.message);
+      } else {
+        showToast("error", "Đã xảy ra lỗi khi tải danh sách chi nhánh");
+      }
+    }
+  };
+
+  const loadCourts = async (branchId: string) => {
+    try {
+      const data = await fetchCourts(branchId);
+      setCourts(data);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        showToast("error", err.message);
+      } else {
+        showToast("error", "Đã xảy ra lỗi khi tải danh sách sân");
+      }
+    }
+  };
+
   // Load branches for branch selector
   useEffect(() => {
     loadBranches();
@@ -147,24 +173,6 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
       loadCourts(selectedBranchId);
     }
   }, [selectedBranchId]);
-
-  async function loadBranches() {
-    try {
-      const data = await fetchBranches(1, 50);
-      setBranches(data.items);
-    } catch (err: any) {
-      showToast("error", err.message);
-    }
-  }
-
-  async function loadCourts(branchId: string) {
-    try {
-      const data = await fetchCourts(branchId);
-      setCourts(data);
-    } catch (err: any) {
-      showToast("error", err.message);
-    }
-  }
 
   function handleAddCondition() {
     if (!selectedConditionType || !conditionValue.trim()) {

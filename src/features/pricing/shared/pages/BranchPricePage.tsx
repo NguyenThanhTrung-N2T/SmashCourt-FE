@@ -55,18 +55,24 @@ export function BranchPricePage({ role = "owner" }: { role?: "owner" | "manager"
     // Auto-select first branch and court type
     useEffect(() => {
         if (branches.length > 0 && !selectedBranchId) {
-            setSelectedBranchId(branches[0].id);
+            const timer = setTimeout(() => {
+                setSelectedBranchId(branches[0].id);
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [branches, selectedBranchId]);
 
     useEffect(() => {
         if (courtTypes.length > 0 && !selectedCourtTypeId) {
-            setSelectedCourtTypeId(courtTypes[0].id);
+            const timer = setTimeout(() => {
+                setSelectedCourtTypeId(courtTypes[0].id);
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [courtTypes, selectedCourtTypeId]);
 
-    const handleCreateVersion = async (effectiveFrom: string, dto: any) => {
-        const result = await upsertVersion(effectiveFrom, dto);
+    const handleCreateVersion = async (effectiveFrom: string, dto: unknown) => {
+        const result = await upsertVersion(effectiveFrom, dto as any);
         if (result) {
             showToast("success", "Đã tạo phiên bản giá ghi đè cho chi nhánh.");
             return true;
@@ -87,7 +93,7 @@ export function BranchPricePage({ role = "owner" }: { role?: "owner" | "manager"
             <div className={cn("grid grid-cols-1 gap-4", role === "owner" ? "md:grid-cols-2" : "md:grid-cols-1")}>
                 {role === "owner" && (
                     <BranchSelector
-                        branches={branches as any}
+                        branches={branches as unknown as Parameters<typeof BranchSelector>[0]["branches"]}
                         selectedBranchId={selectedBranchId}
                         onBranchChange={setSelectedBranchId}
                     />
