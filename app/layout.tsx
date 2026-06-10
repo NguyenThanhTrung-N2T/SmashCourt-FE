@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import AuthSessionSync from "@/src/features/auth/components/AuthSessionSync";
 import { ThemeProvider } from "@/src/contexts/ThemeContext";
+import { SignalRProvider } from "@/src/contexts/SignalRContext";
 import { themeInitScript } from "@/src/scripts/theme-init";
 import "./globals.css";
 
@@ -30,8 +31,10 @@ export default function RootLayout({
       </head>
       <body className={`${interSans.variable} font-sans antialiased`}>
         <ThemeProvider>
-          <AuthSessionSync />
-          {children}
+          <SignalRProvider>
+            <AuthSessionSync />
+            {children}
+          </SignalRProvider>
         </ThemeProvider>
       </body>
     </html>
