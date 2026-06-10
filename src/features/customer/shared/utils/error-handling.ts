@@ -25,12 +25,16 @@ const ERROR_CODES: Record<string, string> = {
   INVALID_STATUS: 'Trạng thái không hợp lệ',
 };
 
-export function handleApiError(error: any): string {
-  if (error.code && ERROR_CODES[error.code as keyof typeof ERROR_CODES]) {
+export function handleApiError(error: unknown): string {
+  if (error && typeof error === 'object' && 'code' in error && ERROR_CODES[error.code as keyof typeof ERROR_CODES]) {
     return ERROR_CODES[error.code as keyof typeof ERROR_CODES];
   }
 
-  return error.message || 'Đã xảy ra lỗi không xác định';
+  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+    return error.message;
+  }
+
+  return 'Đã xảy ra lỗi không xác định';
 }
 
 export function handleValidationErrors(errors?: Record<string, string[]>): void {
@@ -56,7 +60,7 @@ export async function withRetry<T>(
 
       // Don't retry on validation errors or client errors
       if (error && typeof error === 'object' && 'code' in error) {
-        const code = (error as any).code;
+        const code = (error as { code: string }).code;
         if (code === 'VALIDATION_ERROR' || code === 'INSUFFICIENT_PERMISSIONS') {
           throw error;
         }

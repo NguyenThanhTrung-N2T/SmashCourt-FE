@@ -9,7 +9,6 @@
 
 import { useEffect, useState } from "react";
 import {
-    CourtBasketball,
     Clock,
     CalendarDots,
 } from "@phosphor-icons/react";
@@ -61,9 +60,6 @@ export function CourtDetailModal({ isOpen, courtId, onClose, date }: CourtDetail
 
     useEffect(() => {
         if (!isOpen || !courtId) {
-            if (detail !== null) {
-                setDetail(null);
-            }
             return;
         }
         let cancelled = false;
@@ -73,6 +69,7 @@ export function CourtDetailModal({ isOpen, courtId, onClose, date }: CourtDetail
             .catch(() => { })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, courtId, date]);
 
     const statusConfig = detail

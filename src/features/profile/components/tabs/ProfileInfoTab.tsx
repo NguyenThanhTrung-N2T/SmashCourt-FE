@@ -27,11 +27,18 @@ export function ProfileInfoTab({ profile, onUpdate, showToast }: ProfileInfoTabP
   });
 
   useEffect(() => {
-    setFormData({
-      fullName: profile.fullName,
-      phone: profile.phone || "",
-    });
-  }, [profile]);
+    const nextName = profile.fullName;
+    const nextPhone = profile.phone || "";
+    if (formData.fullName !== nextName || formData.phone !== nextPhone) {
+      const timer = setTimeout(() => {
+        setFormData({
+          fullName: nextName,
+          phone: nextPhone,
+        });
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [profile, formData.fullName, formData.phone]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -154,8 +154,11 @@ export default function VerifyEmailPage() {
         cancelAnimationFrame(frameId);
       };
     } catch {
-      setEmailState(null);
-      const frameId = requestAnimationFrame(() => setEntered(true));
+      // Defer state update to avoid cascading renders
+      const frameId = requestAnimationFrame(() => {
+        setEmailState(null);
+        setEntered(true);
+      });
       return () => cancelAnimationFrame(frameId);
     }
   }, [showError]);

@@ -48,8 +48,8 @@ export function StaffCourtTypePage() {
             await addCourtType(courtTypeId);
             showToast("success", "Đã thêm loại sân vào chi nhánh!");
             setShowAddPanel(false);
-        } catch (err: any) {
-            showToast("error", err?.message || "Thêm loại sân thất bại");
+        } catch (err: unknown) {
+            showToast("error", (err as Error)?.message || "Thêm loại sân thất bại");
         }
     };
 
@@ -59,8 +59,8 @@ export function StaffCourtTypePage() {
             await removeCourtType(courtTypeToRemove.id);
             showToast("success", `Đã gỡ loại sân "${courtTypeToRemove.name}"!`);
             setCourtTypeToRemove(null);
-        } catch (err: any) {
-            showToast("error", err?.message || "Gỡ loại sân thất bại");
+        } catch (err: unknown) {
+            showToast("error", (err as Error)?.message || "Gỡ loại sân thất bại");
         }
     };
 

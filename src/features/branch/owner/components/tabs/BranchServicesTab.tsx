@@ -71,7 +71,7 @@ export function BranchServicesTab({ branchId, onToast }: BranchServicesTabProps)
             await addServiceToBranch(dto, branchId);
             toast('success', 'Thêm dịch vụ thành công');
             await loadData(true);
-        } catch (err: any) {
+        } catch (err: unknown) {
             toast('error', handleApiError(err));
         } finally {
             setIsActionLoading(false);
@@ -93,7 +93,7 @@ export function BranchServicesTab({ branchId, onToast }: BranchServicesTabProps)
             toast('success', 'Cập nhật giá thành công');
             setEditingServiceId(null);
             await loadData(true);
-        } catch (err: any) {
+        } catch (err: unknown) {
             toast('error', handleApiError(err));
         } finally {
             setIsActionLoading(false);
@@ -108,7 +108,7 @@ export function BranchServicesTab({ branchId, onToast }: BranchServicesTabProps)
             toast('success', 'Gỡ dịch vụ thành công');
             setServiceToRemove(null);
             await loadData(true);
-        } catch (err: any) {
+        } catch (err: unknown) {
             toast('error', handleApiError(err));
         } finally {
             setIsActionLoading(false);

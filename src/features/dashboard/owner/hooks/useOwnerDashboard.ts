@@ -23,7 +23,7 @@ interface UseOwnerDashboardResult {
 export function useOwnerDashboard(filter: ReportFilterDto): UseOwnerDashboardResult {
     const [data, setData] = useState<OwnerDashboardDto | null>(null);
     const [utilization, setUtilization] = useState<CourtUtilizationReportDto | null>(null);
-    const [bookingTrend, setBookingTrend] = useState<any[] | null>(null);
+    const [bookingTrend, setBookingTrend] = useState<Array<{ period: string; count: number }> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -40,9 +40,9 @@ export function useOwnerDashboard(filter: ReportFilterDto): UseOwnerDashboardRes
             setData(dashboardRes);
             setUtilization(utilizationRes);
             setBookingTrend(dashboardRes.bookingTrend);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error fetching owner dashboard:", err);
-            setError(err.message || "Đã xảy ra lỗi khi tải dữ liệu dashboard");
+            setError((err as Error).message || "Đã xảy ra lỗi khi tải dữ liệu dashboard");
         } finally {
             setIsLoading(false);
         }

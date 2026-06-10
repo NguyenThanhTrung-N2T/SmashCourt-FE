@@ -1,5 +1,5 @@
-import { Clock, Lightning, MapPin, SquaresFour, CalendarCheck } from '@phosphor-icons/react';
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
+import { Clock, Lightning, MapPin, CalendarCheck } from '@phosphor-icons/react';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 import { ReportFilterDto } from '@/src/features/report/shared/report.types';
 import { useCourtUtilizationReport } from '@/src/features/report/shared/hooks/useReportHooks';
 import { ReportStatsCard } from '@/src/features/report/shared/components/ReportStatsCard';
@@ -62,7 +62,7 @@ export function CourtUtilizationTab({ filter }: CourtUtilizationTabProps) {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                         <XAxis dataKey="hour" tickFormatter={(h) => `${h}h`} />
                         <YAxis tickFormatter={(val) => `${val.toFixed(0)}%`} />
-                        <Tooltip formatter={(value: any) => [`${Number(value).toFixed(1)}%`, 'Tỷ lệ lấp đầy']} />
+                        <Tooltip formatter={(value: unknown) => [`${Number(value).toFixed(1)}%`, 'Tỷ lệ lấp đầy']} />
                         <Area
                             type="monotone"
                             dataKey="occupancyRate"
@@ -82,7 +82,7 @@ export function CourtUtilizationTab({ filter }: CourtUtilizationTabProps) {
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
                         <XAxis type="number" tickFormatter={(val) => `${(val * 100).toFixed(0)}%`} />
                         <YAxis dataKey="courtName" type="category" width={100} tick={{ fontSize: 12 }} />
-                        <Tooltip formatter={(value: any) => [`${(Number(value) * 100).toFixed(1)}%`, 'Tỷ lệ lấp đầy']} />
+                        <Tooltip formatter={(value: unknown) => [`${(Number(value) * 100).toFixed(1)}%`, 'Tỷ lệ lấp đầy']} />
                         <Bar dataKey="occupancyRate" name="Tỷ lệ lấp đầy" fill="var(--primary)" radius={[0, 4, 4, 0]} />
                     </BarChart>
                 </ReportChartContainer>

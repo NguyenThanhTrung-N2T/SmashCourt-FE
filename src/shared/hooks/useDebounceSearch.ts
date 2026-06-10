@@ -16,14 +16,16 @@ export function useDebounce<T>(value: T, delay: number) {
       return () => clearTimeout(timer);
     }
 
-    setIsPending(true);
-    const timer = setTimeout(() => {
+    // Defer state update to avoid cascading renders
+    const pendingTimer = setTimeout(() => setIsPending(true), 0);
+    const debounceTimer = setTimeout(() => {
       setDebouncedValue(value);
       setIsPending(false);
     }, delay);
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(pendingTimer);
+      clearTimeout(debounceTimer);
     };
   }, [value, delay, debouncedValue]);
 

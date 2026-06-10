@@ -1,4 +1,4 @@
-import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
+import { useState, useEffect, useCallback, useImperativeHandle, forwardRef } from "react";
 import { Image as ImageIcon, X, Plus, Trash, CheckCircle } from "@phosphor-icons/react";
 import { Input } from "@/src/shared/components/ui/Input";
 import { Select } from "@/src/shared/components/ui/Select";
@@ -110,33 +110,35 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
 
   // Validate discount value when switching discount types
   useEffect(() => {
-    if (discountValue) {
-      const numValue = parseFloat(discountValue);
-      if (discountType === DiscountType.PERCENT) {
-        // Check if value exceeds 100% when switching to PERCENT
-        if (numValue > 100) {
-          setDiscountValue("100");
-          setErrors({ ...errors, discountValue: "Tỷ lệ giảm giá không được vượt quá 100%" });
-        } else if (numValue < 0) {
-          setDiscountValue("0");
-          setErrors({ ...errors, discountValue: "Tỷ lệ giảm giá phải lớn hơn 0" });
-        } else {
-          // Clear error if value is valid
-          setErrors({ ...errors, discountValue: undefined });
-        }
+    if (!discountValue) return;
+
+    const numValue = parseFloat(discountValue);
+    
+    if (discountType === DiscountType.PERCENT) {
+      // Check if value exceeds 100% when switching to PERCENT
+      if (numValue > 100) {
+        setDiscountValue("100");
+        setErrors({ ...errors, discountValue: "Tỷ lệ giảm giá không được vượt quá 100%" });
+      } else if (numValue < 0) {
+        setDiscountValue("0");
+        setErrors({ ...errors, discountValue: "Tỷ lệ giảm giá phải lớn hơn 0" });
       } else {
-        // For FIXED type, just ensure it's positive
-        if (numValue < 0) {
-          setDiscountValue("0");
-          setErrors({ ...errors, discountValue: "Số tiền giảm phải lớn hơn 0" });
-        } else {
-          setErrors({ ...errors, discountValue: undefined });
-        }
+        // Clear error if value is valid
+        setErrors({ ...errors, discountValue: undefined });
+      }
+    } else {
+      // For FIXED type, just ensure it's positive
+      if (numValue < 0) {
+        setDiscountValue("0");
+        setErrors({ ...errors, discountValue: "Số tiền giảm phải lớn hơn 0" });
+      } else {
+        setErrors({ ...errors, discountValue: undefined });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [discountType]);
 
-  const loadBranches = async () => {
+  const loadBranches = useCallback(async () => {
     try {
       const data = await fetchBranches(1, 50);
       setBranches(data.items);
@@ -147,9 +149,9 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
         showToast("error", "Đã xảy ra lỗi khi tải danh sách chi nhánh");
       }
     }
-  };
+  }, [showToast]);
 
-  const loadCourts = async (branchId: string) => {
+  const loadCourts = useCallback(async (branchId: string) => {
     try {
       const data = await fetchCourts(branchId);
       setCourts(data);
@@ -160,19 +162,28 @@ export const PromotionForm = forwardRef<PromotionFormHandle, PromotionFormProps>
         showToast("error", "Đã xảy ra lỗi khi tải danh sách sân");
       }
     }
-  };
+  }, [showToast]);
 
   // Load branches for branch selector
   useEffect(() => {
-    loadBranches();
-  }, []);
+    let mounted = true;
+    const fetchData = async () => {
+      if (mounted) await loadBranches();
+    };
+    void fetchData();
+    return () => { mounted = false; };
+  }, [loadBranches]);
 
   // Load courts when branch is selected
   useEffect(() => {
-    if (selectedBranchId) {
-      loadCourts(selectedBranchId);
-    }
-  }, [selectedBranchId]);
+    if (!selectedBranchId) return;
+    let mounted = true;
+    const fetchData = async () => {
+      if (mounted) await loadCourts(selectedBranchId);
+    };
+    void fetchData();
+    return () => { mounted = false; };
+  }, [selectedBranchId, loadCourts]);
 
   function handleAddCondition() {
     if (!selectedConditionType || !conditionValue.trim()) {

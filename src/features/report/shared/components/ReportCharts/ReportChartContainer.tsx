@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { ResponsiveContainer } from 'recharts';
 
 interface ReportChartContainerProps {
@@ -22,7 +22,7 @@ export function ReportChartContainer({
             </div>
             <div style={{ width: '100%', height }}>
                 <ResponsiveContainer>
-                    {children as any}
+                    {children as React.ReactElement}
                 </ResponsiveContainer>
             </div>
         </div>

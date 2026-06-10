@@ -72,7 +72,7 @@ export function BranchPricePage({ role = "owner" }: { role?: "owner" | "manager"
     }, [courtTypes, selectedCourtTypeId]);
 
     const handleCreateVersion = async (effectiveFrom: string, dto: unknown) => {
-        const result = await upsertVersion(effectiveFrom, dto as any);
+        const result = await upsertVersion(effectiveFrom, dto as Parameters<typeof upsertVersion>[1]);
         if (result) {
             showToast("success", "Đã tạo phiên bản giá ghi đè cho chi nhánh.");
             return true;

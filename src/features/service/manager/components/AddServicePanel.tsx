@@ -136,7 +136,7 @@ export function AddServicePanel({ availableServices, actionLoading, onAdd, onClo
                                 ) : (
                                     <Plus className="h-4 w-4" />
                                 )}
-                                Thêm "{selected.name}" vào chi nhánh
+                                Thêm &ldquo;{selected.name}&rdquo; vào chi nhánh
                             </Button>
                         </div>
                     )}

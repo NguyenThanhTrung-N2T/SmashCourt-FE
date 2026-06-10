@@ -1,20 +1,15 @@
-import { ReactNode, useState, useEffect, ElementType } from 'react';
-import { clsx } from 'clsx';
+import { ReactNode, ElementType } from 'react';
 import {
     Calendar,
-    Funnel,
-    MagnifyingGlass,
     Coffee,
     ChartLineUp,
     Users,
-    Tag,
     Ticket,
     PingPong,
 } from '@phosphor-icons/react';
 import { Select } from '@/src/shared/components/ui/Select';
 import { PageHeader } from '@/src/shared/components/layout';
 import { ReportFilterDto } from '../report.types';
-import { format, subDays } from 'date-fns';
 
 export type ReportTab = 'revenue' | 'bookings' | 'courts' | 'customers' | 'services' | 'promotions';
 
@@ -56,7 +51,7 @@ export function ReportLayout({
     };
 
     const handleGroupByChange = (value: string) => {
-        onFilterChange({ ...filter, groupBy: value as any });
+        onFilterChange({ ...filter, groupBy: value as ReportFilterDto['groupBy'] });
     };
 
     return (

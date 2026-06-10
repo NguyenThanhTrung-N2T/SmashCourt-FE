@@ -31,9 +31,10 @@ export function useManagerDashboard(filter: ReportFilterDto = {}): UseManagerDas
             setError(null);
             const dashboardData = await fetchOperationalManagerDashboard(filter);
             setData(dashboardData);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error fetching manager dashboard:", err);
-            setError(err.message || "Đã xảy ra lỗi khi tải dữ liệu dashboard");
+            const errMsg = err instanceof Error ? err.message : "Đã xảy ra lỗi khi tải dữ liệu dashboard";
+            setError(errMsg);
         } finally {
             setIsLoading(false);
         }

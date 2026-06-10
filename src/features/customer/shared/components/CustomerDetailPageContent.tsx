@@ -7,10 +7,10 @@ import { CustomerDetailLoading, CustomerErrorState } from "@/src/features/custom
 import { CustomerDetailView } from "@/src/features/customer/shared/components";
 
 interface Props {
-    customer: any;
+    customer: { id: string; fullName: string; email: string; [key: string]: unknown } | null;
     loading: boolean;
     error: string | null;
-    toast: any;
+    toast: { show: boolean; type: 'success' | 'error' | 'warning' | 'info'; message: string };
 
     isOwner: boolean;
 

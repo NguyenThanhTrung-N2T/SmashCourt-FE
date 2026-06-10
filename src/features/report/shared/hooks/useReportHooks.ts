@@ -32,11 +32,12 @@ function useGenericReport<T>(
         try {
             const result = await fetchFn(filter);
             setData(result);
-        } catch (err: any) {
-            setError(err.message || 'Failed to fetch report data');
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch report data');
         } finally {
             setLoading(false);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fetchFn, filter.fromDate, filter.toDate, filter.branchId, filter.groupBy]);
 
     useEffect(() => {
@@ -73,11 +74,12 @@ export function useTopSpendersReport(filter: ReportFilterDto & { page?: number; 
         try {
             const result = await reportApi.fetchTopSpendersReport(filter);
             setData(result);
-        } catch (err: any) {
-            setError(err.message || 'Failed to fetch report data');
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch report data');
         } finally {
             setLoading(false);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filter.fromDate, filter.toDate, filter.branchId, filter.groupBy, filter.page, filter.pageSize]);
 
     useEffect(() => {

@@ -139,10 +139,14 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   useEffect(() => {
     const stored = getStoredTheme();
     if (stored && stored !== theme) {
-      setThemeState(stored);
-      const resolved = resolveTheme(stored);
-      setResolvedTheme(resolved);
-      applyTheme(isPublicPage ? "light" : resolved);
+      // Use setTimeout to defer state updates and avoid cascading renders
+      const timer = setTimeout(() => {
+        setThemeState(stored);
+        const resolved = resolveTheme(stored);
+        setResolvedTheme(resolved);
+        applyTheme(isPublicPage ? "light" : resolved);
+      }, 0);
+      return () => clearTimeout(timer);
     } else {
       // Apply current theme on mount
       applyTheme(actualResolvedTheme);

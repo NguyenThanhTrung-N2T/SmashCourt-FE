@@ -1,7 +1,7 @@
 // Caching utilities for branch management
 
 export class BranchManagementCache {
-  private cache = new Map<string, { data: any; timestamp: number }>();
+  private cache = new Map<string, { data: unknown; timestamp: number }>();
   private cacheTimeout = 5 * 60 * 1000; // 5 minutes
 
   private isCacheValid(key: string): boolean {

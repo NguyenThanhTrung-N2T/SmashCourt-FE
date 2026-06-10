@@ -83,9 +83,10 @@ export default function VerifyOtpPage() {
     maxResends: MAX_RESEND_ATTEMPTS,
     initialFailedAttempts: initialState.failedAttempts,
     initialResendCount: initialState.resendCount,
-    onSuccess: (data: any) => {
-      if (data?.resetToken) {
-        setResetToken(data.resetToken);
+    onSuccess: (data?: unknown) => {
+      const payload = data as { resetToken?: string } | undefined;
+      if (payload?.resetToken) {
+        setResetToken(payload.resetToken);
         clearForgotPasswordVerifySession();
         clearAllErrors();
         setVerified(true);
@@ -156,8 +157,11 @@ export default function VerifyOtpPage() {
         cancelAnimationFrame(frameId);
       };
     } catch {
-      setEmailState(null);
-      const frameId = requestAnimationFrame(() => setEntered(true));
+      // Defer state update to avoid cascading renders
+      const frameId = requestAnimationFrame(() => {
+        setEmailState(null);
+        setEntered(true);
+      });
       return () => cancelAnimationFrame(frameId);
     }
   }, [showError]);

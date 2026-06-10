@@ -12,8 +12,8 @@ export function useReportBranches() {
         try {
             const data = await fetchBasicBranches(1, 50); // Get up to 50 branches
             setBranches(data.items);
-        } catch (err: any) {
-            setError(err.message || 'Failed to fetch branches');
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch branches');
         } finally {
             setLoading(false);
         }

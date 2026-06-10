@@ -49,7 +49,7 @@ export function BranchCourtTypesTab({ branchId, onToast }: BranchCourtTypesTabPr
             await addCourtTypeToBranch(dto, branchId);
             toast('success', 'Thêm loại sân thành công');
             await loadData();
-        } catch (err: any) {
+        } catch (err: unknown) {
             const message = handleApiError(err);
             toast('error', message);
         }
@@ -62,7 +62,7 @@ export function BranchCourtTypesTab({ branchId, onToast }: BranchCourtTypesTabPr
             toast('success', 'Gỡ loại sân thành công');
             setCourtTypeToRemove(null);
             await loadData();
-        } catch (err: any) {
+        } catch (err: unknown) {
             const message = handleApiError(err);
             toast('error', message);
         }

@@ -5,7 +5,6 @@ import { useServicePerformanceReport } from '@/src/features/report/shared/hooks/
 import { ReportStatsCard } from '@/src/features/report/shared/components/ReportStatsCard';
 import { ReportChartContainer } from '@/src/features/report/shared/components/ReportCharts/ReportChartContainer';
 import { ReportLoading, ReportError, ReportEmpty } from '@/src/features/report/shared/components/states';
-import { formatDisplayPeriod } from '@/src/features/report/shared/utils/reportUtils';
 
 interface ServiceTabProps {
     filter: ReportFilterDto;
@@ -62,7 +61,7 @@ export function ServiceTab({ filter }: ServiceTabProps) {
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
                         <XAxis type="number" tickFormatter={(val) => `${val / 1000}k`} />
                         <YAxis dataKey="serviceName" type="category" width={120} tick={{ fontSize: 12 }} />
-                        <Tooltip formatter={(value: any) => [formatCurrency(Number(value)), 'Doanh thu']} />
+                        <Tooltip formatter={(value: unknown) => [formatCurrency(Number(value)), 'Doanh thu']} />
                         <Bar dataKey="revenue" name="Doanh thu" fill="var(--primary)" radius={[0, 4, 4, 0]} />
                     </BarChart>
                 </ReportChartContainer>
@@ -86,7 +85,7 @@ export function ServiceTab({ filter }: ServiceTabProps) {
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
-                        <Tooltip formatter={(value: any) => [formatCurrency(Number(value)), 'Doanh thu']} />
+                        <Tooltip formatter={(value: unknown) => [formatCurrency(Number(value)), 'Doanh thu']} />
                         <Legend verticalAlign="bottom" />
                     </PieChart>
                 </ReportChartContainer>

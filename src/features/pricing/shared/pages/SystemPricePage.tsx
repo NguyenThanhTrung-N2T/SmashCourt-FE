@@ -40,17 +40,14 @@ export function SystemPricePage({ readOnly = false }: { readOnly?: boolean }) {
     const {
         currentPrices,
         isLoadingCurrentPrices,
-        currentPricesError,
         versions,
         isLoadingVersions,
         selectedVersionDetail,
-        isLoadingDetail,
         selectVersion,
         selectedEffectiveFrom,
         upsertVersion,
         isUpserting,
         deleteVersion,
-        isDeleting,
     } = useSystemPricing({
         courtTypeId: selectedCourtTypeId || undefined,
         date: date,
@@ -59,12 +56,15 @@ export function SystemPricePage({ readOnly = false }: { readOnly?: boolean }) {
     // Auto-select first court type
     useEffect(() => {
         if (courtTypes.length > 0 && !selectedCourtTypeId) {
-            setSelectedCourtTypeId(courtTypes[0].id);
+            const timer = setTimeout(() => {
+                setSelectedCourtTypeId(courtTypes[0].id);
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [courtTypes, selectedCourtTypeId]);
 
-    const handleCreateVersion = async (effectiveFrom: string, dto: any) => {
-        const result = await upsertVersion(effectiveFrom, dto);
+    const handleCreateVersion = async (effectiveFrom: string, dto: unknown) => {
+        const result = await upsertVersion(effectiveFrom, dto as Parameters<typeof upsertVersion>[1]);
         if (result) {
             showToast("success", "Đã tạo phiên bản giá hệ thống mới.");
             return true;
@@ -204,11 +204,7 @@ export function SystemPricePage({ readOnly = false }: { readOnly?: boolean }) {
                                     </Badge>
                                 </div>
                                 <div className="p-1 min-h-[400px]">
-                                    {isLoadingDetail ? (
-                                        <PriceTableSkeleton />
-                                    ) : (
-                                        <PriceTable slots={selectedVersionDetail.slots} />
-                                    )}
+                                    <PriceTable slots={selectedVersionDetail.slots} />
                                 </div>
                             </div>
                         ) : (

@@ -103,7 +103,7 @@ export default function GuestLanding() {
           </div>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-350">
-            <a
+            <Link
               href="/"
               onClick={(e) => handleScrollTo(e, "home")}
               className={`pb-1 transition-all duration-200 cursor-pointer ${activeSection === "home"
@@ -112,7 +112,7 @@ export default function GuestLanding() {
                 }`}
             >
               Trang chủ
-            </a>
+            </Link>
             <a
               href="#about"
               onClick={(e) => handleScrollTo(e, "about")}
