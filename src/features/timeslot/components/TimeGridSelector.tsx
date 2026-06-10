@@ -171,7 +171,9 @@ function TimeSlotButton({ slot, isSelected, onClick }: TimeSlotButtonProps) {
   useEffect(() => {
     if (!isLocked || !slot.lockRemainingSeconds) return;
 
-    setLockSeconds(slot.lockRemainingSeconds);
+    const timer = setTimeout(() => {
+      setLockSeconds(slot.lockRemainingSeconds || 0);
+    }, 0);
 
     const interval = setInterval(() => {
       setLockSeconds((prev) => {
@@ -183,7 +185,10 @@ function TimeSlotButton({ slot, isSelected, onClick }: TimeSlotButtonProps) {
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, [isLocked, slot.lockRemainingSeconds]);
 
   const getButtonClass = () => {

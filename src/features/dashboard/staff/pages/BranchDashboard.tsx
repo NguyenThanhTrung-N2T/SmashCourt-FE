@@ -73,30 +73,34 @@ export function BranchDashboard() {
         ];
     }, [data]);
 
+    const liveCourts = data?.liveCourts;
     // ── Live Courts (sorted by priority, show max 8) ──
     const displayCourts = useMemo(() => {
-        if (!data?.liveCourts) return [];
-        const sorted = sortCourtsByPriority(data.liveCourts);
+        if (!liveCourts) return [];
+        const sorted = sortCourtsByPriority(liveCourts);
         return sorted.slice(0, 8);
-    }, [data?.liveCourts]);
+    }, [liveCourts]);
 
+    const upcomingBookingsList = data?.upcomingBookings;
     // ── Upcoming Bookings (max 10) ──
     const upcomingBookings = useMemo(() => {
-        if (!data?.upcomingBookings) return [];
-        return data.upcomingBookings.slice(0, 10);
-    }, [data?.upcomingBookings]);
+        if (!upcomingBookingsList) return [];
+        return upcomingBookingsList.slice(0, 10);
+    }, [upcomingBookingsList]);
 
+    const actionQueueList = data?.actionQueue;
     // ── Action Queue ──
     const actionQueue = useMemo(() => {
-        if (!data?.actionQueue) return [];
-        return data.actionQueue;
-    }, [data?.actionQueue]);
+        if (!actionQueueList) return [];
+        return actionQueueList;
+    }, [actionQueueList]);
 
+    const occupancyForecastList = data?.occupancyForecast;
     // ── Occupancy Forecast (next 8 hours) ──
     const occupancyForecast = useMemo(() => {
-        if (!data?.occupancyForecast) return [];
-        return data.occupancyForecast.slice(0, 8);
-    }, [data?.occupancyForecast]);
+        if (!occupancyForecastList) return [];
+        return occupancyForecastList.slice(0, 8);
+    }, [occupancyForecastList]);
 
     // ── Error State ──
     if (error) {

@@ -140,19 +140,27 @@ export default function VerifyOtpPage() {
   useEffect(() => {
     try {
       const storedEmail = getEmail()?.trim().toLowerCase() ?? null;
-      setEmailState(storedEmail);
-
       const flashMessage = consumeForgotPasswordFlashMessage();
-      if (flashMessage) {
-        showError("success", new Error(flashMessage), "verify-otp");
-      }
+
+      const timer = setTimeout(() => {
+        setEmailState(storedEmail);
+        if (flashMessage) {
+          showError("success", new Error(flashMessage), "verify-otp");
+        }
+      }, 0);
+
+      const frameId = requestAnimationFrame(() => setEntered(true));
+      
+      return () => {
+        clearTimeout(timer);
+        cancelAnimationFrame(frameId);
+      };
     } catch {
       setEmailState(null);
+      const frameId = requestAnimationFrame(() => setEntered(true));
+      return () => cancelAnimationFrame(frameId);
     }
-
-    const frameId = requestAnimationFrame(() => setEntered(true));
-    return () => cancelAnimationFrame(frameId);
-  }, []);
+  }, [showError]);
 
   async function onSubmit(e: AuthFormEvent) {
     e.preventDefault();

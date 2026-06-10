@@ -82,9 +82,10 @@ export function SignalRProvider({ children }: SignalRProviderProps) {
         await conn.start();
         setConnectionState("Connected");
         setError(null);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setConnectionState("Disconnected");
-        setError(`Lỗi khởi động kết nối SignalR: ${err?.message || err}`);
+        const errMsg = err instanceof Error ? err.message : String(err);
+        setError(`Lỗi khởi động kết nối SignalR: ${errMsg}`);
       }
     };
 
@@ -101,7 +102,6 @@ export function SignalRProvider({ children }: SignalRProviderProps) {
     };
 
     if (token) {
-      // Nếu đã có kết nối cũ thì ngắt kết nối trước khi khởi động kết nối mới (token refresh)
       stopConnection().then(() => startConnection(token));
     } else {
       stopConnection();
@@ -112,7 +112,6 @@ export function SignalRProvider({ children }: SignalRProviderProps) {
         activeConnection.stop().catch((err) => console.warn("Lỗi stop connection cũ khi unmount:", err));
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]); // Lắng nghe pathname để check lại token cập nhật khi route thay đổi
 
   const value: SignalRContextValue = {

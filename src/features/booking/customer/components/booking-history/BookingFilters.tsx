@@ -68,9 +68,12 @@ export function BookingFilters({ onFilterChange, activeFilters, isLoading }: Boo
   useEffect(() => {
     const propValue = activeFilters.customerKeyword || "";
     if (propValue !== searchValue) {
-      setSearchValue(propValue);
+      const timer = setTimeout(() => {
+        setSearchValue(propValue);
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [activeFilters.customerKeyword]);
+  }, [activeFilters.customerKeyword, searchValue]);
 
   const isActuallyLoading = isLoading || isDebounceSearching;
 

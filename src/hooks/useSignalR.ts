@@ -23,7 +23,7 @@ import { useSignalRContext } from "@/src/contexts/SignalRContext";
  * }
  * ```
  */
-export function useSignalR<T = any>(
+export function useSignalR<T = unknown>(
   eventName: string,
   handler: (data: T) => void
 ): void {

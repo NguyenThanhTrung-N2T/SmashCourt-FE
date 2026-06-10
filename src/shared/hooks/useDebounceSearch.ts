@@ -10,8 +10,10 @@ export function useDebounce<T>(value: T, delay: number) {
 
   useEffect(() => {
     if (value === debouncedValue) {
-      setIsPending(false);
-      return;
+      const timer = setTimeout(() => {
+        setIsPending(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     setIsPending(true);
@@ -43,8 +45,10 @@ export function useDebounceSearch<T>(
     const trimmed = debouncedValue?.trim();
 
     if (!trimmed) {
-      setResults([]);
-      return;
+      const timer = setTimeout(() => {
+        setResults([]);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     const executeSearch = async () => {

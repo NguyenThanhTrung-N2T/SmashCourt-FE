@@ -60,9 +60,11 @@ export function useBookingForm() {
   // Initialize user data
   useEffect(() => {
     const user = getAuthUser();
-    setCurrentUser(user);
+    if (!user) return;
 
-    if (user) {
+    const timer = setTimeout(() => {
+      setCurrentUser(user);
+
       const hasName = !!(user.fullName && user.fullName.trim());
       const hasPhone = !!(user.phone && user.phone.trim());
       const hasEmail = !!(user.email && user.email.trim());
@@ -76,7 +78,9 @@ export function useBookingForm() {
         phone: hasPhone,
         email: hasEmail,
       });
-    }
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Handlers

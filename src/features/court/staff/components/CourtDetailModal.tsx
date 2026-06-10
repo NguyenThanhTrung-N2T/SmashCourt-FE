@@ -61,7 +61,9 @@ export function CourtDetailModal({ isOpen, courtId, onClose, date }: CourtDetail
 
     useEffect(() => {
         if (!isOpen || !courtId) {
-            setDetail(null);
+            if (detail !== null) {
+                setDetail(null);
+            }
             return;
         }
         let cancelled = false;

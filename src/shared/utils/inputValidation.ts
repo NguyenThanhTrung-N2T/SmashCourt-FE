@@ -191,7 +191,7 @@ export const createNumericChangeHandler = (
   const { min, max, allowDecimal = true, allowNegative = false } = options || {};
 
   return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    let newValue = e.target.value;
+    const newValue = e.target.value;
 
     // Allow empty string
     if (newValue === '') {

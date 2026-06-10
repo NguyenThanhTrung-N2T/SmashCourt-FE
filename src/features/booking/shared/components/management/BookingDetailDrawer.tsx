@@ -52,8 +52,13 @@ export function BookingDetailDrawer({
   const [mounted, setMounted] = useState(false);
   const [addServiceModalOpen, setAddServiceModalOpen] = useState(false);
   useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      setMounted(false);
+    };
   }, []);
 
   if (!isOpen || !booking || !mounted) return null;
