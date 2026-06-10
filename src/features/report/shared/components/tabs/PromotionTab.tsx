@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Gift, Percent, Ticket, TrendUp } from '@phosphor-icons/react';
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts';
 import { ReportFilterDto } from '@/src/features/report/shared/report.types';
@@ -60,7 +61,7 @@ export function PromotionTab({ filter }: PromotionTabProps) {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                         <XAxis dataKey="period" axisLine={false} tickLine={false} tickFormatter={formatDisplayPeriod} />
                         <YAxis axisLine={false} tickLine={false} />
-                        <Tooltip formatter={(value: unknown) => [value, 'Lượt dùng']} />
+                        <Tooltip formatter={(value: any) => [value, 'Lượt dùng']} />
                         <Line type="monotone" dataKey="usageCount" name="Lượt dùng" stroke="var(--primary)" strokeWidth={3} />
                     </LineChart>
                 </ReportChartContainer>
@@ -73,7 +74,7 @@ export function PromotionTab({ filter }: PromotionTabProps) {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                         <XAxis dataKey="promotionCode" axisLine={false} tickLine={false} />
                         <YAxis axisLine={false} tickLine={false} />
-                        <Tooltip formatter={(value: unknown) => [value, 'Lượt dùng']} />
+                        <Tooltip formatter={(value: any) => [value, 'Lượt dùng']} />
                         <Bar dataKey="usageCount" name="Lượt dùng" fill="var(--primary)" radius={[4, 4, 0, 0]} />
                     </BarChart>
                 </ReportChartContainer>

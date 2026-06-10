@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Coffee, Package, ShoppingCartSimple, Star } from '@phosphor-icons/react';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from 'recharts';
 import { ReportFilterDto } from '@/src/features/report/shared/report.types';
@@ -61,7 +62,7 @@ export function ServiceTab({ filter }: ServiceTabProps) {
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
                         <XAxis type="number" tickFormatter={(val) => `${val / 1000}k`} />
                         <YAxis dataKey="serviceName" type="category" width={120} tick={{ fontSize: 12 }} />
-                        <Tooltip formatter={(value: unknown) => [formatCurrency(Number(value)), 'Doanh thu']} />
+                        <Tooltip formatter={(value: any) => [formatCurrency(Number(value)), 'Doanh thu']} />
                         <Bar dataKey="revenue" name="Doanh thu" fill="var(--primary)" radius={[0, 4, 4, 0]} />
                     </BarChart>
                 </ReportChartContainer>
@@ -85,7 +86,7 @@ export function ServiceTab({ filter }: ServiceTabProps) {
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
-                        <Tooltip formatter={(value: unknown) => [formatCurrency(Number(value)), 'Doanh thu']} />
+                        <Tooltip formatter={(value: any) => [formatCurrency(Number(value)), 'Doanh thu']} />
                         <Legend verticalAlign="bottom" />
                     </PieChart>
                 </ReportChartContainer>

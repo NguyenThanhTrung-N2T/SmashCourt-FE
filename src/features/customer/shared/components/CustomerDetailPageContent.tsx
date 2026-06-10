@@ -5,12 +5,14 @@ import { ArrowLeft } from "@phosphor-icons/react";
 import { Button, Toast } from "@/src/shared/components/ui";
 import { CustomerDetailLoading, CustomerErrorState } from "@/src/features/customer/shared/states";
 import { CustomerDetailView } from "@/src/features/customer/shared/components";
+import type { CustomerDetailDto } from "@/src/features/customer/shared/types/customer.types";
+import type { ToastState } from "@/src/shared/hooks/useToast";
 
 interface Props {
-    customer: { id: string; fullName: string; email: string; [key: string]: unknown } | null;
+    customer: CustomerDetailDto | null;
     loading: boolean;
     error: string | null;
-    toast: { show: boolean; type: 'success' | 'error' | 'warning' | 'info'; message: string };
+    toast: ToastState;
 
     isOwner: boolean;
 

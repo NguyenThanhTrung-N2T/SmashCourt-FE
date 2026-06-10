@@ -42,7 +42,7 @@ import { StrategicInsightsPanel } from "@/src/features/ai/shared/components/Stra
 
 export function OwnerDashboard() {
     const [filter, setFilter] = useState<FilterOption>("Tháng này");
-    const [branches, setBranches] = useState<Array<{ branchId: string; branchName: string }>>([]);
+    const [branches, setBranches] = useState<Array<{ id: string; name: string; status?: 0 | 1 | 2 }>>([]);
     const [selectedBranchId, setSelectedBranchId] = useState<string>("");
 
     useEffect(() => {

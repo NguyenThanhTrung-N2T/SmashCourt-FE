@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Heart, UserPlus, Users, UsersFour, Trophy } from '@phosphor-icons/react';
 import { Cell, Pie, PieChart, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { ReportFilterDto } from '@/src/features/report/shared/report.types';
@@ -74,7 +75,7 @@ export function CustomerTab({ filter }: CustomerTabProps) {
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                             <XAxis dataKey="period" axisLine={false} tickLine={false} tickFormatter={formatDisplayPeriod} />
                             <YAxis axisLine={false} tickLine={false} />
-                            <Tooltip formatter={(value: unknown) => [value, 'Khách hàng mới']} />
+                            <Tooltip formatter={(value: any) => [value, 'Khách hàng mới']} />
                             <Line type="monotone" dataKey="newCustomers" name="Khách hàng mới" stroke="var(--primary)" strokeWidth={3} />
                         </LineChart>
                     </ReportChartContainer>
@@ -99,7 +100,7 @@ export function CustomerTab({ filter }: CustomerTabProps) {
                                 <Cell key={`cell-${index}`} fill={tierNameToColor[entry.tierName]} />
                             ))}
                         </Pie>
-                        <Tooltip formatter={(value: unknown) => [value, 'Số lượng']} />
+                        <Tooltip formatter={(value: any) => [value, 'Số lượng']} />
                         <Legend verticalAlign="bottom" />
                     </PieChart>
                 </ReportChartContainer>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { CurrencyCircleDollar, Receipt, Tag, TrendUp } from '@phosphor-icons/react';
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts';
@@ -76,7 +77,7 @@ export function RevenueTab({ filter }: RevenueTabProps) {
                         />
                         <Tooltip
                             contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                            formatter={(value: unknown) => [formatValue(Number(value)), 'Doanh thu']}
+                            formatter={(value: any) => [formatValue(Number(value)), 'Doanh thu']}
                         />
                         <Line
                             type="monotone"
@@ -117,8 +118,8 @@ export function RevenueTab({ filter }: RevenueTabProps) {
                         />
                         <Tooltip
                             contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                            formatter={(value: unknown, name: string) => [
-                                typeof value === 'number' && name === 'Doanh thu' ? formatValue(value) : String(value),
+                            formatter={(value: any, name: any) => [
+                                typeof value === 'number' && name === 'Doanh thu' ? formatValue(value) : value,
                                 name
                             ]}
                         />

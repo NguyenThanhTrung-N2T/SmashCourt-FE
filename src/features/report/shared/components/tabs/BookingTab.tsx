@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CalendarCheck, CalendarX, Clock, Users } from '@phosphor-icons/react';
 import { Cell, Pie, PieChart, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { ReportFilterDto } from '@/src/features/report/shared/report.types';
@@ -79,7 +80,7 @@ export function BookingTab({ filter }: BookingTabProps) {
                                 tickFormatter={formatDisplayPeriod}
                             />
                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted)' }} />
-                            <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} formatter={(value: unknown) => [value, 'Số lượng']} />
+                            <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} formatter={(value: any) => [value, 'Số lượng']} />
                             <Legend verticalAlign="top" align="right" />
                             <Bar dataKey="bookingCount" name="Tổng đơn" fill="#A7D7B8" radius={[4, 4, 0, 0]} />
                             <Bar dataKey="completedCount" name="Hoàn thành" fill="#1B5E38" radius={[4, 4, 0, 0]} />
@@ -105,7 +106,7 @@ export function BookingTab({ filter }: BookingTabProps) {
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
-                        <Tooltip formatter={(value: unknown) => [value, 'Lượt đặt']} />
+                        <Tooltip formatter={(value: any) => [value, 'Lượt đặt']} />
                         <Legend verticalAlign="bottom" layout="horizontal" />
                     </PieChart>
                 </ReportChartContainer>

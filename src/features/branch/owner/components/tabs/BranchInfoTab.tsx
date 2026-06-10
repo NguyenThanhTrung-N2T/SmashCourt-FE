@@ -69,7 +69,7 @@ export function BranchInfoTab({ branchId, onUpdate }: BranchInfoTabProps) {
         }
     }, [branch]);
 
-    const handleInputChange = (field: keyof UpdateBranchDto, value: string | number | null) => {
+    const handleInputChange = (field: keyof UpdateBranchDto, value: string | number | null | undefined) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         if (validationErrors[field]) {
             setValidationErrors(prev => {

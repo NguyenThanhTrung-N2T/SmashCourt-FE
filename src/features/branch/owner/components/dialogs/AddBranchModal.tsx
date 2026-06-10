@@ -38,7 +38,7 @@ export function AddBranchModal({ onClose, onSave }: AddBranchModalProps) {
         pageSize: 5,
     });
 
-    const handleInputChange = (field: keyof typeof formData, value: string | number | null) => {
+    const handleInputChange = (field: keyof typeof formData, value: string | number | null | undefined) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         if (validationErrors[field]) {
             setValidationErrors(prev => {

@@ -23,7 +23,7 @@ interface UseOwnerDashboardResult {
 export function useOwnerDashboard(filter: ReportFilterDto): UseOwnerDashboardResult {
     const [data, setData] = useState<OwnerDashboardDto | null>(null);
     const [utilization, setUtilization] = useState<CourtUtilizationReportDto | null>(null);
-    const [bookingTrend, setBookingTrend] = useState<Array<{ period: string; count: number }> | null>(null);
+    const [bookingTrend, setBookingTrend] = useState<BookingTrendDto[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
