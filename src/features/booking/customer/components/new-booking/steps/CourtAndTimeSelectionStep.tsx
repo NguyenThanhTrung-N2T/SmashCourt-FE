@@ -107,7 +107,7 @@ export function CourtAndTimeSelectionStep({
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted">Tạm tính</h3>
             <p className="mt-1 font-medium text-foreground">
-              {selectedSlots.length} khung giờ ·{" "}
+              {selectedSlots.length} slot ·{" "}
               {selectedCourtIds.length} sân đã chọn  {/* ← updated */}
             </p>
           </div>

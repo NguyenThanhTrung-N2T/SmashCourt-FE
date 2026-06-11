@@ -147,9 +147,9 @@ export function CourtManagementBase({ allowManagement, bookingPath }: CourtManag
                                 const [h, m] = time.split(':').map(Number);
                                 const endHours = h + 1;
                                 const endTime = `${endHours.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-
+                                console.log("Prefill data:", { courtId, bookingDate, startTime, endTime });
                                 setPrefill({
-                                    courtId,
+                                    courtIds: [courtId],
                                     bookingDate,
                                     startTime,
                                     endTime

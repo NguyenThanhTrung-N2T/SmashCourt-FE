@@ -8,7 +8,7 @@ export type CustomerMode = "guest" | "customer";
 
 export type WalkInBookingFormState = {
     bookingDate: string;
-    courtId: string;
+    courtIds: string[];
     startTime: string;
     endTime: string;
     selectedSlots: TimeGridSlotDto[];
@@ -23,7 +23,7 @@ export type WalkInBookingFormState = {
 
 export const createDefaultWalkInForm = (): WalkInBookingFormState => ({
     bookingDate: new Date().toISOString().split("T")[0],
-    courtId: "",
+    courtIds: [],
     startTime: "",
     endTime: "",
     selectedSlots: [],

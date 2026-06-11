@@ -67,8 +67,8 @@ export function NewBookingPage() {
   const { validatePhone, validateEmail, validateGuestInfo } = useBookingValidation();
 
   const { totalAmount, isCalculatingPrice } = usePriceCalculation({
-    selectedBranch,
-    selectedCourts,
+    selectedBranchId: selectedBranch?.id || null,
+    selectedCourtIds: selectedCourts.map(c => c.id),
     selectedDate,
     selectedSlots,
   });

@@ -6,7 +6,7 @@
  */
 
 export interface WalkInPrefill {
-    courtId?: string;
+    courtIds: string[];
     bookingDate?: string;
     startTime?: string;
     endTime?: string;

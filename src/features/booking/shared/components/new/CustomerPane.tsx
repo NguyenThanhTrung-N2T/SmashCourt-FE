@@ -7,6 +7,62 @@ import { searchCustomers } from "@/src/api/customer.api";
 import type { CustomerSearchDto } from "@/src/features/customer/shared/types/customer.types";
 import type { CustomerPaneProps } from "@/src/features/booking/shared/types/walkinBooking.types";
 
+const TIER_CONFIG: Record<
+    string,
+    { bg: string; text: string; border: string; pill: string }
+> = {
+    Bronze: {
+        bg: "bg-amber-500/10",
+        text: "text-amber-600",
+        border: "border-amber-500/20",
+        pill: "bg-amber-500/10",
+    },
+    Silver: {
+        bg: "bg-slate-400/10",
+        text: "text-slate-400",
+        border: "border-slate-400/20",
+        pill: "bg-slate-400/10",
+    },
+    Gold: {
+        bg: "bg-yellow-500/10",
+        text: "text-yellow-600",
+        border: "border-yellow-500/20",
+        pill: "bg-yellow-500/10",
+    },
+    Platinum: {
+        bg: "bg-cyan-500/10",
+        text: "text-cyan-500",
+        border: "border-cyan-500/20",
+        pill: "bg-cyan-500/10",
+    },
+    Diamond: {
+        bg: "bg-purple-500/10",
+        text: "text-purple-500",
+        border: "border-purple-500/20",
+        pill: "bg-purple-500/10",
+    },
+};
+
+function TierBadge({
+    tierName,
+    discountRate,
+}: {
+    tierName: string;
+    discountRate: number;
+}) {
+    const tier = TIER_CONFIG[tierName] || TIER_CONFIG.Bronze;
+
+    return (
+        <div
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${tier.border} ${tier.pill} ${tier.text}`}
+        >
+            <span>{tierName}</span>
+            <span className="opacity-80">•</span>
+            <span>-{discountRate}%</span>
+        </div>
+    );
+}
+
 export function CustomerPane({
     form,
     errors,
@@ -83,18 +139,24 @@ export function CustomerPane({
                                             onClick={() => handleSelect(c)}
                                             className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-2"
                                         >
-                                            {/* Avatar */}
                                             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
                                                 {getInitials(c.fullName || "?")}
                                             </div>
 
-                                            <div className="flex-1 min-w-0">
+                                            <div className="min-w-0 flex-1">
                                                 <p className="truncate text-sm font-semibold text-foreground">
                                                     {c.fullName}
                                                 </p>
                                                 <p className="text-xs text-muted">
                                                     {c.phone || "Không có số điện thoại"}
                                                 </p>
+                                            </div>
+
+                                            <div className="shrink-0">
+                                                <TierBadge
+                                                    tierName={c.tierName}
+                                                    discountRate={c.discountRate}
+                                                />
                                             </div>
                                         </button>
                                     ))}
@@ -111,39 +173,45 @@ export function CustomerPane({
             {/* ---- Selected customer card ---- */}
             {selectedCustomer && (
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/5 px-4 py-3">
-                        {/* Avatar */}
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-                            {getInitials(selectedCustomer.fullName || "?")}
-                        </div>
+                    <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 px-4 py-3">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                                {getInitials(selectedCustomer.fullName || "?")}
+                            </div>
 
-                        <div className="flex-1 min-w-0">
-                            <p className="truncate text-sm font-semibold text-foreground">
-                                {selectedCustomer.fullName}
-                            </p>
-                            <p className="text-xs text-muted">
-                                {selectedCustomer.phone || "Không có số điện thoại"}
-                            </p>
-                        </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-semibold text-foreground">
+                                    {selectedCustomer.fullName}
+                                </p>
+                                <p className="text-xs text-muted">
+                                    {selectedCustomer.phone || "Không có số điện thoại"}
+                                </p>
 
-                        <button
-                            type="button"
-                            onClick={handleClear}
-                            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
-                        >
-                            <ArrowCounterClockwise className="h-3.5 w-3.5" />
-                            Thay đổi
-                        </button>
+                                <div className="mt-2">
+                                    <TierBadge
+                                        tierName={selectedCustomer.tierName}
+                                        discountRate={selectedCustomer.discountRate}
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={handleClear}
+                                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
+                            >
+                                <ArrowCounterClockwise className="h-3.5 w-3.5" />
+                                Thay đổi
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Divider */}
                     <div className="flex items-center gap-3">
                         <div className="h-px flex-1 bg-border" />
                         <span className="text-xs text-muted">Thông tin bổ sung</span>
                         <div className="h-px flex-1 bg-border" />
                     </div>
 
-                    {/* Extra fields */}
                     <div className="grid gap-4 md:grid-cols-2">
                         <Input
                             label="Email"
@@ -172,7 +240,6 @@ export function CustomerPane({
                 </div>
             )}
 
-            {/* Validation error */}
             {errors.customerId && (
                 <p className="text-xs font-medium text-red-500">{errors.customerId}</p>
             )}

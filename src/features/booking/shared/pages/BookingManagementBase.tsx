@@ -241,7 +241,7 @@ export function BookingManagementBase({
     const form = createDefaultWalkInForm();
     if (prefill) {
       if (prefill.bookingDate) form.bookingDate = prefill.bookingDate;
-      if (prefill.courtId) form.courtId = prefill.courtId;
+      if (prefill.courtIds) form.courtIds = prefill.courtIds;
       if (prefill.startTime) form.startTime = prefill.startTime;
       if (prefill.endTime) form.endTime = prefill.endTime;
     }

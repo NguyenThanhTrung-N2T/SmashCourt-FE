@@ -1,12 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useState, useEffect, type FormEvent } from "react";
+import { useCallback, useRef, useMemo, useState, useEffect, type FormEvent } from "react";
 import {
-  CalendarBlank,
-  CheckCircle,
-  CourtBasketball,
-  CreditCard,
-  User,
+  CalendarBlank, CheckCircle, CourtBasketball, CreditCard, User, Spinner
 } from "@phosphor-icons/react";
 import { createWalkInBooking } from "@/src/api/booking.api";
 import { Button, Checkbox, Input, Select } from "@/src/shared/components/ui";
@@ -15,8 +11,12 @@ import type { CreateWalkInBookingDto } from "@/src/features/booking/shared/types
 import { InteractiveTimeGrid } from "@/src/features/booking/shared/components/new/InteractiveTimeGrid";
 import { fetchCourts } from "@/src/api/court.api";
 import { CustomerSearchDto } from "@/src/features/customer/shared/types/customer.types";
-import { FormErrors, WalkInBookingWorkspaceProps, WalkInBookingFormState, CustomerMode } from "@/src/features/booking/shared/types/walkinBooking.types";
+import {
+  FormErrors, WalkInBookingWorkspaceProps, WalkInBookingFormState, CustomerMode,
+} from "@/src/features/booking/shared/types/walkinBooking.types";
 import { ModeSwitch, GuestPane, CustomerPane } from "@/src/features/booking/shared/components/new";
+import { usePriceCalculation } from "@/src/features/booking/customer/hooks/usePriceCalculation";
+import { formatTime } from "@/src/shared/utils/date";
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -25,62 +25,52 @@ function toApiTime(time: string): string {
   return time.length === 5 ? `${time}:00` : time;
 }
 
-function selectedCourtName(courts: CourtDto[], courtId: string): string {
-  return courts.find((c) => c.id === courtId)?.name || "";
-}
-
-function formatWorkspaceTitle(form: WalkInBookingFormState, courts: CourtDto[]): string {
-  const courtName = selectedCourtName(courts, form.courtId);
-  const time = form.startTime || "new";
-  if (courtName && form.startTime) return `Tại quầy - ${courtName} - ${time}`;
-  if (courtName) return `Tại quầy - ${courtName}`;
+function formatWorkspaceTitle(): string {
+  const now = new Date();
+  const hhmm = now.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+  if (now) return `Tại quầy - ${hhmm}`;
   return "Đặt tại quầy";
 }
 
-function getInitials(name: string): string {
-  const parts = name.trim().split(" ").filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0][0].toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
 export function WalkInBookingWorkspace({
-  branchId,
-  branchName,
-  form,
-  selectedCourtTypeId,
-  onCourtTypeChange,
-  onChange,
-  onDirtyChange,
-  onTitleChange,
-  onCreated,
-  onError,
+  branchId, branchName, form, selectedCourtTypeId,
+  onCourtTypeChange, onChange, onDirtyChange, onTitleChange, onCreated, onError,
 }: WalkInBookingWorkspaceProps) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
-
   const [loadingCourts, setLoadingCourts] = useState(false);
   const [courts, setCourts] = useState<CourtDto[]>([]);
-
-  const [selectedCustomer, setSelectedCustomer] =
-    useState<CustomerSearchDto | null>(null);
-
-  // Load courts for this branch
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerSearchDto | null>(null);
+  const { totalAmount, isCalculatingPrice } = usePriceCalculation({
+    selectedBranchId: branchId,
+    selectedCourtIds: form.courtIds,
+    selectedDate: form.bookingDate,
+    selectedSlots: form.selectedSlots,
+  });
   useEffect(() => {
-    const loadCourts = async () => {
+    const load = async () => {
       try {
         setLoadingCourts(true);
         const data = await fetchCourts(branchId);
         setCourts(data || []);
-      } catch (error) {
-        console.error("Failed to load courts:", error);
+      } catch {
         setCourts([]);
       } finally {
         setLoadingCourts(false);
       }
     };
-    loadCourts();
+    load();
   }, [branchId]);
+
+  const formRef = useRef(form);
+
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
 
   const courtTypes = useMemo(() => {
     const map = new Map<string, string>();
@@ -90,37 +80,72 @@ export function WalkInBookingWorkspace({
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
   }, [courts]);
 
-  const filteredCourts = useMemo(() => {
-    if (selectedCourtTypeId === "all") return courts;
-    return courts.filter((c) => c.courtTypeId === selectedCourtTypeId);
-  }, [courts, selectedCourtTypeId]);
+  const filteredCourts = useMemo(
+    () => selectedCourtTypeId === "all" ? courts : courts.filter((c) => c.courtTypeId === selectedCourtTypeId),
+    [courts, selectedCourtTypeId],
+  );
 
-  const selectedCourt = useMemo(
-    () => courts.find((c) => c.id === form.courtId),
-    [courts, form.courtId],
+  // All courts currently in the selection
+  const selectedCourts = useMemo(
+    () => courts.filter((c) => form.courtIds.includes(c.id)),
+    [courts, form.courtIds],
   );
 
   const updateForm = useCallback(
     (patch: Partial<WalkInBookingFormState>) => {
-      const next = { ...form, ...patch };
+      const next = { ...formRef.current, ...patch };
+      formRef.current = next;
       onChange(next);
       onDirtyChange(true);
-      onTitleChange(formatWorkspaceTitle(next, courts));
+      onTitleChange(formatWorkspaceTitle());
     },
-    [form, onChange, onDirtyChange, onTitleChange, courts],
+    [onChange, onDirtyChange, onTitleChange],
   );
 
-  // When switching mode, reset customer-related fields
+  // ---------------------------------------------------------------------------
+  // Multi-court handlers (mirrors useBookingForm logic)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Fired when the user drags on a court track.
+   * - Already selected → keep the multi-selection, clear slots for re-drag.
+   * - New court       → reset to just this court.
+   */
+  const handleDragCourt = useCallback((court: CourtDto) => {
+    const current = formRef.current;
+    const alreadySelected = current.courtIds.includes(court.id);
+
+    if (!alreadySelected) {
+      updateForm({ courtIds: [court.id] });
+    }
+  }, [updateForm]);
+
+  /**
+   * Fired when the user clicks the candidate (light-green) zone on a court.
+   * Toggles that court in/out of the shared time range.
+   */
+  const handleToggleCourt = useCallback((court: CourtDto) => {
+    const current = formRef.current;
+    const isSelected = current.courtIds.includes(court.id);
+
+    if (isSelected) {
+      const nextIds = current.courtIds.filter((id) => id !== court.id);
+      updateForm({
+        courtIds: nextIds,
+        ...(nextIds.length === 0 ? { selectedSlots: [], startTime: "", endTime: "" } : {}),
+      });
+    } else {
+      updateForm({ courtIds: [...current.courtIds, court.id] });
+    }
+  }, [updateForm]);
+
+  // ---------------------------------------------------------------------------
+  // Mode
+  // ---------------------------------------------------------------------------
+
   const handleModeChange = (mode: CustomerMode) => {
     setSelectedCustomer(null);
-    updateForm({
-      customerMode: mode,
-      customerId: null,
-      guestName: "",
-      guestPhone: "",
-      guestEmail: "",
-      note: "",
-    });
+    updateForm({ customerMode: mode, customerId: null, guestName: "", guestPhone: "", guestEmail: "", note: "" });
   };
 
   // ---------------------------------------------------------------------------
@@ -129,21 +154,17 @@ export function WalkInBookingWorkspace({
 
   const validate = (): FormErrors => {
     const errs: FormErrors = {};
-
     if (!form.bookingDate) errs.bookingDate = "Ngày đặt sân là bắt buộc";
-    if (!form.courtId) errs.courtId = "Vui lòng chọn sân";
+    if (form.courtIds.length === 0) errs.courtIds = "Vui lòng chọn sân";  // ← was courtId
     if (!form.startTime) errs.startTime = "Thời gian bắt đầu là bắt buộc";
     if (!form.endTime) errs.endTime = "Thời gian kết thúc là bắt buộc";
-    if (form.startTime && form.endTime && form.endTime <= form.startTime) {
+    if (form.startTime && form.endTime && form.endTime <= form.startTime)
       errs.endTime = "Thời gian kết thúc phải sau thời gian bắt đầu";
-    }
-
     if (form.customerMode === "guest") {
       if (!form.guestName.trim()) errs.guestName = "Vui lòng nhập tên khách hàng";
     } else {
       if (!form.customerId) errs.customerId = "Vui lòng chọn khách hàng từ danh sách";
     }
-
     return errs;
   };
 
@@ -153,20 +174,18 @@ export function WalkInBookingWorkspace({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     const nextErrors = validate();
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
     const payload: CreateWalkInBookingDto = {
       bookingDate: form.bookingDate,
-      courts: [
-        {
-          courtId: form.courtId,
-          startTime: toApiTime(form.startTime),
-          endTime: toApiTime(form.endTime),
-        },
-      ],
+      // All selected courts share the same time range
+      courts: form.courtIds.map((courtId) => ({
+        courtId,
+        startTime: toApiTime(form.startTime),
+        endTime: toApiTime(form.endTime),
+      })),
       customerId: form.customerId || null,
       guestName: form.guestName.trim() || null,
       guestPhone: form.guestPhone.trim() || null,
@@ -182,19 +201,20 @@ export function WalkInBookingWorkspace({
       onDirtyChange(false);
       onCreated(booking);
     } catch (error: unknown) {
-  onError(error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định");
-} finally {
-  setSubmitting(false);
-}
+      onError(error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // ---------------------------------------------------------------------------
-  // Derived submit guard
+  // Submit guard
   // ---------------------------------------------------------------------------
 
   const canSubmit =
     !loadingCourts &&
     courts.length > 0 &&
+    form.courtIds.length > 0 &&        // ← added
     form.selectedSlots.length > 0 &&
     (form.customerMode === "guest"
       ? form.guestName.trim().length > 0
@@ -206,9 +226,7 @@ export function WalkInBookingWorkspace({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* ------------------------------------------------------------------ */}
-      {/* Schedule section                                                     */}
-      {/* ------------------------------------------------------------------ */}
+      {/* Schedule section */}
       <section className="rounded-xl border border-border bg-surface-1 p-5 shadow-sm">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -217,7 +235,7 @@ export function WalkInBookingWorkspace({
           <div>
             <h2 className="text-lg font-bold text-foreground">Lịch trình</h2>
             <p className="text-sm font-medium text-muted">
-              Sân và khung giờ {branchName || "Chi nhánh được chọn"}
+              {branchName || "Chi nhánh được chọn"}
             </p>
           </div>
         </div>
@@ -229,12 +247,7 @@ export function WalkInBookingWorkspace({
             min={new Date().toISOString().split("T")[0]}
             value={form.bookingDate}
             onChange={(e) =>
-              updateForm({
-                bookingDate: e.target.value,
-                selectedSlots: [],
-                startTime: "",
-                endTime: "",
-              })
+              updateForm({ bookingDate: e.target.value, selectedSlots: [], startTime: "", endTime: "" })
             }
             error={errors.bookingDate}
             leftIcon={<CalendarBlank className="h-4 w-4" />}
@@ -249,24 +262,20 @@ export function WalkInBookingWorkspace({
                 value={selectedCourtTypeId}
                 onChange={(val) => {
                   onCourtTypeChange(val);
-                  if (val !== "all" && form.courtId) {
-                    const court = courts.find((c) => c.id === form.courtId);
-                    if (court && court.courtTypeId !== val) {
-                      updateForm({
-                        courtId: "",
-                        selectedSlots: [],
-                        startTime: "",
-                        endTime: "",
-                      });
+                  if (val !== "all") {
+                    const hasConflict = form.courtIds.some((id) => {
+                      const c = courts.find((c) => c.id === id);
+                      return c && c.courtTypeId !== val;
+                    });
+                    if (hasConflict) {
+                      updateForm({ courtIds: [], selectedSlots: [], startTime: "", endTime: "" });
                     }
                   }
                 }}
               >
                 <option value="all">Tất cả</option>
                 {courtTypes.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
+                  <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
               </Select>
             </div>
@@ -282,9 +291,10 @@ export function WalkInBookingWorkspace({
               branchId={branchId}
               courts={filteredCourts}
               selectedDate={form.bookingDate}
-              selectedCourtId={form.courtId}
+              selectedCourtIds={form.courtIds}
               selectedSlots={form.selectedSlots}
-              onSelectCourt={(court) => updateForm({ courtId: court.id })}
+              onDragCourt={handleDragCourt}      // ← was: onSelectCourt
+              onToggleCourt={handleToggleCourt}  // ← new
               onSlotsChange={(slots) =>
                 updateForm({
                   selectedSlots: slots,
@@ -293,9 +303,9 @@ export function WalkInBookingWorkspace({
                 })
               }
             />
-            {(errors.courtId || errors.startTime || errors.endTime) && (
+            {(errors.courtIds || errors.startTime || errors.endTime) && (
               <p className="text-xs font-medium text-red-500">
-                {errors.courtId || errors.startTime || errors.endTime}
+                {errors.courtIds || errors.startTime || errors.endTime}
               </p>
             )}
           </div>
@@ -306,53 +316,31 @@ export function WalkInBookingWorkspace({
         )}
       </section>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Customer + Payment row                                              */}
-      {/* ------------------------------------------------------------------ */}
+      {/* Customer + Payment row */}
       <div className="grid gap-4 lg:grid-cols-[1fr_0.75fr]">
-        {/* Customer section */}
         <section className="rounded-xl border border-border bg-surface-1 p-5 shadow-sm">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-primary">
               <User className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground">
-                Thông tin khách hàng
-              </h2>
-              <p className="text-sm font-medium text-muted">
-                Khách vãng lai hoặc khách có tài khoản
-              </p>
+              <h2 className="text-lg font-bold text-foreground">Thông tin khách hàng</h2>
+              <p className="text-sm font-medium text-muted">Khách vãng lai hoặc khách có tài khoản</p>
             </div>
           </div>
-
-          {/* Mode toggle */}
           <div className="mb-5">
-            <ModeSwitch
-              value={form.customerMode}
-              onChange={handleModeChange}
-            />
+            <ModeSwitch value={form.customerMode} onChange={handleModeChange} />
           </div>
-
-          {/* Panes */}
           {form.customerMode === "guest" ? (
-            <GuestPane
-              form={form}
-              errors={errors}
-              updateForm={updateForm}
-            />
+            <GuestPane form={form} errors={errors} updateForm={updateForm} />
           ) : (
             <CustomerPane
-              form={form}
-              errors={errors}
-              updateForm={updateForm}
-              selectedCustomer={selectedCustomer}
-              setSelectedCustomer={setSelectedCustomer}
+              form={form} errors={errors} updateForm={updateForm}
+              selectedCustomer={selectedCustomer} setSelectedCustomer={setSelectedCustomer}
             />
           )}
         </section>
 
-        {/* Payment aside */}
         <aside className="rounded-xl border border-border bg-surface-1 p-5 shadow-sm">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
@@ -360,9 +348,7 @@ export function WalkInBookingWorkspace({
             </div>
             <div>
               <h2 className="text-lg font-bold text-foreground">Thanh toán</h2>
-              <p className="text-sm font-medium text-muted">
-                Hình thức thanh toán
-              </p>
+              <p className="text-sm font-medium text-muted">Hình thức thanh toán</p>
             </div>
           </div>
 
@@ -374,40 +360,62 @@ export function WalkInBookingWorkspace({
               description="Bỏ chọn nếu khách sẽ thanh toán sau"
             />
 
+            {/* Booking summary — now multi-court aware */}
             <div className="rounded-xl border border-border bg-surface-2 p-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-muted">
-                Xác nhận
-              </p>
-              <p className="mt-2 text-sm font-semibold text-foreground">
-                {selectedCourt?.name ||
-                  "Không có sân và khung giờ nào được chọn"}
-              </p>
-              <p className="mt-1 text-sm text-muted">
-                {new Intl.DateTimeFormat("en-GB").format(
-                  new Date(form.bookingDate),
-                )}
-                {form.startTime && form.endTime
-                  ? ` · ${form.startTime} – ${form.endTime}`
-                  : ""}
-              </p>
+              <p className="text-xs font-bold uppercase tracking-wider text-muted">Xác nhận</p>
+              {selectedCourts.length > 0 ? (
+                <>
+                  <p className="mt-2 text-sm font-semibold text-foreground">
+                    {selectedCourts.length > 1
+                      ? `${selectedCourts.length} sân: ${selectedCourts.map((c) => c.name).join(", ")}`
+                      : selectedCourts[0].name}
+                  </p>
+                  <p className="mt-1 text-sm text-muted">
+                    {new Intl.DateTimeFormat("en-GB").format(new Date(form.bookingDate))}
+                    {form.startTime && form.endTime ? ` · ${formatTime(form.startTime)} – ${formatTime(form.endTime)}` : ""}
+                  </p>
+                </>
+              ) : (
+                <p className="mt-2 text-sm font-semibold text-foreground">
+                  Không có sân và khung giờ nào được chọn
+                </p>
+              )}
             </div>
           </div>
+          {/* Live Summary Bar */}
+          {form && form.selectedSlots && form.selectedSlots.length > 0 && (
+            <div className="mt-6 flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-6 shadow-sm">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-muted">Tạm tính</h3>
+                <p className="mt-1 font-medium text-foreground">
+                  {form.selectedSlots.length} slot ·{" "}
+                  {form.courtIds.length} sân đã chọn
+                </p>
+              </div>
+              <div className="text-right">
+                {isCalculatingPrice ? (
+                  <div className="flex items-center justify-end gap-2 text-primary">
+                    <Spinner />
+                    <span className="text-sm font-medium">Đang tính...</span>
+                  </div>
+                ) : (
+                  <span className="text-3xl font-bold text-primary">
+                    {totalAmount.toLocaleString("vi-VN")} đ
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </aside>
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Submit bar                                                          */}
-      {/* ------------------------------------------------------------------ */}
+      {/* Submit bar */}
       <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface-1 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2 text-sm font-semibold text-muted">
           <CheckCircle className="h-5 w-5 text-primary" />
           Tạo đơn khi đã có lịch sân, thông tin khách hàng và thanh toán
         </div>
-        <Button
-          type="submit"
-          isLoading={submitting}
-          disabled={!canSubmit}
-        >
+        <Button type="submit" isLoading={submitting} disabled={!canSubmit}>
           Tạo đơn đặt tại quầy
         </Button>
       </div>

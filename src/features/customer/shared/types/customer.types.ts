@@ -73,6 +73,8 @@ export interface CustomerSearchDto {
   fullName: string;
   email?: string;
   phone?: string;
+  tierName: string;
+  discountRate: number;
 }
 
 // ============================================================================

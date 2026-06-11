@@ -4,32 +4,31 @@
 
 import { useState, useEffect } from "react";
 import { calculatePrice } from "@/src/api/pricing.api";
-import type { BranchBasicDto } from "@/src/features/branch/shared/types/branch.types";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
 interface UsePriceCalculationParams {
-  selectedBranch: BranchBasicDto | null;
-  selectedCourts: CourtDto[];
+  selectedBranchId: string | null;
+  selectedCourtIds: string[];
   selectedDate: string;
   selectedSlots: TimeGridSlotDto[];
 }
 
 export function usePriceCalculation({
-  selectedBranch,
-  selectedCourts,
+  selectedBranchId,
+  selectedCourtIds,
   selectedDate,
   selectedSlots,
 }: UsePriceCalculationParams) {
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [isCalculatingPrice, setIsCalculatingPrice] = useState(false);
   // Stringify IDs for a stable dep value — avoids re-running on mere array reference changes
-  const courtIds = selectedCourts.map((c) => c.id).join(",");
+  const courtIds = selectedCourtIds.join(",");
   useEffect(() => {
     let isMounted = true;
 
     async function fetchPrice() {
-      if (!selectedBranch || !courtIds || !selectedDate || selectedSlots.length === 0) {
+      if (!selectedBranchId || !courtIds || !selectedDate || selectedSlots.length === 0) {
         if (isMounted) setTotalAmount(0);
         return;
       }
@@ -49,8 +48,8 @@ export function usePriceCalculation({
           endTime = "24:00:00";
         }
 
-        const result = await calculatePrice(selectedBranch.id, {
-          courts: selectedCourts.map((c) => c.id),
+        const result = await calculatePrice(selectedBranchId, {
+          courts: selectedCourtIds,
           bookingDate: new Date(selectedDate).toISOString(),
           startTime,
           endTime,
@@ -72,7 +71,7 @@ export function usePriceCalculation({
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [selectedBranch, courtIds, selectedDate, selectedSlots]);
+  }, [selectedBranchId, courtIds, selectedDate, selectedSlots]);
 
   return {
     totalAmount,
