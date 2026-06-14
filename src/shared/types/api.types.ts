@@ -1,0 +1,36 @@
+export type ApiValidationErrors = Record<string, string[]>;
+
+export type ApiEnvelope<T> = {
+  success?: boolean;
+  code?: string;
+  errorCode?: string;  // Backend uses 'errorCode' field
+  message?: string | null;
+  detail?: string | null;
+  error?: string | null;
+  title?: string | null;
+  data?: T | null;
+  errors?: ApiValidationErrors | null;
+};
+
+export type ApiErrorPayload = ApiEnvelope<unknown>;
+
+export type AuthApiSuccess<T> = {
+  success: boolean | null;
+  code: string | null;
+  message: string | null;
+  data: T | null;
+  errors: ApiValidationErrors | null;
+};
+
+export interface PaginatedData<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+export type ApiResult<T> =
+  | { ok: true; data: T; message?: string | null; code?: string | null }
+  | { ok: false; error: ApiErrorPayload };

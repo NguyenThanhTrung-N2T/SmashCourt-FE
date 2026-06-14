@@ -1,0 +1,193 @@
+"use client";
+
+import Link from "next/link";
+import { SmartImage } from "@/src/shared/components/ui/SmartImage";
+import { usePathname } from "next/navigation";
+import {
+  SignOut,
+  Question,
+  CircleNotch,
+  X,
+} from "@phosphor-icons/react";
+
+import { NavItem } from "@/src/shared/types/navigation.types";
+import { MANAGER_NAV } from "../navigation/manager.navigation";
+
+type SidebarProps = {
+  isLoggingOut: boolean;
+  onLogout: () => void;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
+  branchName?: string;
+};
+
+const menuItems = MANAGER_NAV.filter((item) => item.href !== "/manager/settings");
+const sysItems = MANAGER_NAV.filter((item) => item.href === "/manager/settings");
+
+export default function ManagerSidebar({
+  isLoggingOut,
+  onLogout,
+  mobileOpen,
+  onMobileClose,
+}: SidebarProps) {
+  const pathname = usePathname();
+
+  function isActive(item: NavItem) {
+    if (item.exact) return pathname === item.href;
+    return pathname.startsWith(item.href);
+  }
+
+  const renderNavLinks = (items: NavItem[]) => (
+    <nav className="space-y-0.5" role="navigation">
+      {items.map((item) => {
+        const active = isActive(item);
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onMobileClose}
+            aria-current={active ? "page" : undefined}
+            className={`group flex items-center gap-3 py-2.5 px-6 border-l-[3px] transition-all duration-200 ${active
+                ? "border-primary bg-primary/5 text-primary font-bold"
+                : "border-transparent text-muted hover:bg-surface-2/50 hover:text-foreground font-medium"
+              }`}
+          >
+            <Icon
+              className={`h-[18px] w-[18px] ${active
+                  ? "text-primary"
+                  : "text-muted group-hover:text-foreground"
+                }`}
+            />
+            <span className="text-sm">{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+
+  const sidebarContent = (
+    <>
+      {/* Logo */}
+      <div className="h-[88px] px-6 flex items-center gap-2.5 shrink-0">
+        <SmartImage src="/favicon.ico" alt="SmashCourt Logo" width={36} height={36} className="h-9 w-9 rounded-xl" />
+        <span className="text-lg font-extrabold tracking-tight text-foreground">
+          SmashCourt
+        </span>
+
+        {/* Mobile close button */}
+        <button
+          onClick={onMobileClose}
+          aria-label="Đóng menu"
+          className="ml-auto md:hidden flex h-8 w-8 items-center justify-center rounded-xl text-muted hover:bg-surface-2 hover:text-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B5E38]"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Nav Content */}
+      <div className="flex-1 overflow-y-auto scrollbar-none flex flex-col py-2">
+        <div className="flex flex-col gap-6">
+          <div>
+            <p className="px-6 text-[9px] font-extrabold text-muted mb-2 uppercase tracking-[0.12em]">
+              List
+            </p>
+            {renderNavLinks(menuItems)}
+          </div>
+
+          <div>
+            <p className="px-6 text-[9px] font-extrabold text-muted mb-2 uppercase tracking-[0.12em]">
+              General
+            </p>
+            {renderNavLinks(sysItems)}
+            <nav className="space-y-0.5">
+              <button
+                aria-label="Trợ giúp"
+                className="w-full group flex items-center gap-3 py-2.5 px-6 border-l-[3px] border-transparent text-muted hover:bg-surface-2/50 hover:text-foreground font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B5E38]"
+              >
+                <Question className="h-[18px] w-[18px] text-muted group-hover:text-foreground" />
+                <span className="text-sm">Trợ giúp</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      {/* Logout Button - Sticky at bottom */}
+      <div className="shrink-0 border-t border-surface-2/50 py-2">
+        <nav className="space-y-0.5">
+          <button
+            onClick={onLogout}
+            disabled={isLoggingOut}
+            aria-label="Đăng xuất"
+            className="w-full group flex items-center gap-3 py-2.5 px-6 border-l-[3px] border-transparent text-muted hover:bg-red-500/10 hover:text-red-500 font-medium transition-all duration-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+          >
+            {isLoggingOut ? (
+              <CircleNotch className="h-[18px] w-[18px] text-red-400 animate-spin" />
+            ) : (
+              <SignOut className="h-[18px] w-[18px] text-muted group-hover:text-red-500" />
+            )}
+            <span className="text-sm">{isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}</span>
+          </button>
+        </nav>
+      </div>
+
+      {/* Mobile App Promo Card */}
+      {/* <div className="p-4 shrink-0">
+        <div
+          className="rounded-3xl p-5 relative overflow-hidden"
+          style={{
+            backgroundImage: "url('/mobile_app_bg.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <div className="absolute inset-0 bg-slate-900/60 rounded-3xl" />
+          <div className="relative z-10 text-white flex flex-col gap-3">
+            <div className="h-9 w-9 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+              <SmartImage src="/favicon.ico" alt="App" width={20} height={20} className="h-5 w-5 rounded-md" />
+            </div>
+            <div>
+              <p className="font-extrabold text-sm leading-tight">
+                Download our
+                <br />
+                Mobile App
+              </p>
+              <p className="text-[10px] text-white/60 mt-0.5">Get easy in another way</p>
+            </div>
+            <button className="w-full rounded-xl bg-[#1B5E38] hover:bg-[#145229] py-2 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50">
+              Download
+            </button>
+          </div>
+        </div>
+      </div> */}
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-[220px] shrink-0 m-4 mr-0 bg-surface-1 rounded-3xl flex-col shadow-sm overflow-hidden border border-transparent">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 md:hidden"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={onMobileClose}
+            aria-hidden="true"
+          />
+          <aside className="absolute left-0 top-0 bottom-0 w-[260px] bg-surface-1 flex flex-col shadow-2xl animate-slide-in-left overflow-hidden z-50">
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+    </>
+  );
+}
