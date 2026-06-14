@@ -115,14 +115,14 @@ export function NotificationDispatcher() {
                 addNotificationRef.current(item);
                 showToastRef.current(tone, dto.message);
 
-                publishRefresh("bookings");
+                publishRefresh("bookings", dto);
                 if (courtRefreshEvents.includes(eventName)) {
-                    publishRefresh("courts");
+                    publishRefresh("courts", dto);
                 }
                 if (dashboardRefreshEvents.includes(eventName)) {
-                    publishRefresh("dashboard");
+                    publishRefresh("dashboard", dto);
                 }
-                publishRefresh("booking-detail");
+                publishRefresh("booking-detail", dto);
             };
 
         const makePaymentHandler = (eventName: string) =>
@@ -143,9 +143,9 @@ export function NotificationDispatcher() {
                 };
                 addNotificationRef.current(item);
                 showToastRef.current(tone, dto.message);
-                publishRefresh("payments");
-                publishRefresh("booking-detail");
-                publishRefresh("dashboard");
+                publishRefresh("payments", dto);
+                publishRefresh("booking-detail", dto);
+                publishRefresh("dashboard", dto);
             };
 
         // Create handlers once per connection, not per render

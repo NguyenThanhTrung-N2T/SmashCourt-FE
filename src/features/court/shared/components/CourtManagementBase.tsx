@@ -33,6 +33,7 @@ export function CourtManagementBase({ allowManagement, bookingPath }: CourtManag
         stats,
         courtsPaged,
         loading,
+        loadingStats,
         date,
         setDate,
         search,
@@ -54,13 +55,15 @@ export function CourtManagementBase({ allowManagement, bookingPath }: CourtManag
         setBookingDetailId,
         refresh,
         setConfirmDialog,
+        handleRealtimeUpdate,
     } = useCourtManagement();
 
     const { showToast } = useGlobalToast();
 
     // Subscribe to realtime refreshes
-    useRealtimeRefresh(["courts", "bookings"], () => {
-        refresh();
+    useRealtimeRefresh(["courts", "bookings"], (target, payload) => {
+        handleRealtimeUpdate(target, payload);
+        console.log("Realtime update:", target, payload);
     });
 
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -97,7 +100,11 @@ export function CourtManagementBase({ allowManagement, bookingPath }: CourtManag
             />
 
             {/* KPI Summary Cards */}
-            <CourtSummaryCards stats={stats} loading={loading} />
+            <div className="space-y-4">
+                <CourtSummaryCards stats={stats} loading={loadingStats} />
+            </div>
+
+
 
             {/* Filters */}
             <CourtFilters

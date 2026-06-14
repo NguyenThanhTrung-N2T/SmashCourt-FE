@@ -40,6 +40,7 @@ export function CourtTrack({
   const { slots, isLoading } = useTimeGrid({
     branchId,
     courtId: court.id,
+    courtTypeId: court.courtTypeId,
     date: selectedDate,
   });
 

@@ -9,9 +9,10 @@ import React, {
   useCallback,
 } from "react";
 import { HubConnection } from "@microsoft/signalr";
+import { format } from "date-fns";
 import { createSignalRConnection } from "@/src/lib/signalr-client";
 import { getAccessToken } from "@/src/features/auth/session/sessionStore";
-
+import { HubConnectionState } from "@microsoft/signalr";
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
@@ -32,6 +33,15 @@ interface SignalRContextValue {
    * Call this after login if you are not using the "auth:token-changed" event.
    */
   reconnect: () => void;
+  /**
+   * Ref-counted subscription to a granular TimeGrid group.
+   * Only used by CUSTOMER role to receive availability updates.
+   */
+  subscribeToTimeGrid: (
+    branchId: string,
+    courtTypeId: string,
+    date: string
+  ) => Promise<() => void>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -80,19 +90,23 @@ export function SignalRProvider({ children }: { children: React.ReactNode }) {
   // ── connect ────────────────────────────────────────────────────────────────
 
   const connect = useCallback(async () => {
-    // Claim this generation slot.
+    // 1. Claim this generation slot.
     const myGeneration = ++generationRef.current;
 
-    // Tear down any existing connection before starting a new one.
+    // 2. Tear down any existing connection before starting a new one.
     if (activeConnRef.current) {
       try {
         await activeConnRef.current.stop();
       } catch {
-        // Ignore — we're replacing it anyway.
+        // Ignore.
       }
       activeConnRef.current = null;
       setConnection(null);
     }
+
+    // 3. Reset all subscription state for the new connection attempt.
+    //    Client and server state must be perfectly synchronized.
+    subscriptionsRef.current.clear();
 
     const token = getAccessToken();
     if (!token) {
@@ -108,11 +122,11 @@ export function SignalRProvider({ children }: { children: React.ReactNode }) {
 
       // Register lifecycle callbacks before starting so we never miss an event.
       conn.onclose((err) => {
-        // Only update state if this is still the active connection.
         if (activeConnRef.current === conn) {
           activeConnRef.current = null;
           setConnection(null);
           setConnectionState("Disconnected");
+          subscriptionsRef.current.clear();
         }
         if (err) setError(`Connection closed: ${err.message}`);
       });
@@ -125,11 +139,23 @@ export function SignalRProvider({ children }: { children: React.ReactNode }) {
       conn.onreconnected(() => {
         setConnectionState("Connected");
         setError(null);
+
+        // ✅ IMPORTANT: Re-join all active groups upon reconnection.
+        // SignalR server loses group memberships when a connection drops.
+        console.log(`[SignalR] Reconnected. Re-joining ${subscriptionsRef.current.size} groups...`);
+        subscriptionsRef.current.forEach((count, key) => {
+          if (count > 0) {
+            const parts = key.split(":");
+            if (parts[0] === "timegrid" && parts.length === 4) {
+              const [, branchId, courtTypeId, date] = parts;
+              conn.invoke("JoinTimeGrid", branchId, courtTypeId, date).catch((err) => {
+                console.error(`[SignalR] Failed to re-join group ${key}:`, err);
+              });
+            }
+          }
+        });
       });
 
-      // ✅ Fully start the connection BEFORE exposing it to context.
-      //    This prevents consumers from receiving a connection that is still
-      //    in the "Connecting" state and cannot accept .on() registrations yet.
       await conn.start();
 
       // By the time start() resolves, our generation may have been superseded
@@ -235,6 +261,53 @@ export function SignalRProvider({ children }: { children: React.ReactNode }) {
     connect();
   }, [connect]);
 
+  // ── TimeGrid Subscriptions (Ref-counted) ───────────────────────────────────
+  const subscriptionsRef = useRef<Map<string, number>>(new Map());
+
+  const subscribeToTimeGrid = useCallback(
+    async (branchId: string, courtTypeId: string, date: string) => {
+      if (!activeConnRef.current || connectionState !== "Connected") return () => { };
+
+      // Normalize date to yyyy-MM-dd to ensure consistent group keys
+      const normalizedDate = format(new Date(date), "yyyy-MM-dd");
+      const key = `timegrid:${branchId}:${courtTypeId}:${normalizedDate}`;
+      const conn = activeConnRef.current;
+
+      const currentCount = subscriptionsRef.current.get(key) || 0;
+      subscriptionsRef.current.set(key, currentCount + 1);
+
+      if (currentCount === 0) {
+        console.log(`[SignalR] Joining TimeGrid group: ${key}`);
+        conn.invoke("JoinTimeGrid", branchId, courtTypeId, normalizedDate).catch((err) => {
+          console.error(`[SignalR] Failed to join TimeGrid group ${key}:`, err);
+        });
+      }
+
+      return () => {
+        const count = subscriptionsRef.current.get(key) || 0;
+
+        if (count <= 1) {
+          subscriptionsRef.current.delete(key);
+
+          if (conn.state !== HubConnectionState.Connected) {
+            return;
+          }
+
+          conn.invoke(
+            "LeaveTimeGrid",
+            branchId,
+            courtTypeId,
+            normalizedDate
+          ).catch(() => {
+            // ignore cleanup errors
+          });
+        } else {
+          subscriptionsRef.current.set(key, count - 1);
+        }
+      };
+    },
+    [connectionState]
+  );
   return (
     <SignalRContext.Provider
       value={{
@@ -243,6 +316,7 @@ export function SignalRProvider({ children }: { children: React.ReactNode }) {
         isConnected: connectionState === "Connected",
         error,
         reconnect,
+        subscribeToTimeGrid,
       }}
     >
       {children}

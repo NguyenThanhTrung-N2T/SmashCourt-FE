@@ -61,11 +61,10 @@ export async function fetchCourtById(
  */
 export async function fetchCourtManagementStats(query?: {
   branchId?: string;
-  date?: string;
 }): Promise<CourtManagementDashboardStats> {
   const url =
     `/api/courts/management-dashboard/stats` +
-    buildQuery({ branchId: query?.branchId, date: query?.date });
+    buildQuery({ branchId: query?.branchId });
   const response = await authProtectedFetch<CourtManagementDashboardStats>(url, {
     method: "GET",
   });
@@ -95,6 +94,25 @@ export async function fetchCourtManagementCourts(
     { method: "GET" }
   );
   if (!response.data) throw new Error("Failed to load court cards");
+  return response.data;
+}
+
+/**
+ * POST /api/courts/management-dashboard/courts-by-ids
+ * Returns specific court cards for targeted updates.
+ */
+export async function fetchCourtManagementCourtsByIds(
+  courtIds: string[],
+  query?: { branchId?: string; date?: string }
+): Promise<CourtManagementCardDto[]> {
+  const url =
+    `/api/courts/management-dashboard/courts-by-ids` +
+    buildQuery({ branchId: query?.branchId, date: query?.date });
+  const response = await authProtectedFetch<CourtManagementCardDto[]>(url, {
+    method: "POST",
+    body: courtIds,
+  });
+  if (!response.data) throw new Error("Failed to load targeted court cards");
   return response.data;
 }
 

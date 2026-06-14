@@ -10,9 +10,11 @@ export const SignalREvents = {
   BOOKING_CHECKED_OUT: "BookingCheckedOut",
   BOOKING_CANCELLED: "BookingCancelled",
   BOOKING_COMPLETED: "BookingCompleted",
+  BOOKING_REFUNDED: "BookingRefunded",
   BOOKING_EXPIRED: "BookingExpired",
+  BOOKING_PENDING_PAYMENT: "BookingPendingPayment",
   BOOKING_NO_SHOW: "BookingNoShow",
-  
+
   // Payment Events
   PAYMENT_SUCCESS: "PaymentSuccess",
   PAYMENT_FAILED: "PaymentFailed",

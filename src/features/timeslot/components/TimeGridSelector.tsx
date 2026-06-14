@@ -18,6 +18,7 @@ import type { TimeGridSlotDto } from "../types/timeslot.types";
 interface TimeGridSelectorProps {
   branchId: string;
   courtId: string;
+  courtTypeId: string;
   courtName: string;
   date: string; // YYYY-MM-DD
   selectedSlots: TimeGridSlotDto[];
@@ -27,6 +28,7 @@ interface TimeGridSelectorProps {
 export function TimeGridSelector({
   branchId,
   courtId,
+  courtTypeId,
   courtName,
   date,
   selectedSlots,
@@ -35,6 +37,7 @@ export function TimeGridSelector({
   const { slots, isLoading, error } = useTimeGrid({
     branchId,
     courtId,
+    courtTypeId,
     date,
   });
 

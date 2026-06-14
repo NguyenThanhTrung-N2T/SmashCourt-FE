@@ -17,10 +17,7 @@ export function GuestPane({ form, errors, updateForm }: GuestPaneProps) {
                 <Input
                     label="Họ và tên *"
                     value={form.guestName}
-                    onChange={createValidatedChangeHandler(
-                        (val) => updateForm({ guestName: val }),
-                        ValidationRules.vietnameseText
-                    )}
+                    onChange={(e) => updateForm({ guestName: e.target.value })}
                     placeholder="Nguyễn Văn A"
                     error={errors.guestName}
                     leftIcon={<User className="h-4 w-4" />}
