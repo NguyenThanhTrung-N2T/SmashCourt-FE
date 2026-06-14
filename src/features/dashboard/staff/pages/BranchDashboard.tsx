@@ -27,10 +27,16 @@ import { PageHeader } from "@/src/shared/components/layout";
 import { useManagerDashboard } from "@/src/features/dashboard/staff/hooks/useManagerDashboard";
 import { sortCourtsByPriority } from "@/src/features/dashboard/staff/utils/dashboard-helpers";
 import { EmptyState } from "@/src/shared/components/feedback/EmptyState";
+import { useRealtimeRefresh } from "@/src/shared/hooks/useRealtimeRefresh";
 
 export function BranchDashboard() {
     const router = useRouter();
     const { data, isLoading, error, refetch } = useManagerDashboard();
+
+    // Subscribe to realtime refreshes
+    useRealtimeRefresh(["bookings", "payments"], () => {
+        refetch();
+    });
 
     // ── KPI Cards Data ──
     const kpis = useMemo(() => {

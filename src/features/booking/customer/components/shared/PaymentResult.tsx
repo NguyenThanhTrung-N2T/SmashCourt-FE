@@ -11,7 +11,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle, XCircle, Receipt } from "@phosphor-icons/react";
 import { Button } from "@/src/shared/components/ui/Button";
 import { Spinner } from "@/src/shared/components/feedback/Spinner";
-import { Alert } from "@/src/shared/components/ui/Alert";
 import { usePaymentConfirmation } from "../../hooks/usePaymentConfirmation";
 import { formatCurrency } from "../../utils/bookingStatus";
 import type { VNPayCallbackParams } from "../../../shared/types/payment.types";
@@ -24,6 +23,7 @@ export function PaymentResult() {
   const [result, setResult] = useState<{
     isSuccess: boolean;
     bookingId: string;
+    bookingCode: string;
     amount: number;
     message: string;
   } | null>(null);
@@ -139,7 +139,7 @@ export function PaymentResult() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted">Mã đặt sân</span>
                 <span className="font-semibold text-foreground">
-                  {result.bookingId.slice(0, 8).toUpperCase()}
+                  {result.bookingCode}
                 </span>
               </div>
               <div className="flex items-center justify-between">

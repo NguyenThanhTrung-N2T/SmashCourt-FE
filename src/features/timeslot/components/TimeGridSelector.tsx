@@ -22,7 +22,6 @@ interface TimeGridSelectorProps {
   date: string; // YYYY-MM-DD
   selectedSlots: TimeGridSlotDto[];
   onSlotsChange: (slots: TimeGridSlotDto[]) => void;
-  autoRefresh?: boolean;
 }
 
 export function TimeGridSelector({
@@ -32,14 +31,11 @@ export function TimeGridSelector({
   date,
   selectedSlots,
   onSlotsChange,
-  autoRefresh = true,
 }: TimeGridSelectorProps) {
-  const { slots, isLoading, error, refetch } = useTimeGrid({
+  const { slots, isLoading, error } = useTimeGrid({
     branchId,
     courtId,
     date,
-    autoRefresh,
-    refreshInterval: 30000, // 30 seconds
   });
 
   const handleSlotClick = (slot: TimeGridSlotDto) => {

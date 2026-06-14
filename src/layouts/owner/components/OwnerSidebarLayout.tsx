@@ -4,14 +4,15 @@ import { useRouter } from "next/navigation";
 import { type ReactNode, useState, useEffect } from "react";
 
 import { authLogout } from "@/src/api/auth.api";
-import { Toast } from "@/src/shared/components/ui/Toast";
-import { useToast } from "@/src/shared/hooks/useToast";
+import { useGlobalToast } from "@/src/shared/hooks/useGlobalToast";
 import {
     broadcastLogoutSync,
     clearAuthSession,
     getAuthUser,
     type AuthUserSession,
 } from "@/src/features/auth/session/sessionStore";
+import { RealtimeProviders } from "@/src/contexts/RealtimeProviders";
+import { NotificationDrawer } from "@/src/features/notifications/components/NotificationDrawer";
 
 import Sidebar from "./Sidebar";
 import Header from "./Header";
@@ -21,29 +22,22 @@ type Props = {
     children: ReactNode;
 };
 
-export default function OwnerSidebarLayout({ user: initialUser, children }: Props) {
+function OwnerSidebarLayoutInner({ user: initialUser, children }: Props) {
     const router = useRouter();
     const [loggingOut, setLoggingOut] = useState(false);
     const [redirecting, setRedirecting] = useState(false);
-    const { toast, show: showToast } = useToast();
+    const { showToast } = useGlobalToast();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [notifOpen, setNotifOpen] = useState(false);
     const [user, setUser] = useState<AuthUserSession>(initialUser);
 
-    // Listen for session storage changes to update user data
     useEffect(() => {
         const handleStorageChange = () => {
             const updatedUser = getAuthUser();
-            if (updatedUser) {
-                setUser(updatedUser);
-            }
+            if (updatedUser) setUser(updatedUser);
         };
-
-        // Listen for storage events (from other tabs/windows)
         window.addEventListener("storage", handleStorageChange);
-        
-        // Also check periodically for same-tab updates
         const interval = setInterval(handleStorageChange, 1000);
-
         return () => {
             window.removeEventListener("storage", handleStorageChange);
             clearInterval(interval);
@@ -67,6 +61,8 @@ export default function OwnerSidebarLayout({ user: initialUser, children }: Prop
         }, 1200);
     }
 
+    void redirecting;
+
     return (
         <div className="h-screen w-full overflow-hidden flex font-sans text-foreground bg-[var(--page-bg)] transition-colors duration-300">
             <Sidebar
@@ -82,6 +78,7 @@ export default function OwnerSidebarLayout({ user: initialUser, children }: Prop
                     onMenuToggle={() => setMobileOpen(true)}
                     onLogout={onLogout}
                     isLoggingOut={loggingOut}
+                    onOpenNotifications={() => setNotifOpen(true)}
                 />
 
                 <main className="flex-1 min-w-0 overflow-y-auto scrollbar-none">
@@ -89,7 +86,15 @@ export default function OwnerSidebarLayout({ user: initialUser, children }: Prop
                 </main>
             </div>
 
-            <Toast toast={toast} />
+            <NotificationDrawer open={notifOpen} onClose={() => setNotifOpen(false)} />
         </div>
+    );
+}
+
+export default function OwnerSidebarLayout(props: Props) {
+    return (
+        <RealtimeProviders>
+            <OwnerSidebarLayoutInner {...props} />
+        </RealtimeProviders>
     );
 }

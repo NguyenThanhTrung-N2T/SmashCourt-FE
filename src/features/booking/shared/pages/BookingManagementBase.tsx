@@ -20,13 +20,15 @@ import {
 } from '@/src/features/booking/shared/types';
 import { WalkInBookingWorkspace } from '@/src/features/booking/shared/components/new';
 import { useBookingManagement, useBookingSchedule, useBookingCalendar } from '@/src/features/booking/shared/hooks';
-import { Toast, ConfirmationDialog, Button } from '@/src/shared/components/ui';
+import { ConfirmationDialog, Button } from '@/src/shared/components/ui';
 import { PageHeader } from '@/src/shared/components/layout';
 import type { BranchDto } from '@/src/features/branch/shared/types/branch.types';
 import type { BookingDto } from '@/src/features/booking/shared/types/booking.types';
 import { Table, GridNine, Calendar, Plus, X, FileText } from '@phosphor-icons/react';
 import { useEffect } from 'react';
 import { consumePrefill, WalkInPrefill } from '@/src/lib/walkInPrefill';
+import { useRealtimeRefresh } from '@/src/shared/hooks/useRealtimeRefresh';
+import { useGlobalToast } from '@/src/shared/hooks/useGlobalToast';
 
 type ViewTab = 'table' | 'schedule' | 'calendar';
 type WorkspaceId = 'management' | string;
@@ -79,6 +81,8 @@ export function BookingManagementBase({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { showToast } = useGlobalToast();
+
   const {
     bookings,
     summary,
@@ -97,9 +101,14 @@ export function BookingManagementBase({
     handleCancel,
     handleConfirmRefund,
     refresh,
-    toast,
-    showToast,
   } = useBookingManagement(initialBranchId, activeView === 'table');
+
+  // Subscribe to realtime refreshes
+  useRealtimeRefresh("bookings", () => {
+    refresh();
+    // If schedule or calendar are active, they might need refreshing too if they don't share the same data source
+    // In this case, useBookingManagement's refresh handles the main list.
+  });
   // ── URL helpers ──────────────────────────────────────────
   const pushParam = useCallback((key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -594,7 +603,6 @@ export function BookingManagementBase({
         onConfirm={confirmDialog.onConfirm}
         onCancel={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
       />
-      <Toast toast={toast} />
     </div>
   );
 }

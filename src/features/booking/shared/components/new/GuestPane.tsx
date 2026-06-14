@@ -1,7 +1,11 @@
-import { CheckCircle, User } from "@phosphor-icons/react";
+import { CheckCircle, User, Phone } from "@phosphor-icons/react";
 import { Input, Textarea } from "@/src/shared/components/ui";
 import { getInitials } from "@/src/features/booking/shared/utils/getInitials";
 import type { GuestPaneProps } from "@/src/features/booking/shared/types/walkinBooking.types";
+import {
+    createValidatedChangeHandler,
+    ValidationRules,
+} from "@/src/shared/utils/inputValidation";
 
 export function GuestPane({ form, errors, updateForm }: GuestPaneProps) {
     const showPreview = form.guestName.trim().length > 0;
@@ -13,7 +17,10 @@ export function GuestPane({ form, errors, updateForm }: GuestPaneProps) {
                 <Input
                     label="Họ và tên *"
                     value={form.guestName}
-                    onChange={(e) => updateForm({ guestName: e.target.value })}
+                    onChange={createValidatedChangeHandler(
+                        (val) => updateForm({ guestName: val }),
+                        ValidationRules.vietnameseText
+                    )}
                     placeholder="Nguyễn Văn A"
                     error={errors.guestName}
                     leftIcon={<User className="h-4 w-4" />}
@@ -23,9 +30,13 @@ export function GuestPane({ form, errors, updateForm }: GuestPaneProps) {
                 <Input
                     label="Số điện thoại"
                     value={form.guestPhone}
-                    onChange={(e) => updateForm({ guestPhone: e.target.value })}
-                    placeholder="0901 234 567"
+                    onChange={createValidatedChangeHandler(
+                        (val) => updateForm({ guestPhone: val }),
+                        ValidationRules.phoneFormat
+                    )}
+                    placeholder="Ví dụ: 0901234567"
                     error={errors.guestPhone}
+                    leftIcon={<Phone className="h-4 w-4" />}
                 />
 
                 {/* Email — optional, full width */}
@@ -34,8 +45,12 @@ export function GuestPane({ form, errors, updateForm }: GuestPaneProps) {
                         label="Email"
                         type="email"
                         value={form.guestEmail}
-                        onChange={(e) => updateForm({ guestEmail: e.target.value })}
+                        onChange={createValidatedChangeHandler(
+                            (val) => updateForm({ guestEmail: val }),
+                            ValidationRules.emailFormat
+                        )}
                         placeholder="khach@email.com"
+                        error={errors.guestEmail}
                     />
                 </div>
             </div>

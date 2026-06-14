@@ -3,6 +3,7 @@
  */
 
 import { createOnlineBooking } from "@/src/api/booking.api";
+import { useGlobalToast } from "@/src/shared/hooks/useGlobalToast";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
@@ -33,6 +34,8 @@ export function useBookingSubmit({
   setError,
   validateGuestInfo,
 }: UseBookingSubmitParams) {
+  const { showToast } = useGlobalToast();
+
   const handleSubmitBooking = async () => {
     if (selectedCourts.length === 0 || selectedSlots.length === 0) return;
 
@@ -63,7 +66,9 @@ export function useBookingSubmit({
       // Redirect to payment
       window.location.href = booking.paymentUrl;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không thể tạo đặt sân");
+      const message = err instanceof Error ? err.message : "Không thể tạo đặt sân";
+      setError(message);
+      showToast("error", message);
       setIsSubmitting(false);
     }
   };

@@ -39,6 +39,7 @@ import { formatDisplayPeriod } from "@/src/features/report/shared/utils/reportUt
 import { ReportFilterDto } from "@/src/features/dashboard/shared/dashboard.types";
 import { AIPanelSection } from "@/src/features/ai/shared/components/AIPanelSection";
 import { StrategicInsightsPanel } from "@/src/features/ai/shared/components/StrategicInsightsPanel";
+import { useRealtimeRefresh } from "@/src/shared/hooks/useRealtimeRefresh";
 
 export function OwnerDashboard() {
     const [filter, setFilter] = useState<FilterOption>("Tháng này");
@@ -64,7 +65,12 @@ export function OwnerDashboard() {
         branchId: selectedBranchId || undefined
     }), [filter, selectedBranchId]);
     const groupByLabel = getGroupByLabel(filter);
-    const { data, utilization, bookingTrend: trendData, isLoading, error } = useOwnerDashboard(filterDates);
+    const { data, utilization, bookingTrend: trendData, isLoading, error, refetch } = useOwnerDashboard(filterDates);
+
+    // Subscribe to realtime refreshes
+    useRealtimeRefresh(["bookings", "payments"], () => {
+        if (refetch) refetch();
+    });
 
     // ── Data Mapping ──
     const dashboardData = data?.summary;

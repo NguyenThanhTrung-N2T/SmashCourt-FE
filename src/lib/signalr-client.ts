@@ -1,17 +1,17 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { getAccessToken } from "@/src/features/auth/session/sessionStore";
 
 /**
  * Tạo SignalR connection builder
- * @param accessToken JWT token để authenticate
  * @returns HubConnection instance
  */
-export function createSignalRConnection(accessToken: string): HubConnection {
+export function createSignalRConnection(): HubConnection {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5179";
   const hubUrl = `${API_URL}/hubs/notifications`;
 
   const connection = new HubConnectionBuilder()
     .withUrl(hubUrl, {
-      accessTokenFactory: () => accessToken,
+      accessTokenFactory: () => getAccessToken() || "",
     })
     .withAutomaticReconnect({
       nextRetryDelayInMilliseconds: (retryContext) => {

@@ -9,6 +9,8 @@ import { useCourtManagement } from "@/src/features/court/staff/hooks/useCourtMan
 import { useCourtTypes } from "@/src/features/court-type/shared/hooks/useCourtTypes";
 import { setPrefill } from "@/src/lib/walkInPrefill";
 import { useRouter } from "next/navigation";
+import { useRealtimeRefresh } from "@/src/shared/hooks/useRealtimeRefresh";
+import { useGlobalToast } from "@/src/shared/hooks/useGlobalToast";
 import {
     CourtDetailModal,
     CourtFilters,
@@ -51,10 +53,15 @@ export function CourtManagementBase({ allowManagement, bookingPath }: CourtManag
         bookingDetailId,
         setBookingDetailId,
         refresh,
-        toast,
-        showToast,
         setConfirmDialog,
     } = useCourtManagement();
+
+    const { showToast } = useGlobalToast();
+
+    // Subscribe to realtime refreshes
+    useRealtimeRefresh(["courts", "bookings"], () => {
+        refresh();
+    });
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editCourtId, setEditCourtId] = useState<string | null>(null);
@@ -212,9 +219,6 @@ export function CourtManagementBase({ allowManagement, bookingPath }: CourtManag
                 onCancel={closeConfirmDialog}
                 variant="warning"
             />
-
-            {/* Toast */}
-            <Toast toast={toast} />
         </div>
     );
 }

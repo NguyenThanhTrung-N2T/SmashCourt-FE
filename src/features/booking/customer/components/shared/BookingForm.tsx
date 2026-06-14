@@ -175,7 +175,7 @@ export function BookingForm({
 
         <Input
           label="Số điện thoại"
-          placeholder="0901234567"
+          placeholder="Ví dụ: 0901234567"
           value={formData.guestPhone}
           onChange={createValidatedChangeHandler(
             (val) => handleChange("guestPhone", val),

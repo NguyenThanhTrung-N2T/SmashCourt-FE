@@ -41,8 +41,6 @@ export function CourtTrack({
     branchId,
     courtId: court.id,
     date: selectedDate,
-    autoRefresh: true,
-    refreshInterval: 30000,
   });
 
   // ─── blockToSlotMap (unchanged) ───────────────────────────────────────────

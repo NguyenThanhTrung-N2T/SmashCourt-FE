@@ -1,27 +1,21 @@
-/**
- * useTimeGrid Hook
- * 
- * Hook for fetching court availability time grid.
- */
-
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { fetchTimeGrid } from "@/src/api/timegrid.api";
+import { useRealtimeRefresh } from "@/src/shared/hooks/useRealtimeRefresh";
 import type { TimeGridSlotDto } from "../types/timeslot.types";
+import { RefreshTarget } from "@/src/types/notification.types";
+import { debounce } from "lodash";
 
 interface UseTimeGridParams {
   branchId: string;
   courtId: string;
   date: string; // YYYY-MM-DD or ISO 8601
-  autoRefresh?: boolean; // Auto-refresh every 30 seconds
-  refreshInterval?: number; // Custom refresh interval in ms
 }
+const TIMEGRID_REFRESH_TARGETS: RefreshTarget[] = ["bookings", "courts", "payments"];
 
 export function useTimeGrid({
   branchId,
   courtId,
   date,
-  autoRefresh = false,
-  refreshInterval = 30000,
 }: UseTimeGridParams) {
   const [slots, setSlots] = useState<TimeGridSlotDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,21 +41,17 @@ export function useTimeGrid({
       setIsLoading(false);
     }
   }, [branchId, courtId, date]);
+  const debouncedLoad = useMemo(
+    () => debounce(() => loadTimeGrid(), 300),
+    [loadTimeGrid]
+  );
+  // Clean up debounce timer on unmount
+  useEffect(() => () => debouncedLoad.cancel(), [debouncedLoad]);
+  useRealtimeRefresh(TIMEGRID_REFRESH_TARGETS, debouncedLoad);
 
   useEffect(() => {
     loadTimeGrid();
   }, [loadTimeGrid]);
-
-  // Auto-refresh functionality
-  useEffect(() => {
-    if (!autoRefresh) return;
-
-    const interval = setInterval(() => {
-      loadTimeGrid();
-    }, refreshInterval);
-
-    return () => clearInterval(interval);
-  }, [autoRefresh, refreshInterval, loadTimeGrid]);
 
   // Refresh when tab becomes visible
   useEffect(() => {
