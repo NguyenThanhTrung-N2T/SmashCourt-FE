@@ -6,7 +6,7 @@
 
 import { ElementType } from 'react';
 
-export type ProfileTabId = 'info' | 'password' | 'sessions';
+export type ProfileTabId = 'info' | 'security' | 'sessions';
 
 interface Tab {
   id: ProfileTabId;
@@ -31,11 +31,10 @@ export function ProfileTabNav({ tabs, activeTab, onTabChange }: ProfileTabNavPro
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex items-center gap-2 px-6 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${
-                isActive
+              className={`flex items-center gap-2 px-6 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${isActive
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted hover:text-foreground hover:border-border'
-              }`}
+                }`}
             >
               <Icon className="h-5 w-5" />
               {tab.label}

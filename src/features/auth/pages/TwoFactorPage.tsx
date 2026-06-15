@@ -7,11 +7,15 @@ import { AlertCircle, Shield } from "lucide-react";
 
 import {
   authLogin2fa,
+  authResendOtp,
   hasAuthErrorCode,
 } from "@/src/api/auth.api";
 import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
+import CountdownButton from "@/src/features/auth/components/CountdownButton";
 import OtpInput from "@/src/features/auth/components/OtpInput";
+import { OtpType } from "@/src/features/auth/constants";
 import {
+  clearAuthSession,
   clearEmail,
   clearTempToken,
   clearTwoFactorVerifySession,
@@ -19,7 +23,7 @@ import {
   getTempToken,
   getTwoFactorVerifySession,
   setAuthenticatedSession,
-  startTwoFactorVerifySession,
+  setTwoFactorVerifySession,
   type TwoFactorVerifySession,
 } from "@/src/features/auth/session/sessionStore";
 import { formatEmailShort } from "@/src/features/auth/utils/clientErrors";
@@ -31,6 +35,7 @@ import type { AuthFormEvent } from "@/src/features/auth/types/forms";
 
 const RESET_REDIRECT_MS = 3500;
 const MAX_VERIFY_ATTEMPTS = 3;
+const MAX_RESEND_ATTEMPTS = 3;
 const TEMP_TOKEN_TTL_MS = 5 * 60 * 1000;
 
 const TEXT = {
@@ -41,6 +46,9 @@ const TEXT = {
   loginLabel: "Đăng nhập",
   submitLabel: "Xác thực",
   loadingLabel: "Đang xử lý...",
+  resendLabel: "Gửi lại mã",
+  resendCooldownLabel: "Gửi lại sau",
+  resendSuccess: "OTP đã được gửi lại.",
   successToast: "Đăng nhập thành công",
   resetToast: "Phiên xác thực đã hết hiệu lực",
   sessionExpired:
@@ -58,95 +66,165 @@ function shouldResetTwoFactorSession(input?: unknown) {
     "ACCOUNT_LOCKED",
     "UNAUTHORIZED",
     "FORBIDDEN",
+    "NOT_FOUND",
   ]);
+}
+
+function isChallengeExpired(session?: TwoFactorVerifySession | null) {
+  if (!session) return true;
+  return Date.now() - session.startedAt >= TEMP_TOKEN_TTL_MS;
 }
 
 export default function TwoFactorPage() {
   const router = useRouter();
-  const [tempToken, setTempTokenState] = useState<string | null>(null);
-  const [mailHint, setMailHint] = useState<string | null>(null);
+  const [session, setSession] = useState<TwoFactorVerifySession | null>(null);
   const [otpCode, setOtpCode] = useState("");
   const [entered, setEntered] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [resettingSession, setResettingSession] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
+  const [resendSuccess, setResendSuccess] = useState<string | null>(null);
 
-  // Use new hooks
   const { error, showError, clearError } = useAuthError();
   const { scheduleRedirectByRole, isRedirecting } = useAuthRedirect({
     delay: 1800,
   });
   const logError = useAuthErrorLogger("login-2fa");
 
-  function isTempTokenExpired(session: TwoFactorVerifySession) {
-    return Date.now() - session.startedAt >= TEMP_TOKEN_TTL_MS;
+  const email = session?.email ?? null;
+  const tempToken = session?.tempToken ?? null;
+  const remainingAttempts = Math.max(0, MAX_VERIFY_ATTEMPTS - failedAttempts);
+  const remainingResends = Math.max(0, MAX_RESEND_ATTEMPTS - (session?.resendCount ?? 0));
+  const controlsDisabled = loading || isRedirecting || resettingSession;
+  const resendDisabled =
+    controlsDisabled || isResending || remainingResends === 0 || !email;
+
+  function persistSession(next: TwoFactorVerifySession | null) {
+    setSession(next);
+    if (next) {
+      setTwoFactorVerifySession(next);
+    } else {
+      clearTwoFactorVerifySession();
+    }
   }
 
   function clearTwoFactorChallengeAndRestart(message?: string) {
+    clearAuthSession();
     clearTwoFactorVerifySession();
     clearTempToken();
-    setTempTokenState(null);
+
+    setSession(null);
     setResettingSession(true);
     setOtpCode("");
+    setFailedAttempts(0);
+    setResendSuccess(null);
     clearError();
     showError(new Error(message ?? TEXT.sessionExpired), "2fa");
 
     setTimeout(() => {
       clearEmail();
-      setMailHint(null);
       router.replace("/auth/login");
     }, RESET_REDIRECT_MS);
   }
 
+  function incrementFailedAttempts() {
+    const nextAttempts = failedAttempts + 1;
+    setFailedAttempts(nextAttempts);
+
+    if (session) {
+      persistSession({
+        ...session,
+        failedAttempts: nextAttempts,
+      });
+    }
+
+    return nextAttempts;
+  }
+
   useEffect(() => {
     try {
+      const storedSession = getTwoFactorVerifySession();
       const storedEmail = getEmail()?.trim().toLowerCase() ?? null;
       const storedTempToken = getTempToken() ?? null;
-      setMailHint(storedEmail);
-      setTempTokenState(storedTempToken);
 
-      if (storedEmail && storedTempToken) {
-        const storedSession = getTwoFactorVerifySession();
-        if (
-          storedSession?.email === storedEmail &&
-          storedSession.tempToken === storedTempToken
-        ) {
-          setFailedAttempts(storedSession.failedAttempts);
-        } else {
-          startTwoFactorVerifySession(storedEmail, storedTempToken);
-        }
+      let nextSession: TwoFactorVerifySession | null = null;
+
+      if (
+        storedSession?.email &&
+        storedSession?.tempToken &&
+        !isChallengeExpired(storedSession)
+      ) {
+        nextSession = storedSession;
+      } else if (
+        storedEmail &&
+        storedTempToken
+      ) {
+        nextSession = {
+          email: storedEmail,
+          tempToken: storedTempToken,
+          failedAttempts: 0,
+          resendCount: 0,
+          startedAt: Date.now(),
+        };
+        setTwoFactorVerifySession(nextSession);
       }
+
+      if (!nextSession) {
+        setSession(null);
+        return;
+      }
+
+      setSession(nextSession);
+      setFailedAttempts(nextSession.failedAttempts ?? 0);
     } catch {
-      setTempTokenState(null);
-      setMailHint(null);
+      setSession(null);
     }
 
     const frameId = requestAnimationFrame(() => setEntered(true));
     return () => cancelAnimationFrame(frameId);
   }, []);
 
+  useEffect(() => {
+    if (!resendSuccess) return;
+
+    const timer = setTimeout(() => {
+      setResendSuccess(null);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [resendSuccess]);
+
   async function onSubmit(e: AuthFormEvent) {
     e.preventDefault();
-    if (!tempToken || !mailHint || resettingSession) return;
+    if (!tempToken || !email || resettingSession) return;
 
     clearError();
+    setResendSuccess(null);
 
     const normalized = normalizeOtp(otpCode);
-    setOtpCode(normalized);
+    if (normalized !== otpCode) {
+      setOtpCode(normalized);
+    }
+
     if (!isValidOtp(normalized)) {
       showError(new Error(TEXT.invalidOtp), "2fa");
       return;
     }
 
     const currentSession = getTwoFactorVerifySession();
-    if (currentSession && isTempTokenExpired(currentSession)) {
+    if (isChallengeExpired(currentSession)) {
       clearTwoFactorChallengeAndRestart(TEXT.sessionExpiredShort);
       return;
     }
 
     try {
       setLoading(true);
-      const data = await authLogin2fa({ tempToken, otpCode: normalized });
+
+      const data = await authLogin2fa({
+        tempToken,
+        otpCode: normalized,
+      });
 
       if (data.status === "Success") {
         if (data.accessToken && data.user) {
@@ -155,21 +233,24 @@ export default function TwoFactorPage() {
             user: data.user,
           });
         }
+
         clearTwoFactorVerifySession();
         clearTempToken();
+        setFailedAttempts(0);
+
         scheduleRedirectByRole(data.user?.role);
         return;
       }
 
-      setFailedAttempts((prev) => prev + 1);
+      const nextAttempts = incrementFailedAttempts();
       logError(data);
 
       if (
         shouldResetTwoFactorSession(data.message) ||
-        failedAttempts + 1 >= MAX_VERIFY_ATTEMPTS
+        nextAttempts >= MAX_VERIFY_ATTEMPTS
       ) {
         clearTwoFactorChallengeAndRestart(
-          data.message ?? TEXT.sessionExpiredShort
+          data.message ?? TEXT.sessionExpiredShort,
         );
         return;
       }
@@ -177,25 +258,78 @@ export default function TwoFactorPage() {
       showError(new Error(data.message ?? "Xác thực 2FA thất bại"), "2fa");
     } catch (err) {
       logError(err);
-      setFailedAttempts((prev) => prev + 1);
+
+      const nextAttempts = incrementFailedAttempts();
 
       if (
         shouldResetTwoFactorSession(err) ||
-        failedAttempts + 1 >= MAX_VERIFY_ATTEMPTS
+        nextAttempts >= MAX_VERIFY_ATTEMPTS
       ) {
         clearTwoFactorChallengeAndRestart(
-          err instanceof Error ? err.message : TEXT.sessionExpiredShort
+          err instanceof Error ? err.message : TEXT.sessionExpiredShort,
         );
         return;
       }
 
-      showError(err, "2fa");
+      showError(
+        err instanceof Error ? err : new Error("Xác thực 2FA thất bại"),
+        "2fa",
+      );
     } finally {
       setLoading(false);
     }
   }
 
-  if (!tempToken || !mailHint) {
+  async function onResend() {
+    if (!email || resettingSession || isResending || remainingResends === 0) return;
+
+    clearError();
+    setResendSuccess(null);
+
+    try {
+      setIsResending(true);
+
+      const result = await authResendOtp({
+        email,
+        type: OtpType.TWO_FA,
+      });
+
+      const currentSession = getTwoFactorVerifySession();
+      const nextSession: TwoFactorVerifySession = {
+        email,
+        tempToken: tempToken ?? currentSession?.tempToken ?? "",
+        failedAttempts: 0,
+        resendCount: (currentSession?.resendCount ?? 0) + 1,
+        startedAt: Date.now(),
+      };
+
+      if (nextSession.tempToken) {
+        persistSession(nextSession);
+      }
+
+      setFailedAttempts(0);
+      setOtpCode("");
+      setResendSuccess(result.message ?? TEXT.resendSuccess);
+    } catch (err) {
+      logError(err);
+
+      if (shouldResetTwoFactorSession(err)) {
+        clearTwoFactorChallengeAndRestart(
+          err instanceof Error ? err.message : TEXT.sessionExpiredShort,
+        );
+        return;
+      }
+
+      showError(
+        err instanceof Error ? err : new Error("Không thể gửi lại OTP."),
+        "2fa",
+      );
+    } finally {
+      setIsResending(false);
+    }
+  }
+
+  if (!tempToken || !email) {
     return (
       <section className="mx-auto max-w-md text-center">
         <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
@@ -216,8 +350,6 @@ export default function TwoFactorPage() {
     );
   }
 
-  const controlsDisabled = loading || isRedirecting || resettingSession;
-
   return (
     <section
       className={`mx-auto max-w-md transition-all duration-500 ease-out motion-reduce:transition-none ${entered
@@ -225,9 +357,7 @@ export default function TwoFactorPage() {
           : "translate-y-2 opacity-0 motion-reduce:translate-y-0"
         }`}
     >
-      <header
-        className={`text-center ${entered ? "auth-animate-fade-up" : ""}`}
-      >
+      <header className={`text-center ${entered ? "auth-animate-fade-up" : ""}`}>
         <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
           {TEXT.codeTitle}
         </h2>
@@ -244,11 +374,8 @@ export default function TwoFactorPage() {
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             {TEXT.sentTo}
           </p>
-          <p
-            className="truncate font-mono text-sm font-semibold text-slate-800"
-            title={mailHint}
-          >
-            {formatEmailShort(mailHint)}
+          <p className="truncate font-mono text-sm font-semibold text-slate-800" title={email}>
+            {formatEmailShort(email)}
           </p>
         </div>
       </div>
@@ -273,6 +400,12 @@ export default function TwoFactorPage() {
           />
         </div>
 
+        {remainingAttempts > 0 && remainingAttempts < MAX_VERIFY_ATTEMPTS ? (
+          <p className="text-center text-sm font-semibold text-red-600">
+            Bạn còn {remainingAttempts} lần nhập với mã hiện tại.
+          </p>
+        ) : null}
+
         {error ? (
           <div
             className="flex gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-4 animate-in fade-in duration-200"
@@ -285,6 +418,14 @@ export default function TwoFactorPage() {
           </div>
         ) : null}
 
+        {resendSuccess ? (
+          <AuthStatusToast
+            visible={true}
+            tone="success"
+            message={resendSuccess}
+          />
+        ) : null}
+
         <button
           type="submit"
           disabled={controlsDisabled}
@@ -293,10 +434,39 @@ export default function TwoFactorPage() {
           {loading ? TEXT.loadingLabel : TEXT.submitLabel}
         </button>
 
-        <p className="border-t border-slate-200 pt-6 text-center text-sm font-medium text-slate-600">
+        <div className="flex flex-col items-center gap-3 border-t border-slate-200 pt-6">
+          <CountdownButton
+            onResend={onResend}
+            seconds={60}
+            initialCooldownSeconds={60}
+            label={
+              remainingResends === 0
+                ? "Đã hết lượt gửi lại"
+                : TEXT.resendLabel
+            }
+            resendLabel={TEXT.resendCooldownLabel}
+            variant="outline"
+            className="min-h-9 border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-500 shadow-none hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+            disabled={resendDisabled}
+          />
+
+          {remainingResends === 1 ? (
+            <p className="text-sm font-semibold text-amber-600">
+              Chỉ còn 1 lượt gửi lại OTP.
+            </p>
+          ) : null}
+
+          {remainingResends === 0 ? (
+            <p className="text-sm font-semibold text-red-600">
+              Bạn đã dùng hết 3 lượt gửi lại OTP.
+            </p>
+          ) : null}
+        </div>
+
+        <p className="pt-1 text-center text-sm font-medium text-slate-600">
           <Link
             href="/auth/login"
-            className="inline-flex min-h-14 items-center justify-center rounded-xl px-6 text-lg font-extrabold text-emerald-600 underline-offset-2 transition-colors hover:bg-emerald-50 hover:text-emerald-700 hover:underline"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl px-5 text-base font-bold text-emerald-600 underline-offset-2 transition-colors hover:bg-emerald-50 hover:text-emerald-700 hover:underline"
           >
             {TEXT.loginLabel}
           </Link>
