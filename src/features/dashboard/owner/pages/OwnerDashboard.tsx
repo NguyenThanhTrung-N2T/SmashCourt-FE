@@ -86,9 +86,10 @@ export function OwnerDashboard() {
         // shift the numbers, so skip the reload entirely
         if (filter === "Tất cả") return;
 
+        const typedPayload = payload as { branchId?: string } | undefined;
         // Skip events for branches the owner isn't currently viewing
         // (PaymentNotificationDto may not carry branchId — guard only when present)
-        if (payload?.branchId && selectedBranchId && payload.branchId !== selectedBranchId) return;
+        if (typedPayload?.branchId && selectedBranchId && typedPayload.branchId !== selectedBranchId) return;
 
         debouncedRefetch();
     });

@@ -137,7 +137,7 @@ function CancelBookingContent() {
         </div>
         <Button
           onClick={() => router.push("/")}
-          variant="outline"
+          variant="secondary"
           className="w-full rounded-full py-2.5"
         >
           Trở về Trang chủ
@@ -282,7 +282,7 @@ function CancelBookingContent() {
         <Button
           onClick={() => router.push("/")}
           disabled={isCancelling}
-          variant="outline"
+          variant="secondary"
           className="w-full rounded-full py-3"
         >
           Giữ Lịch Chơi
