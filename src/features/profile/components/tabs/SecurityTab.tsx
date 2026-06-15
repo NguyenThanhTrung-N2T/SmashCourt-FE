@@ -341,14 +341,25 @@ export function SecurityTab({ profile, showToast }: SecurityTabProps) {
 
         {/* Description */}
         <p className="text-sm text-muted leading-relaxed">
-          {twoFA.isEnabled
-            ? "2FA đang được bật. Mỗi lần đăng nhập bạn sẽ cần nhập mã OTP từ email. Điều này giúp ngăn chặn truy cập trái phép ngay cả khi mật khẩu bị lộ."
-            : "Khi bật 2FA, mỗi lần đăng nhập bạn sẽ cần nhập thêm mã OTP được gửi đến email. Đây là lớp bảo mật quan trọng giúp bảo vệ tài khoản."}
+          {isOAuthUser
+            ? "Tài khoản của bạn đăng nhập qua Google OAuth. Google đã tự động bảo mật tài khoản của bạn, vì vậy bạn không cần thiết lập 2FA tại đây."
+            : twoFA.isEnabled
+              ? "2FA đang được bật. Mỗi lần đăng nhập bạn sẽ cần nhập mã OTP từ email. Điều này giúp ngăn chặn truy cập trái phép ngay cả khi mật khẩu bị lộ."
+              : "Khi bật 2FA, mỗi lần đăng nhập bạn sẽ cần nhập thêm mã OTP được gửi đến email. Đây là lớp bảo mật quan trọng giúp bảo vệ tài khoản."}
         </p>
 
         {/* Toggle button */}
         <div className="flex justify-end pt-1">
-          {twoFA.isEnabled ? (
+          {isOAuthUser ? (
+            <Button
+              disabled={true}
+              variant="secondary"
+              className="opacity-50 cursor-not-allowed"
+            >
+              <ShieldCheck className="h-4 w-4 mr-2" />
+              Không khả dụng cho Google
+            </Button>
+          ) : twoFA.isEnabled ? (
             <Button
               variant="secondary"
               isLoading={twoFA.isRequestLoading}
