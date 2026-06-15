@@ -4,17 +4,18 @@
  * Main hook for managing bookings with filtering, pagination, and actions.
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useToast } from '@/src/shared/hooks/useToast';
 import {
   fetchAllBookings,
   fetchBookingDashboardSummary,
-  fetchBookingById,
+  fetchBookingDetailsById,
   checkInBooking,
   checkoutBooking,
   completePaymentBooking,
   cancelBookingByStaff,
   confirmBookingRefund,
+  fetchBookingById
 } from '@/src/api/booking.api';
 import type {
   BookingDto,
@@ -39,6 +40,11 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
   });
   const [summary, setSummary] = useState<BookingDashboardSummaryDto | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<BookingDto | null>(null);
+  const selectedBookingRef = useRef<BookingDto | null>(null);
+  useEffect(() => {
+    selectedBookingRef.current = selectedBooking;
+  }, [selectedBooking]);
+
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Table-specific filters
@@ -48,7 +54,7 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
 
   // Shared branch filter
   const [branchId, setBranchId] = useState<string | undefined>(initialBranchId);
-  
+
   // Load bookings
   const loadBookings = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
@@ -67,15 +73,12 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
       setLoading(false);
     }
   }, [tableFilters, branchId, showToast]);
-  
+
+  // Add a ref so patchBooking can read current items without a stale closure
+  const bookingsRef = useRef(bookings);
   useEffect(() => {
-    if (!enabled) return; // ← only gate here
-
-    const controller = new AbortController();
-    loadBookings(controller.signal);
-
-    return () => controller.abort(); // cancel if deps change before it finishes
-}, [loadBookings, enabled]);
+    bookingsRef.current = bookings;
+  }, [bookings]);
 
   // Load dashboard summary
   const loadSummary = useCallback(async () => {
@@ -88,6 +91,42 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
       console.error('Load summary error:', error);
     }
   }, [branchId]);
+  const patchBooking = useCallback(async (bookingId: string) => {
+    const isInCurrentPage = bookingsRef.current.items.some((b) => b.id === bookingId);
+
+    if (!isInCurrentPage) {
+      // New booking (or on a different page) — reload the list and summary
+      await Promise.all([loadBookings(), loadSummary()]);
+      return;
+    }
+
+    try {
+      const updated = await fetchBookingById(bookingId);
+      setBookings((prev) => {
+        const idx = prev.items.findIndex((b) => b.id === bookingId);
+        if (idx === -1) return prev;
+        const newItems = [...prev.items];
+        newItems[idx] = updated;
+        return { ...prev, items: newItems };
+      });
+      if (selectedBookingRef.current?.id === bookingId) {
+        setSelectedBooking(updated);
+      }
+    } catch (error) {
+      console.error('[patchBooking] error:', error);
+    }
+  }, [loadBookings, loadSummary]); // add these two deps
+
+  useEffect(() => {
+    if (!enabled) return; // ← only gate here
+
+    const controller = new AbortController();
+    loadBookings(controller.signal);
+
+    return () => controller.abort(); // cancel if deps change before it finishes
+  }, [loadBookings, enabled]);
+
+
 
   // Update table filters (resets pagination)
   const updateTableFilters = useCallback((newFilters: Partial<BookingTableFilters>) => {
@@ -110,7 +149,7 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
   // Open booking detail
   const openBookingDetail = useCallback(async (bookingId: string) => {
     try {
-      const booking = await fetchBookingById(bookingId);
+      const booking = await fetchBookingDetailsById(bookingId);
       setSelectedBooking(booking);
       setDrawerOpen(true);
     } catch (error) {
@@ -205,13 +244,6 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
     }
   }, [loadBookings, loadSummary, selectedBooking, openBookingDetail, showToast]);
 
-  // Load on mount and filter changes (only if enabled)
-  useEffect(() => {
-    if (enabled) {
-      loadBookings();
-    }
-  }, [loadBookings, enabled]);
-
   useEffect(() => {
     loadSummary();
   }, [loadSummary]);
@@ -236,5 +268,6 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
     refresh: loadBookings,
     toast,
     showToast,
+    patchBooking,
   };
 }

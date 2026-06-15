@@ -28,10 +28,14 @@ import { useManagerDashboard } from "@/src/features/dashboard/staff/hooks/useMan
 import { sortCourtsByPriority } from "@/src/features/dashboard/staff/utils/dashboard-helpers";
 import { EmptyState } from "@/src/shared/components/feedback/EmptyState";
 import { useRealtimeRefresh } from "@/src/shared/hooks/useRealtimeRefresh";
+import { getAuthUser } from "@/src/features/auth/session/sessionStore";
 
 export function BranchDashboard() {
     const router = useRouter();
     const { data, isLoading, error, refetch } = useManagerDashboard();
+
+    const user = getAuthUser();
+    const basePath = user?.role === "BRANCH_MANAGER" ? "/manager" : "/staff";
 
     // Subscribe to realtime refreshes
     useRealtimeRefresh(["bookings", "payments"], () => {
@@ -157,7 +161,7 @@ export function BranchDashboard() {
                     </div>
                     {data && data.totalCourts > 0 && (
                         <button
-                            onClick={() => router.push('/manager/courts')}
+                            onClick={() => router.push(`${basePath}/courts`)}
                             className="inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-secondary transition-colors"
                         >
                             Xem tất cả {data.totalCourts} sân
@@ -176,7 +180,7 @@ export function BranchDashboard() {
                                 court={court}
                                 onClick={() => {
                                     if (court.bookingId) {
-                                        router.push(`/manager/bookings?bookingId=${court.bookingId}`);
+                                        router.push(`${basePath}/bookings?bookingId=${court.bookingId}`);
                                     }
                                 }}
                             />
@@ -205,7 +209,7 @@ export function BranchDashboard() {
                             </p>
                         </div>
                         <button
-                            onClick={() => router.push('/manager/bookings')}
+                            onClick={() => router.push(`${basePath}/bookings`)}
                             className="inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-secondary transition-colors"
                         >
                             Xem tất cả
@@ -222,7 +226,7 @@ export function BranchDashboard() {
                                     key={booking.bookingId}
                                     booking={booking}
                                     onClick={() => {
-                                        router.push(`/manager/bookings/${booking.bookingId}`);
+                                        router.push(`${basePath}/bookings/${booking.bookingId}`);
                                     }}
                                 />
                             ))}
@@ -266,7 +270,7 @@ export function BranchDashboard() {
                                     key={action.bookingId}
                                     action={action}
                                     onClick={() => {
-                                        router.push(`/manager/bookings?bookingId=${action.bookingId}`);
+                                        router.push(`${basePath}/bookings?bookingId=${action.bookingId}`);
                                     }}
                                 />
                             ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "@phosphor-icons/react";
 import { PageHeader } from "@/src/shared/components/layout";
 import { Button, Toast, ConfirmationDialog } from "@/src/shared/components/ui";
@@ -21,6 +21,7 @@ import {
     CreateCourtModal,
     EditCourtModal,
 } from "@/src/features/court/staff/components";
+import { useCourtTimeline } from "../hooks/useCourtTimeline";
 
 interface CourtManagementBaseProps {
     allowManagement: boolean;
@@ -59,11 +60,32 @@ export function CourtManagementBase({ allowManagement, bookingPath }: CourtManag
     } = useCourtManagement();
 
     const { showToast } = useGlobalToast();
+    // ── Now state (today only) ──────────────────────────────────────────
+    const today = new Date().toISOString().split("T")[0];
+    const isToday = date === today;
+
+    const [now, setNow] = useState<Date | null>(isToday ? new Date() : null);
+    useEffect(() => {
+        if (!isToday) {
+            setNow(null);
+            return;
+        }
+        setNow(new Date());
+        const timer = setInterval(() => setNow(new Date()), 60000);
+        return () => clearInterval(timer);
+    }, [isToday]);
+    const {
+        data: timelineData,
+        loading: timelineLoading,
+        refresh: refreshTimeline,
+    } = useCourtTimeline(date, typeId || undefined, viewMode === "timeline");
 
     // Subscribe to realtime refreshes
     useRealtimeRefresh(["courts", "bookings"], (target, payload) => {
         handleRealtimeUpdate(target, payload);
-        console.log("Realtime update:", target, payload);
+        if (viewMode === "timeline") {
+            refreshTimeline();                   // keeps timeline blocks in sync
+        }
     });
 
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -146,8 +168,10 @@ export function CourtManagementBase({ allowManagement, bookingPath }: CourtManag
                 </div>
             ) : (
                 <CourtTimelineView
+                    data={timelineData}
+                    loading={timelineLoading}
+                    now={now}
                     date={date}
-                    typeId={typeId || undefined}
                     onViewDetail={openDrawer}
                     onBookingClick={setBookingDetailId}
                     onSlotClick={(courtId, time) => {

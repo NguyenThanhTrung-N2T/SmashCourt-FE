@@ -29,6 +29,7 @@ import { useEffect } from 'react';
 import { consumePrefill, WalkInPrefill } from '@/src/lib/walkInPrefill';
 import { useRealtimeRefresh } from '@/src/shared/hooks/useRealtimeRefresh';
 import { useGlobalToast } from '@/src/shared/hooks/useGlobalToast';
+import type { BookingNotificationDto } from '@/src/types/signalr.types';
 
 type ViewTab = 'table' | 'schedule' | 'calendar';
 type WorkspaceId = 'management' | string;
@@ -101,13 +102,42 @@ export function BookingManagementBase({
     handleCancel,
     handleConfirmRefund,
     refresh,
+    patchBooking
   } = useBookingManagement(initialBranchId, activeView === 'table');
 
-  // Subscribe to realtime refreshes
-  useRealtimeRefresh("bookings", () => {
-    refresh();
-    // If schedule or calendar are active, they might need refreshing too if they don't share the same data source
-    // In this case, useBookingManagement's refresh handles the main list.
+  // BOOKING LIST REAL TIME
+  useRealtimeRefresh("bookings", (_, payload: BookingNotificationDto | undefined) => {
+    const bookingId = payload?.bookingId;
+    if (!bookingId) {
+      refresh(); // broadcast with no ID → full reload fallback
+      return;
+    }
+
+    // Skip if the event belongs to a different branch than the one in view
+    if (payload.branchId && branchId && payload.branchId !== branchId) {
+      return;
+    }
+
+    patchBooking(bookingId);
+  });
+  // BOOKING HEAT MAP REAL TIME
+  useRealtimeRefresh("bookings", (_, payload: BookingNotificationDto | undefined) => {
+    // Branch guard — ignore events for branches not in view
+    if (payload?.branchId && branchId && payload.branchId !== branchId) {
+      return;
+    }
+
+    const bookingId = payload?.bookingId;
+
+    // Update booking list
+    if (bookingId) {
+      patchBooking(bookingId);
+    } else {
+      refresh();
+    }
+
+    // Update heatmap — no-op when calendar tab isn't active (guarded by enabled inside the hook)
+    calendar.refresh();
   });
   // ── URL helpers ──────────────────────────────────────────
   const pushParam = useCallback((key: string, value: string | null) => {

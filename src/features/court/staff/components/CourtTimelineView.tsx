@@ -1,26 +1,26 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { CalendarBlank, User, Clock } from "@phosphor-icons/react";
+import { useRef, useEffect } from "react";
+import { CalendarBlank, Clock } from "@phosphor-icons/react";
 import { Skeleton } from "@/src/shared/components/feedback/Skeleton";
 import { EmptyState } from "@/src/shared/components/layout";
-import { fetchCourtManagementTimeline } from "@/src/api/court.api";
 import { CourtTimelineSlotStatus, type CourtManagementTimelineDto } from "@/src/features/court/shared/types/court.types";
 import { formatTime, parseTimeToMinutes } from "@/src/features/timeslot/utils/timeFormat";
 import { format } from "date-fns";
 import { clsx } from "clsx";
 
 interface CourtTimelineViewProps {
-    date: string;
-    typeId?: string;
+    data: CourtManagementTimelineDto | null;
+    loading: boolean;
+    now: Date | null;       // null = not today, hide indicator
+    date: string;           // still needed to reset auto-scroll on date change
     onViewDetail: (courtId: string) => void;
     onBookingClick: (bookingId: string) => void;
     onSlotClick?: (courtId: string, startTime: string) => void;
 }
 
-// Layout constants
 const ROW_HEIGHT = 54;
-const HOUR_WIDTH = 120; // 2px per minute
+const HOUR_WIDTH = 120;
 const COURT_COLUMN_WIDTH = 200;
 
 function getTimePosition(time: string, dayStartMinutes: number) {
@@ -35,102 +35,48 @@ interface HourMarker {
 }
 
 export function CourtTimelineView({
+    data,
+    loading,
+    now,
     date,
-    typeId,
     onViewDetail,
     onBookingClick,
     onSlotClick,
 }: CourtTimelineViewProps) {
-    const [data, setData] = useState<CourtManagementTimelineDto | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [currentTime, setCurrentTime] = useState(new Date());
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const hasAutoScrolledRef = useRef(false);
-    const handleSlotClick = (courtId: string, time: string) => {
-        onSlotClick?.(courtId, time);
-    };
 
-    useEffect(() => {
-        const load = async () => {
-            setLoading(true);
-            try {
-                const result = await fetchCourtManagementTimeline({ date, typeId });
-                setData(result);
-            } catch (err) {
-                console.error("Failed to load timeline", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        load();
-    }, [date, typeId]);
+    // Keep a ref so auto-scroll reads the latest `now` without being
+    // triggered by every 60-second tick.
+    const nowRef = useRef(now);
+    useEffect(() => { nowRef.current = now; });
 
-    // Update current time every minute
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 60000);
-
-        return () => clearInterval(timer);
-    }, []);
-
-    // Reset auto-scroll when switching date
+    // Reset scroll flag whenever the user picks a different date
     useEffect(() => {
         hasAutoScrolledRef.current = false;
     }, [date]);
 
-    // Auto-scroll timeline to current time
+    // Auto-scroll to current time once when data first loads (today only)
     useEffect(() => {
-        if (
-            hasAutoScrolledRef.current ||
-            !data ||
-            !scrollContainerRef.current
-        ) {
-            return;
-        }
+        if (hasAutoScrolledRef.current || !data || !scrollContainerRef.current) return;
+        const currentNow = nowRef.current;
+        if (!currentNow) return; // not today
 
-        const isToday =
-            date === new Date().toISOString().split("T")[0];
+        const dayStartMinutes = parseTimeToMinutes(data.operatingHours.open);
+        const dayEndMinutes = parseTimeToMinutes(data.operatingHours.close);
+        const nowMinutes = currentNow.getHours() * 60 + currentNow.getMinutes();
 
-        if (!isToday) return;
-
-        const dayStartMinutes = parseTimeToMinutes(
-            data.operatingHours.open
-        );
-
-        const dayEndMinutes = parseTimeToMinutes(
-            data.operatingHours.close
-        );
-
-        const now = new Date();
-
-        const nowMinutes =
-            now.getHours() * 60 + now.getMinutes();
-
-        if (
-            nowMinutes < dayStartMinutes ||
-            nowMinutes > dayEndMinutes
-        ) {
-            return;
-        }
+        if (nowMinutes < dayStartMinutes || nowMinutes > dayEndMinutes) return;
 
         hasAutoScrolledRef.current = true;
 
-        const nowPosition =
-            (nowMinutes - dayStartMinutes) * 2;
-
+        const nowPosition = (nowMinutes - dayStartMinutes) * 2;
         const container = scrollContainerRef.current;
-
-        const targetScrollLeft =
-            COURT_COLUMN_WIDTH +
-            nowPosition -
-            container.clientWidth / 2;
-
         container.scrollTo({
-            left: Math.max(0, targetScrollLeft),
+            left: Math.max(0, COURT_COLUMN_WIDTH + nowPosition - container.clientWidth / 2),
             behavior: "smooth",
         });
-    }, [data, date]);
+    }, [data, date]); // `date` re-triggers after hasAutoScrolledRef resets
 
     if (loading) {
         return (
@@ -158,49 +104,33 @@ export function CourtTimelineView({
     const totalMinutes = dayEndMinutes - dayStartMinutes;
     const timelineWidth = (totalMinutes / 60) * HOUR_WIDTH;
 
-    // Generate hour markers
     const hourMarkers: HourMarker[] = [];
     for (let m = dayStartMinutes; m <= dayEndMinutes; m += 30) {
         const hours = Math.floor(m / 60);
         const minutes = m % 60;
-
-        const timeStr = `${hours.toString().padStart(2, "0")}:${minutes
-            .toString()
-            .padStart(2, "0")}`;
-
         hourMarkers.push({
-            time: timeStr,
+            time: `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`,
             left: (m - dayStartMinutes) * 2,
             isFullHour: minutes === 0,
         });
     }
 
-    const isToday = date === new Date().toISOString().split("T")[0];
-    const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-
-    const showNowIndicator =
-        isToday &&
-        nowMinutes >= dayStartMinutes &&
-        nowMinutes <= dayEndMinutes;
-
-    // Calculate position: each minute = 2px, relative to day start
+    // Derived from `now` prop — no internal state needed
+    const nowMinutes = now ? now.getHours() * 60 + now.getMinutes() : 0;
+    const showNowIndicator = now !== null && nowMinutes >= dayStartMinutes && nowMinutes <= dayEndMinutes;
     const nowPosition = showNowIndicator ? (nowMinutes - dayStartMinutes) * 2 : 0;
 
     const getBookingStyles = (status: CourtTimelineSlotStatus) => {
         switch (status) {
-            case CourtTimelineSlotStatus.PLAYING:
-                return "bg-[#9FE1CB] text-[#085041] border-[#7BCDB3]";
-            case CourtTimelineSlotStatus.COMPLETED:
-                return "bg-[#C0DD97] text-[#27500A] border-[#A8C97A]";
+            case CourtTimelineSlotStatus.PLAYING: return "bg-[#9FE1CB] text-[#085041] border-[#7BCDB3]";
+            case CourtTimelineSlotStatus.COMPLETED: return "bg-[#C0DD97] text-[#27500A] border-[#A8C97A]";
             case CourtTimelineSlotStatus.BOOKED:
-            default:
-                return "bg-[#B5D4F4] text-[#0C447C] border-[#92BEEB]";
+            default: return "bg-[#B5D4F4] text-[#0C447C] border-[#92BEEB]";
         }
     };
 
     return (
         <div className="flex flex-col h-full bg-surface-1 border border-border rounded-2xl overflow-hidden shadow-sm relative">
-            {/* Legend (Floating or Above) */}
             <div className="flex items-center gap-4 px-6 py-3 border-b border-border bg-surface-2/30">
                 <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-[#B5D4F4]" />
@@ -220,38 +150,23 @@ export function CourtTimelineView({
                 </div>
             </div>
 
-            {/* Scrollable Container */}
-            <div
-                ref={scrollContainerRef}
-                className="flex-1 overflow-auto custom-scrollbar relative"
-            >
+            <div ref={scrollContainerRef} className="flex-1 overflow-auto custom-scrollbar relative">
                 <div className="relative" style={{ width: COURT_COLUMN_WIDTH + timelineWidth }}>
-                    {/* CURRENT TIME INDICATOR */}
                     {showNowIndicator && (
-                    <div
-                        className="absolute top-0 bottom-0 z-[45] pointer-events-none"
-                        style={{ left: COURT_COLUMN_WIDTH + nowPosition }}
-                    >
-                        {/* Pill — sits in header area, centered on line */}
                         <div
-                            className="absolute z-[46]"
-                            style={{ top: 48, transform: 'translate(-50%, -50%)' }}
+                            className="absolute top-0 bottom-0 z-[45] pointer-events-none"
+                            style={{ left: COURT_COLUMN_WIDTH + nowPosition }}
                         >
-                            <div className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-md whitespace-nowrap">
-                                <Clock size={10} weight="fill" />
-                                {format(currentTime, 'HH:mm')}
+                            <div className="absolute z-[46]" style={{ top: 48, transform: "translate(-50%, -50%)" }}>
+                                <div className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-md whitespace-nowrap">
+                                    <Clock size={10} weight="fill" />
+                                    {format(now, "HH:mm")}
+                                </div>
                             </div>
+                            <div className="absolute left-0 bottom-0 w-[1.5px] bg-red-500/60" style={{ top: 48 }} />
                         </div>
+                    )}
 
-                        {/* Line starts BELOW the header (top: 48px = header height) */}
-                        <div
-                            className="absolute left-0 bottom-0 w-[1.5px] bg-red-500/60"
-                            style={{ top: 48 }}
-                        />
-                    </div>
-                )}
-
-                    {/* Header Row (Sticky top) */}
                     <div className="sticky top-0 z-40 flex bg-surface-2 border-b border-border">
                         <div
                             className="sticky left-0 z-50 bg-surface-2 border-r border-border shrink-0 flex items-center px-6 py-3"
@@ -263,10 +178,7 @@ export function CourtTimelineView({
                             {hourMarkers.map((marker) => (
                                 <div
                                     key={marker.time}
-                                    className={clsx(
-                                        "absolute top-0 bottom-0 border-l transition-colors",
-                                        marker.isFullHour ? "border-border" : "border-border/30"
-                                    )}
+                                    className={clsx("absolute top-0 bottom-0 border-l transition-colors", marker.isFullHour ? "border-border" : "border-border/30")}
                                     style={{ left: marker.left }}
                                 >
                                     {marker.isFullHour && (
@@ -279,16 +191,13 @@ export function CourtTimelineView({
                         </div>
                     </div>
 
-                    {/* Timeline Content */}
                     <div className="relative">
-
                         {data.courts.map((court) => (
                             <div
                                 key={court.id}
                                 className="flex group border-b border-border/50 last:border-0 hover:bg-surface-2/20 transition-colors"
                                 style={{ height: ROW_HEIGHT }}
                             >
-                                {/* Court Header (Sticky left) */}
                                 <div
                                     className="sticky left-0 z-20 bg-surface-1 border-r border-border group-hover:bg-surface-2/90 shrink-0 px-6 flex flex-col justify-center gap-0.5 cursor-pointer transition-colors"
                                     style={{ width: COURT_COLUMN_WIDTH }}
@@ -302,71 +211,45 @@ export function CourtTimelineView({
                                     </span>
                                 </div>
 
-                                {/* Timeline Row */}
                                 <div className="relative flex-1" style={{ width: timelineWidth }}>
-                                    {/* Grid Lines */}
                                     {hourMarkers.map((marker) => (
                                         <div
                                             key={marker.time}
-                                            className={clsx(
-                                                "absolute top-0 bottom-0 border-l pointer-events-none",
-                                                marker.isFullHour ? "border-border/50" : "border-border/10"
-                                            )}
+                                            className={clsx("absolute top-0 bottom-0 border-l pointer-events-none", marker.isFullHour ? "border-border/50" : "border-border/10")}
                                             style={{ left: marker.left }}
                                         />
                                     ))}
-
-                                    {/* Empty Slots Interactivity (behind bookings) */}
                                     {hourMarkers.slice(0, -1).map((marker, i) => (
                                         <div
                                             key={`empty-${i}`}
-                                            className="absolute top-0 bottom-0 hover:bg-[#EAF3DE] cursor-cell transition-colors group/cell z-0"
-                                            style={{
-                                                left: marker.left,
-                                                width: hourMarkers[i + 1].left - marker.left
-                                            }}
-                                            onClick={() => {
-                                                handleSlotClick(court.id, marker.time);
-                                            }}
+                                            className="absolute top-0 bottom-0 hover:bg-[#EAF3DE] cursor-cell transition-colors z-0"
+                                            style={{ left: marker.left, width: hourMarkers[i + 1].left - marker.left }}
+                                            onClick={() => onSlotClick?.(court.id, marker.time)}
                                         />
                                     ))}
-
-                                    {/* Bookings */}
                                     {court.slots.map((slot, idx) => {
                                         if (slot.status === CourtTimelineSlotStatus.AVAILABLE) return null;
-
                                         const left = getTimePosition(slot.startTime, dayStartMinutes);
-                                        const endLeft = getTimePosition(slot.endTime, dayStartMinutes);
-                                        const width = endLeft - left;
-
+                                        const width = getTimePosition(slot.endTime, dayStartMinutes) - left;
                                         return (
                                             <div
                                                 key={idx}
-                                                title={slot.isEarlyCheckout
-                                                    ? `Trả sân sớm — kết thúc ${slot.actualEndTime}, dự kiến ${slot.endTime}`
-                                                    : undefined}
+                                                title={slot.isEarlyCheckout ? `Trả sân sớm — kết thúc ${slot.actualEndTime}, dự kiến ${slot.endTime}` : undefined}
                                                 className={clsx(
                                                     "absolute top-[7px] bottom-[7px] border rounded-lg px-3 flex items-center justify-between cursor-pointer transition-all shadow-sm hover:z-50 hover:scale-[1.01] hover:shadow-md overflow-hidden z-10",
                                                     getBookingStyles(slot.status)
                                                 )}
                                                 style={{ left, width }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if (slot.bookingId) onBookingClick(slot.bookingId);
-                                                }}
+                                                onClick={(e) => { e.stopPropagation(); if (slot.bookingId) onBookingClick(slot.bookingId); }}
                                             >
                                                 <span className="text-[11px] font-black truncate mr-1">
                                                     {slot.playerName || "Khách vãng lai"}
                                                 </span>
                                                 <div className="flex items-center gap-1 shrink-0">
                                                     {slot.isEarlyCheckout && (
-                                                        <span className="text-[9px] font-black opacity-60 border border-current rounded px-1">
-                                                            Sớm
-                                                        </span>
+                                                        <span className="text-[9px] font-black opacity-60 border border-current rounded px-1">Sớm</span>
                                                     )}
-                                                    <span className="text-[10px] font-bold opacity-70">
-                                                        {formatTime(slot.startTime)}
-                                                    </span>
+                                                    <span className="text-[10px] font-bold opacity-70">{formatTime(slot.startTime)}</span>
                                                 </div>
                                             </div>
                                         );

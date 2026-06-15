@@ -1,8 +1,9 @@
-import React from "react";
 import { ManagerDashboardActionItemDto } from "@/src/features/report/shared/report.types";
-import { formatTimeRange, formatCurrency, getActionTypeConfig } from "../utils/dashboard-helpers";
+import { formatCurrency, getActionTypeConfig } from "../utils/dashboard-helpers";
 import { User, Phone, CourtBasketball, Clock, CalendarBlank } from "@phosphor-icons/react";
 import { Badge } from "@/src/shared/components/ui/Badge";
+import { formatDateTime } from "@/src/shared/utils/date";
+import { formatTimeRange } from "../utils/dashboard-helpers";
 
 interface ActionQueueItemProps {
     action: ManagerDashboardActionItemDto;
@@ -11,20 +12,12 @@ interface ActionQueueItemProps {
 
 export function ActionQueueItem({ action, onClick }: ActionQueueItemProps) {
     const actionConfig = getActionTypeConfig(action.actionType);
-    const createdDate = new Date(action.createdAt);
-    const formattedDate = createdDate.toLocaleDateString('vi-VN', { 
-        day: '2-digit', 
-        month: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
 
     return (
         <div
             onClick={onClick}
-            className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 transition-all duration-200 ${
-                onClick ? 'cursor-pointer hover:shadow-md hover:border-primary' : ''
-            }`}
+            className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 transition-all duration-200 ${onClick ? 'cursor-pointer hover:shadow-md hover:border-primary' : ''
+                }`}
         >
             {/* Header */}
             <div className="flex items-start justify-between mb-3">
@@ -100,7 +93,7 @@ export function ActionQueueItem({ action, onClick }: ActionQueueItemProps) {
                 <div className="flex items-center gap-2 text-xs">
                     <CalendarBlank size={14} weight="duotone" className="text-slate-400 flex-shrink-0" />
                     <span className="font-medium text-slate-400 dark:text-slate-500">
-                        Tạo lúc: {formattedDate}
+                        Tạo lúc: {formatDateTime(action.createdAt)}
                     </span>
                 </div>
             </div>

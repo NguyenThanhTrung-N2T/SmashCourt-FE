@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import {
     ChartLineUp,
     Calendar,
@@ -67,9 +67,30 @@ export function OwnerDashboard() {
     const groupByLabel = getGroupByLabel(filter);
     const { data, utilization, bookingTrend: trendData, isLoading, error, refetch } = useOwnerDashboard(filterDates);
 
-    // Subscribe to realtime refreshes
-    useRealtimeRefresh(["bookings", "payments"], () => {
-        if (refetch) refetch();
+    const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const debouncedRefetch = useCallback(() => {
+        if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+        refetchTimerRef.current = setTimeout(() => refetch(), 2000);
+    }, [refetch]);
+
+    useEffect(() => {
+        return () => {
+            if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+        };
+    }, []);
+
+    // ── Realtime (replace existing useRealtimeRefresh) ───────────────────
+    useRealtimeRefresh(["bookings", "payments"], (_, payload) => {
+        // "Tất cả" = all-time aggregate — one new booking doesn't meaningfully
+        // shift the numbers, so skip the reload entirely
+        if (filter === "Tất cả") return;
+
+        // Skip events for branches the owner isn't currently viewing
+        // (PaymentNotificationDto may not carry branchId — guard only when present)
+        if (payload?.branchId && selectedBranchId && payload.branchId !== selectedBranchId) return;
+
+        debouncedRefetch();
     });
 
     // ── Data Mapping ──

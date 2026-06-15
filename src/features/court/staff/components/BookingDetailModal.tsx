@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { User, Phone, Calendar, Clock, CurrencyCircleDollar, Warning, Check, X, PencilLine, Trash } from "@phosphor-icons/react";
 import { Modal, Button, Badge, Toast } from "@/src/shared/components/ui";
-import { fetchBookingById, checkInBooking, checkoutBooking, cancelBookingByStaff } from "@/src/api/booking.api";
+import { fetchBookingDetailsById, checkInBooking, checkoutBooking, cancelBookingByStaff } from "@/src/api/booking.api";
 import { BookingStatus, type BookingDto } from "@/src/features/booking/shared/types/booking.types";
 import { toBookingStatusValue } from "@/src/features/booking/shared/utils/bookingStatus";
 
@@ -38,7 +38,7 @@ export function BookingDetailModal({ isOpen, bookingId, onClose, onRefresh }: Bo
         const load = async () => {
             setLoading(true);
             try {
-                const data = await fetchBookingById(bookingId);
+                const data = await fetchBookingDetailsById(bookingId);
                 setBooking(data);
             } catch (err) {
                 console.error("Failed to fetch booking", err);
