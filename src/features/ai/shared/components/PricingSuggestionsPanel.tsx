@@ -7,7 +7,6 @@ import {
 } from "@phosphor-icons/react";
 import { useAISuggestion } from "@/src/features/ai/shared/hooks/useAISuggestion";
 import { getPricingSuggestions } from "@/src/api/ai.api";
-import { AIDateInput } from "@/src/features/ai/shared/components/AIDateInput";
 import type {
     PricingSuggestionDto,
     PricingSuggestionResponseDto,
@@ -49,11 +48,10 @@ function IncreaseBadge({ value }: { value: number }) {
     const isPositive = value >= 0;
     return (
         <span
-            className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-bold ${
-                isPositive
-                    ? "bg-emerald-500/10 text-emerald-500"
-                    : "bg-red-500/10 text-red-500"
-            }`}
+            className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-bold ${isPositive
+                ? "bg-emerald-500/10 text-emerald-500"
+                : "bg-red-500/10 text-red-500"
+                }`}
         >
             {isPositive ? "▲" : "▼"} {Math.abs(value).toFixed(1)}%
         </span>
@@ -67,8 +65,8 @@ function ConfidenceBar({ value }: { value: number }) {
         pct >= 75
             ? "bg-emerald-500"
             : pct >= 45
-            ? "bg-amber-500"
-            : "bg-red-500";
+                ? "bg-amber-500"
+                : "bg-red-500";
 
     return (
         <div className="flex items-center gap-2">
@@ -107,7 +105,7 @@ function SuggestionRow({ row }: { row: PricingSuggestionDto }) {
 
 function formatGeneratedAt(generatedAt: string): string {
     if (!generatedAt) return "";
-    
+
     // Try parse as ISO format first (from Python FastAPI)
     try {
         const date = new Date(generatedAt);
@@ -123,14 +121,14 @@ function formatGeneratedAt(generatedAt: string): string {
     } catch {
         // Fall through to try legacy format
     }
-    
+
     // Try legacy format dd/MM/yyyy HH:mm:ss (from .NET backend)
     const match = generatedAt.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/);
     if (match) {
         const [, day, month, year, hour, minute, second] = match;
         return `${day}-${month}-${year} ${hour}:${minute}:${second}`;
     }
-    
+
     return generatedAt;
 }
 
@@ -168,9 +166,11 @@ export function PricingSuggestionsPanel({ branchId }: PricingSuggestionsPanelPro
                         <label className="text-[10px] font-bold uppercase tracking-wider text-muted">
                             Từ ngày <span className="text-red-400">*</span>
                         </label>
-                        <AIDateInput
+                        <input
+                            type="date"
                             value={fromDate}
-                            onChange={setFromDate}
+                            max={toDate || undefined}
+                            onChange={(e) => setFromDate(e.target.value)}
                             className="w-full rounded-xl border-2 border-border bg-surface-2 px-3 py-2 text-sm font-medium text-foreground outline-none transition-all focus:border-primary/60 focus:ring-4 focus:ring-primary/10"
                         />
                     </div>
@@ -180,9 +180,11 @@ export function PricingSuggestionsPanel({ branchId }: PricingSuggestionsPanelPro
                         <label className="text-[10px] font-bold uppercase tracking-wider text-muted">
                             Đến ngày <span className="text-red-400">*</span>
                         </label>
-                        <AIDateInput
+                        <input
+                            type="date"
                             value={toDate}
-                            onChange={setToDate}
+                            min={fromDate || undefined}
+                            onChange={(e) => setToDate(e.target.value)}
                             className="w-full rounded-xl border-2 border-border bg-surface-2 px-3 py-2 text-sm font-medium text-foreground outline-none transition-all focus:border-primary/60 focus:ring-4 focus:ring-primary/10"
                         />
                     </div>
