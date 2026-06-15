@@ -18,7 +18,6 @@ export function useBookingCalendar(branchId?: string, enabled = true) {
   const loadHeatmap = useCallback(async () => {
     if (!enabled) return;
 
-    setLoading(true);
     try {
       const data = await fetchBookingCalendarHeatmap({
         year: calendarFilters.year,
@@ -35,9 +34,9 @@ export function useBookingCalendar(branchId?: string, enabled = true) {
   }, [calendarFilters.year, calendarFilters.month, branchId, enabled]);
 
   useEffect(() => {
-    if (enabled) {
-      loadHeatmap();
-    }
+    if (!enabled) return;
+    setLoading(true); // Only here — month/year/branch changes show skeleton, direct refresh() calls don't
+    loadHeatmap();
   }, [loadHeatmap, enabled]);
 
   const goToPreviousMonth = useCallback(() => {

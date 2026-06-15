@@ -57,20 +57,21 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
 
   // Load bookings
   const loadBookings = useCallback(async (signal?: AbortSignal) => {
-    setLoading(true);
+    // No setLoading(true) here — background calls stay silent
     try {
-      // Combine shared and table filters for API call
-      const apiFilters: BookingListQuery = {
-        ...tableFilters,
-        branchId,
-      };
+      const apiFilters: BookingListQuery = { ...tableFilters, branchId };
       const data = await fetchAllBookings(apiFilters);
+
+      // Abort guard — don't update state if the request was cancelled
+      if (signal?.aborted) return;
+
       setBookings(data);
     } catch (error) {
+      if (signal?.aborted) return; // also swallow abort errors
       showToast('error', 'Failed to load bookings');
       console.error('Load bookings error:', error);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }, [tableFilters, branchId, showToast]);
 
@@ -112,21 +113,19 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
       if (selectedBookingRef.current?.id === bookingId) {
         setSelectedBooking(updated);
       }
+      loadSummary();
     } catch (error) {
       console.error('[patchBooking] error:', error);
     }
   }, [loadBookings, loadSummary]); // add these two deps
 
   useEffect(() => {
-    if (!enabled) return; // ← only gate here
-
+    if (!enabled) return;
     const controller = new AbortController();
+    setLoading(true); // Only here — filter/branch changes show skeleton, direct calls don't
     loadBookings(controller.signal);
-
-    return () => controller.abort(); // cancel if deps change before it finishes
+    return () => controller.abort();
   }, [loadBookings, enabled]);
-
-
 
   // Update table filters (resets pagination)
   const updateTableFilters = useCallback((newFilters: Partial<BookingTableFilters>) => {
@@ -265,7 +264,9 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
     handleCompletePayment,
     handleCancel,
     handleConfirmRefund,
-    refresh: loadBookings,
+    refresh: useCallback(async () => {
+      await Promise.all([loadBookings(), loadSummary()]);
+    }, [loadBookings, loadSummary]),
     toast,
     showToast,
     patchBooking,

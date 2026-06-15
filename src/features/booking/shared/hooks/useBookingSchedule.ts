@@ -22,7 +22,6 @@ export function useBookingSchedule(branchId?: string, enabled = true) {
       return;
     }
 
-    setLoading(true);
     try {
       const data = await fetchBookingSchedule({
         date: scheduleFilters.date,
@@ -38,9 +37,9 @@ export function useBookingSchedule(branchId?: string, enabled = true) {
   }, [scheduleFilters.date, branchId, enabled]);
 
   useEffect(() => {
-    if (enabled) {
-      loadSchedule();
-    }
+    if (!enabled) return;
+    setLoading(true); // Only here — month/year/branch changes show skeleton, direct refresh() calls don't
+    loadSchedule();
   }, [loadSchedule, enabled]);
 
   const setSelectedDate = useCallback((date: string) => {

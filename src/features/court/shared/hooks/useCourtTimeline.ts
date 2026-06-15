@@ -8,7 +8,6 @@ export function useCourtTimeline(date: string, typeId?: string, enabled = true) 
 
     const loadTimeline = useCallback(async () => {
         if (!enabled) return;   // ← guard
-        setLoading(true);
         try {
             const result = await fetchCourtManagementTimeline({ date, typeId });
             setData(result);
@@ -21,7 +20,9 @@ export function useCourtTimeline(date: string, typeId?: string, enabled = true) 
     }, [date, typeId, enabled]);
 
     useEffect(() => {
-        if (enabled) loadTimeline();
+        if (!enabled) return;
+        setLoading(true); // Only here — date/type changes show skeleton, realtime refresh() calls don't
+        loadTimeline();
     }, [loadTimeline, enabled]);
 
     return { data, loading, refresh: loadTimeline };

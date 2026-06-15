@@ -105,39 +105,20 @@ export function BookingManagementBase({
     patchBooking
   } = useBookingManagement(initialBranchId, activeView === 'table');
 
-  // BOOKING LIST REAL TIME
   useRealtimeRefresh("bookings", (_, payload: BookingNotificationDto | undefined) => {
-    const bookingId = payload?.bookingId;
-    if (!bookingId) {
-      refresh(); // broadcast with no ID → full reload fallback
-      return;
-    }
-
-    // Skip if the event belongs to a different branch than the one in view
-    if (payload.branchId && branchId && payload.branchId !== branchId) {
-      return;
-    }
-
-    patchBooking(bookingId);
-  });
-  // BOOKING HEAT MAP REAL TIME
-  useRealtimeRefresh("bookings", (_, payload: BookingNotificationDto | undefined) => {
-    // Branch guard — ignore events for branches not in view
-    if (payload?.branchId && branchId && payload.branchId !== branchId) {
-      return;
-    }
+    // Branch guard — ignore events not belonging to the current branch view
+    if (payload?.branchId && branchId && payload.branchId !== branchId) return;
 
     const bookingId = payload?.bookingId;
 
-    // Update booking list
     if (bookingId) {
-      patchBooking(bookingId);
+      patchBooking(bookingId); // Targeted patch, no loading flash
     } else {
-      refresh();
+      refresh(); // Fallback full reload when no ID present
     }
-
-    // Update heatmap — no-op when calendar tab isn't active (guarded by enabled inside the hook)
+    // Update heatmap — no-op when calendar tab isn't active (guarded inside the hook)
     calendar.refresh();
+    schedule.refresh();
   });
   // ── URL helpers ──────────────────────────────────────────
   const pushParam = useCallback((key: string, value: string | null) => {
