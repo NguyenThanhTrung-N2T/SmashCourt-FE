@@ -16,6 +16,7 @@ export interface BookingNotificationDto {
   customerName: string;
   branchId: string;
   branchName: string;
+  courtIds: string[];
   status: string;
   message: string;
   timestamp: string; // ISO 8601 datetime string

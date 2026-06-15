@@ -119,11 +119,22 @@ export async function fetchBookingCalendarHeatmap(
 }
 
 /**
- * Get management booking detail.
+ * Get a single booking by id.
  */
 export async function fetchBookingById(id: string): Promise<BookingDto> {
   const response = await authProtectedFetch<BookingDto>(
     `/api/bookings/${id}`,
+    { method: "GET" }
+  );
+  if (!response.data) throw new Error("Failed to fetch booking");
+  return response.data;
+}
+/**
+ * Get management booking detail.
+ */
+export async function fetchBookingDetailsById(id: string): Promise<BookingDto> {
+  const response = await authProtectedFetch<BookingDto>(
+    `/api/bookings/details/${id}`,
     { method: "GET" }
   );
   if (!response.data) throw new Error("Failed to fetch booking details");

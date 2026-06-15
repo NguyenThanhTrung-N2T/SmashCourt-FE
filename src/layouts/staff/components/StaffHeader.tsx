@@ -15,6 +15,7 @@ import { SmartImage } from "@/src/shared/components/ui";
 import ThemeToggle from "@/src/shared/components/ui/ThemeToggle";
 import { STAFF_ACCOUNT_MENU } from "../navigation/staff.navigation";
 import Link from "next/link";
+import { NotificationBell } from "@/src/features/notifications/components/NotificationBell";
 
 function getInitials(fullName: string) {
     const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -31,6 +32,7 @@ type StaffHeaderProps = {
     onMenuToggle: () => void;
     onLogout: () => void;
     isLoggingOut: boolean;
+    onOpenNotifications: () => void;
 };
 
 export default function StaffHeader({
@@ -39,6 +41,7 @@ export default function StaffHeader({
     onMenuToggle,
     onLogout,
     isLoggingOut,
+    onOpenNotifications,
 }: StaffHeaderProps) {
     const searchInputRef = useRef<HTMLInputElement>(null);
     const [profileOpen, setProfileOpen] = useState(false);
@@ -112,16 +115,7 @@ export default function StaffHeader({
 
             {/* Right: notification + theme toggle + profile */}
             <div className="flex items-center gap-3">
-                <button
-                    aria-label="Thông báo"
-                    className="relative flex h-10 w-10 items-center justify-center rounded-full bg-surface-1 text-muted hover:text-foreground shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B5E38]"
-                >
-                    <Bell className="h-[18px] w-[18px]" />
-                    <span
-                        className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-red-500 border-2 border-surface-1"
-                        aria-label="Có thông báo mới"
-                    />
-                </button>
+                <NotificationBell onClick={onOpenNotifications} />
 
                 {/* Theme toggle */}
                 <ThemeToggle />

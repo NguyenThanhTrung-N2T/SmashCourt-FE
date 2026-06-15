@@ -8,12 +8,14 @@ import ThemeToggle from "@/src/shared/components/ui/ThemeToggle";
 import UserAccountMenu from "./UserAccountMenu";
 import { CUSTOMER_TOP_NAV } from "../navigation/customer.navigation";
 import type { AuthUser } from "@/src/shared/types/auth.types";
+import { NotificationBell } from "@/src/features/notifications/components/NotificationBell";
 
 interface CustomerTopNavProps {
   user: AuthUser;
   onLogout: () => void;
   isLoggingOut: boolean;
   onMobileMenuToggle: () => void;
+  onOpenNotifications: () => void;
 }
 
 export default function CustomerTopNav({
@@ -21,6 +23,7 @@ export default function CustomerTopNav({
   onLogout,
   isLoggingOut,
   onMobileMenuToggle,
+  onOpenNotifications,
 }: CustomerTopNavProps) {
   const pathname = usePathname();
 
@@ -79,8 +82,8 @@ export default function CustomerTopNav({
                 aria-current={active ? "page" : undefined}
                 title={item.hint}
                 className={`group relative flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 overflow-hidden ${active
-                    ? "bg-gradient-to-r from-primary/15 to-primary/10 text-primary shadow-lg shadow-primary/20 border border-primary/20"
-                    : "text-muted hover:text-foreground hover:bg-surface-2/80 hover:shadow-md hover:scale-105"
+                  ? "bg-gradient-to-r from-primary/15 to-primary/10 text-primary shadow-lg shadow-primary/20 border border-primary/20"
+                  : "text-muted hover:text-foreground hover:bg-surface-2/80 hover:shadow-md hover:scale-105"
                   }`}
               >
                 {/* Background glow effect for active state */}
@@ -107,6 +110,9 @@ export default function CustomerTopNav({
           {/* Theme Toggle */}
           <ThemeToggle variant="icon" />
 
+          {/* Notification Bell */}
+          <NotificationBell onClick={onOpenNotifications} />
+
           {/* User Account Menu (Desktop Only) */}
           <div className="hidden md:block">
             <UserAccountMenu
@@ -129,3 +135,4 @@ export default function CustomerTopNav({
     </nav>
   );
 }
+

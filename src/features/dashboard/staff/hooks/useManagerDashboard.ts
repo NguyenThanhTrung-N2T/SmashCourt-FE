@@ -15,13 +15,10 @@ interface UseManagerDashboardResult {
     refetch: () => Promise<void>;
 }
 
-const AUTO_REFRESH_INTERVAL = 60000; // 60 seconds
-
 export function useManagerDashboard(filter: ReportFilterDto = {}): UseManagerDashboardResult {
     const [data, setData] = useState<OperationalManagerDashboardDto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     // Serialize filter to prevent infinite loops from object reference changes
     const filterKey = JSON.stringify(filter);
@@ -45,26 +42,6 @@ export function useManagerDashboard(filter: ReportFilterDto = {}): UseManagerDas
     useEffect(() => {
         setIsLoading(true);
         fetchData();
-    }, [fetchData]);
-
-    // Auto-refresh setup
-    useEffect(() => {
-        // Clear existing interval
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-        }
-
-        // Set up new interval for auto-refresh
-        intervalRef.current = setInterval(() => {
-            fetchData();
-        }, AUTO_REFRESH_INTERVAL);
-
-        // Cleanup on unmount
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
-        };
     }, [fetchData]);
 
     return {

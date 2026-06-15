@@ -15,6 +15,7 @@ import {
   toBookingStatusValue,
   toInvoicePaymentStatusValue,
 } from "@/src/features/booking/shared/utils/bookingStatus";
+import { useRealtimeRefresh } from "@/src/shared/hooks/useRealtimeRefresh";
 
 const PAGE_SIZE = 12;
 
@@ -41,6 +42,11 @@ export function BookingHistoryList() {
   }, [searchParams]);
 
   const { bookings, isLoading, error, updateQuery, query, refetch } = useCustomerBookings(queryFromUrl);
+
+  // Subscribe to realtime refreshes
+  useRealtimeRefresh("bookings", () => {
+    refetch();
+  });
 
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const { retryPayment, isLoading: isRetryingPayment, error: paymentError, clearError } = useRetryPayment();

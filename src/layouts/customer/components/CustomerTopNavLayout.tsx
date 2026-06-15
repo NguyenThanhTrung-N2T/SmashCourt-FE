@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import CustomerTopNav from "./CustomerTopNav";
 import MobileNav from "./MobileNav";
 import { authLogout } from "@/src/api/auth.api";
-import { Toast } from "@/src/shared/components/ui/Toast";
-import { useToast } from "@/src/shared/hooks/useToast";
+import { useGlobalToast } from "@/src/shared/hooks/useGlobalToast";
 import {
   broadcastLogoutSync,
   clearAuthSession,
@@ -14,21 +13,24 @@ import {
 } from "@/src/features/auth/session/sessionStore";
 import type { AuthUser } from "@/src/shared/types/auth.types";
 import { AIAssistantWidget } from "@/src/features/ai/shared/components/AIAssistantWidget";
+import { RealtimeProviders } from "@/src/contexts/RealtimeProviders";
+import { NotificationDrawer } from "@/src/features/notifications/components/NotificationDrawer";
 
 interface CustomerTopNavLayoutProps {
   user: AuthUser;
   children: ReactNode;
 }
 
-export default function CustomerTopNavLayout({
+function CustomerTopNavLayoutInner({
   user,
   children,
 }: CustomerTopNavLayoutProps) {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const router = useRouter();
-  const { toast, show: showToast } = useToast();
+  const { showToast } = useGlobalToast();
 
   // Handle mobile drawer toggle
   const handleMobileMenuToggle = () => {
@@ -60,6 +62,8 @@ export default function CustomerTopNavLayout({
     }, 1200);
   };
 
+  void redirecting;
+
   return (
     <div className="h-screen bg-background overflow-y-auto custom-scrollbar">
       {/* Top Navigation */}
@@ -68,6 +72,7 @@ export default function CustomerTopNavLayout({
         onLogout={handleLogout}
         isLoggingOut={isLoggingOut}
         onMobileMenuToggle={handleMobileMenuToggle}
+        onOpenNotifications={() => setNotifOpen(true)}
       />
 
       {/* Mobile Navigation Drawer */}
@@ -87,7 +92,15 @@ export default function CustomerTopNavLayout({
       {/* Floating AI Assistant — available on all customer pages */}
       <AIAssistantWidget role="CUSTOMER" />
 
-      <Toast toast={toast} />
+      <NotificationDrawer open={notifOpen} onClose={() => setNotifOpen(false)} />
     </div>
+  );
+}
+
+export default function CustomerTopNavLayout(props: CustomerTopNavLayoutProps) {
+  return (
+    <RealtimeProviders>
+      <CustomerTopNavLayoutInner {...props} />
+    </RealtimeProviders>
   );
 }

@@ -88,8 +88,6 @@ export interface LiveCourtAttentionDto {
     customerPhone: string | null;
     startTime: string | null;
     endTime: string | null;
-    minutesUntilStart: number | null;
-    minutesSinceStart: number | null;
     amountDue: number | null;
     paymentStatus: string | null;
 }

@@ -6,6 +6,11 @@ import { useDebounceSearch } from "@/src/shared/hooks/useDebounceSearch";
 import { searchCustomers } from "@/src/api/customer.api";
 import type { CustomerSearchDto } from "@/src/features/customer/shared/types/customer.types";
 import type { CustomerPaneProps } from "@/src/features/booking/shared/types/walkinBooking.types";
+import {
+    createValidatedChangeHandler,
+    ValidationRules,
+} from "@/src/shared/utils/inputValidation";
+import { Phone } from "@phosphor-icons/react";
 
 const TIER_CONFIG: Record<
     string,
@@ -217,15 +222,24 @@ export function CustomerPane({
                             label="Email"
                             type="email"
                             value={form.guestEmail}
-                            onChange={(e) => updateForm({ guestEmail: e.target.value })}
+                            onChange={createValidatedChangeHandler(
+                                (val) => updateForm({ guestEmail: val }),
+                                ValidationRules.emailFormat
+                            )}
                             placeholder="Tự điền từ tài khoản"
+                            error={errors.guestEmail}
                         />
                         <div className="md:col-span-1">
                             <Input
                                 label="Số điện thoại"
                                 value={form.guestPhone}
-                                onChange={(e) => updateForm({ guestPhone: e.target.value })}
-                                placeholder="Tự điền từ tài khoản"
+                                onChange={createValidatedChangeHandler(
+                                    (val) => updateForm({ guestPhone: val }),
+                                    ValidationRules.phoneFormat
+                                )}
+                                placeholder="Ví dụ: 0901234567"
+                                error={errors.guestPhone}
+                                leftIcon={<Phone className="h-4 w-4" />}
                             />
                         </div>
                     </div>

@@ -18,28 +18,27 @@ import type { TimeGridSlotDto } from "../types/timeslot.types";
 interface TimeGridSelectorProps {
   branchId: string;
   courtId: string;
+  courtTypeId: string;
   courtName: string;
   date: string; // YYYY-MM-DD
   selectedSlots: TimeGridSlotDto[];
   onSlotsChange: (slots: TimeGridSlotDto[]) => void;
-  autoRefresh?: boolean;
 }
 
 export function TimeGridSelector({
   branchId,
   courtId,
+  courtTypeId,
   courtName,
   date,
   selectedSlots,
   onSlotsChange,
-  autoRefresh = true,
 }: TimeGridSelectorProps) {
-  const { slots, isLoading, error, refetch } = useTimeGrid({
+  const { slots, isLoading, error } = useTimeGrid({
     branchId,
     courtId,
+    courtTypeId,
     date,
-    autoRefresh,
-    refreshInterval: 30000, // 30 seconds
   });
 
   const handleSlotClick = (slot: TimeGridSlotDto) => {

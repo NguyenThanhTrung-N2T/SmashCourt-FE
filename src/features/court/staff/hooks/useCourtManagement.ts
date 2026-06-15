@@ -12,6 +12,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
     fetchCourtManagementStats,
     fetchCourtManagementCourts,
+    fetchCourtManagementCourtsByIds,
     suspendCourt,
     activateCourt,
     deleteCourt,
@@ -78,17 +79,17 @@ export function useCourtManagement() {
     }, []);
 
     // ── Data Fetching ───────────────────────────────────────────────────────────
-    const loadStats = useCallback(async (isPolling = false) => {
-        if (!isPolling) setLoadingStats(true);
+    const loadStats = useCallback(async (silent = false) => {
+        if (!silent) setLoadingStats(true);
         try {
-            const data = await fetchCourtManagementStats({ date });
+            const data = await fetchCourtManagementStats();
             if (isMounted.current) setStats(data);
         } catch {
-            if (isMounted.current && !isPolling) showToast("error", "Không thể tải thống kê sân");
+            if (isMounted.current && !silent) showToast("error", "Không thể tải thống kê sân");
         } finally {
             if (isMounted.current) setLoadingStats(false);
         }
-    }, [date, showToast]);
+    }, [showToast]);
 
     const loadCourts = useCallback(async () => {
         setLoadingCourts(true);
@@ -117,22 +118,52 @@ export function useCourtManagement() {
         loadCourts();
     }, [loadCourts]);
 
-    // Polling for stats every 30s only if date is today
+    // Polling for stats every 2 mins as a fallback
     useEffect(() => {
-        const isToday = date === new Date().toISOString().split("T")[0];
-        if (!isToday) return;
-
         const interval = setInterval(() => {
             loadStats(true);
-        }, 30000);
+        }, 120000);
 
         return () => clearInterval(interval);
-    }, [date, loadStats]);
+    }, [loadStats]);
 
     const refresh = useCallback(() => {
         loadStats();
         loadCourts();
     }, [loadStats, loadCourts]);
+
+    const handleRealtimeUpdate = useCallback(async (target: string, payload: any) => {
+        if (target === "courts" || target === "bookings") {
+            // "Silent" stats update on every court/booking event
+            loadStats(true);
+
+            // "Targeted Fetch": If payload has courtIds, fetch only those cards
+            if (payload && Array.isArray(payload.courtIds) && payload.courtIds.length > 0) {
+                try {
+                    const updatedCards = await fetchCourtManagementCourtsByIds(payload.courtIds, { date });
+                    if (isMounted.current) {
+                        setCourtsPaged(prev => {
+                            if (!prev) return prev;
+                            const newItems = prev.items.map(court => {
+                                const updated = updatedCards.find(u => u.id === court.id);
+                                return updated ? updated : court;
+                            });
+                            return { ...prev, items: newItems };
+                        });
+                    }
+                } catch {
+                    // Fallback to full reload on error
+                    loadCourts();
+                }
+            } else {
+                loadCourts();
+            }
+        } else if (target === "dashboard") {
+            loadStats();
+        } else {
+            refresh();
+        }
+    }, [date, loadCourts, loadStats, refresh]);
 
     // ── Mutations ──────────────────────────────────────────────────────────────
 
@@ -221,6 +252,7 @@ export function useCourtManagement() {
         page,
         setPage,
         refresh,
+        handleRealtimeUpdate,
         // Mutations
         handleSuspend,
         handleActivate,

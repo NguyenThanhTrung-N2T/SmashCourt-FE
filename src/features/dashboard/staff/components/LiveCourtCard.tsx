@@ -1,7 +1,8 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { LiveCourtAttentionDto } from "@/src/features/report/shared/report.types";
 import { getAttentionStatusConfig, formatTimeRange, formatRelativeTime, formatCurrency, getCourtStatusVietnamese } from "../utils/dashboard-helpers";
 import { User, Phone, Clock } from "@phosphor-icons/react";
+import { differenceInMinutes } from "date-fns";
 
 interface LiveCourtCardProps {
     court: LiveCourtAttentionDto;
@@ -12,13 +13,29 @@ export function LiveCourtCard({ court, onClick }: LiveCourtCardProps) {
     const statusConfig = getAttentionStatusConfig(court.attentionStatus);
     const isAvailable = court.attentionStatus === 'AVAILABLE';
     const isPendingPayment = court.attentionStatus === 'PENDING_PAYMENT';
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setNow(new Date());
+        }, 60000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const minutesSinceStart = court.startTime
+        ? differenceInMinutes(now, new Date(court.startTime))
+        : null;
+
+    const minutesUntilStart = court.startTime
+        ? differenceInMinutes(new Date(court.startTime), now)
+        : null;
 
     return (
         <div
             onClick={onClick}
-            className={`relative bg-white dark:bg-slate-800 border-2 rounded-2xl p-5 transition-all duration-200 ${
-                onClick ? 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5' : ''
-            }`}
+            className={`relative bg-white dark:bg-slate-800 border-2 rounded-2xl p-5 transition-all duration-200 ${onClick ? 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5' : ''
+                }`}
             style={{ borderColor: statusConfig.color }}
         >
             {/* Status Badge */}
@@ -32,7 +49,7 @@ export function LiveCourtCard({ court, onClick }: LiveCourtCardProps) {
                 >
                     <span>{statusConfig.label}</span>
                 </div>
-                
+
                 {/* Court Status */}
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     {getCourtStatusVietnamese(court.courtStatus)}
@@ -82,13 +99,16 @@ export function LiveCourtCard({ court, onClick }: LiveCourtCardProps) {
                     )}
 
                     {/* Relative Time */}
-                    {(court.minutesUntilStart !== null || court.minutesSinceStart !== null) && (
+                    {(minutesUntilStart !== null || minutesSinceStart !== null) && (
                         <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
                             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                                {court.minutesUntilStart !== null
-                                    ? formatRelativeTime(court.minutesUntilStart)
-                                    : formatRelativeTime(court.minutesSinceStart ? -court.minutesSinceStart : null)
-                                }
+                                {minutesUntilStart !== null && minutesUntilStart > 0
+                                    ? formatRelativeTime(minutesUntilStart)
+                                    : formatRelativeTime(
+                                        minutesSinceStart !== null
+                                            ? -minutesSinceStart
+                                            : null
+                                    )}
                             </span>
                         </div>
                     )}
