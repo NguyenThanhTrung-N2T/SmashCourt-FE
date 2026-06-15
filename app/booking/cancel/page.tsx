@@ -49,7 +49,7 @@ function CancelBookingContent() {
         const error = err as Error;
         setError(
           error?.message ||
-            "Không thể tìm thấy thông tin đơn đặt sân hoặc token đã hết hạn."
+          "Không thể tìm thấy thông tin đơn đặt sân hoặc token đã hết hạn."
         );
       } finally {
         setIsLoading(false);
@@ -260,7 +260,7 @@ function CancelBookingContent() {
             </>
           ) : (
             <p className="text-red-600/90 dark:text-red-400 font-semibold">
-              ⚠️ Đơn này không đủ điều kiện hoàn tiền (hoàn 0%) do hủy quá gần giờ chơi hoặc quá thời hạn quy định.
+              Đơn này không đủ điều kiện hoàn tiền (hoàn 0%) do hủy quá gần giờ chơi hoặc quá thời hạn quy định.
             </p>
           )}
           <p className="text-[11px] mt-1 italic">

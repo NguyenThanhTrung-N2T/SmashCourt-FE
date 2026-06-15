@@ -5,7 +5,7 @@
  * and provides listener for system theme changes.
  */
 
-import type { SystemTheme } from "@/src/types/theme.types";
+import type { SystemTheme } from "@/src/shared/types/theme.types";
 
 /**
  * Media query for detecting dark mode preference
@@ -59,12 +59,12 @@ export function onSystemThemeChange(
 ): () => void {
   if (!isSystemThemeSupported()) {
     // Return no-op cleanup function
-    return () => {};
+    return () => { };
   }
 
   try {
     const mediaQuery = window.matchMedia(DARK_MODE_QUERY);
-    
+
     // Modern browsers support addEventListener
     const listener = (e: MediaQueryListEvent) => {
       callback(e.matches ? "dark" : "light");
@@ -73,25 +73,25 @@ export function onSystemThemeChange(
     // Try modern API first
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener("change", listener);
-      
+
       return () => {
         mediaQuery.removeEventListener("change", listener);
       };
     }
-    
+
     // Fallback to deprecated API for older browsers
     if (mediaQuery.addListener) {
       mediaQuery.addListener(listener);
-      
+
       return () => {
         mediaQuery.removeListener(listener);
       };
     }
 
     // No listener support
-    return () => {};
+    return () => { };
   } catch (error) {
     console.warn("Failed to setup system theme listener:", error);
-    return () => {};
+    return () => { };
   }
 }

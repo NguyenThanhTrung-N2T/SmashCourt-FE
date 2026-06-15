@@ -2,7 +2,7 @@
 
 import { X, CheckCircle, XCircle, Info, Warning } from "@phosphor-icons/react";
 import { useToastContext } from "@/src/contexts/ToastContext";
-import type { ToastMessage, ToastTone } from "@/src/types/notification.types";
+import type { ToastMessage, ToastTone } from "@/src/shared/types/notification.types";
 
 // ---------------------------------------------------------------------------
 // Individual Toast Item

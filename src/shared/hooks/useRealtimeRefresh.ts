@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import type { RefreshTarget } from "@/src/types/notification.types";
+import type { RefreshTarget } from "@/src/shared/types/notification.types";
 
 const REFRESH_EVENT = "smashcourt:realtime-refresh";
 
@@ -30,33 +30,37 @@ export function publishRefresh(target: RefreshTarget, payload?: unknown): void {
  * useRealtimeRefresh("bookings", () => fetchBookings());
  * useRealtimeRefresh(["bookings", "dashboard"], () => router.refresh());
  */
-export function useRealtimeRefresh(
+export function useRealtimeRefresh<TPayload = unknown>(
     target: RefreshTarget | RefreshTarget[],
-    callback: (target: RefreshTarget, payload?: unknown) => void,
+    callback: (target: RefreshTarget, payload?: TPayload) => void,
 ): void {
-    // Use ref pattern instead of useCallback([]) to always call latest callback
     const callbackRef = useRef(callback);
+
     useEffect(() => {
         callbackRef.current = callback;
-    }); // no deps = always latest
+    });
 
-    // Stabilize the target array with useMemo in the caller, or stringify here
     const targetKey = Array.isArray(target) ? target.join(",") : target;
 
     useEffect(() => {
         function handleEvent(e: Event) {
-            const detail = (e as CustomEvent<{ target: RefreshTarget; payload?: unknown }>).detail;
+            const detail = (
+                e as CustomEvent<{
+                    target: RefreshTarget;
+                    payload?: TPayload;
+                }>
+            ).detail;
+
             if (!detail) return;
 
             const targets = targetKey.split(",") as RefreshTarget[];
-            const isMatch = targets.includes(detail.target);
 
-            if (isMatch) {
-                callbackRef.current(detail.target, detail.payload); // always calls latest, never stale
+            if (targets.includes(detail.target)) {
+                callbackRef.current(detail.target, detail.payload);
             }
         }
 
         window.addEventListener(REFRESH_EVENT, handleEvent);
         return () => window.removeEventListener(REFRESH_EVENT, handleEvent);
-    }, [targetKey]); // stable string, not array reference
+    }, [targetKey]);
 }

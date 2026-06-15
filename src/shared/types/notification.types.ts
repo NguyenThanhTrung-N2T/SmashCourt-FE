@@ -2,7 +2,7 @@ import type { SignalREventName } from "@/src/lib/signalr-events";
 import type {
     BookingNotificationDto,
     PaymentNotificationDto,
-} from "@/src/types/signalr.types";
+} from "@/src/shared/types/signalr.types";
 
 /**
  * Unified notification item stored in the notification center.

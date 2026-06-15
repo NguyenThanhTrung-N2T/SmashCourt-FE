@@ -6,7 +6,7 @@ import { useSignalRContext } from "@/src/contexts/SignalRContext";
 import { getAuthUser } from "@/src/features/auth/session/sessionStore";
 import { SignalREvents } from "@/src/lib/signalr-events";
 import type { TimeGridSlotDto } from "../types/timeslot.types";
-import { RefreshTarget } from "@/src/types/notification.types";
+import { RefreshTarget } from "@/src/shared/types/notification.types";
 import { debounce } from "lodash";
 
 interface UseTimeGridParams {

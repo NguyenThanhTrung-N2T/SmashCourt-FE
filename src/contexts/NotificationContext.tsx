@@ -6,7 +6,7 @@ import React, {
     useContext,
     useReducer,
 } from "react";
-import type { NotificationItem } from "@/src/types/notification.types";
+import type { NotificationItem } from "@/src/shared/types/notification.types";
 
 // ---------------------------------------------------------------------------
 // State & Actions

@@ -9,7 +9,7 @@ import {
     XCircle,
 } from "@phosphor-icons/react";
 import { SignalREvents } from "@/src/lib/signalr-events";
-import type { NotificationItem } from "@/src/types/notification.types";
+import type { NotificationItem } from "@/src/shared/types/notification.types";
 
 interface NotificationCardProps {
     item: NotificationItem;

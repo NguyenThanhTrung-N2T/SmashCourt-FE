@@ -10,8 +10,8 @@ import { getAuthUser } from "@/src/features/auth/session/sessionStore";
 import type {
     BookingNotificationDto,
     PaymentNotificationDto,
-} from "@/src/types/signalr.types";
-import type { NotificationItem } from "@/src/types/notification.types";
+} from "@/src/shared/types/signalr.types";
+import type { NotificationItem } from "@/src/shared/types/notification.types";
 import type { SignalREventName } from "@/src/lib/signalr-events";
 
 // ---------------------------------------------------------------------------
