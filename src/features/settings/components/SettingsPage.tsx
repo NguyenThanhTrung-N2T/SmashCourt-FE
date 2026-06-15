@@ -2,7 +2,7 @@
 
 import { Palette, Sun, Moon, Monitor, Check } from "lucide-react";
 import { useTheme } from "@/src/contexts/ThemeContext";
-import type { ThemePreference } from "@/src/types/theme.types";
+import type { ThemePreference } from "@/src/shared/types/theme.types";
 
 interface ThemeOption {
   id: ThemePreference;
@@ -77,11 +77,10 @@ export function SettingsPage() {
                 <button
                   key={themeOption.id}
                   onClick={() => setTheme(themeOption.id)}
-                  className={`relative flex flex-col items-center gap-4 rounded-2xl border-2 p-6 text-center transition-all ${
-                    isSelected
+                  className={`relative flex flex-col items-center gap-4 rounded-2xl border-2 p-6 text-center transition-all ${isSelected
                       ? "border-primary bg-primary/10 shadow-lg shadow-primary/20"
                       : "border-border bg-surface-1 hover:border-primary/60 hover:bg-primary/5"
-                  }`}
+                    }`}
                 >
                   {isSelected && (
                     <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white shadow-lg">
@@ -90,22 +89,20 @@ export function SettingsPage() {
                   )}
 
                   <div
-                    className={`flex h-16 w-16 items-center justify-center rounded-2xl ${
-                      isSelected
+                    className={`flex h-16 w-16 items-center justify-center rounded-2xl ${isSelected
                         ? "bg-gradient-to-br from-primary to-primary-dark text-white shadow-lg"
                         : "bg-surface-2 text-muted"
-                    }`}
+                      }`}
                   >
                     <Icon className="h-8 w-8" />
                   </div>
 
                   <div>
                     <h3
-                      className={`text-lg font-bold ${
-                        isSelected
+                      className={`text-lg font-bold ${isSelected
                           ? "text-primary"
                           : "text-foreground"
-                      }`}
+                        }`}
                     >
                       {themeOption.label}
                     </h3>

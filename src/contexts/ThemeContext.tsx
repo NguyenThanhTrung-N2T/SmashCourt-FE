@@ -12,7 +12,7 @@ import type {
   ThemePreference,
   ResolvedTheme,
   ThemeContextValue,
-} from "@/src/types/theme.types";
+} from "@/src/shared/types/theme.types";
 import {
   getStoredTheme,
   setStoredTheme,
@@ -55,7 +55,7 @@ function applyTheme(theme: ResolvedTheme): void {
   }
 
   const root = document.documentElement;
-  
+
   if (theme === "dark") {
     root.classList.add("dark");
   } else {
@@ -104,14 +104,14 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     console.log("[ThemeContext] Setting theme to:", newTheme);
     setThemeState(newTheme);
     setStoredTheme(newTheme);
-    
+
     const resolved = resolveTheme(newTheme);
     console.log("[ThemeContext] Resolved theme:", resolved);
     setResolvedTheme(resolved);
-    
+
     // Check again in case it changed
     applyTheme(isPublicPage ? "light" : resolved);
-    
+
     // Verify DOM update
     console.log("[ThemeContext] Dark class present:", document.documentElement.classList.contains("dark"));
   };
@@ -174,10 +174,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
  */
 export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
-  
+
   if (context === undefined) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
-  
+
   return context;
 }

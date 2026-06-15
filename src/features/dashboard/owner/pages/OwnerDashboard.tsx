@@ -40,6 +40,7 @@ import { ReportFilterDto } from "@/src/features/dashboard/shared/dashboard.types
 import { AIPanelSection } from "@/src/features/ai/shared/components/AIPanelSection";
 import { StrategicInsightsPanel } from "@/src/features/ai/shared/components/StrategicInsightsPanel";
 import { useRealtimeRefresh } from "@/src/shared/hooks/useRealtimeRefresh";
+import { BookingNotificationDto, PaymentNotificationDto } from "@/src/shared/types/signalr.types";
 
 export function OwnerDashboard() {
     const [filter, setFilter] = useState<FilterOption>("Tháng này");
@@ -81,17 +82,24 @@ export function OwnerDashboard() {
     }, []);
 
     // ── Realtime (replace existing useRealtimeRefresh) ───────────────────
-    useRealtimeRefresh(["bookings", "payments"], (_, payload) => {
-        // "Tất cả" = all-time aggregate — one new booking doesn't meaningfully
-        // shift the numbers, so skip the reload entirely
+    useRealtimeRefresh(["bookings", "payments"], (target, payload) => {
         if (filter === "Tất cả") return;
 
-        // Skip events for branches the owner isn't currently viewing
-        // (PaymentNotificationDto may not carry branchId — guard only when present)
-        if (payload?.branchId && selectedBranchId && payload.branchId !== selectedBranchId) return;
+        if (target === "bookings") {
+            const booking = payload as BookingNotificationDto;
+
+            if (
+                booking?.branchId &&
+                selectedBranchId &&
+                booking.branchId !== selectedBranchId
+            ) {
+                return;
+            }
+        }
 
         debouncedRefetch();
-    });
+    }
+    );
 
     // ── Data Mapping ──
     const dashboardData = data?.summary;

@@ -5,7 +5,7 @@
  * error handling for environments where localStorage is unavailable.
  */
 
-import type { ThemePreference } from "@/src/types/theme.types";
+import type { ThemePreference } from "@/src/shared/types/theme.types";
 
 const STORAGE_KEY = "theme-preference";
 
@@ -33,7 +33,7 @@ export function getStoredTheme(): ThemePreference | null {
     }
 
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    
+
     if (!stored) {
       return null;
     }

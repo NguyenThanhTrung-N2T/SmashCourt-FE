@@ -7,7 +7,7 @@ import React, {
     useRef,
     useState,
 } from "react";
-import type { ToastMessage, ToastTone } from "@/src/types/notification.types";
+import type { ToastMessage, ToastTone } from "@/src/shared/types/notification.types";
 
 // ---------------------------------------------------------------------------
 // Context

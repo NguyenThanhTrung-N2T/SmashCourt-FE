@@ -29,7 +29,7 @@ import { useEffect } from 'react';
 import { consumePrefill, WalkInPrefill } from '@/src/lib/walkInPrefill';
 import { useRealtimeRefresh } from '@/src/shared/hooks/useRealtimeRefresh';
 import { useGlobalToast } from '@/src/shared/hooks/useGlobalToast';
-import type { BookingNotificationDto } from '@/src/types/signalr.types';
+import type { BookingNotificationDto } from '@/src/shared/types/signalr.types';
 
 type ViewTab = 'table' | 'schedule' | 'calendar';
 type WorkspaceId = 'management' | string;
@@ -105,7 +105,7 @@ export function BookingManagementBase({
     patchBooking
   } = useBookingManagement(initialBranchId, activeView === 'table');
 
-  useRealtimeRefresh("bookings", (_, payload: BookingNotificationDto | undefined) => {
+  useRealtimeRefresh<BookingNotificationDto>("bookings", (_, payload) => {
     // Branch guard — ignore events not belonging to the current branch view
     if (payload?.branchId && branchId && payload.branchId !== branchId) return;
 
