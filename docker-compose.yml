@@ -1,9 +1,10 @@
 services:
-  web:
+  fe:
     build:
       context: .
       dockerfile: Dockerfile
       target: dev
+    container_name: smashcourt-fe
     ports:
       - "3000:3000"
     environment:
@@ -12,4 +13,11 @@ services:
       - .:/app
       - /app/node_modules
       - /app/.next
+    networks:
+      - smashcourt-network
     command: sh -c "npm ci && npm run dev -- -H 0.0.0.0 -p 3000"
+
+networks:
+  smashcourt-network:
+    name: smashcourt-network
+    external: true

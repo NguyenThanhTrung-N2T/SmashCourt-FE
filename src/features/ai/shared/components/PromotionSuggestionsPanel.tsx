@@ -142,6 +142,35 @@ function PromotionCard({ card }: { card: PromotionSuggestionDto }) {
     );
 }
 
+function formatGeneratedAt(generatedAt: string): string {
+    if (!generatedAt) return "";
+    
+    // Try parse as ISO format first (from Python FastAPI)
+    try {
+        const date = new Date(generatedAt);
+        if (!isNaN(date.getTime())) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hour = String(date.getHours()).padStart(2, '0');
+            const minute = String(date.getMinutes()).padStart(2, '0');
+            const second = String(date.getSeconds()).padStart(2, '0');
+            return `${day}-${month}-${year} ${hour}:${minute}:${second}`;
+        }
+    } catch {
+        // Fall through to try legacy format
+    }
+    
+    // Try legacy format dd/MM/yyyy HH:mm:ss (from .NET backend)
+    const match = generatedAt.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/);
+    if (match) {
+        const [, day, month, year, hour, minute, second] = match;
+        return `${day}-${month}-${year} ${hour}:${minute}:${second}`;
+    }
+    
+    return generatedAt;
+}
+
 // ---------------------------------------------------------------------------
 // PromotionSuggestionsPanel
 // ---------------------------------------------------------------------------
@@ -264,11 +293,7 @@ export function PromotionSuggestionsPanel({ branchId }: PromotionSuggestionsPane
                 {/* generatedAt timestamp */}
                 {!isLoading && data?.generatedAt && (
                     <p className="pt-1 text-center text-[10px] text-muted">
-                        Được tạo lúc{" "}
-                        {new Date(data.generatedAt).toLocaleString("vi-VN", {
-                            dateStyle: "short",
-                            timeStyle: "short",
-                        })}
+                        Được tạo lúc {formatGeneratedAt(data.generatedAt)}
                     </p>
                 )}
             </div>
