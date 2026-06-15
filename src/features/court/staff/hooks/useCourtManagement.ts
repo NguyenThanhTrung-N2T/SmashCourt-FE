@@ -60,7 +60,8 @@ export function useCourtManagement() {
     const drawerOpen = drawerCourtId !== null;
 
     const [bookingDetailId, setBookingDetailId] = useState<string | null>(null);
-    const [newBookingData, setNewBookingData] = useState<{ courtId: string; courtName: string; startTime: string } | null>(null);
+    // Note: newBookingData reserved for future booking creation feature
+    // const [newBookingData, setNewBookingData] = useState<{ courtId: string; courtName: string; startTime: string } | null>(null);
 
     // Confirm dialog
     const [confirmDialog, setConfirmDialog] = useState<{
@@ -132,15 +133,15 @@ export function useCourtManagement() {
         loadCourts();
     }, [loadStats, loadCourts]);
 
-    const handleRealtimeUpdate = useCallback(async (target: string, payload: any) => {
+    const handleRealtimeUpdate = useCallback(async (target: string, payload: unknown) => {
         if (target === "courts" || target === "bookings") {
             // "Silent" stats update on every court/booking event
             loadStats(true);
 
             // "Targeted Fetch": If payload has courtIds, fetch only those cards
-            if (payload && Array.isArray(payload.courtIds) && payload.courtIds.length > 0) {
+            if (payload && typeof payload === 'object' && 'courtIds' in payload && Array.isArray(payload.courtIds) && payload.courtIds.length > 0) {
                 try {
-                    const updatedCards = await fetchCourtManagementCourtsByIds(payload.courtIds, { date });
+                    const updatedCards = await fetchCourtManagementCourtsByIds(payload.courtIds as string[], { date });
                     if (isMounted.current) {
                         setCourtsPaged(prev => {
                             if (!prev) return prev;

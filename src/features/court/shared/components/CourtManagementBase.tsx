@@ -67,9 +67,11 @@ export function CourtManagementBase({ allowManagement, bookingPath }: CourtManag
     const [now, setNow] = useState<Date | null>(isToday ? new Date() : null);
     useEffect(() => {
         if (!isToday) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setNow(null);
             return;
         }
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setNow(new Date());
         const timer = setInterval(() => setNow(new Date()), 60000);
         return () => clearInterval(timer);
