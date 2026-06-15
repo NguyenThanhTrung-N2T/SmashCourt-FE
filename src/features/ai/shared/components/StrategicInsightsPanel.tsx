@@ -15,7 +15,6 @@ import {
 } from "@phosphor-icons/react";
 import { useAISuggestion } from "@/src/features/ai/shared/hooks/useAISuggestion";
 import { getStrategicSuggestions } from "@/src/api/ai.api";
-import { AIDateInput } from "@/src/features/ai/shared/components/AIDateInput";
 import type {
     StrategicSuggestionResponseDto,
     BranchPerformanceDto,
@@ -478,7 +477,7 @@ function StrategicReport({ data }: { data: StrategicSuggestionResponseDto }) {
 
 function formatGeneratedAt(generatedAt: string): string {
     if (!generatedAt) return "";
-    
+
     // Try parse as ISO format first (from Python FastAPI)
     try {
         const date = new Date(generatedAt);
@@ -494,14 +493,14 @@ function formatGeneratedAt(generatedAt: string): string {
     } catch {
         // Fall through to try legacy format
     }
-    
+
     // Try legacy format dd/MM/yyyy HH:mm:ss (from .NET backend)
     const match = generatedAt.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/);
     if (match) {
         const [, day, month, year, hour, minute, second] = match;
         return `${day}-${month}-${year} ${hour}:${minute}:${second}`;
     }
-    
+
     return generatedAt;
 }
 
@@ -528,9 +527,11 @@ export function StrategicInsightsPanel() {
                         <label className="text-[10px] font-bold uppercase tracking-wider text-muted">
                             Từ ngày <span className="text-red-400">*</span>
                         </label>
-                        <AIDateInput
+                        <input
+                            type="date"
                             value={fromDate}
-                            onChange={setFromDate}
+                            max={toDate || undefined}
+                            onChange={(e) => setFromDate(e.target.value)}
                             className="w-full rounded-xl border-2 border-border bg-surface-2 px-3 py-2 text-sm font-medium text-foreground outline-none transition-all focus:border-primary/60 focus:ring-4 focus:ring-primary/10"
                         />
                     </div>
@@ -540,9 +541,11 @@ export function StrategicInsightsPanel() {
                         <label className="text-[10px] font-bold uppercase tracking-wider text-muted">
                             Đến ngày <span className="text-red-400">*</span>
                         </label>
-                        <AIDateInput
+                        <input
+                            type="date"
                             value={toDate}
-                            onChange={setToDate}
+                            min={fromDate || undefined}
+                            onChange={(e) => setToDate(e.target.value)}
                             className="w-full rounded-xl border-2 border-border bg-surface-2 px-3 py-2 text-sm font-medium text-foreground outline-none transition-all focus:border-primary/60 focus:ring-4 focus:ring-primary/10"
                         />
                     </div>

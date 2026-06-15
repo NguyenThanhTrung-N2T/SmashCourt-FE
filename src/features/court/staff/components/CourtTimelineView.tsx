@@ -44,23 +44,31 @@ export function CourtTimelineView({
     onSlotClick,
 }: CourtTimelineViewProps) {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const hasAutoScrolledRef = useRef(false);
+    const hasAutoScrolledRef = useRef(true);
 
     // Keep a ref so auto-scroll reads the latest `now` without being
     // triggered by every 60-second tick.
     const nowRef = useRef(now);
     useEffect(() => { nowRef.current = now; });
-
+    // Track loading transitions — true→false means a full reload finished
+    const prevLoadingRef = useRef(loading)
     // Reset scroll flag whenever the user picks a different date
     useEffect(() => {
         hasAutoScrolledRef.current = false;
     }, [date]);
-
-    // Auto-scroll to current time once when data first loads (today only)
+    // Reset when a full reload completes (loading: true → false)
+    // Background realtime refreshes never set loading=true, so this won't fire for them
     useEffect(() => {
-        if (hasAutoScrolledRef.current || !data || !scrollContainerRef.current) return;
+        if (prevLoadingRef.current && !loading) {
+            hasAutoScrolledRef.current = false;
+        }
+        prevLoadingRef.current = loading;
+    }, [loading]);
+    // Auto-scroll — guard on loading so it waits for fresh data, not stale
+    useEffect(() => {
+        if (loading || hasAutoScrolledRef.current || !data || !scrollContainerRef.current) return;
         const currentNow = nowRef.current;
-        if (!currentNow) return; // not today
+        if (!currentNow) return;
 
         const dayStartMinutes = parseTimeToMinutes(data.operatingHours.open);
         const dayEndMinutes = parseTimeToMinutes(data.operatingHours.close);
@@ -76,7 +84,7 @@ export function CourtTimelineView({
             left: Math.max(0, COURT_COLUMN_WIDTH + nowPosition - container.clientWidth / 2),
             behavior: "smooth",
         });
-    }, [data, date]); // `date` re-triggers after hasAutoScrolledRef resets
+    }, [data, date, loading]);
 
     if (loading) {
         return (

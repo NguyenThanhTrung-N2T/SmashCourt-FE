@@ -238,7 +238,6 @@ export function CourtManagementBase({ allowManagement, bookingPath }: CourtManag
                 isOpen={!!bookingDetailId}
                 bookingId={bookingDetailId}
                 onClose={() => setBookingDetailId(null)}
-                onRefresh={refresh}
             />
 
             {/* Confirm Dialog */}
