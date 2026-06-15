@@ -57,6 +57,7 @@ export function ProfileInfoTab({ profile, onUpdate, showToast }: ProfileInfoTabP
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFormData({
       fullName: profile.fullName,
       phone: profile.phone || "",

@@ -151,12 +151,12 @@ export function BookingDetailModal({
                   <div className="flex items-center gap-2 text-sm">
                     <User className="h-4 w-4 text-muted" />
                     <span className="font-semibold text-foreground">
-                      {booking.customerName}
+                      {booking.customerName || booking.guestName}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Phone className="h-4 w-4 text-muted" />
-                    <span className="text-muted">{booking.customerPhone}</span>
+                    <span className="text-muted">{booking.customerPhone || booking.guestPhone || "Chưa cung cấp"}</span>
                   </div>
                 </div>
               </div>

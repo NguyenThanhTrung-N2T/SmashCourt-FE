@@ -45,9 +45,10 @@ function CancelBookingContent() {
       try {
         const data = await fetchCancellationInfo(token!);
         setInfo(data);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as Error;
         setError(
-          err?.message ||
+          error?.message ||
             "Không thể tìm thấy thông tin đơn đặt sân hoặc token đã hết hạn."
         );
       } finally {
@@ -65,8 +66,9 @@ function CancelBookingContent() {
     try {
       await cancelBookingByToken(token);
       setSuccess(true);
-    } catch (err: any) {
-      setError(err?.message || "Đã xảy ra lỗi trong quá trình hủy đặt sân.");
+    } catch (err) {
+      const error = err as Error;
+      setError(error?.message || "Đã xảy ra lỗi trong quá trình hủy đặt sân.");
     } finally {
       setIsCancelling(false);
     }

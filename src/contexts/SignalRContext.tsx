@@ -207,6 +207,7 @@ export function SignalRProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     connect();
 
     return () => {

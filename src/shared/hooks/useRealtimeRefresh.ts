@@ -9,10 +9,10 @@ const REFRESH_EVENT = "smashcourt:realtime-refresh";
  * Publish a refresh signal for a given resource type.
  * Called by NotificationDispatcher when a relevant SignalR event arrives.
  */
-export function publishRefresh(target: RefreshTarget, payload?: any): void {
+export function publishRefresh(target: RefreshTarget, payload?: unknown): void {
     if (typeof window === "undefined") return;
     window.dispatchEvent(
-        new CustomEvent<{ target: RefreshTarget; payload?: any }>(REFRESH_EVENT, {
+        new CustomEvent<{ target: RefreshTarget; payload?: unknown }>(REFRESH_EVENT, {
             detail: { target, payload },
         }),
     );
@@ -32,7 +32,7 @@ export function publishRefresh(target: RefreshTarget, payload?: any): void {
  */
 export function useRealtimeRefresh(
     target: RefreshTarget | RefreshTarget[],
-    callback: (target: RefreshTarget, payload?: any) => void,
+    callback: (target: RefreshTarget, payload?: unknown) => void,
 ): void {
     // Use ref pattern instead of useCallback([]) to always call latest callback
     const callbackRef = useRef(callback);
@@ -45,7 +45,7 @@ export function useRealtimeRefresh(
 
     useEffect(() => {
         function handleEvent(e: Event) {
-            const detail = (e as CustomEvent<{ target: RefreshTarget; payload?: any }>).detail;
+            const detail = (e as CustomEvent<{ target: RefreshTarget; payload?: unknown }>).detail;
             if (!detail) return;
 
             const targets = targetKey.split(",") as RefreshTarget[];
