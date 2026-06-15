@@ -16,6 +16,7 @@ import type {
   VerifyForgotPasswordOtpRequest,
   ResetPasswordRequest,
   GoogleCallbackRequest,
+  Verify2FASettingRequest
 } from "@/src/shared/types/auth.types";
 
 // Import from core modules
@@ -30,8 +31,6 @@ import {
 
 // Re-export utilities for backward compatibility
 export { AuthApiError, hasAuthErrorCode, getAuthFieldError, authProtectedFetch };
-
-
 
 export async function authRegister(body: RegisterRequest) {
   const response = await authFetch<null>(`/api/auth/register`, {
@@ -180,4 +179,49 @@ export async function authGoogleCallback(body: GoogleCallbackRequest) {
   }>(`/api/auth/google/callback`, { method: "POST", body });
 
   return withResponseMeta(response);
+}
+export async function authEnable2FA() {
+  const response = await authProtectedFetch<null>(`/api/auth/2fa/enable`, {
+    method: "POST",
+  });
+
+  return {
+    message: response.message ?? undefined,
+    code: response.code ?? undefined,
+  };
+}
+
+export async function authEnable2FAVerify(body: Verify2FASettingRequest) {
+  const response = await authProtectedFetch<null>(`/api/auth/2fa/enable/verify`, {
+    method: "POST",
+    body,
+  });
+
+  return {
+    message: response.message ?? undefined,
+    code: response.code ?? undefined,
+  };
+}
+
+export async function authDisable2FA() {
+  const response = await authProtectedFetch<null>(`/api/auth/2fa/disable`, {
+    method: "POST",
+  });
+
+  return {
+    message: response.message ?? undefined,
+    code: response.code ?? undefined,
+  };
+}
+
+export async function authDisable2FAVerify(body: Verify2FASettingRequest) {
+  const response = await authProtectedFetch<null>(`/api/auth/2fa/disable/verify`, {
+    method: "POST",
+    body,
+  });
+
+  return {
+    message: response.message ?? undefined,
+    code: response.code ?? undefined,
+  };
 }

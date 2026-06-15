@@ -21,11 +21,13 @@ import {
 import AuthStatusToast from "@/src/features/auth/components/AuthStatusToast";
 import { getRedirectPathByRole } from "../constants";
 import {
+  clearTwoFactorVerifySession,
   consumePostVerifyLoginHint,
   getEmail,
   setEmail,
   setAuthenticatedSession,
   setTempToken,
+  setPostVerifyLoginHint,
   startPasswordChangeSession,
   startTwoFactorVerifySession,
   getAuthUser,
@@ -139,6 +141,7 @@ export default function LoginPage() {
 
     try {
       setLoading(true);
+      clearTwoFactorVerifySession();
       const data = await authLogin({ email: trimmedEmail, password });
 
       if (data.status === "2fa_required") {
@@ -149,6 +152,7 @@ export default function LoginPage() {
         setEmail(trimmedEmail);
         setTempToken(data.tempToken);
         startTwoFactorVerifySession(trimmedEmail, data.tempToken);
+        setPostVerifyLoginHint("Mã OTP đã được gửi đến email của bạn. Vui lòng nhập để hoàn tất đăng nhập.");
         router.push("/auth/2fa");
         return;
       }
@@ -166,6 +170,8 @@ export default function LoginPage() {
       }
 
       if (data.status === "Success") {
+        clearTwoFactorVerifySession();
+
         if (data.accessToken && data.user) {
           setAuthenticatedSession({
             accessToken: data.accessToken,

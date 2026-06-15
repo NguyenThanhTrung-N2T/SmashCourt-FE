@@ -10,9 +10,9 @@ export type UserRole = "CUSTOMER" | "STAFF" | "BRANCH_MANAGER" | "OWNER";
 
 const roleToRedirect: Record<UserRole, string> = {
   CUSTOMER: "/",
-  STAFF: "/",
+  STAFF: "/staff",
   BRANCH_MANAGER: "/manager",
-  OWNER: "/",
+  OWNER: "/owner",
 };
 
 export function getRedirectPathByRole(role: string | undefined | null) {

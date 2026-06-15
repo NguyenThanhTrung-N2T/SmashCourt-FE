@@ -34,6 +34,9 @@ export interface Login2faRequest {
   tempToken: string;
   otpCode: string;
 }
+export type Verify2FASettingRequest = {
+  otpCode: string;
+};
 
 export interface ChangePasswordWithTempTokenRequest {
   tempToken: string;

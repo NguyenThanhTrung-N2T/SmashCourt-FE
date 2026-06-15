@@ -16,7 +16,7 @@ import {
   consumeForgotPasswordFlashMessage,
   getEmail,
   getForgotPasswordVerifySession,
-  setResetToken,
+  setResetToken
 } from "@/src/features/auth/session/sessionStore";
 import { formatEmailShort } from "@/src/features/auth/utils/clientErrors";
 import { useOtpVerification } from "@/src/features/auth/hooks/useOtpVerification";
@@ -151,7 +151,7 @@ export default function VerifyOtpPage() {
       }, 0);
 
       const frameId = requestAnimationFrame(() => setEntered(true));
-      
+
       return () => {
         clearTimeout(timer);
         cancelAnimationFrame(frameId);
@@ -215,8 +215,8 @@ export default function VerifyOtpPage() {
   return (
     <section
       className={`mx-auto max-w-md transition-all duration-500 ease-out motion-reduce:transition-none ${entered
-          ? "translate-y-0 opacity-100"
-          : "translate-y-2 opacity-0 motion-reduce:translate-y-0"
+        ? "translate-y-0 opacity-100"
+        : "translate-y-2 opacity-0 motion-reduce:translate-y-0"
         }`}
     >
       <header

@@ -11,7 +11,7 @@ import { useMyProfile, useUpdateProfile } from "@/src/features/profile/hooks";
 import { ProfileHeader } from "./ProfileHeader";
 import { ProfileTabNav, type ProfileTabId } from "./ProfileTabNav";
 import { ProfileInfoTab } from "./tabs/ProfileInfoTab";
-import { ChangePasswordTab } from "./tabs/ChangePasswordTab";
+import { SecurityTab } from "./tabs/SecurityTab";
 import { SessionManagementTab } from "./tabs/SessionManagementTab";
 import { Toast, Button } from "@/src/shared/components/ui";
 import { useToast } from "@/src/shared/hooks/useToast";
@@ -19,7 +19,7 @@ import { User, Lock, Devices, Warning } from "@phosphor-icons/react";
 
 const TABS = [
   { id: "info" as ProfileTabId, label: "Thông tin cá nhân", icon: User },
-  { id: "password" as ProfileTabId, label: "Đổi mật khẩu", icon: Lock },
+  { id: "security" as ProfileTabId, label: "Bảo mật", icon: Lock },
   { id: "sessions" as ProfileTabId, label: "Quản lý thiết bị", icon: Devices },
 ];
 
@@ -100,8 +100,8 @@ export function ProfilePageContent() {
           {activeTab === "info" && (
             <ProfileInfoTab profile={profile} onUpdate={refetch} showToast={show} />
           )}
-          {activeTab === "password" && (
-            <ChangePasswordTab profile={profile} showToast={show} />
+          {activeTab === "security" && (
+            <SecurityTab profile={profile} showToast={show} />
           )}
           {activeTab === "sessions" && (
             <SessionManagementTab showToast={show} />

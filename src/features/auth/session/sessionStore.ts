@@ -255,7 +255,21 @@ export function clearRegisterVerifySession() {
 export function setTwoFactorVerifySession(session: TwoFactorVerifySession) {
   setItem(KEYS.twoFactorVerifyState, JSON.stringify(session));
 }
+export function updateTwoFactorVerifySession(
+  patch: Partial<TwoFactorVerifySession>
+) {
+  const current = getTwoFactorVerifySession();
 
+  if (!current) return null;
+
+  const next = {
+    ...current,
+    ...patch,
+  };
+
+  setTwoFactorVerifySession(next);
+  return next;
+}
 export function getTwoFactorVerifySession(): TwoFactorVerifySession | null {
   const raw = getItem(KEYS.twoFactorVerifyState);
   if (!raw) return null;
