@@ -20,7 +20,7 @@ import { CourtTypeStatus } from "@/src/features/court-type/shared/types/court-ty
 // ---------------------------------------------------------------------------
 
 const TYPE_CONFIG: Record<
-    BookingSuggestionDto["type"],
+    string,
     {
         icon: React.ReactNode;
         accent: string;       // Tailwind bg color class for icon container
@@ -50,6 +50,20 @@ const TYPE_CONFIG: Record<
         badge: "bg-amber-500/10 text-amber-500",
         label: "Loại sân",
     },
+    general: {
+        icon: <ChatDots className="h-4 w-4" weight="duotone" />,
+        accent: "bg-indigo-500/15 text-indigo-500",
+        border: "border-indigo-500/20",
+        badge: "bg-indigo-500/10 text-indigo-500",
+        label: "Gợi ý",
+    },
+    promotion: {
+        icon: <Star className="h-4 w-4" weight="duotone" />,
+        accent: "bg-purple-500/15 text-purple-500",
+        border: "border-purple-500/20",
+        badge: "bg-purple-500/10 text-purple-500",
+        label: "Khuyến mãi",
+    },
 };
 // ---------------------------------------------------------------------------
 // Sub-components
@@ -72,7 +86,7 @@ function SkeletonCard() {
 }
 
 function SuggestionCard({ suggestion }: { suggestion: BookingSuggestionDto }) {
-    const config = TYPE_CONFIG[suggestion.type];
+    const config = TYPE_CONFIG[suggestion.type] || TYPE_CONFIG["general"];
 
     return (
         <div
@@ -107,11 +121,13 @@ function SuggestionCard({ suggestion }: { suggestion: BookingSuggestionDto }) {
             </div>
 
             {/* Action button */}
-            <button
-                className={`mt-3 rounded-full px-3 py-1.5 text-[11px] font-semibold transition-all hover:opacity-80 active:scale-95 ${config.badge}`}
-            >
-                {suggestion.action}
-            </button>
+            {suggestion.action && (
+                <button
+                    className={`mt-3 rounded-full px-3 py-1.5 text-[11px] font-semibold transition-all hover:opacity-80 active:scale-95 ${config.badge}`}
+                >
+                    {suggestion.action}
+                </button>
+            )}
         </div>
     );
 }
