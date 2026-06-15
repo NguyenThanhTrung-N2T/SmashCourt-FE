@@ -29,6 +29,34 @@ interface ChatPanelProps {
 // Sub-components
 // ---------------------------------------------------------------------------
 
+/**
+ * Parse timestamp from Backend (can be ISO string or dd/MM/yyyy HH:mm:ss format)
+ */
+function parseTimestamp(timestamp: string): Date {
+    // Try ISO format first
+    const isoDate = new Date(timestamp);
+    if (!isNaN(isoDate.getTime())) {
+        return isoDate;
+    }
+    
+    // Try dd/MM/yyyy HH:mm:ss format
+    const match = timestamp.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/);
+    if (match) {
+        const [, day, month, year, hour, minute, second] = match;
+        return new Date(
+            parseInt(year),
+            parseInt(month) - 1,
+            parseInt(day),
+            parseInt(hour),
+            parseInt(minute),
+            parseInt(second)
+        );
+    }
+    
+    // Fallback to current time
+    return new Date();
+}
+
 function MessageBubble({ message }: { message: ChatMessage }) {
     const isUser = message.role === "user";
 
@@ -70,7 +98,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
                     className={`mt-1 text-[10px] ${isUser ? "text-white/50" : "text-muted"
                         }`}
                 >
-                    {new Date(message.timestamp).toLocaleTimeString([], {
+                    {parseTimestamp(message.timestamp).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                     })}
