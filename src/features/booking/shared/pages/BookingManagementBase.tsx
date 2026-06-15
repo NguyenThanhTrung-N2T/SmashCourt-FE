@@ -123,7 +123,8 @@ export function BookingManagementBase({
     patchBooking,
   } = useBookingManagement(initialBranchId, activeView === "table");
 
-  useRealtimeRefresh<BookingNotificationDto>("bookings", (_, payload) => {
+  useRealtimeRefresh("bookings", (_, payload: unknown) => {
+    const bookingPayload = payload as BookingNotificationDto | undefined;
     // Branch guard — ignore events not belonging to the current branch view
     if (
       bookingPayload?.branchId &&

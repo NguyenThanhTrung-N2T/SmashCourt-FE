@@ -14,12 +14,18 @@ import { Button } from "@/src/shared/components/ui";
 const OTP_LENGTH = 6;
 const OTP_EXPIRY_SECONDS = 5 * 60; // matches backend: 5 minutes
 
-// ─── Countdown hook ───────────────────────────────────────────────────────────
 function useCountdown(totalSeconds: number, active: boolean) {
+    const [prevActive, setPrevActive] = useState(active);
+    const [prevTotalSeconds, setPrevTotalSeconds] = useState(totalSeconds);
     const [remaining, setRemaining] = useState(totalSeconds);
 
+    if (active !== prevActive || totalSeconds !== prevTotalSeconds) {
+        setPrevActive(active);
+        setPrevTotalSeconds(totalSeconds);
+        setRemaining(totalSeconds);
+    }
+
     useEffect(() => {
-        setRemaining(totalSeconds); // reset whenever active flips to true
         if (!active) return;
 
         const id = setInterval(() => {
@@ -143,14 +149,18 @@ export function OtpModal({
     onCancel,
 }: OtpModalProps) {
     const [otp, setOtp] = useState("");
+    const [prevOpen, setPrevOpen] = useState(open);
+
+    if (open !== prevOpen) {
+        setPrevOpen(open);
+        if (open) {
+            setOtp("");
+        }
+    }
+
     const { remaining, formatted } = useCountdown(OTP_EXPIRY_SECONDS, open);
     const isExpired = remaining === 0;
     const filled = otp.trim().length === OTP_LENGTH;
-
-    // Reset when modal opens
-    useEffect(() => {
-        if (open) setOtp("");
-    }, [open]);
 
     if (!open) return null;
 
