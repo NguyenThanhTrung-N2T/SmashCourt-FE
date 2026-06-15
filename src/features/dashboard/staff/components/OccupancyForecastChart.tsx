@@ -37,9 +37,9 @@ export function OccupancyForecastChart({ data, height = "h-64" }: OccupancyForec
                         <div className="bg-surface-inverse text-inverse text-xs font-bold px-3 py-2 rounded-lg shadow-xl whitespace-nowrap border border-white/10">
                             <div className="space-y-1">
                                 <div className="text-inverse/60 text-[10px] uppercase tracking-wider">
-                                    {new Date(hoveredPoint.time).toLocaleTimeString('vi-VN', { 
-                                        hour: '2-digit', 
-                                        minute: '2-digit' 
+                                    {new Date(hoveredPoint.time).toLocaleTimeString('vi-VN', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
                                     })}
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -51,8 +51,8 @@ export function OccupancyForecastChart({ data, height = "h-64" }: OccupancyForec
                                     <span>Còn trống: {hoveredPoint.availableCourts}</span>
                                 </div>
                                 <div className="pt-1 border-t border-white/20">
-                                    <span>Tỷ lệ: {hoveredPoint.occupancyRate > 1 
-                                        ? Math.round(hoveredPoint.occupancyRate) 
+                                    <span>Tỷ lệ: {hoveredPoint.occupancyRate > 1
+                                        ? Math.round(hoveredPoint.occupancyRate)
                                         : Math.round(hoveredPoint.occupancyRate * 100)}%</span>
                                 </div>
                                 {hoveredPoint.isPeakRisk && (
@@ -73,7 +73,7 @@ export function OccupancyForecastChart({ data, height = "h-64" }: OccupancyForec
                         const occupiedHeight = (point.occupiedCourts / maxCourts) * 100;
                         const availableHeight = (point.availableCourts / maxCourts) * 100;
                         const totalHeight = occupiedHeight + availableHeight;
-                        
+
                         const isHovered = hoveredIndex === index;
                         const occupancyColor = getOccupancyColor(point.occupancyRate);
 
@@ -81,7 +81,7 @@ export function OccupancyForecastChart({ data, height = "h-64" }: OccupancyForec
                             <div
                                 key={index}
                                 className="flex-1 flex flex-col justify-end cursor-pointer transition-all duration-200"
-                                style={{ 
+                                style={{
                                     height: '100%',
                                     opacity: isHovered ? 1 : 0.85,
                                     transform: isHovered ? 'scale(1.05)' : 'scale(1)',
@@ -89,7 +89,7 @@ export function OccupancyForecastChart({ data, height = "h-64" }: OccupancyForec
                                 onMouseEnter={() => setHoveredIndex(index)}
                             >
                                 {/* Single stacked bar container */}
-                                <div 
+                                <div
                                     className="w-full flex flex-col-reverse rounded-t overflow-hidden transition-all duration-300"
                                     style={{
                                         height: `${totalHeight}%`,
@@ -113,7 +113,7 @@ export function OccupancyForecastChart({ data, height = "h-64" }: OccupancyForec
                                             )}
                                         </div>
                                     )}
-                                    
+
                                     {/* Available Courts (top part - gray) */}
                                     {availableHeight > 0 && (
                                         <div
@@ -139,10 +139,9 @@ export function OccupancyForecastChart({ data, height = "h-64" }: OccupancyForec
                     if (!shouldShow) return <div key={index} className="flex-1" />;
 
                     const time = new Date(point.time);
-                    console.log(time);
-                    const label = time.toLocaleTimeString('vi-VN', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
+                    const label = time.toLocaleTimeString('vi-VN', {
+                        hour: '2-digit',
+                        minute: '2-digit'
                     });
 
                     return (

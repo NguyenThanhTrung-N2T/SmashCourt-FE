@@ -36,10 +36,15 @@ function today(): string {
 // ---------------------------------------------------------------------------
 
 const RATING_CONFIG: Record<
-    BranchPerformanceDto["performanceRating"],
+    string,
     { label: string; badge: string; dot: string }
 > = {
     Excellent: {
+        label: "Xuất sắc",
+        badge: "bg-emerald-500/12 text-emerald-500 border border-emerald-500/25",
+        dot: "bg-emerald-500",
+    },
+    excellent: {
         label: "Xuất sắc",
         badge: "bg-emerald-500/12 text-emerald-500 border border-emerald-500/25",
         dot: "bg-emerald-500",
@@ -49,10 +54,30 @@ const RATING_CONFIG: Record<
         badge: "bg-blue-500/12 text-blue-500 border border-blue-500/25",
         dot: "bg-blue-500",
     },
+    good: {
+        label: "Tốt",
+        badge: "bg-blue-500/12 text-blue-500 border border-blue-500/25",
+        dot: "bg-blue-500",
+    },
     "Needs Improvement": {
         label: "Cần cải thiện",
         badge: "bg-amber-500/12 text-amber-500 border border-amber-500/25",
         dot: "bg-amber-500",
+    },
+    "needs improvement": {
+        label: "Cần cải thiện",
+        badge: "bg-amber-500/12 text-amber-500 border border-amber-500/25",
+        dot: "bg-amber-500",
+    },
+    average: {
+        label: "Trung bình",
+        badge: "bg-amber-500/12 text-amber-500 border border-amber-500/25",
+        dot: "bg-amber-500",
+    },
+    poor: {
+        label: "Kém",
+        badge: "bg-red-500/12 text-red-500 border border-red-500/25",
+        dot: "bg-red-500",
     },
 };
 
@@ -145,7 +170,7 @@ function SkeletonReport() {
 // ---------------------------------------------------------------------------
 
 function BranchPerformanceCard({ branch }: { branch: BranchPerformanceDto }) {
-    const config = RATING_CONFIG[branch.performanceRating];
+    const config = RATING_CONFIG[branch.performanceRating] || RATING_CONFIG["Good"];
 
     return (
         <div className="rounded-xl border border-border bg-surface-2 p-4 transition-colors hover:bg-surface-1">

@@ -40,9 +40,8 @@ export function CourtTrack({
   const { slots, isLoading } = useTimeGrid({
     branchId,
     courtId: court.id,
+    courtTypeId: court.courtTypeId,
     date: selectedDate,
-    autoRefresh: true,
-    refreshInterval: 30000,
   });
 
   // ─── blockToSlotMap (unchanged) ───────────────────────────────────────────

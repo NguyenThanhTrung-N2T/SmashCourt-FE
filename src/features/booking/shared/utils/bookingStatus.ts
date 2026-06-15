@@ -127,6 +127,8 @@ export function getPaymentStatusLabel(status: InvoicePaymentStatusInput): string
       return 'Đã thanh toán';
     case InvoicePaymentStatus.REFUNDED:
       return 'Đã hoàn tiền';
+    case InvoicePaymentStatus.EXPIRED:
+      return 'Hết hạn';
     default:
       return 'Unknown';
   }
@@ -142,6 +144,7 @@ export function getPaymentStatusVariant(
       return 'success';
     case InvoicePaymentStatus.PARTIALLY_PAID:
       return 'warning';
+    case InvoicePaymentStatus.EXPIRED:
     case InvoicePaymentStatus.UNPAID:
       return 'error';
     case InvoicePaymentStatus.REFUNDED:

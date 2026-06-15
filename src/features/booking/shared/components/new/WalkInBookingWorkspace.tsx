@@ -155,15 +155,38 @@ export function WalkInBookingWorkspace({
   const validate = (): FormErrors => {
     const errs: FormErrors = {};
     if (!form.bookingDate) errs.bookingDate = "Ngày đặt sân là bắt buộc";
-    if (form.courtIds.length === 0) errs.courtIds = "Vui lòng chọn sân";  // ← was courtId
+    if (form.courtIds.length === 0) errs.courtIds = "Vui lòng chọn sân";
     if (!form.startTime) errs.startTime = "Thời gian bắt đầu là bắt buộc";
     if (!form.endTime) errs.endTime = "Thời gian kết thúc là bắt buộc";
     if (form.startTime && form.endTime && form.endTime <= form.startTime)
       errs.endTime = "Thời gian kết thúc phải sau thời gian bắt đầu";
+
     if (form.customerMode === "guest") {
-      if (!form.guestName.trim()) errs.guestName = "Vui lòng nhập tên khách hàng";
+      if (!form.guestName.trim()) {
+        errs.guestName = "Vui lòng nhập tên khách hàng";
+      }
+
+      if (!form.guestPhone.trim()) {
+        errs.guestPhone = "Vui lòng nhập số điện thoại";
+      } else if (!/^0\d{9}$/.test(form.guestPhone)) {
+        errs.guestPhone = "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)";
+      }
+
+      if (form.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.guestEmail)) {
+        errs.guestEmail = "Email không hợp lệ";
+      }
     } else {
-      if (!form.customerId) errs.customerId = "Vui lòng chọn khách hàng từ danh sách";
+      if (!form.customerId) {
+        errs.customerId = "Vui lòng chọn khách hàng từ danh sách";
+      }
+
+      // Also validate phone/email if they are being overridden
+      if (form.guestPhone && !/^0\d{9}$/.test(form.guestPhone)) {
+        errs.guestPhone = "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)";
+      }
+      if (form.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.guestEmail)) {
+        errs.guestEmail = "Email không hợp lệ";
+      }
     }
     return errs;
   };

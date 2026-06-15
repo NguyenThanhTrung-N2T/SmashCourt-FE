@@ -10,8 +10,13 @@ import { useState, useEffect } from "react";
 import { Input, Button } from "@/src/shared/components/ui";
 import { User, Phone } from "@phosphor-icons/react";
 import { useUpdateProfile } from "@/src/features/profile/hooks";
-import type { UserProfile } from "@/src/features/profile/types/profile.types";
+import { UserProfile } from "@/src/features/profile/types/profile.types";
 import type { ToastState } from "@/src/shared/hooks/useToast";
+import {
+  createValidatedChangeHandler,
+  createTrimOnBlurHandler,
+  ValidationRules,
+} from "@/src/shared/utils/inputValidation";
 
 interface ProfileInfoTabProps {
   profile: UserProfile;
@@ -25,23 +30,45 @@ export function ProfileInfoTab({ profile, onUpdate, showToast }: ProfileInfoTabP
     fullName: profile.fullName,
     phone: profile.phone || "",
   });
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setValidationErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.fullName.trim()) {
+      errors.fullName = "Vui lòng nhập họ tên";
+    } else if (!ValidationRules.vietnameseText(formData.fullName)) {
+      errors.fullName = "Họ tên chỉ được chứa chữ cái";
+    }
+
+    if (!formData.phone.trim()) {
+      errors.phone = "Vui lòng nhập số điện thoại";
+    } else if (!/^0\d{9}$/.test(formData.phone)) {
+      errors.phone = "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   useEffect(() => {
-    const nextName = profile.fullName;
-    const nextPhone = profile.phone || "";
-    if (formData.fullName !== nextName || formData.phone !== nextPhone) {
-      const timer = setTimeout(() => {
-        setFormData({
-          fullName: nextName,
-          phone: nextPhone,
-        });
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [profile, formData.fullName, formData.phone]);
+    setFormData({
+      fullName: profile.fullName,
+      phone: profile.phone || "",
+    });
+  }, [profile.fullName, profile.phone]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     const result = await updateProfile({
       fullName: formData.fullName.trim(),
@@ -77,10 +104,15 @@ export function ProfileInfoTab({ profile, onUpdate, showToast }: ProfileInfoTabP
         {/* Full Name */}
         <Input
           label="Họ và tên"
-          leftIcon={<User className="h-5 w-5" />}
+          leftIcon={<User className="h-4 w-4" />}
           value={formData.fullName}
-          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+          onChange={createValidatedChangeHandler(
+            (val) => handleChange("fullName", val),
+            ValidationRules.vietnameseText
+          )}
+          onBlur={createTrimOnBlurHandler((val) => handleChange("fullName", val))}
           placeholder="Nhập họ và tên"
+          error={validationErrors.fullName}
           required
           maxLength={100}
         />
@@ -88,12 +120,15 @@ export function ProfileInfoTab({ profile, onUpdate, showToast }: ProfileInfoTabP
         {/* Phone */}
         <Input
           label="Số điện thoại"
-          leftIcon={<Phone className="h-5 w-5" />}
+          leftIcon={<Phone className="h-4 w-4" />}
           value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          placeholder="Nhập số điện thoại"
+          onChange={createValidatedChangeHandler(
+            (val) => handleChange("phone", val),
+            ValidationRules.phoneFormat
+          )}
+          placeholder="Ví dụ: 0901234567"
+          error={validationErrors.phone}
           required
-          type="tel"
         />
 
         {/* Submit Button */}

@@ -25,6 +25,7 @@ export interface ConfirmPaymentDto {
 export interface PaymentConfirmationDto {
   isSuccess: boolean;
   bookingId: string;
+  bookingCode: string;
   amount: number;
   message: string;
 }

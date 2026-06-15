@@ -63,14 +63,14 @@ export const ValidationRules = {
    * Allow Vietnamese text (including diacritics) and spaces
    */
   vietnameseText: (value: string): boolean => {
-    return /^[\p{L}\s]*$/u.test(value);
+    return /^[\p{L}\p{M}\s]*$/u.test(value);
   },
 
   /**
    * Allow Vietnamese text with numbers and spaces
    */
   vietnameseTextWithNumbers: (value: string): boolean => {
-    return /^[\p{L}\p{N}\s]*$/u.test(value);
+    return /^[\p{L}\p{M}\p{N}\s]*$/u.test(value);
   },
 
   /**

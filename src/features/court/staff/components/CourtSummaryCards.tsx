@@ -77,23 +77,29 @@ export function CourtSummaryCards({ stats, loading }: CourtSummaryCardsProps) {
                                 : {}
                         }
                     >
-                        <div className="flex items-start justify-between">
+                        <div className="flex items-center justify-between">
                             <p
                                 className={`text-xs font-bold uppercase tracking-wide ${card.isPrimary ? "text-green-100/80" : "text-muted"
                                     }`}
                             >
                                 {card.label}
                             </p>
-                            <button
-                                className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${card.isPrimary
-                                    ? "border-white/30 text-white hover:bg-white/10"
-                                    : "border-border text-muted hover:bg-surface-2"
-                                    }`}
-                            >
-                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-1.5 opacity-60">
+                                    <span className="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${card.isPrimary ? "text-white" : "text-muted"}`}>Live</span>
+                                </div>
+                                <button
+                                    className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${card.isPrimary
+                                        ? "border-white/30 text-white hover:bg-white/10"
+                                        : "border-border text-muted hover:bg-surface-2"
+                                        }`}
+                                >
+                                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
 
                         <p

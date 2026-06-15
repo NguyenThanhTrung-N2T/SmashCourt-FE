@@ -20,13 +20,16 @@ import {
 } from '@/src/features/booking/shared/types';
 import { WalkInBookingWorkspace } from '@/src/features/booking/shared/components/new';
 import { useBookingManagement, useBookingSchedule, useBookingCalendar } from '@/src/features/booking/shared/hooks';
-import { Toast, ConfirmationDialog, Button } from '@/src/shared/components/ui';
+import { ConfirmationDialog, Button } from '@/src/shared/components/ui';
 import { PageHeader } from '@/src/shared/components/layout';
 import type { BranchDto } from '@/src/features/branch/shared/types/branch.types';
 import type { BookingDto } from '@/src/features/booking/shared/types/booking.types';
 import { Table, GridNine, Calendar, Plus, X, FileText } from '@phosphor-icons/react';
 import { useEffect } from 'react';
 import { consumePrefill, WalkInPrefill } from '@/src/lib/walkInPrefill';
+import { useRealtimeRefresh } from '@/src/shared/hooks/useRealtimeRefresh';
+import { useGlobalToast } from '@/src/shared/hooks/useGlobalToast';
+import type { BookingNotificationDto } from '@/src/types/signalr.types';
 
 type ViewTab = 'table' | 'schedule' | 'calendar';
 type WorkspaceId = 'management' | string;
@@ -79,6 +82,8 @@ export function BookingManagementBase({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { showToast } = useGlobalToast();
+
   const {
     bookings,
     summary,
@@ -97,9 +102,24 @@ export function BookingManagementBase({
     handleCancel,
     handleConfirmRefund,
     refresh,
-    toast,
-    showToast,
+    patchBooking
   } = useBookingManagement(initialBranchId, activeView === 'table');
+
+  useRealtimeRefresh("bookings", (_, payload: BookingNotificationDto | undefined) => {
+    // Branch guard — ignore events not belonging to the current branch view
+    if (payload?.branchId && branchId && payload.branchId !== branchId) return;
+
+    const bookingId = payload?.bookingId;
+
+    if (bookingId) {
+      patchBooking(bookingId); // Targeted patch, no loading flash
+    } else {
+      refresh(); // Fallback full reload when no ID present
+    }
+    // Update heatmap — no-op when calendar tab isn't active (guarded inside the hook)
+    calendar.refresh();
+    schedule.refresh();
+  });
   // ── URL helpers ──────────────────────────────────────────
   const pushParam = useCallback((key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -594,7 +614,6 @@ export function BookingManagementBase({
         onConfirm={confirmDialog.onConfirm}
         onCancel={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
       />
-      <Toast toast={toast} />
     </div>
   );
 }

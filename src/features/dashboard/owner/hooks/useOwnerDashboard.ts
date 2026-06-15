@@ -27,16 +27,21 @@ export function useOwnerDashboard(filter: ReportFilterDto): UseOwnerDashboardRes
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // Serialize to prevent infinite loops from object reference churn
+    const filterKey = JSON.stringify(filter);
+
     const fetchData = useCallback(async () => {
-        setIsLoading(true);
+        // No setIsLoading(true) here — background refetches stay silent
         setError(null);
         try {
-            // Fetching both in parallel for a faster load
             const [dashboardRes, utilizationRes] = await Promise.all([
                 fetchOwnerDashboard(filter),
-                fetchCourtUtilizationReport({ fromDate: filter.fromDate, toDate: filter.toDate, branchId: filter.branchId })
+                fetchCourtUtilizationReport({
+                    fromDate: filter.fromDate,
+                    toDate: filter.toDate,
+                    branchId: filter.branchId
+                })
             ]);
-
             setData(dashboardRes);
             setUtilization(utilizationRes);
             setBookingTrend(dashboardRes.bookingTrend);
@@ -46,18 +51,13 @@ export function useOwnerDashboard(filter: ReportFilterDto): UseOwnerDashboardRes
         } finally {
             setIsLoading(false);
         }
-    }, [filter]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filterKey]);
 
     useEffect(() => {
+        setIsLoading(true); // Only shown on mount + filter/branch changes
         fetchData();
     }, [fetchData]);
 
-    return {
-        data,
-        utilization,
-        bookingTrend,
-        isLoading,
-        error,
-        refetch: fetchData
-    };
+    return { data, utilization, bookingTrend, isLoading, error, refetch: fetchData };
 }

@@ -36,7 +36,7 @@ export interface BookingSlotMetadata {
 }
 
 export interface BookingSuggestionDto {
-    type: "time_slot" | "branch" | "court_type";
+    type: "time_slot" | "branch" | "court_type" | "general" | "promotion";
     title: string;
     description: string;
     action: string;
