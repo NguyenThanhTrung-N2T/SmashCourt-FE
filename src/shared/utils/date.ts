@@ -3,8 +3,22 @@
  */
 export function parseBackendDate(dateString: string): Date | null {
   try {
+    const cleaned = dateString.trim();
+
+    // Check if it matches DD/MM/YYYY format with optional time
+    const slashMatch = cleaned.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{1,2}):(\d{1,2}))?$/);
+    if (slashMatch) {
+      const day = parseInt(slashMatch[1], 10);
+      const month = parseInt(slashMatch[2], 10) - 1;
+      const year = parseInt(slashMatch[3], 10);
+      const hours = parseInt(slashMatch[4], 10) || 0;
+      const minutes = parseInt(slashMatch[5], 10) || 0;
+      const seconds = parseInt(slashMatch[6], 10) || 0;
+      return new Date(year, month, day, hours, minutes, seconds);
+    }
+
     // Backend format: "12 05 2026 23:42:37" (DD MM YYYY HH:mm:ss)
-    const parts = dateString.trim().split(' ');
+    const parts = cleaned.split(' ');
     if (parts.length >= 3) {
       const day = parseInt(parts[0], 10);
       const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
