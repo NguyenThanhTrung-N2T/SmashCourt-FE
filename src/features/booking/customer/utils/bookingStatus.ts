@@ -195,6 +195,12 @@ export function formatCurrency(amount: number): string {
 export function formatDate(dateString: string): string {
   if (!dateString) return "";
 
+  // Handle "DD/MM/YYYY HH:mm:ss" or "DD/MM/YYYY"
+  const slashMatch = dateString.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if (slashMatch) {
+    return `${slashMatch[1]}/${slashMatch[2]}/${slashMatch[3]}`;
+  }
+
   if (/^\d{2} \d{2} \d{4} \d{2}:\d{2}:\d{2}$/.test(dateString)) {
     const parts = dateString.split(" ");
     return `${parts[0]}/${parts[1]}/${parts[2]}`;
@@ -215,6 +221,12 @@ export function formatDate(dateString: string): string {
 
 export function formatDateTime(dateString: string): string {
   if (!dateString) return "";
+
+  // Handle "DD/MM/YYYY HH:mm:ss"
+  const slashMatch = dateString.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})/);
+  if (slashMatch) {
+    return `${slashMatch[4]}:${slashMatch[5]} ${slashMatch[1]}/${slashMatch[2]}/${slashMatch[3]}`;
+  }
 
   if (/^\d{2} \d{2} \d{4} \d{2}:\d{2}:\d{2}$/.test(dateString)) {
     const parts = dateString.split(" ");

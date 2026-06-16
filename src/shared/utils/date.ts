@@ -18,7 +18,7 @@ export function parseBackendDate(dateString: string): Date | null {
       let hours = 0, minutes = 0, seconds = 0;
       if (slashParts[1]) {
         const tp = slashParts[1].split(':');
-        hours   = parseInt(tp[0], 10) || 0;
+        hours = parseInt(tp[0], 10) || 0;
         minutes = parseInt(tp[1], 10) || 0;
         seconds = parseInt(tp[2], 10) || 0;
       }
@@ -29,13 +29,13 @@ export function parseBackendDate(dateString: string): Date | null {
     // "DD MM YYYY" or "DD MM YYYY HH:mm:ss"
     const spaceParts = trimmed.split(' ');
     if (spaceParts.length >= 3 && spaceParts[0].length <= 2 && !spaceParts[0].includes('/')) {
-      const day   = parseInt(spaceParts[0], 10);
+      const day = parseInt(spaceParts[0], 10);
       const month = parseInt(spaceParts[1], 10) - 1;
-      const year  = parseInt(spaceParts[2], 10);
+      const year = parseInt(spaceParts[2], 10);
       let hours = 0, minutes = 0, seconds = 0;
       if (spaceParts[3]) {
         const tp = spaceParts[3].split(':');
-        hours   = parseInt(tp[0], 10) || 0;
+        hours = parseInt(tp[0], 10) || 0;
         minutes = parseInt(tp[1], 10) || 0;
         seconds = parseInt(tp[2], 10) || 0;
       }
