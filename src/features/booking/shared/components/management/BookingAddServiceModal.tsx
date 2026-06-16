@@ -33,11 +33,11 @@ export function BookingAddServiceModal({
     useEffect(() => {
         if (!isOpen) return;
         setLoadingServices(true);
-        getBranchServices(undefined, 1, 50)
+        getBranchServices(booking.branchId, 1, 50)
             .then((data) => setBranchServices(data.items))
             .catch(() => onError('Không tải được danh sách dịch vụ'))
             .finally(() => setLoadingServices(false));
-    }, [isOpen]);
+    }, [isOpen, booking.branchId]);
 
     const getExistingQty = (serviceId: string) =>
         booking.services?.find((s) => s.serviceId === serviceId)?.quantity ?? 0;
