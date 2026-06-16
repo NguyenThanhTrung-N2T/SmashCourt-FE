@@ -170,7 +170,7 @@ export function SystemPricePage({ readOnly = false }: { readOnly?: boolean }) {
                                                 </Badge>
                                             </div>
                                             <p className="text-[10px] text-muted font-medium">
-                                                Ngày hiệu lực: {v.effectiveFrom}
+                                                Ngày hiệu lực: {fmtDate(v.effectiveFrom)}
                                             </p>
                                             {!readOnly && v.status === "SCHEDULED" && (
                                                 <button

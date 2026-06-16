@@ -36,7 +36,6 @@ export function EditCourtTypeModal({ courtType, onClose, onSaved }: { courtType:
       subtitle="Chỉnh sửa"
       icon={<PencilSimpleLine className="h-5 w-5" />}
       maxWidth="lg"
-      headerGradient="from-indigo-500 to-violet-500"
     >
       <CourtTypeForm
         initialName={courtType.name}

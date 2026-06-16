@@ -22,13 +22,15 @@ export function PriceTable({ slots, compact = false }: { slots: UpsertSystemPric
                             "text-right text-[10px] font-bold text-muted uppercase tracking-wider",
                             compact ? "px-4 py-3" : "px-6 py-4"
                         )}>
-                            Ngày thường
+                            <span className="block">Ngày thường</span>
+                            <span className="block text-[9px] font-medium text-muted/60 normal-case tracking-normal mt-0.5">/ 30 phút</span>
                         </th>
                         <th className={cn(
                             "text-right text-[10px] font-bold text-muted uppercase tracking-wider",
                             compact ? "px-4 py-3" : "px-6 py-4"
                         )}>
-                            Cuối tuần
+                            <span className="block">Cuối tuần</span>
+                            <span className="block text-[9px] font-medium text-muted/60 normal-case tracking-normal mt-0.5">/ 30 phút</span>
                         </th>
                     </tr>
                 </thead>

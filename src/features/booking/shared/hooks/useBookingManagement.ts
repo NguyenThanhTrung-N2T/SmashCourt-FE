@@ -6,6 +6,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useToast } from '@/src/shared/hooks/useToast';
+import { AuthApiError } from '@/src/api/core/apiError';
 import {
   fetchAllBookings,
   fetchBookingDashboardSummary,
@@ -174,7 +175,8 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {
-      showToast('error', 'Check-in thất bại');
+      const message = error instanceof AuthApiError ? error.message : 'Check-in thất bại';
+      showToast('error', message);
       console.error('Check-in error:', error);
     }
   }, [loadBookings, loadSummary, selectedBooking, openBookingDetail, showToast]);
