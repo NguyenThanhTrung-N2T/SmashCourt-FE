@@ -2,12 +2,14 @@
 
 import { useCallback, useRef, useMemo, useState, useEffect, type FormEvent } from "react";
 import {
-  CalendarBlank, CheckCircle, CourtBasketball, CreditCard, User, Spinner
+  CalendarBlank, CheckCircle, CourtBasketball, CreditCard, User, Spinner, Crown, // [NEW] Crown
 } from "@phosphor-icons/react";
 import { createWalkInBooking } from "@/src/api/booking.api";
+import { fetchApplicablePromotions } from "@/src/api/promotion.api"; // [NEW]
 import { Button, Checkbox, Input, Select } from "@/src/shared/components/ui";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { CreateWalkInBookingDto } from "@/src/features/booking/shared/types/booking.types";
+import type { ApplicablePromotion } from "@/src/features/benefit/promotion/shared/types/promotion.types"; // [NEW]
 import { InteractiveTimeGrid } from "@/src/features/booking/shared/components/new/InteractiveTimeGrid";
 import { fetchCourts } from "@/src/api/court.api";
 import { CustomerSearchDto } from "@/src/features/customer/shared/types/customer.types";
@@ -15,8 +17,10 @@ import {
   FormErrors, WalkInBookingWorkspaceProps, WalkInBookingFormState, CustomerMode,
 } from "@/src/features/booking/shared/types/walkinBooking.types";
 import { ModeSwitch, GuestPane, CustomerPane } from "@/src/features/booking/shared/components/new";
+import { PromotionSelector } from "@/src/features/booking/customer/components/new-booking/PromotionSelector"; // [NEW] 
 import { usePriceCalculation } from "@/src/features/booking/customer/hooks/usePriceCalculation";
 import { formatTime } from "@/src/shared/utils/date";
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -27,10 +31,10 @@ function toApiTime(time: string): string {
 
 function formatWorkspaceTitle(): string {
   const now = new Date();
-  const hhmm = now.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
+  const hhmm = now.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
   });
   if (now) return `Tại quầy - ${hhmm}`;
   return "Đặt tại quầy";
@@ -45,12 +49,32 @@ export function WalkInBookingWorkspace({
   const [loadingCourts, setLoadingCourts] = useState(false);
   const [courts, setCourts] = useState<CourtDto[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerSearchDto | null>(null);
+
+  // [NEW] Promotion state
+  const [selectedPromotionId, setSelectedPromotionId] = useState<string | null>(null);
+  const [availablePromotions, setAvailablePromotions] = useState<ApplicablePromotion[]>([]);
+  const [isLoadingPromotions, setIsLoadingPromotions] = useState(false);
+  const [promotionsError, setPromotionsError] = useState<string | null>(null);
+
   const { totalAmount, isCalculatingPrice } = usePriceCalculation({
     selectedBranchId: branchId,
     selectedCourtIds: form.courtIds,
     selectedDate: form.bookingDate,
     selectedSlots: form.selectedSlots,
   });
+
+  // [NEW] Derived discount values
+  const hasCustomer = form.customerMode === "customer" && Boolean(form.customerId);
+  const loyaltyDiscountRate = selectedCustomer?.discountRate ?? 0;
+  const loyaltyDiscount =
+    hasCustomer && loyaltyDiscountRate > 0
+      ? Math.round((totalAmount * loyaltyDiscountRate) / 100)
+      : 0;
+  const bookingAmountAfterLoyalty = Math.max(0, totalAmount - loyaltyDiscount);
+  const selectedPromotion = availablePromotions.find((p) => p.id === selectedPromotionId);
+  const promotionDiscount = selectedPromotion?.discountAmount ?? 0;
+  const finalTotal = Math.max(0, bookingAmountAfterLoyalty - promotionDiscount);
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -72,6 +96,65 @@ export function WalkInBookingWorkspace({
     formRef.current = form;
   }, [form]);
 
+  // [NEW] Reset promotion selection whenever the customer changes
+  useEffect(() => {
+    setSelectedPromotionId(null);
+    setAvailablePromotions([]);
+    setPromotionsError(null);
+  }, [form.customerId]);
+
+  // [NEW] Fetch applicable promotions when a customer is selected and slots/amount are ready
+  useEffect(() => {
+    if (
+      !hasCustomer ||
+      !branchId ||
+      !form.bookingDate ||
+      form.selectedSlots.length === 0 ||
+      totalAmount <= 0 ||
+      bookingAmountAfterLoyalty <= 0
+    ) {
+      setAvailablePromotions([]);
+      setIsLoadingPromotions(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    async function fetchPromotions() {
+      try {
+        setIsLoadingPromotions(true);
+        setPromotionsError(null);
+
+        const sortedSlots = [...form.selectedSlots].sort((a, b) =>
+          a.startTime.localeCompare(b.startTime),
+        );
+        const startTime = toApiTime(sortedSlots[0].startTime);
+        const rawEnd = sortedSlots[sortedSlots.length - 1].endTime;
+        const endTime = rawEnd === "00:00:00" ? "24:00:00" : toApiTime(rawEnd);
+
+        const data = await fetchApplicablePromotions({
+          branchId,
+          bookingDate: `${form.bookingDate}T${startTime}`,
+          startTime,
+          endTime,
+          bookingAmount: bookingAmountAfterLoyalty,
+        });
+
+        if (isMounted) setAvailablePromotions(data);
+      } catch (err) {
+        console.error("Failed to fetch promotions:", err);
+        if (isMounted) setPromotionsError("Không thể tải danh sách khuyến mãi");
+      } finally {
+        if (isMounted) setIsLoadingPromotions(false);
+      }
+    }
+
+    fetchPromotions();
+    return () => {
+      isMounted = false;
+    };
+  }, [hasCustomer, branchId, form.bookingDate, form.selectedSlots, bookingAmountAfterLoyalty, totalAmount]);
+
   const courtTypes = useMemo(() => {
     const map = new Map<string, string>();
     courts.forEach((c) => {
@@ -85,7 +168,6 @@ export function WalkInBookingWorkspace({
     [courts, selectedCourtTypeId],
   );
 
-  // All courts currently in the selection
   const selectedCourts = useMemo(
     () => courts.filter((c) => form.courtIds.includes(c.id)),
     [courts, form.courtIds],
@@ -103,27 +185,17 @@ export function WalkInBookingWorkspace({
   );
 
   // ---------------------------------------------------------------------------
-  // Multi-court handlers (mirrors useBookingForm logic)
+  // Multi-court handlers
   // ---------------------------------------------------------------------------
 
-  /**
-   * Fired when the user drags on a court track.
-   * - Already selected → keep the multi-selection, clear slots for re-drag.
-   * - New court       → reset to just this court.
-   */
   const handleDragCourt = useCallback((court: CourtDto) => {
     const current = formRef.current;
     const alreadySelected = current.courtIds.includes(court.id);
-
     if (!alreadySelected) {
       updateForm({ courtIds: [court.id] });
     }
   }, [updateForm]);
 
-  /**
-   * Fired when the user clicks the candidate (light-green) zone on a court.
-   * Toggles that court in/out of the shared time range.
-   */
   const handleToggleCourt = useCallback((court: CourtDto) => {
     const current = formRef.current;
     const isSelected = current.courtIds.includes(court.id);
@@ -145,6 +217,10 @@ export function WalkInBookingWorkspace({
 
   const handleModeChange = (mode: CustomerMode) => {
     setSelectedCustomer(null);
+    // [NEW] Also reset promotion when switching modes
+    setSelectedPromotionId(null);
+    setAvailablePromotions([]);
+    setPromotionsError(null);
     updateForm({ customerMode: mode, customerId: null, guestName: "", guestPhone: "", guestEmail: "", note: "" });
   };
 
@@ -162,9 +238,7 @@ export function WalkInBookingWorkspace({
       errs.endTime = "Thời gian kết thúc phải sau thời gian bắt đầu";
 
     if (form.customerMode === "guest") {
-      if (!form.guestName.trim()) {
-        errs.guestName = "Vui lòng nhập tên khách hàng";
-      }
+      if (!form.guestName.trim()) errs.guestName = "Vui lòng nhập tên khách hàng";
 
       if (!form.guestPhone.trim()) {
         errs.guestPhone = "Vui lòng nhập số điện thoại";
@@ -172,21 +246,15 @@ export function WalkInBookingWorkspace({
         errs.guestPhone = "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)";
       }
 
-      if (form.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.guestEmail)) {
+      if (form.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.guestEmail))
         errs.guestEmail = "Email không hợp lệ";
-      }
     } else {
-      if (!form.customerId) {
-        errs.customerId = "Vui lòng chọn khách hàng từ danh sách";
-      }
+      if (!form.customerId) errs.customerId = "Vui lòng chọn khách hàng từ danh sách";
 
-      // Also validate phone/email if they are being overridden
-      if (form.guestPhone && !/^0\d{9}$/.test(form.guestPhone)) {
+      if (form.guestPhone && !/^0\d{9}$/.test(form.guestPhone))
         errs.guestPhone = "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)";
-      }
-      if (form.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.guestEmail)) {
+      if (form.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.guestEmail))
         errs.guestEmail = "Email không hợp lệ";
-      }
     }
     return errs;
   };
@@ -203,7 +271,6 @@ export function WalkInBookingWorkspace({
 
     const payload: CreateWalkInBookingDto = {
       bookingDate: form.bookingDate,
-      // All selected courts share the same time range
       courts: form.courtIds.map((courtId) => ({
         courtId,
         startTime: toApiTime(form.startTime),
@@ -213,7 +280,7 @@ export function WalkInBookingWorkspace({
       guestName: form.guestName.trim() || null,
       guestPhone: form.guestPhone.trim() || null,
       guestEmail: form.guestEmail.trim() || null,
-      promotionId: null,
+      promotionId: selectedPromotionId, // [CHANGED] was hardcoded null
       note: form.note.trim() || null,
       payNow: form.payNow,
     };
@@ -237,7 +304,7 @@ export function WalkInBookingWorkspace({
   const canSubmit =
     !loadingCourts &&
     courts.length > 0 &&
-    form.courtIds.length > 0 &&        // ← added
+    form.courtIds.length > 0 &&
     form.selectedSlots.length > 0 &&
     (form.customerMode === "guest"
       ? form.guestName.trim().length > 0
@@ -316,8 +383,8 @@ export function WalkInBookingWorkspace({
               selectedDate={form.bookingDate}
               selectedCourtIds={form.courtIds}
               selectedSlots={form.selectedSlots}
-              onDragCourt={handleDragCourt}      // ← was: onSelectCourt
-              onToggleCourt={handleToggleCourt}  // ← new
+              onDragCourt={handleDragCourt}
+              onToggleCourt={handleToggleCourt}
               onSlotsChange={(slots) =>
                 updateForm({
                   selectedSlots: slots,
@@ -383,7 +450,7 @@ export function WalkInBookingWorkspace({
               description="Bỏ chọn nếu khách sẽ thanh toán sau"
             />
 
-            {/* Booking summary — now multi-court aware */}
+            {/* Booking summary */}
             <div className="rounded-xl border border-border bg-surface-2 p-4">
               <p className="text-xs font-bold uppercase tracking-wider text-muted">Xác nhận</p>
               {selectedCourts.length > 0 ? (
@@ -395,7 +462,9 @@ export function WalkInBookingWorkspace({
                   </p>
                   <p className="mt-1 text-sm text-muted">
                     {new Intl.DateTimeFormat("en-GB").format(new Date(form.bookingDate))}
-                    {form.startTime && form.endTime ? ` · ${formatTime(form.startTime)} – ${formatTime(form.endTime)}` : ""}
+                    {form.startTime && form.endTime
+                      ? ` · ${formatTime(form.startTime)} – ${formatTime(form.endTime)}`
+                      : ""}
                   </p>
                 </>
               ) : (
@@ -405,14 +474,14 @@ export function WalkInBookingWorkspace({
               )}
             </div>
           </div>
-          {/* Live Summary Bar */}
-          {form && form.selectedSlots && form.selectedSlots.length > 0 && (
+
+          {/* Live Summary Bar — court fee subtotal */}
+          {form.selectedSlots.length > 0 && (
             <div className="mt-6 flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-6 shadow-sm">
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-muted">Tạm tính</h3>
                 <p className="mt-1 font-medium text-foreground">
-                  {form.selectedSlots.length} slot ·{" "}
-                  {form.courtIds.length} sân đã chọn
+                  {form.selectedSlots.length} slot · {form.courtIds.length} sân đã chọn
                 </p>
               </div>
               <div className="text-right">
@@ -427,6 +496,58 @@ export function WalkInBookingWorkspace({
                   </span>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* [NEW] Loyalty discount + Promotion Selector — registered customers only */}
+          {hasCustomer && form.selectedSlots.length > 0 && !isCalculatingPrice && totalAmount > 0 && (
+            <div className="mt-4 space-y-4">
+              {/* Loyalty tier discount row */}
+              {loyaltyDiscountRate > 0 && (
+                <div className="flex items-center justify-between rounded-xl border border-border bg-surface-2 p-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                      <Crown className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-foreground">
+                        {selectedCustomer?.tierName ?? "Thành viên"}
+                      </p>
+                      <p className="text-[11px] text-muted">
+                        Ưu đãi hạng thành viên ({loyaltyDiscountRate}%)
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    -{loyaltyDiscount.toLocaleString("vi-VN")} đ
+                  </span>
+                </div>
+              )}
+
+              {/* Promotion selector */}
+              <PromotionSelector
+                promotions={availablePromotions}
+                isLoading={isLoadingPromotions}
+                error={promotionsError}
+                selectedPromotionId={selectedPromotionId}
+                onSelectPromotion={setSelectedPromotionId}
+                promotionDiscount={promotionDiscount}
+              />
+
+              {/* Final total — only shown when at least one discount is applied */}
+              {(loyaltyDiscount > 0 || promotionDiscount > 0) && (
+                <div className="flex items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-500/5 px-5 py-4 shadow-sm">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted">
+                      Tổng thanh toán
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-muted">Sau khi áp dụng ưu đãi</p>
+                  </div>
+                  <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {finalTotal.toLocaleString("vi-VN")} đ
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </aside>
