@@ -14,11 +14,11 @@ export function getStatusValue(status: BookingStatusInput): number {
 
 /**
  * Combines bookingDate and a time string into a single Date object.
- * bookingDate format: "17 05 2026 07:00:00"
- * timeStr format: "20:00:00" or "20:00"
+ * Supports formats: "DD MM YYYY", "DD MM YYYY HH:mm:ss", "YYYY-MM-DD", "YYYY-MM-DDTHH:mm:ss"
+ * timeStr format: "HH:mm:ss" or "HH:mm"
  */
 export function combineDateAndTime(bookingDate: string, timeStr: string): Date | null {
-  const dateObj = parseBackendDate(bookingDate);
+  const dateObj = parseBookingDate(bookingDate);
   if (!dateObj) return null;
 
   const timeParts = timeStr.trim().split(':');
@@ -28,13 +28,35 @@ export function combineDateAndTime(bookingDate: string, timeStr: string): Date |
   const minutes = parseInt(timeParts[1], 10);
   const seconds = timeParts[2] ? parseInt(timeParts[2], 10) : 0;
 
+  if (isNaN(hours) || isNaN(minutes)) return null;
+
   const combined = new Date(dateObj);
   combined.setHours(hours, minutes, seconds, 0);
   return combined;
 }
 
 /**
- * Condition: Allows check-in from startTime - 15 minutes to endTime.
+ * Parses a bookingDate string from the API into a local Date.
+ * Supports: "DD MM YYYY", "DD MM YYYY HH:mm:ss", "YYYY-MM-DD", ISO datetime strings.
+ */
+function parseBookingDate(dateString: string): Date | null {
+  if (!dateString) return null;
+  // Try the "DD MM YYYY" backend format first (parseBackendDate handles this)
+  const fromBackend = parseBackendDate(dateString);
+  if (fromBackend) return fromBackend;
+
+  // Try ISO date-only "YYYY-MM-DD" — parse as local midnight, not UTC
+  const isoDateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateString);
+  if (isoDateOnly) {
+    const [, y, m, d] = isoDateOnly;
+    return new Date(Number(y), Number(m) - 1, Number(d));
+  }
+
+  return null;
+}
+
+/**
+ * Condition: Allows check-in within the window [startTime - 15m, startTime + 15m].
  * Also checks if the status is CONFIRMED or PAID_ONLINE.
  */
 export function canCheckIn(booking: BookingDto): boolean {
@@ -42,22 +64,20 @@ export function canCheckIn(booking: BookingDto): boolean {
   const isCorrectStatus = status === BookingStatus.CONFIRMED || status === BookingStatus.PAID_ONLINE;
   if (!isCorrectStatus) return false;
 
-  if (!booking.courts || booking.courts.length === 0) return true;
+  if (!booking.courts || booking.courts.length === 0) return false;
 
   const startTime = booking.courts[0]?.startTime;
-  const endTime = booking.courts[booking.courts.length - 1]?.endTime || booking.courts[0]?.endTime;
 
-  if (!startTime || !endTime) return true;
+  if (!startTime) return false;
 
   const startDateTime = combineDateAndTime(booking.bookingDate, startTime);
-  const endDateTime = combineDateAndTime(booking.bookingDate, endTime);
 
-  if (!startDateTime || !endDateTime) return true;
+  if (!startDateTime) return false;
 
   const now = new Date();
   const allowedStart = new Date(startDateTime.getTime() - 15 * 60 * 1000); // 15 minutes before startTime
-  const allowdEnd = new Date(startDateTime.getTime() + 15 * 60 * 60 * 1000);
-  return now >= allowedStart && now <= allowdEnd;
+  const allowedEnd = new Date(startDateTime.getTime() + 15 * 60 * 1000);   // 15 minutes after startTime
+  return now >= allowedStart && now <= allowedEnd;
 }
 
 /**

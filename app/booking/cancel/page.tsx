@@ -113,7 +113,14 @@ function CancelBookingContent() {
         )}
 
         <Button
-          onClick={() => router.push("/")}
+          onClick={() => {
+            const user = getAuthUser();
+            if (!user) {
+              router.push("/auth/login");
+            } else {
+              router.push("/");
+            }
+          }}
           variant="primary"
           className="w-full rounded-full py-2.5 font-bold"
         >
@@ -136,7 +143,14 @@ function CancelBookingContent() {
           </p>
         </div>
         <Button
-          onClick={() => router.push("/")}
+          onClick={() => {
+            const user = getAuthUser();
+            if (!user) {
+              router.push("/auth/login");
+            } else {
+              router.push("/");
+            }
+          }}
           variant="secondary"
           className="w-full rounded-full py-2.5"
         >
@@ -165,7 +179,14 @@ function CancelBookingContent() {
           </p>
         </div>
         <Button
-          onClick={() => router.push("/")}
+          onClick={() => {
+            const user = getAuthUser();
+            if (!user) {
+              router.push("/auth/login");
+            } else {
+              router.push("/");
+            }
+          }}
           variant="primary"
           className="w-full rounded-full py-2.5"
         >
@@ -280,7 +301,14 @@ function CancelBookingContent() {
           {isCancelling ? "Đang xử lý hủy sân..." : "Xác nhận Hủy Đặt Sân"}
         </Button>
         <Button
-          onClick={() => router.push("/")}
+          onClick={() => {
+            const user = getAuthUser();
+            if (!user) {
+              router.push("/auth/login");
+            } else {
+              router.push("/");
+            }
+          }}
           disabled={isCancelling}
           variant="secondary"
           className="w-full rounded-full py-3"
@@ -292,8 +320,33 @@ function CancelBookingContent() {
   );
 }
 
+import { getAuthUser } from "@/src/features/auth/session/sessionStore";
+import CustomerTopNavLayout from "@/src/layouts/customer/components/CustomerTopNavLayout";
+
 export default function CancelBookingPage() {
-  return (
+  const [currentUser] = useState<ReturnType<typeof getAuthUser>>(() => {
+    if (typeof window !== "undefined") {
+      return getAuthUser();
+    }
+    return null;
+  });
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+        <Spinner className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const pageContent = (
     <div className="container max-w-lg mx-auto px-4 py-12">
       <Suspense
         fallback={
@@ -307,4 +360,14 @@ export default function CancelBookingPage() {
       </Suspense>
     </div>
   );
+
+  if (currentUser && currentUser.role.toUpperCase() === "CUSTOMER") {
+    return (
+      <CustomerTopNavLayout user={currentUser}>
+        {pageContent}
+      </CustomerTopNavLayout>
+    );
+  }
+
+  return <div className="min-h-screen bg-background">{pageContent}</div>;
 }

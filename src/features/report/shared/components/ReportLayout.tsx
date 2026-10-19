@@ -94,6 +94,7 @@ export function ReportLayout({
                         <div>
                             <label className="text-[10px] font-black uppercase tracking-widest text-muted ml-1">Từ ngày</label>
                             <input
+                                lang="vi"
                                 type="date"
                                 value={filter.fromDate || ''}
                                 onChange={(e) => handleDateChange('fromDate', e.target.value)}
@@ -104,6 +105,7 @@ export function ReportLayout({
                         <div>
                             <label className="text-[10px] font-black uppercase tracking-widest text-muted ml-1">Đến ngày</label>
                             <input
+                                lang="vi"
                                 type="date"
                                 value={filter.toDate || ''}
                                 onChange={(e) => handleDateChange('toDate', e.target.value)}

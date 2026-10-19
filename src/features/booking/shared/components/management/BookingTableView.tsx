@@ -70,7 +70,6 @@ export function BookingTableView({
   const getBookingId = (booking: BookingDto) => {
     return booking.id || booking.bookingCode || '';
   };
-
   return (
     <div className="space-y-4">
       <div className="bg-surface-1 border border-border rounded-xl overflow-hidden">

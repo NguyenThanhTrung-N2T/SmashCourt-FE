@@ -172,7 +172,7 @@ export function BranchPricePage({ role = "owner" }: { role?: "owner" | "manager"
                                                 </Badge>
                                             </div>
                                             <p className="text-[10px] text-muted font-medium">
-                                                Ngày hiệu lực: {v.effectiveFrom}
+                                                Ngày hiệu lực: {fmtDate(v.effectiveFrom)}
                                             </p>
                                             {v.status === "SCHEDULED" && (
                                                 <button
@@ -240,8 +240,14 @@ export function BranchPricePage({ role = "owner" }: { role?: "owner" | "manager"
                                                         <thead>
                                                             <tr className="bg-surface-2/50 border-b border-border text-[10px] font-bold text-muted uppercase tracking-wider">
                                                                 <th className="px-6 py-4 text-left">Khung giờ</th>
-                                                                <th className="px-6 py-4 text-right">Ngày thường</th>
-                                                                <th className="px-6 py-4 text-right">Cuối tuần</th>
+                                                                <th className="px-6 py-4 text-right">
+                                                                    <span className="block">Ngày thường</span>
+                                                                    <span className="block text-[9px] font-medium text-muted/60 normal-case tracking-normal mt-0.5">/ 30 phút</span>
+                                                                </th>
+                                                                <th className="px-6 py-4 text-right">
+                                                                    <span className="block">Cuối tuần</span>
+                                                                    <span className="block text-[9px] font-medium text-muted/60 normal-case tracking-normal mt-0.5">/ 30 phút</span>
+                                                                </th>
                                                                 <th className="px-6 py-4 text-center">Nguồn</th>
                                                             </tr>
                                                         </thead>
