@@ -169,19 +169,15 @@ cp .env.example .env
 Sau đó mở file `.env` và điền các giá trị phù hợp:
 
 ```env
-# Backend API
-NEXT_PUBLIC_API_URL=http://localhost:5000
-
-# SignalR Hub (real-time connection)
-NEXT_PUBLIC_HUB_URL=http://localhost:5000/hubs
+# Địa chỉ gốc của Backend (không có /api ở cuối)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5179
 ```
 
 Bảng mô tả chi tiết các biến môi trường:
 
 | Biến | Bắt buộc | Mô tả |
 | :--- | :---: | :--- |
-| `NEXT_PUBLIC_API_URL` | ✅ | Địa chỉ gốc của REST API Backend |
-| `NEXT_PUBLIC_HUB_URL` | ✅ | Địa chỉ SignalR Hub để nhận cập nhật real-time |
+| `NEXT_PUBLIC_API_BASE_URL` | ✅ | Địa chỉ gốc của Backend; REST gọi `{base}/api/...`, SignalR hub ở `{base}/hubs/notifications`. Bản production khai trong Vercel (Project Settings › Environment Variables) |
 
 > ⚠️ **Lưu ý bảo mật**: Các biến `NEXT_PUBLIC_*` sẽ được nhúng vào bundle phía client. **Tuyệt đối không** đặt API key bí mật hoặc thông tin nhạy cảm vào đây.
 
