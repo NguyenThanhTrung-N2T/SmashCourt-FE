@@ -15,7 +15,8 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Chỉ hủy lượt chạy cũ của pull request; không hủy một lần triển khai đang dở trên master
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   lint-and-build:
@@ -37,5 +38,46 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # FE-01 (Epic 6C, OPS-07): kiểm kiểu TypeScript toàn dự án trước khi build
+      - name: Type check
+        run: npx tsc --noEmit -p .
+
       - name: Build
         run: npm run build
+
+  # Triển khai Vercel production (Epic 6C, P6-36): chỉ khi push lên master và lint, tsc, build đều đạt; develop và pull request chỉ chạy CI.
+  # Cần ở repo: Environment "production" chứa secrets VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID; tắt tự triển khai theo Git trong Vercel để chỉ còn đường này.
+  # Biến NEXT_PUBLIC_* khai trong Vercel (Project Settings › Environment Variables), `vercel pull` lấy về lúc build.
+  deploy-production:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: lint-and-build
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: vercel-production
+      cancel-in-progress: false
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@65.9.0
+
+      - name: Pull Vercel project settings
+        run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Build
+        run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Deploy prebuilt output
+        run: vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}"

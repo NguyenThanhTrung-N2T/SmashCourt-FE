@@ -11,7 +11,7 @@ npx eslint <file...>                # lint file đã sửa
 npm run lint                        # = CI
 npm run build                       # = CI, kiểm chứng bundle production
 ```
-CI (`.github/workflows/ci.yml`, Node 20): `npm ci` → `npm run lint` → `npm run build`. Chưa có test tự động.
+CI (`.github/workflows/ci.yml`, Node 20): `npm ci` → `npm run lint` → `npx tsc --noEmit -p .` → `npm run build`. Push `master` mà CI đạt ⇒ job `deploy-production` triển khai Vercel production (Vercel CLI ghim `65.9.0`, `vercel pull/build/deploy --prebuilt`; cần Environment `production` có `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`; tắt tự triển khai theo Git trong Vercel). `develop` chỉ chạy CI. Chưa có test tự động.
 
 ## Kiến trúc (chi tiết: skill `smashcourt-fe-architecture`)
 ```
