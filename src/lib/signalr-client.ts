@@ -1,13 +1,14 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { getAccessToken } from "@/src/features/auth/session/sessionStore";
+import { toUrl } from "@/src/api/core";
 
 /**
  * Tạo SignalR connection builder
+ * Hub dùng chung địa chỉ BE với REST (NEXT_PUBLIC_API_BASE_URL)
  * @returns HubConnection instance
  */
 export function createSignalRConnection(): HubConnection {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5179";
-  const hubUrl = `${API_URL}/hubs/notifications`;
+  const hubUrl = toUrl("/hubs/notifications");
 
   const connection = new HubConnectionBuilder()
     .withUrl(hubUrl, {
