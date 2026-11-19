@@ -27,6 +27,8 @@ import {
   formatTime,
   canCancelBooking,
   calculateRefundInfo,
+  getCancelSourceText,
+  getCancelReasonText,
 } from "../../utils/bookingStatus";
 
 interface BookingDetailModalProps {
@@ -64,8 +66,8 @@ export function BookingDetailModal({
 
     const result = await retryPayment(booking.id || "");
 
-    if (result) {
-      // Redirect to payment URL
+    if (result?.paymentUrl) {
+      // TODO(6B-2): Handle status branching properly (C1 fix)
       window.location.href = result.paymentUrl;
     }
     // Error is handled by the hook and displayed via paymentError state
@@ -312,6 +314,27 @@ export function BookingDetailModal({
                       {formatCurrency(finalTotal)}
                     </span>
                   </div>
+
+                  {booking.depositRate !== null && booking.depositAmount !== null && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted">
+                        {booking.paymentStatus === "UNPAID" ? "Tiền cọc phải trả" : "Tiền cọc đã trả"} ({Math.round(booking.depositRate * 100)}%)
+                      </span>
+                      <span className="font-semibold text-primary">
+                        {formatCurrency(booking.depositAmount)}
+                      </span>
+                    </div>
+                  )}
+
+                  {booking.remainingAmount !== null && booking.remainingAmount > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted">Còn lại thu tại quầy</span>
+                      <span className="font-semibold text-foreground">
+                        {formatCurrency(booking.remainingAmount)}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted">Trạng thái thanh toán</span>
                     <Badge
@@ -381,6 +404,33 @@ export function BookingDetailModal({
                 </>
               )}
 
+              {/* Cancellation Details */}
+              {booking.status.startsWith("CANCELLED") && (
+                <>
+                  <Divider />
+                  <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 space-y-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-red-600">
+                      Thông tin hủy đơn
+                    </h3>
+                    <div className="text-sm space-y-1">
+                      <p className="text-foreground">
+                        <span className="text-muted">Người hủy: </span>
+                        <span className="font-medium">{getCancelSourceText(booking.cancelSource)}</span>
+                        {booking.cancelledAt && (
+                          <span className="text-muted ml-2">({formatDateTime(booking.cancelledAt)})</span>
+                        )}
+                      </p>
+                      {getCancelReasonText(booking.cancelReason) && (
+                        <p className="text-foreground">
+                          <span className="text-muted">Lý do: </span>
+                          <span className="font-medium">{getCancelReasonText(booking.cancelReason)}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* Timestamps & Pay Now Button */}
               <Divider />
               <div className="flex items-center justify-between gap-4">
@@ -403,7 +453,7 @@ export function BookingDetailModal({
                     leftIcon={!isRetryingPayment ? <CreditCard className="h-4 w-4" /> : undefined}
                     className="shrink-0"
                   >
-                    {isRetryingPayment ? "Đang xử lý..." : "Thanh toán ngay"}
+                    {isRetryingPayment ? "Đang xử lý..." : "Thanh toán cọc"}
                   </Button>
                 )}
               </div>
@@ -419,7 +469,7 @@ export function BookingDetailModal({
               )}
 
               {/* Cancel Button */}
-              {canCancelBooking(booking.status) && (
+              {canCancelBooking(booking.status, booking.bookingDate, booking.courts[0]?.startTime) && (
                 <>
                   <Divider />
                   <div className="flex justify-end gap-3">
@@ -443,12 +493,17 @@ export function BookingDetailModal({
           const finalTotal = booking.finalTotal ?? booking.finalTotal ?? 0;
           const firstCourt = booking.courts[0];
 
-          // Calculate refund info using dynamic policies
+          // Determine already paid amount: PAID_ONLINE -> depositAmount (fallback finalTotal); PENDING/CONFIRMED -> 0
+          const paidAmount = booking.status === "PAID_ONLINE"
+            ? (booking.depositAmount ?? finalTotal)
+            : 0;
+
+          // Calculate refund info using dynamic policies on paidAmount (contract §3.4, R-1)
           const refundInfo = firstCourt
             ? calculateRefundInfo(
               booking.bookingDate,
               firstCourt.startTime,
-              finalTotal,
+              paidAmount,
               policies
             )
             : { refundPercent: 0, refundAmount: 0, canCancel: false };
@@ -518,9 +573,9 @@ export function BookingDetailModal({
                   {refundInfo.refundAmount > 0 ? (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted">Tổng tiền đã thanh toán</span>
+                        <span className="text-sm text-muted">Số tiền đã thanh toán</span>
                         <span className="font-semibold text-foreground">
-                          {formatCurrency(finalTotal)}
+                          {formatCurrency(paidAmount)}
                         </span>
                       </div>
 
@@ -540,7 +595,7 @@ export function BookingDetailModal({
 
                       <Alert variant="info" className="mt-3">
                         <p className="text-xs">
-                          * Nhân viên sẽ xác nhận và hoàn tiền trong vòng 3-5 ngày làm việc
+                          * Khoản tiền hoàn lại sẽ được chi trả bằng tiền mặt tại chi nhánh đặt sân.
                         </p>
                       </Alert>
                     </div>

@@ -31,6 +31,12 @@ export const MANAGER_NAV: NavItem[] = [
     hint: "Quản lý đặt sân",
   },
   {
+    label: "Duyệt cọc",
+    href: "/manager/booking-approvals",
+    icon: ShieldCheck,
+    hint: "Duyệt cọc đơn đặt sân",
+  },
+  {
     label: "Sân",
     href: "/manager/courts",
     icon: CourtBasketball,

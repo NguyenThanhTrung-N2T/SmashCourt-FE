@@ -34,8 +34,10 @@ const DATE_PRESETS = [
 
 const statusOptions = [
   { value: "", label: "Tất cả trạng thái" },
-  { value: BookingStatus.PENDING.toString(), label: "Chờ thanh toán" },
-  { value: BookingStatus.PAID_ONLINE.toString(), label: "Đã thanh toán" },
+  { value: BookingStatus.PENDING.toString(), label: "Chờ thanh toán cọc" },
+  { value: BookingStatus.PENDING_APPROVAL.toString(), label: "Chờ duyệt cọc" },
+  { value: BookingStatus.CONFIRMED.toString(), label: "Đã xác nhận" },
+  { value: BookingStatus.PAID_ONLINE.toString(), label: "Đã cọc" },
   { value: BookingStatus.IN_PROGRESS.toString(), label: "Đang chơi" },
   { value: BookingStatus.COMPLETED.toString(), label: "Hoàn thành" },
   { value: BookingStatus.CANCELLED.toString(), label: "Đã hủy" },

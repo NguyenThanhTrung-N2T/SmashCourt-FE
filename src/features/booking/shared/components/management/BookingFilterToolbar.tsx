@@ -200,6 +200,7 @@ export function BookingFilterToolbar({
             >
               <option value="">Tất cả</option>
               <option value={BookingStatus.PENDING}>Đặt online, chưa thanh toán</option>
+              <option value={BookingStatus.PENDING_APPROVAL}>Chờ duyệt cọc</option>
               <option value={BookingStatus.PAID_ONLINE}>Đã thanh toán online</option>
               <option value={BookingStatus.CONFIRMED}>Đặt tại quầy, chưa thanh toán</option>
               <option value={BookingStatus.IN_PROGRESS}>Đang chơi</option>

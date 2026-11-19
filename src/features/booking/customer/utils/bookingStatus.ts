@@ -24,13 +24,16 @@ export interface StatusConfig {
 export function getBookingStatusConfig(status: BookingStatusInput): StatusConfig {
   switch (toBookingStatusValue(status)) {
     case BookingStatus.PENDING:
-      return { label: "Chờ thanh toán", variant: "warning", dot: true };
+      return { label: "Chờ thanh toán cọc", variant: "warning", dot: true };
 
     case BookingStatus.CONFIRMED:
-      return { label: "Đã xác nhận", variant: "info", dot: true };
+      return { label: "Thanh toán tại quầy", variant: "info", dot: true };
 
     case BookingStatus.PAID_ONLINE:
-      return { label: "Đã thanh toán", variant: "success", dot: true };
+      return { label: "Đã cọc", variant: "success", dot: true };
+
+    case BookingStatus.PENDING_APPROVAL:
+      return { label: "Chờ chi nhánh xác nhận", variant: "warning", dot: true };
 
     case BookingStatus.IN_PROGRESS:
       return { label: "Đang chơi", variant: "info", dot: true };
@@ -45,7 +48,7 @@ export function getBookingStatusConfig(status: BookingStatusInput): StatusConfig
       return { label: "Đã hủy", variant: "error", dot: true };
 
     case BookingStatus.CANCELLED_PENDING_REFUND:
-      return { label: "Chờ hoàn tiền", variant: "warning", dot: true };
+      return { label: "Chờ nhận tiền hoàn", variant: "warning", dot: true };
 
     case BookingStatus.CANCELLED_REFUNDED:
       return { label: "Đã hoàn tiền", variant: "neutral", dot: true };
@@ -55,6 +58,48 @@ export function getBookingStatusConfig(status: BookingStatusInput): StatusConfig
 
     default:
       return { label: "Không xác định", variant: "neutral" };
+  }
+}
+
+/**
+ * Customer-facing label for who cancelled the booking (contract §2.2, P6-31).
+ * Never shows staff names to customers.
+ */
+export function getCancelSourceText(source: string | null | undefined): string {
+  switch (source) {
+    case "CUSTOMER":
+      return "Bạn đã hủy";
+    case "LINK":
+      return "Bạn đã hủy qua link trong email";
+    case "STAFF":
+      return "Chi nhánh đã hủy";
+    case "SYSTEM":
+      return "Hệ thống tự hủy";
+    default:
+      return "Đã hủy";
+  }
+}
+
+/**
+ * Customer-facing reason for cancellation (contract §2.2, plan §4.5).
+ */
+export function getCancelReasonText(reason: string | null | undefined): string | null {
+  switch (reason) {
+    case "PAYMENT_EXPIRED":
+      return "Hết hạn thanh toán";
+    case "APPROVAL_EXPIRED":
+      return "Chi nhánh chưa xác nhận kịp, bạn chưa bị trừ tiền";
+    case "SYSTEM_CLEANUP":
+      return "Đơn chưa hoàn tất, sân đã được trả lại";
+    case "POLICY_REJECTED":
+    case "APPROVAL_REJECTED":
+      return "Không được nhận";
+    case "CUSTOMER_CANCELLED":
+      return "Bạn đã hủy";
+    case "STAFF_CANCELLED":
+      return "Chi nhánh đã hủy";
+    default:
+      return null;
   }
 }
 
@@ -75,9 +120,32 @@ export function getPaymentStatusConfig(status: InvoicePaymentStatusInput): Statu
   }
 }
 
-export function canCancelBooking(status: BookingStatusInput): boolean {
+export function canCancelBooking(
+  status: BookingStatusInput,
+  bookingDate?: string,
+  startTime?: string
+): boolean {
   const statusValue = toBookingStatusValue(status);
-  return statusValue === BookingStatus.CONFIRMED || statusValue === BookingStatus.PAID_ONLINE;
+  if (statusValue === undefined) return false;
+
+  const cancellableStatuses: number[] = [
+    BookingStatus.PENDING,
+    BookingStatus.PENDING_APPROVAL,
+    BookingStatus.CONFIRMED,
+    BookingStatus.PAID_ONLINE,
+  ];
+
+  if (!cancellableStatuses.includes(statusValue)) {
+    return false;
+  }
+
+  // Contract §3.4, P6-23: Customer cannot cancel after earliest start time (+07:00)
+  if (bookingDate && startTime) {
+    const hours = calculateHoursUntil(bookingDate, startTime);
+    return hours > 0;
+  }
+
+  return true;
 }
 
 interface RefundInfo {
@@ -90,7 +158,7 @@ interface RefundInfo {
  * Calculate refund information based on cancellation policies
  * @param bookingDate - Booking date string
  * @param startTime - Start time string (HH:mm:ss)
- * @param totalAmount - Total booking amount
+ * @param totalAmount - Total amount already paid (contract §3.4, R-1)
  * @param cancelPolicies - Array of cancellation policies from API (sorted by hoursBefore DESC)
  */
 export function calculateRefundInfo(
@@ -132,55 +200,37 @@ export function calculateRefundInfo(
 }
 
 /**
- * Calculate hours until booking start time
+ * Calculate hours until booking start time in Vietnam timezone (+07:00).
+ * Handles the "20/11/2026 07:00:00" artifact safely (contract §1.3, R-6).
  */
-function calculateHoursUntil(bookingDate: string, startTime: string): number {
+export function calculateHoursUntil(bookingDate: string, startTime: string): number {
   try {
-    // Parse booking date and time
-    // bookingDate formats we need to handle:
-    // - "12 05 2026 07:00:00" (DD MM YYYY HH:mm:ss with spaces)
-    // - "12/05/2026" (DD/MM/YYYY)
-    // - "2026-05-12" (ISO format)
-    let dateStr = bookingDate;
+    const cleanDate = bookingDate.trim().split(" ")[0];
+    let y = "", m = "", d = "";
 
-    // Handle "12 05 2026 07:00:00" format (space-separated with timestamp)
-    if (bookingDate.includes(' ') && !bookingDate.includes('-') && !bookingDate.includes('/')) {
-      const parts = bookingDate.split(' ');
-      if (parts.length >= 3) {
-        // parts[0] = DD, parts[1] = MM, parts[2] = YYYY
-        const day = parts[0].padStart(2, '0');
-        const month = parts[1].padStart(2, '0');
-        const year = parts[2];
-        dateStr = `${year}-${month}-${day}`;
-      }
-    }
-    // Handle DD/MM/YYYY format
-    else if (bookingDate.includes('/')) {
-      const parts = bookingDate.split('/');
-      if (parts.length === 3) {
-        const day = parts[0].padStart(2, '0');
-        const month = parts[1].padStart(2, '0');
-        const year = parts[2];
-        dateStr = `${year}-${month}-${day}`;
-      }
+    if (cleanDate.includes("/")) {
+      const parts = cleanDate.split("/");
+      d = parts[0].padStart(2, "0");
+      m = parts[1].padStart(2, "0");
+      y = parts[2];
+    } else if (cleanDate.includes("-")) {
+      const parts = cleanDate.split("-");
+      y = parts[0];
+      m = parts[1].padStart(2, "0");
+      d = parts[2].padStart(2, "0");
     }
 
-    const bookingDateTime = new Date(`${dateStr}T${startTime}`);
-    const now = new Date();
+    if (!y || !m || !d) return 0;
 
-    // Validate the parsed date
-    if (isNaN(bookingDateTime.getTime())) {
-      console.error("Invalid date parsed:", { bookingDate, startTime, dateStr, bookingDateTime });
-      return 0;
-    }
+    const [h, min, s = "00"] = startTime.split(":");
+    const isoVN = `${y}-${m}-${d}T${h.padStart(2, "0")}:${min.padStart(2, "0")}:${s.padStart(2, "0")}+07:00`;
+    const startInstant = new Date(isoVN).getTime();
 
-    // Calculate difference in hours
-    const diffMs = bookingDateTime.getTime() - now.getTime();
-    const diffHours = diffMs / (1000 * 60 * 60);
+    if (isNaN(startInstant)) return 0;
 
-    return diffHours;
-  } catch (e) {
-    console.error("Error in calculateHoursUntil:", e);
+    const diffMs = startInstant - Date.now();
+    return diffMs / (1000 * 60 * 60);
+  } catch {
     return 0;
   }
 }

@@ -61,6 +61,7 @@ export function NewBookingPage() {
     handleDateChange,
     handleNext,
     handleBack,
+    goToStep,
     canProceedFromStep,
   } = useBookingForm();
 
@@ -119,6 +120,9 @@ export function NewBookingPage() {
     setIsSubmitting,
     setError,
     validateGuestInfo,
+    onBookingRejected: () => {
+      goToStep(3);
+    },
   });
 
   const handleGuestNameChange = (value: string) => {

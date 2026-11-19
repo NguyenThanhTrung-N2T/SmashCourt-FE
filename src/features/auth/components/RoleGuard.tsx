@@ -31,6 +31,12 @@ export function RoleGuard({ children, allowedRole }: RoleGuardProps) {
                 const initialUser = getAuthUser();
 
                 if (!initialUser) {
+                    // Trap #3: If returning from payment gateway with vnp_* query params, preserve them
+                    if (typeof window !== "undefined" && window.location.search.includes("vnp_")) {
+                        const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                        router.replace(`/auth/login?returnUrl=${returnUrl}`);
+                        return;
+                    }
                     router.replace("/auth/login");
                     return;
                 }

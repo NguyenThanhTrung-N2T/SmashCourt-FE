@@ -3,26 +3,12 @@
 import { useEffect, useState } from "react";
 import {
     Phone, Envelope, Calendar, Clock, MapPin, Tag,
-    Receipt, ShoppingCart, PencilLine, SignIn, SignOut,
-    XCircle, CheckCircle, CreditCard, ArrowCounterClockwise,
+    Receipt, XCircle, ArrowCounterClockwise,
     WarningCircle, ArrowRight
 } from "@phosphor-icons/react";
 import { Modal, Button, Badge } from "@/src/shared/components/ui";
-import {
-    fetchBookingDetailsById,
-    checkInBooking,
-    checkoutBooking,
-    cancelBookingByStaff,
-} from "@/src/api/booking.api";
+import { fetchBookingDetailsById } from "@/src/api/booking.api";
 import type { BookingDto, BookingCourtDto } from "@/src/features/booking/shared/types/booking.types";
-import {
-    canCheckIn,
-    canCheckout,
-    canCancel,
-    canConfirmRefund,
-    canCompletePayment,
-    canAddService,
-} from "@/src/features/booking/shared/utils/bookingRules";
 import {
     getBookingStatusLabel,
     getBookingStatusVariant,
@@ -31,6 +17,9 @@ import {
     formatCurrency,
     formatTime,
     getCourtTotal,
+    getCancelSourceText,
+    getCancelReasonText,
+    getDepositSourceText,
 } from "@/src/features/booking/shared/utils/bookingStatus";
 import { formatDate, formatDateTime } from "@/src/shared/utils/date";
 
@@ -238,6 +227,24 @@ export function BookingDetailModal({
                                         <span className="font-black text-foreground">Tổng cộng</span>
                                         <span className="text-base font-black text-primary">{formatCurrency(booking.finalTotal ?? 0)}</span>
                                     </div>
+                                    {booking.depositAmount !== null && booking.depositAmount !== undefined && booking.depositAmount > 0 && (
+                                        <div className="border-t border-border pt-2 space-y-1 text-xs">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-muted">
+                                                    Tiền cọc ({booking.depositRate != null ? `${Math.round(booking.depositRate * 100)}%` : ''})
+                                                    {booking.depositSource && ` • ${getDepositSourceText(booking.depositSource)}`}
+                                                </span>
+                                                <span className="font-semibold text-foreground">{formatCurrency(booking.depositAmount)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-bold text-foreground">Còn lại cần thu tại quầy</span>
+                                                <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                                    {formatCurrency(booking.remainingAmount ?? Math.max(0, (booking.finalTotal ?? 0) - booking.depositAmount))}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Refund */}
                                     {booking.refundAmount != null &&
                                         (booking.status === "CANCELLED_REFUNDED" || booking.status === "CANCELLED_PENDING_REFUND") && (
@@ -262,6 +269,66 @@ export function BookingDetailModal({
                                         )}
                                 </div>
                             </Section>
+
+                            {/* ── Approval / TADSS ── */}
+                            {(booking.status === "PENDING_APPROVAL" || Boolean(booking.approvalReasonCode) || Boolean(booking.approvalExpiresAt)) && (
+                                <Section title="Xét duyệt cọc (TADSS)" icon={<WarningCircle size={12} className="text-warning" />}>
+                                    <div className="rounded-2xl border border-warning/30 bg-warning/5 px-4 py-3 space-y-2 text-xs">
+                                        {booking.approvalReasonCode && (
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-muted">Mã lý do</span>
+                                                <span className="font-mono font-semibold text-foreground px-1.5 py-0.5 bg-surface-2 rounded">{booking.approvalReasonCode}</span>
+                                            </div>
+                                        )}
+                                        {booking.approvalReasons && booking.approvalReasons.length > 0 && (
+                                            <div>
+                                                <span className="text-muted block mb-1">Chi tiết TADSS</span>
+                                                <ul className="list-disc list-inside space-y-0.5 text-foreground">
+                                                    {booking.approvalReasons.map((r, i) => (
+                                                        <li key={i}>{r}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        {booking.approvalExpiresAt && (
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-muted">Hạn duyệt cọc</span>
+                                                <span className="font-medium text-foreground">{formatDateTime(booking.approvalExpiresAt)}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </Section>
+                            )}
+
+                            {/* ── Cancellation ── */}
+                            {(Boolean(booking.cancelledAt) || Boolean(booking.cancelSource) || booking.status === "CANCELLED" || booking.status === "CANCELLED_REFUNDED" || booking.status === "CANCELLED_PENDING_REFUND") && (
+                                <Section title="Thông tin hủy đơn" icon={<XCircle size={12} className="text-error" />}>
+                                    <div className="rounded-2xl border border-error/30 bg-error/5 px-4 py-3 space-y-1.5 text-xs">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-muted">Nguồn hủy</span>
+                                            <span className="font-bold text-foreground">{getCancelSourceText(booking.cancelSource)}</span>
+                                        </div>
+                                        {booking.cancelledByName && (
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-muted">Người hủy</span>
+                                                <span className="font-medium text-foreground">{booking.cancelledByName}</span>
+                                            </div>
+                                        )}
+                                        {booking.cancelledAt && (
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-muted">Thời điểm hủy</span>
+                                                <span className="font-medium text-foreground">{formatDateTime(booking.cancelledAt)}</span>
+                                            </div>
+                                        )}
+                                        {booking.cancelReason && (
+                                            <div>
+                                                <span className="text-muted block">Lý do hủy</span>
+                                                <span className="font-medium text-foreground">{getCancelReasonText(booking.cancelReason)}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </Section>
+                            )}
 
                             {/* ── Note ── */}
                             {booking.note && (

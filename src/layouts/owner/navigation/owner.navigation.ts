@@ -43,6 +43,12 @@ export const OWNER_NAV: NavItem[] = [
         hint: "Đơn đặt sân & lịch sử",
     },
     {
+        label: "Duyệt cọc",
+        href: "/owner/booking-approvals",
+        icon: ShieldCheck,
+        hint: "Duyệt cọc đơn đặt sân",
+    },
+    {
         label: "Bảng giá",
         href: "/owner/pricing",
         icon: Tag,

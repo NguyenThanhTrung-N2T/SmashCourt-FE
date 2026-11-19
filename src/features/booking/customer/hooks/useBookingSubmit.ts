@@ -2,7 +2,9 @@
  * Custom hook for handling booking submission
  */
 
+import { useRouter } from "next/navigation";
 import { createOnlineBooking } from "@/src/api/booking.api";
+import { AuthApiError } from "@/src/api/core";
 import { useGlobalToast } from "@/src/shared/hooks/useGlobalToast";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
 import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
@@ -19,6 +21,7 @@ interface UseBookingSubmitParams {
   setIsSubmitting: (value: boolean) => void;
   setError: (value: string | null) => void;
   validateGuestInfo: (name: string, phone: string, email: string) => string | null;
+  onBookingRejected?: () => void;
 }
 
 export function useBookingSubmit({
@@ -33,7 +36,9 @@ export function useBookingSubmit({
   setIsSubmitting,
   setError,
   validateGuestInfo,
+  onBookingRejected,
 }: UseBookingSubmitParams) {
+  const router = useRouter();
   const { showToast } = useGlobalToast();
 
   const handleSubmitBooking = async () => {
@@ -63,13 +68,53 @@ export function useBookingSubmit({
         note: bookingNote.trim() || undefined,
       });
 
-      // Redirect to payment
-      window.location.href = booking.paymentUrl;
+      // Save booking response in sessionStorage for instant hydration on the result page
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("last_booking_result", JSON.stringify(booking));
+        } catch {
+          // Ignore storage quota / private mode errors
+        }
+      }
+
+      // Navigate to the booking result page (C1 fix, contract §3.1)
+      router.push(`/bookings/result?bookingId=${booking.bookingId}`);
     } catch (err) {
+      setIsSubmitting(false);
+
+      if (err instanceof AuthApiError) {
+        if (err.code === "BOOKING_REJECTED") {
+          const message =
+            "Rất tiếc, đơn đặt sân này không được chấp nhận. Vui lòng chọn khung giờ khác hoặc liên hệ chi nhánh.";
+          setError(message);
+          showToast("error", message);
+          onBookingRejected?.();
+          return;
+        }
+
+        if (err.code === "CONFLICT") {
+          const message = "Đơn đặt sân vừa được nhân viên xử lý, vui lòng xem lịch sử đặt sân.";
+          setError(message);
+          showToast("warning", message);
+          router.push("/bookings");
+          return;
+        }
+
+        if (err.status === 401 || err.status === 403) {
+          showToast("error", "Vui lòng đăng nhập để thực hiện đặt sân.");
+          router.push("/auth/login");
+          return;
+        }
+
+        const message = err.message || "Yêu cầu không hợp lệ. Vui lòng thử lại.";
+        setError(message);
+        showToast("error", message);
+        return;
+      }
+
       const message = err instanceof Error ? err.message : "Không thể tạo đặt sân";
       setError(message);
       showToast("error", message);
-      setIsSubmitting(false);
     }
   };
 

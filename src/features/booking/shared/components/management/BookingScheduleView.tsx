@@ -28,6 +28,9 @@ const TIME_SLOTS = [
 function getStatusColor(status: BookingStatusInput): string {
   const statusValue = toBookingStatusValue(status);
   switch (statusValue) {
+    case BookingStatus.PENDING_APPROVAL:
+      return 'bg-amber-600 hover:bg-amber-700 border-amber-700';
+
     case BookingStatus.PENDING:
       return 'bg-amber-500 hover:bg-amber-600 border-amber-600';
 

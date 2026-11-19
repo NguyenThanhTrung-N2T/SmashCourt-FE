@@ -196,6 +196,7 @@ export function useBookingForm() {
     handleDateChange,
     handleNext,
     handleBack,
+    goToStep: setCurrentStep,
     canProceedFromStep,
   };
 }

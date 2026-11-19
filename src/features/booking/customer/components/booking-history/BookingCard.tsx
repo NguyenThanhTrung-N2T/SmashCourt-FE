@@ -4,7 +4,8 @@
  * Displays a booking summary card in the booking history list.
  */
 "use client"
-import { CalendarBlank, Clock, MapPin, Receipt, CreditCard, Circle } from "@phosphor-icons/react";
+import { useState, useEffect } from "react";
+import { CalendarBlank, MapPin, Receipt, CreditCard, Circle } from "@phosphor-icons/react";
 import { Badge } from "@/src/shared/components/ui/Badge";
 import { Button } from "@/src/shared/components/ui/Button";
 import type { BookingDto } from "../../../shared/types/booking.types";
@@ -14,6 +15,7 @@ import {
   formatDate,
   formatTime,
 } from "../../utils/bookingStatus";
+import { parseBackendDateVN } from "@/src/shared/utils/date";
 import { getCourtTotal } from "../../../shared/utils/bookingStatus";
 
 interface BookingCardProps {
@@ -28,10 +30,25 @@ export function BookingCard({ booking, onViewDetail, onPayNow }: BookingCardProp
   const finalTotal = booking.finalTotal ?? booking.finalTotal;
   const paymentStatus = booking.paymentStatus;
 
-  // Check if payment is pending (UNPAID = 0) and booking is pending
+  const [isExpired, setIsExpired] = useState(false);
+
+  useEffect(() => {
+    if (!booking.expiresAt) return;
+    const targetDate = parseBackendDateVN(booking.expiresAt);
+    if (!targetDate) return;
+
+    const interval = setInterval(() => {
+      setIsExpired(Date.now() >= targetDate.getTime());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [booking.expiresAt]);
+
+  // Check if payment is pending (UNPAID) and booking is PENDING before expiration
   const isPendingPayment =
     paymentStatus === 'UNPAID' &&
-    booking.status === 'PENDING';
+    booking.status === 'PENDING' &&
+    !isExpired;
 
   return (
     <div className="flex h-full flex-col rounded-xl border-2 border-border bg-surface-1 p-4 shadow-sm transition-all hover:shadow-md">
@@ -96,15 +113,37 @@ export function BookingCard({ booking, onViewDetail, onPayNow }: BookingCardProp
 
       {/* Stick to the bottom */}
       <div className="mt-auto">
-        {/* Total */}
-        <div className="mb-3 flex items-center justify-between border-t-2 border-border pt-3">
-          <div className="flex items-center gap-2">
-            <Receipt className="h-4 w-4 text-muted" />
-            <span className="text-sm font-bold text-muted">Tổng tiền</span>
+        {/* Total & Deposit Breakdown */}
+        <div className="mb-3 border-t-2 border-border pt-3 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Receipt className="h-4 w-4 text-muted" />
+              <span className="text-sm font-bold text-muted">Tổng tiền</span>
+            </div>
+            <span className="text-lg font-bold text-primary">
+              {finalTotal !== undefined ? formatCurrency(finalTotal) : "N/A"}
+            </span>
           </div>
-          <span className="text-lg font-bold text-primary">
-            {finalTotal !== undefined ? formatCurrency(finalTotal) : "N/A"}
-          </span>
+
+          {booking.depositAmount !== null && booking.depositAmount > 0 && (
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted">
+                {booking.paymentStatus === "UNPAID" ? "Cọc phải trả:" : "Đã cọc:"}
+              </span>
+              <span className="font-semibold text-foreground">
+                {formatCurrency(booking.depositAmount)}
+              </span>
+            </div>
+          )}
+
+          {booking.remainingAmount !== null && booking.remainingAmount > 0 && booking.paymentStatus !== "UNPAID" && (
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted">Thu tại quầy:</span>
+              <span className="font-semibold text-foreground">
+                {formatCurrency(booking.remainingAmount)}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Actions */}
@@ -117,7 +156,7 @@ export function BookingCard({ booking, onViewDetail, onPayNow }: BookingCardProp
               onClick={() => onPayNow(booking.id || "")}
               leftIcon={<CreditCard className="h-4 w-4" />}
             >
-              Thanh toán
+              Thanh toán cọc
             </Button>
           )}
           <Button

@@ -12,7 +12,9 @@ import {
   Spinner,
 } from "@phosphor-icons/react";
 import { fetchCancellationInfo, cancelBookingByToken } from "@/src/api/booking.api";
+import { AuthApiError } from "@/src/api/core";
 import type { CancelTokenInfoDto } from "@/src/features/booking/shared/types/booking.types";
+import { calculateHoursUntil } from "@/src/features/booking/customer/utils/bookingStatus";
 import { Button } from "@/src/shared/components/ui/Button";
 
 function formatVND(amount: number): string {
@@ -67,8 +69,12 @@ function CancelBookingContent() {
       await cancelBookingByToken(token);
       setSuccess(true);
     } catch (err) {
-      const error = err as Error;
-      setError(error?.message || "Đã xảy ra lỗi trong quá trình hủy đặt sân.");
+      if (err instanceof AuthApiError && err.code === "BOOKING_ALREADY_STARTED") {
+        setError("Đơn đặt sân đã tới giờ chơi, không thể tự hủy qua liên kết. Vui lòng liên hệ chi nhánh.");
+      } else {
+        const error = err as Error;
+        setError(error?.message || "Đã xảy ra lỗi trong quá trình hủy đặt sân.");
+      }
     } finally {
       setIsCancelling(false);
     }
@@ -165,6 +171,9 @@ function CancelBookingContent() {
     info.status === "CANCELLED" ||
     info.status === "CANCELLED_PENDING_REFUND" ||
     info.status === "CANCELLED_REFUNDED";
+
+  // Contract §3.4, P6-23: Check if booking has already started in Vietnam time (+07:00)
+  const isStarted = calculateHoursUntil(info.bookingDate, info.startTime) <= 0;
 
   if (isAlreadyCancelled) {
     return (
@@ -290,16 +299,27 @@ function CancelBookingContent() {
         </div>
       </div>
 
+      {/* Already Started Alert */}
+      {isStarted && (
+        <div className="rounded-2xl border-2 border-amber-500/20 bg-amber-500/5 p-4 text-center">
+          <p className="text-sm font-semibold text-amber-600">
+            Đơn đặt sân đã tới giờ chơi, không thể tự hủy qua liên kết. Vui lòng liên hệ trực tiếp chi nhánh để được hỗ trợ.
+          </p>
+        </div>
+      )}
+
       {/* Action Buttons */}
       <div className="flex flex-col gap-2.5 pt-2">
-        <Button
-          onClick={handleCancel}
-          disabled={isCancelling}
-          variant="danger"
-          className="w-full rounded-full py-3 font-bold text-sm shadow-md"
-        >
-          {isCancelling ? "Đang xử lý hủy sân..." : "Xác nhận Hủy Đặt Sân"}
-        </Button>
+        {!isStarted && (
+          <Button
+            onClick={handleCancel}
+            disabled={isCancelling}
+            variant="danger"
+            className="w-full rounded-full py-3 font-bold text-sm shadow-md"
+          >
+            {isCancelling ? "Đang xử lý hủy sân..." : "Xác nhận Hủy Đặt Sân"}
+          </Button>
+        )}
         <Button
           onClick={() => {
             const user = getAuthUser();
@@ -313,7 +333,7 @@ function CancelBookingContent() {
           variant="secondary"
           className="w-full rounded-full py-3"
         >
-          Giữ Lịch Chơi
+          {isStarted ? "Trở về Trang chủ" : "Giữ Lịch Chơi"}
         </Button>
       </div>
     </div>

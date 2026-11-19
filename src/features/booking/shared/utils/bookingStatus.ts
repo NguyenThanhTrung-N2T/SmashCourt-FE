@@ -68,6 +68,8 @@ export function getBookingStatusLabel(status: BookingStatusInput): string {
   switch (statusValue) {
     case BookingStatus.PENDING:
       return 'Chưa thanh toán';
+    case BookingStatus.PENDING_APPROVAL:
+      return 'Chờ duyệt cọc';
     case BookingStatus.CONFIRMED:
       return 'Đặt tại quầy';
     case BookingStatus.PAID_ONLINE:
@@ -100,6 +102,7 @@ export function getBookingStatusVariant(
     case BookingStatus.CONFIRMED:
     case BookingStatus.PAID_ONLINE:
       return 'info';
+    case BookingStatus.PENDING_APPROVAL:
     case BookingStatus.IN_PROGRESS:
       return 'warning';
     case BookingStatus.COMPLETED:
@@ -207,3 +210,54 @@ export function formatDateTime(dateTime: string): string {
     minute: '2-digit',
   });
 }
+
+export function getCancelSourceText(source?: string | null): string {
+  if (!source) return '—';
+  switch (source.toUpperCase()) {
+    case 'CUSTOMER':
+      return 'Khách hàng';
+    case 'STAFF':
+      return 'Nhân viên';
+    case 'SYSTEM':
+      return 'Hệ thống tự động';
+    case 'ADMIN':
+      return 'Quản trị viên';
+    default:
+      return source;
+  }
+}
+
+export function getCancelReasonText(reason?: string | null): string {
+  if (!reason) return 'Không có lý do';
+  switch (reason) {
+    case 'CUSTOMER_REQUEST':
+      return 'Khách yêu cầu hủy';
+    case 'PAYMENT_TIMEOUT':
+      return 'Quá hạn thanh toán';
+    case 'APPROVAL_REJECTED':
+      return 'Quản lý từ chối duyệt cọc';
+    case 'APPROVAL_TIMEOUT':
+      return 'Quá hạn chờ duyệt cọc (Hệ thống tự hủy)';
+    case 'FORCE_MAJEURE':
+      return 'Sự cố bất khả kháng (Thời tiết/Sân hỏng)';
+    case 'STAFF_CORRECTION':
+      return 'Nhân viên điều chỉnh';
+    default:
+      return reason;
+  }
+}
+
+export function getDepositSourceText(source?: string | null): string {
+  if (!source) return '—';
+  switch (source.toUpperCase()) {
+    case 'TADSS':
+      return 'Hệ thống gợi ý';
+    case 'MANUAL':
+      return 'Chỉ định thủ công';
+    case 'POLICY':
+      return 'Chính sách chi nhánh';
+    default:
+      return source;
+  }
+}
+

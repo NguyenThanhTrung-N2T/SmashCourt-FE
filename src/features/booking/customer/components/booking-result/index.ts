@@ -1,0 +1,2 @@
+export { BookingResultPage } from "./BookingResultPage";
+

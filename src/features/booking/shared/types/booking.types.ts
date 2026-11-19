@@ -15,6 +15,7 @@ export const BookingStatus = {
   CANCELLED_PENDING_REFUND: 7,
   CANCELLED_REFUNDED: 8,
   NO_SHOW: 9,
+  PENDING_APPROVAL: 10,
 } as const;
 
 export const InvoicePaymentStatus = {
@@ -210,13 +211,34 @@ export interface BookingDto {
   courts: BookingCourtDto[];
   services: BookingServiceDto[];
   refundAmount: number | null;
+
+  // Phase 6: Deposit & Approval fields (contract §2.2)
+  depositRate: number | null;
+  depositAmount: number | null;
+  remainingAmount: number | null;
+  depositSource: DepositSource | null;
+  approvalExpiresAt: string | null;
+  approvalReasonCode: string | null; // staff endpoints only; customer = null
+  approvalReasons: string[] | null;  // staff endpoints only; customer = null
+  cancelReason: CancelReason | null;
+  cancelSource: CancelSource | null;
+  cancelledByName: string | null;    // staff endpoints only; customer = null
+  cancelledAt: string | null;
 }
 
 export interface OnlineBookingResponse {
   bookingId: string;
-  paymentUrl: string;
-  expiresAt: string;
+  bookingCode: string;
+  status: string; // 'PENDING' | 'PENDING_APPROVAL' | 'CONFIRMED'
+  paymentUrl: string | null;
+  expiresAt: string | null;
+  paymentLinkExpiresAt: string | null;
   finalTotal: number;
+  depositRate: number | null;
+  depositAmount: number | null;
+  remainingAmount: number | null;
+  depositSource: DepositSource | null;
+  approvalExpiresAt: string | null;
 }
 
 export interface BookingScheduleItemDto {
@@ -263,6 +285,24 @@ export interface CancelTokenInfoDto {
 export interface TimeGridSlotDto {
   startTime: string;
   endTime: string;
-  status: "AVAILABLE" | "LOCKED" | "IN_USE";
+  status: "AVAILABLE" | "LOCKED" | "IN_USE" | "RESERVED";
   lockRemainingSeconds?: number | null;
 }
+
+// ─────────────────────────────────────────────
+// Phase 6: Deposit & Approval types (contract §2.1, §2.2)
+// ─────────────────────────────────────────────
+
+export type DepositSource = 'TADSS' | 'MANAGER' | 'FULL_PAYMENT_FALLBACK';
+
+export type CancelReason =
+  | 'PAYMENT_EXPIRED'
+  | 'APPROVAL_EXPIRED'
+  | 'APPROVAL_REJECTED'
+  | 'POLICY_REJECTED'
+  | 'CUSTOMER_CANCELLED'
+  | 'STAFF_CANCELLED'
+  | 'SYSTEM_CLEANUP';
+
+export type CancelSource = 'CUSTOMER' | 'LINK' | 'STAFF' | 'SYSTEM';
+

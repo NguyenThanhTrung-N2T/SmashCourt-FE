@@ -62,6 +62,39 @@ export function parseBackendDate(dateString: string): Date | null {
 }
 
 /**
+ * Parse backend Vietnam datetime string ("DD/MM/YYYY HH:mm:ss" or ISO) into an absolute Date object with +07:00 offset.
+ * Used for countdown timers to expiresAt/approvalExpiresAt to guarantee correct time across any browser timezone (contract §1.3, R-6).
+ */
+export function parseBackendDateVN(dateString: string): Date | null {
+  try {
+    const trimmed = dateString.trim();
+    const slashParts = trimmed.split(' ');
+    const slashDate = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(slashParts[0]);
+    if (slashDate) {
+      const [, d, m, y] = slashDate;
+      const day = d.padStart(2, '0');
+      const month = m.padStart(2, '0');
+      let timePart = '00:00:00';
+      if (slashParts[1]) {
+        const tp = slashParts[1].split(':');
+        const h = (tp[0] || '0').padStart(2, '0');
+        const min = (tp[1] || '0').padStart(2, '0');
+        const s = (tp[2] || '0').padStart(2, '0');
+        timePart = `${h}:${min}:${s}`;
+      }
+      const isoStr = `${y}-${month}-${day}T${timePart}+07:00`;
+      const date = new Date(isoStr);
+      if (!isNaN(date.getTime())) return date;
+    }
+    const standardDate = new Date(trimmed);
+    if (!isNaN(standardDate.getTime())) return standardDate;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Format a date string to DD/MM/YYYY format
  */
 export function formatDate(dateString: string): string {

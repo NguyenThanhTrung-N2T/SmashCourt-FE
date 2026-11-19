@@ -18,6 +18,11 @@ export const SignalREvents = {
   // Payment Events
   PAYMENT_SUCCESS: "PaymentSuccess",
   PAYMENT_FAILED: "PaymentFailed",
+
+  // Phase 6: Deposit Approval events (contract §6)
+  BOOKING_PENDING_APPROVAL: "BookingPendingApproval",
+  BOOKING_APPROVAL_RESOLVED: "BookingApprovalResolved",
+  PENDING_APPROVAL_QUEUE_CHANGED: "PendingApprovalQueueChanged",
 } as const;
 
 export type SignalREventName = typeof SignalREvents[keyof typeof SignalREvents];

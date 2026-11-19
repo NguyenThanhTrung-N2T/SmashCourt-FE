@@ -1,3 +1,5 @@
+import type { OnlineBookingResponse } from "./booking.types";
+
 /**
  * Payment Types
  * 
@@ -24,10 +26,13 @@ export interface ConfirmPaymentDto {
 
 export interface PaymentConfirmationDto {
   isSuccess: boolean;
-  bookingId: string;
-  bookingCode: string;
-  amount: number;
   message: string;
+  bookingId: string | null;
+  bookingCode: string | null;
+  amount: number | null;
+  transactionRef: string | null;
+  responseCode: string | null;
+  bookingStatus: string | null;
 }
 
 // ============================================================================
@@ -38,11 +43,6 @@ export interface PaymentConfirmationDto {
  * Response from retry payment endpoint
  * 
  * Returned when customer retries payment for a PENDING booking.
- * Contains new payment URL and extended expiration time.
+ * Shares the exact 12-field contract as OnlineBookingResponse (contract §3.1, §3.3).
  */
-export interface RetryPaymentResponseDto {
-  bookingId: string;
-  paymentUrl: string;
-  expiresAt: string; // ISO 8601 datetime
-  finalTotal: number;
-}
+export type RetryPaymentResponseDto = OnlineBookingResponse;

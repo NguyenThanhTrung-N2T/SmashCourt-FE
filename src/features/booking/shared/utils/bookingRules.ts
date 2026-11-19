@@ -95,7 +95,8 @@ export function canCancel(booking: BookingDto): boolean {
   const status = getStatusValue(booking.status);
   return status === BookingStatus.CONFIRMED ||
     status === BookingStatus.PAID_ONLINE ||
-    status === BookingStatus.PENDING;
+    status === BookingStatus.PENDING ||
+    status === BookingStatus.PENDING_APPROVAL;
 }
 
 /**

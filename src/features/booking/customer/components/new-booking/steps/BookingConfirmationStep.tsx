@@ -397,7 +397,7 @@ export function BookingConfirmationStep({
 
           <div className="border-t border-border pt-2">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-foreground">Tổng thanh toán</span>
+              <span className="font-bold text-foreground">Tổng tiền đơn</span>
               <span className="text-2xl font-bold text-primary">
                 {finalAmount.toLocaleString("vi-VN")} đ
               </span>
@@ -407,8 +407,7 @@ export function BookingConfirmationStep({
       </div>
 
       <Alert variant="info" title="Lưu ý">
-        Sau khi xác nhận, bạn sẽ được chuyển đến trang thanh toán. Vui lòng hoàn tất thanh toán
-        trong vòng 10 phút để giữ chỗ.
+        Tổng tiền đơn; mức cọc được xác định sau khi đặt, phần còn lại thu tại quầy.
       </Alert>
     </div>
   );

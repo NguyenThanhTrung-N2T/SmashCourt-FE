@@ -91,8 +91,8 @@ export function BookingHistoryList() {
   const handlePayNow = async (bookingId: string) => {
     const result = await retryPayment(bookingId);
 
-    if (result) {
-      // Redirect to payment URL
+    if (result?.paymentUrl) {
+      // TODO(6B-2): Handle status branching properly (C1 fix)
       window.location.href = result.paymentUrl;
     }
   };

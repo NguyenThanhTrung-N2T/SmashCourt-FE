@@ -175,8 +175,14 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {
-      const message = error instanceof AuthApiError ? error.message : 'Check-in thất bại';
-      showToast('error', message);
+      if (error instanceof AuthApiError && (error.code === 'BOOKING_ALREADY_NO_SHOW' || error.status === 409 || error.code === 'CONFLICT' || error.message?.includes('NO_SHOW'))) {
+        showToast('error', 'Đơn đặt sân đã bị đánh dấu Không đến (No-show) hoặc Đã hết hạn bởi hệ thống tự động. Vui lòng làm mới danh sách.');
+        await loadBookings();
+        await loadSummary();
+      } else {
+        const message = error instanceof AuthApiError ? error.message : 'Check-in thất bại';
+        showToast('error', message);
+      }
       console.error('Check-in error:', error);
     }
   }, [loadBookings, loadSummary, selectedBooking, openBookingDetail, showToast]);

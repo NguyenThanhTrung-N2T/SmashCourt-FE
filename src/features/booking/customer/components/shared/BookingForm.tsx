@@ -26,7 +26,7 @@ interface BookingFormProps {
   bookingDate: string; // ISO 8601
   branchName: string;
   totalAmount: number;
-  onSuccess?: (paymentUrl: string) => void;
+  onSuccess?: (paymentUrl: string | null) => void;
   onCancel?: () => void;
 }
 
