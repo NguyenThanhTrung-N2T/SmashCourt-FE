@@ -1,3 +1,4 @@
+import { parseBackendDateVN } from "@/src/shared/utils/date";
 import { useEffect, useState } from "react";
 import { LiveCourtAttentionDto } from "@/src/features/report/shared/report.types";
 import { getAttentionStatusConfig, formatTimeRange, formatRelativeTime, formatCurrency, getCourtStatusVietnamese } from "../utils/dashboard-helpers";
@@ -24,11 +25,11 @@ export function LiveCourtCard({ court, onClick }: LiveCourtCardProps) {
     }, []);
 
     const minutesSinceStart = court.startTime
-        ? differenceInMinutes(now, new Date(court.startTime))
+        ? differenceInMinutes(now, parseBackendDateVN(court.startTime) ?? new Date(NaN))
         : null;
 
     const minutesUntilStart = court.startTime
-        ? differenceInMinutes(new Date(court.startTime), now)
+        ? differenceInMinutes(parseBackendDateVN(court.startTime) ?? new Date(NaN), now)
         : null;
 
     return (

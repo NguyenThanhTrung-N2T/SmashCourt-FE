@@ -4,6 +4,7 @@
  * GitHub-style calendar heatmap for booking analytics.
  */
 
+import { getTodayVN } from '@/src/shared/utils/date';
 import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Skeleton } from '@/src/shared/components/feedback/Skeleton';
@@ -126,7 +127,7 @@ export function BookingCalendarView({
             }
 
             const dayNumber = new Date(day.date).getDate();
-            const isToday = day.date === new Date().toISOString().split('T')[0];
+            const isToday = day.date === getTodayVN();
 
             return (
               <button

@@ -1,3 +1,4 @@
+import { parseBackendDateVN } from "@/src/shared/utils/date";
 import {
     useRef,
     useEffect,
@@ -33,28 +34,8 @@ interface ChatPanelProps {
  * Parse timestamp from Backend (can be ISO string or dd/MM/yyyy HH:mm:ss format)
  */
 function parseTimestamp(timestamp: string): Date {
-    // Try ISO format first
-    const isoDate = new Date(timestamp);
-    if (!isNaN(isoDate.getTime())) {
-        return isoDate;
-    }
-    
-    // Try dd/MM/yyyy HH:mm:ss format
-    const match = timestamp.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/);
-    if (match) {
-        const [, day, month, year, hour, minute, second] = match;
-        return new Date(
-            parseInt(year),
-            parseInt(month) - 1,
-            parseInt(day),
-            parseInt(hour),
-            parseInt(minute),
-            parseInt(second)
-        );
-    }
-    
-    // Fallback to current time
-    return new Date();
+    // Đọc dd/MM/yyyy trước: new Date("05/10/2026 …") hiểu là 10/05 kiểu Mỹ (T-8)
+    return parseBackendDateVN(timestamp) ?? new Date();
 }
 
 function MessageBubble({ message }: { message: ChatMessage }) {

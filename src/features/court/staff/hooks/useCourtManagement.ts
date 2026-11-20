@@ -8,6 +8,7 @@
  * Supports split API (Stats + Paginated Courts) and Date scoping.
  */
 
+import { getTodayVN } from "@/src/shared/utils/date";
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
     fetchCourtManagementStats,
@@ -32,7 +33,7 @@ export function useCourtManagement() {
     const [loadingCourts, setLoadingCourts] = useState(true);
 
     // Filters & Pagination
-    const [date, setDateState] = useState<string>(new Date().toISOString().split("T")[0]);
+    const [date, setDateState] = useState<string>(getTodayVN());
     const [search, setSearchState] = useState("");
     const [typeId, setTypeIdState] = useState("");
     const [page, setPage] = useState(1);

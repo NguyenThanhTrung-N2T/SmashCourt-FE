@@ -6,6 +6,7 @@
  * Reusable presenter for booking dashboard. Used by both OwnerBookingPage and ManagerBookingPage.
  */
 
+import { getTodayVN } from "@/src/shared/utils/date";
 import { useState, useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import {
@@ -250,19 +251,20 @@ export function BookingManagementBase({
       if (newTab === "schedule" && activeView === "table") {
         // Table → Schedule: Use table's date filter if available, otherwise today
         const targetDate =
-          tableFilters.date || new Date().toISOString().split("T")[0];
+          tableFilters.date || getTodayVN();
         schedule.setSelectedDate(targetDate);
       } else if (newTab === "calendar" && activeView === "schedule") {
         // Schedule → Calendar: Convert schedule date to month/year
-        const scheduleDate = new Date(schedule.selectedDate);
-        calendar.setSelectedYear(scheduleDate.getFullYear());
-        calendar.setSelectedMonth(scheduleDate.getMonth() + 1);
+        // Khóa ngày "yyyy-MM-dd": đọc thẳng năm / tháng, không qua múi giờ máy
+        const [scheduleYear, scheduleMonth] = schedule.selectedDate.split("-").map(Number);
+        calendar.setSelectedYear(scheduleYear);
+        calendar.setSelectedMonth(scheduleMonth);
       } else if (newTab === "calendar" && activeView === "table") {
         // Table → Calendar: Convert table date to month/year if available
         if (tableFilters.date) {
-          const tableDate = new Date(tableFilters.date);
-          calendar.setSelectedYear(tableDate.getFullYear());
-          calendar.setSelectedMonth(tableDate.getMonth() + 1);
+          const [tableYear, tableMonth] = tableFilters.date.split("-").map(Number);
+          calendar.setSelectedYear(tableYear);
+          calendar.setSelectedMonth(tableMonth);
         }
       }
 

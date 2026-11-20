@@ -2,6 +2,7 @@
  * Custom hook for managing booking form state and logic
  */
 
+import { getTodayVN } from "@/src/shared/utils/date";
 import { useState, useEffect } from "react";
 import { getAuthUser } from "@/src/features/auth/session/sessionStore";
 import type { BranchBasicDto } from "@/src/features/branch/shared/types/branch.types";
@@ -37,7 +38,7 @@ export function useBookingForm() {
   // Step 3: Court & Time
   const [selectedCourts, setSelectedCourts] = useState<CourtDto[]>([]);
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
+    getTodayVN()
   );
   const [selectedSlots, setSelectedSlots] = useState<TimeGridSlotDto[]>([]);
 

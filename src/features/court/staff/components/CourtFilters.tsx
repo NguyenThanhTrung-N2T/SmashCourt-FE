@@ -6,6 +6,7 @@
  * Filter bar: search input + court type select (left) + view toggle (right).
  */
 
+import { getTodayVN, addDaysToDateKey } from "@/src/shared/utils/date";
 import { MagnifyingGlass, SquaresFour, Rows, Calendar, CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -54,9 +55,7 @@ export function CourtFilters({
                 <div className="flex items-center gap-2 bg-surface-1 border border-border rounded-xl p-1 shrink-0 shadow-sm">
                     <button
                         onClick={() => {
-                            const d = new Date(date);
-                            d.setDate(d.getDate() - 1);
-                            onDateChange(d.toISOString().split("T")[0]);
+                            onDateChange(addDaysToDateKey(date, -1));
                         }}
                         className="p-2 hover:bg-surface-2 rounded-lg text-muted hover:text-foreground transition-colors"
                         title="Ngày trước"
@@ -82,8 +81,8 @@ export function CourtFilters({
 
                         {/* Badges */}
                         {(() => {
-                            const today = new Date().toISOString().split("T")[0];
-                            const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0];
+                            const today = getTodayVN();
+                            const tomorrow = addDaysToDateKey(today, 1);
                             if (date === today) return (
                                 <span className="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-md">
                                     Hôm nay
@@ -100,9 +99,7 @@ export function CourtFilters({
 
                     <button
                         onClick={() => {
-                            const d = new Date(date);
-                            d.setDate(d.getDate() + 1);
-                            onDateChange(d.toISOString().split("T")[0]);
+                            onDateChange(addDaysToDateKey(date, 1));
                         }}
                         className="p-2 hover:bg-surface-2 rounded-lg text-muted hover:text-foreground transition-colors"
                         title="Ngày sau"

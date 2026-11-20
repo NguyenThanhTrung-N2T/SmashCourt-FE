@@ -4,6 +4,7 @@
  * View and manage active sessions (devices).
  */
 
+import { parseBackendDate } from "@/src/shared/utils/date";
 import { useState } from "react";
 import { Button } from "@/src/shared/components/ui/Button";
 import {
@@ -67,7 +68,8 @@ export function SessionManagementTab({ showToast }: SessionManagementTabProps) {
 
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: vi });
+      const date = parseBackendDate(dateString);
+      return date ? format(date, "dd/MM/yyyy HH:mm", { locale: vi }) : dateString;
     } catch {
       return dateString;
     }

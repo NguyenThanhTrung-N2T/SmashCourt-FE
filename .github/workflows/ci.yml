@@ -42,10 +42,14 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit -p .
 
+      # FE-12: unit test hàm thuần (ngày giờ theo giờ VN, đọc chuỗi giờ BE), node:test, không thêm gói
+      - name: Unit test
+        run: npm test
+
       - name: Build
         run: npm run build
 
-  # Triển khai Vercel production (Epic 6C, P6-36): chỉ khi push lên master và lint, tsc, build đều đạt; develop và pull request chỉ chạy CI.
+  # Triển khai Vercel production (Epic 6C, P6-36): chỉ khi push lên master và lint, tsc, unit test, build đều đạt; develop và pull request chỉ chạy CI.
   # Cần ở repo: Environment "production" chứa secrets VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID; tắt tự triển khai theo Git trong Vercel để chỉ còn đường này.
   # Biến NEXT_PUBLIC_* khai trong Vercel (Project Settings › Environment Variables), `vercel pull` lấy về lúc build.
   deploy-production:

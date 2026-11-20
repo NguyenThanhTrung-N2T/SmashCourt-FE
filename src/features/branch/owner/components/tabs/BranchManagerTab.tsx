@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDate } from '@/src/shared/utils/date';
 import { useState, useEffect } from 'react';
 import { UserCircle, User, Plus, Trash, Warning } from '@phosphor-icons/react';
 import type { BranchManagerDto, AssignManagerDto, UserSearchResultDto } from '@/src/features/branch/shared/types/branch.types';
@@ -119,7 +120,7 @@ export function BranchManagerTab({ branchId, onToast }: BranchManagerTabProps) {
                                     <p className="text-sm text-muted mt-1">{manager.phone}</p>
                                 )}
                                 <p className="text-xs text-muted mt-2">
-                                    Được gán: {new Date(manager.assignedAt).toLocaleDateString('vi-VN')}
+                                    Được gán: {formatDate(manager.assignedAt)}
                                     {manager.assignedByName && ` bởi ${manager.assignedByName}`}
                                 </p>
                             </div>

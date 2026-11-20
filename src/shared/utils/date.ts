@@ -86,12 +86,83 @@ export function parseBackendDateVN(dateString: string): Date | null {
       const date = new Date(isoStr);
       if (!isNaN(date.getTime())) return date;
     }
+    // ISO không kèm múi giờ (dashboard BE trả "yyyy-MM-ddTHH:mm:ss" theo giờ VN): coi là +07:00, không theo múi giờ máy
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(trimmed)) {
+      const vnDate = new Date(`${trimmed}+07:00`);
+      if (!isNaN(vnDate.getTime())) return vnDate;
+    }
     const standardDate = new Date(trimmed);
     if (!isNaN(standardDate.getTime())) return standardDate;
     return null;
   } catch {
     return null;
   }
+}
+
+// ─── Ngày giờ theo giờ Việt Nam (P6-22, T-7) ────────────────────────────────
+// "Hôm nay" lấy bằng toISOString() là ngày UTC: từ 00:00 tới 06:59 giờ VN ra ngày hôm trước.
+// Các hàm dưới luôn tính theo Asia/Ho_Chi_Minh, không phụ thuộc múi giờ máy; ngày dạng "yyyy-MM-dd" (khóa ngày).
+
+const VN_TIME_ZONE = 'Asia/Ho_Chi_Minh';
+
+const vnDatePartsFormatter = new Intl.DateTimeFormat('en-US', {
+  timeZone: VN_TIME_ZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+
+function vnParts(date: Date): Record<'year' | 'month' | 'day' | 'hour' | 'minute', string> {
+  const parts: Record<string, string> = {};
+  for (const part of vnDatePartsFormatter.formatToParts(date)) parts[part.type] = part.value;
+  return {
+    year: parts.year,
+    month: parts.month,
+    day: parts.day,
+    // Một số trình duyệt in nửa đêm là "24" dù hourCycle h23
+    hour: parts.hour === '24' ? '00' : parts.hour,
+    minute: parts.minute,
+  };
+}
+
+/** Ngày lịch Việt Nam ("yyyy-MM-dd") của một thời điểm (mặc định: bây giờ). */
+export function toDateKeyVN(date: Date = new Date()): string {
+  const { year, month, day } = vnParts(date);
+  return `${year}-${month}-${day}`;
+}
+
+/** "Hôm nay" theo giờ Việt Nam, dạng "yyyy-MM-dd" (gửi BE, gán cho input type="date"). */
+export function getTodayVN(): string {
+  return toDateKeyVN(new Date());
+}
+
+/** Cộng / trừ ngày trên khóa ngày "yyyy-MM-dd" (tính trên lịch, không qua múi giờ máy). */
+export function addDaysToDateKey(dateKey: string, days: number): string {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
+}
+
+/**
+ * Chuẩn hóa về khóa ngày "yyyy-MM-dd". Khóa ngày giữ nguyên: new Date("2026-11-20") là nửa đêm UTC,
+ * format theo múi giờ máy có thể lùi một ngày (UTC−x). Chuỗi khác đọc qua parseBackendDate (dd/MM/yyyy).
+ */
+export function normalizeDateKey(value: string): string {
+  const trimmed = value.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  const date = parseBackendDate(trimmed);
+  if (!date) return trimmed;
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+/** Số phút từ 00:00 của "bây giờ" theo giờ Việt Nam (so với giờ chơi "HH:mm"). */
+export function getMinutesOfDayVN(date: Date = new Date()): number {
+  const { hour, minute } = vnParts(date);
+  return Number(hour) * 60 + Number(minute);
 }
 
 /**

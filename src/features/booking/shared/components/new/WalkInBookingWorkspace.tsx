@@ -19,8 +19,7 @@ import {
 import { ModeSwitch, GuestPane, CustomerPane } from "@/src/features/booking/shared/components/new";
 import { PromotionSelector } from "@/src/features/booking/customer/components/new-booking/PromotionSelector"; // [NEW] 
 import { usePriceCalculation } from "@/src/features/booking/customer/hooks/usePriceCalculation";
-import { formatTime } from "@/src/shared/utils/date";
-
+import { formatTime, getTodayVN } from "@/src/shared/utils/date";
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -334,7 +333,7 @@ export function WalkInBookingWorkspace({
           <Input
             label="Ngày đặt sân"
             type="date"
-            min={new Date().toISOString().split("T")[0]}
+            min={getTodayVN()}
             value={form.bookingDate}
             onChange={(e) =>
               updateForm({ bookingDate: e.target.value, selectedSlots: [], startTime: "", endTime: "" })

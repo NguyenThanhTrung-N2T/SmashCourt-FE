@@ -1,3 +1,4 @@
+import { getTodayVN } from '@/src/shared/utils/date';
 import type { BookingStatusValue, InvoicePaymentStatusValue } from './booking.types';
 
 // ============================================================================
@@ -61,11 +62,11 @@ export interface BookingFiltersState {
 export const DEFAULT_TABLE_FILTERS: BookingTableFilters = {
   page: 1,
   pageSize: 20,
-  date: new Date().toISOString().split('T')[0], // Default to today
+  date: getTodayVN(), // Default to today
 };
 
 export const DEFAULT_SCHEDULE_FILTERS: ScheduleFilters = {
-  date: new Date().toISOString().split('T')[0], // Default to today
+  date: getTodayVN(), // Default to today
 };
 
 export const DEFAULT_CALENDAR_FILTERS: CalendarFilters = {

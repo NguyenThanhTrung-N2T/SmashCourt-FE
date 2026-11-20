@@ -1,3 +1,4 @@
+import { parseBackendDateVN } from "@/src/shared/utils/date";
 import React, { useState } from "react";
 import { OccupancyForecastPointDto } from "@/src/features/report/shared/report.types";
 import { getOccupancyColor } from "../utils/dashboard-helpers";
@@ -37,9 +38,10 @@ export function OccupancyForecastChart({ data, height = "h-64" }: OccupancyForec
                         <div className="bg-surface-inverse text-inverse text-xs font-bold px-3 py-2 rounded-lg shadow-xl whitespace-nowrap border border-white/10">
                             <div className="space-y-1">
                                 <div className="text-inverse/60 text-[10px] uppercase tracking-wider">
-                                    {new Date(hoveredPoint.time).toLocaleTimeString('vi-VN', {
+                                    {(parseBackendDateVN(hoveredPoint.time) ?? new Date(NaN)).toLocaleTimeString('vi-VN', {
                                         hour: '2-digit',
-                                        minute: '2-digit'
+                                        minute: '2-digit',
+                                        timeZone: 'Asia/Ho_Chi_Minh'
                                     })}
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -138,10 +140,11 @@ export function OccupancyForecastChart({ data, height = "h-64" }: OccupancyForec
                     const shouldShow = data.length <= 8 || index % 2 === 0;
                     if (!shouldShow) return <div key={index} className="flex-1" />;
 
-                    const time = new Date(point.time);
+                    const time = parseBackendDateVN(point.time) ?? new Date(NaN);
                     const label = time.toLocaleTimeString('vi-VN', {
                         hour: '2-digit',
-                        minute: '2-digit'
+                        minute: '2-digit',
+                        timeZone: 'Asia/Ho_Chi_Minh'
                     });
 
                     return (

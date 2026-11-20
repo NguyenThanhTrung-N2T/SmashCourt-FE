@@ -4,6 +4,7 @@
  * Hook for managing schedule view data.
  */
 
+import { addDaysToDateKey } from '@/src/shared/utils/date';
 import { useState, useCallback, useEffect } from 'react';
 import { fetchBookingSchedule } from '@/src/api/booking.api';
 import type { BookingScheduleCourtDto } from '../types/booking.types';
@@ -47,15 +48,11 @@ export function useBookingSchedule(branchId?: string, enabled = true) {
   }, []);
 
   const goToPreviousDay = useCallback(() => {
-    const date = new Date(scheduleFilters.date);
-    date.setDate(date.getDate() - 1);
-    setScheduleFilters({ date: date.toISOString().split('T')[0] });
+    setScheduleFilters({ date: addDaysToDateKey(scheduleFilters.date, -1) });
   }, [scheduleFilters.date]);
 
   const goToNextDay = useCallback(() => {
-    const date = new Date(scheduleFilters.date);
-    date.setDate(date.getDate() + 1);
-    setScheduleFilters({ date: date.toISOString().split('T')[0] });
+    setScheduleFilters({ date: addDaysToDateKey(scheduleFilters.date, 1) });
   }, [scheduleFilters.date]);
 
   return {

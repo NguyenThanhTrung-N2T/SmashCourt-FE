@@ -1,5 +1,5 @@
+import { normalizeDateKey } from "@/src/shared/utils/date";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { format } from "date-fns";
 import { fetchTimeGrid } from "@/src/api/timegrid.api";
 import { useRealtimeRefresh } from "@/src/shared/hooks/useRealtimeRefresh";
 import { useSignalRContext } from "@/src/contexts/SignalRContext";
@@ -67,7 +67,7 @@ export function useTimeGrid({
     if (!isCustomer) return;
 
     // Normalize date to ensure consistency with the SignalR group key
-    const normalizedDate = format(new Date(date), "yyyy-MM-dd");
+    const normalizedDate = normalizeDateKey(date);
 
     let unsubscribed = false;
     let cleanupFn: (() => void) | null = null;

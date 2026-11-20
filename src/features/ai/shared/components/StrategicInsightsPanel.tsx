@@ -1,3 +1,4 @@
+import { getTodayVN, parseBackendDate } from "@/src/shared/utils/date";
 import { useState } from "react";
 import {
     Sparkle,
@@ -27,7 +28,7 @@ import type {
 // ---------------------------------------------------------------------------
 
 function today(): string {
-    return new Date().toISOString().split("T")[0];
+    return getTodayVN();
 }
 
 // ---------------------------------------------------------------------------
@@ -480,7 +481,7 @@ function formatGeneratedAt(generatedAt: string): string {
 
     // Try parse as ISO format first (from Python FastAPI)
     try {
-        const date = new Date(generatedAt);
+        const date = parseBackendDate(generatedAt) ?? new Date(NaN);
         if (!isNaN(date.getTime())) {
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');

@@ -4,6 +4,7 @@
  * Helper functions for status mapping, time formatting, and data transformations.
  */
 
+import { parseBackendDateVN } from "@/src/shared/utils/date";
 import { LiveCourtAttentionDto } from "@/src/features/report/shared/report.types";
 
 /**
@@ -112,8 +113,10 @@ export function formatRelativeTime(minutes: number | null): string {
  */
 export function formatTime(isoString: string | null): string {
     if (!isoString) return '';
-    const date = new Date(isoString);
-    return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    // BE trả giờ VN không kèm múi giờ ("yyyy-MM-ddTHH:mm:ss"): đọc là +07:00 và in theo giờ VN
+    const date = parseBackendDateVN(isoString);
+    if (!date) return '';
+    return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' });
 }
 
 /**

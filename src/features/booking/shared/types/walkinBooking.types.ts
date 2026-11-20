@@ -1,6 +1,7 @@
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+import { getTodayVN } from "@/src/shared/utils/date";
 import { BookingDto } from "./booking.types";
 import { TimeGridSlotDto } from "@/src/features/timeslot/types";
 import { CustomerSearchDto, CustomerSearchQuery } from "@/src/features/customer/shared/types/customer.types";
@@ -22,7 +23,7 @@ export type WalkInBookingFormState = {
 };
 
 export const createDefaultWalkInForm = (): WalkInBookingFormState => ({
-    bookingDate: new Date().toISOString().split("T")[0],
+    bookingDate: getTodayVN(),
     courtIds: [],
     startTime: "",
     endTime: "",

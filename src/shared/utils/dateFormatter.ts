@@ -4,6 +4,8 @@
  * Utility functions for formatting dates consistently across the application.
  */
 
+import { parseBackendDate } from "@/src/shared/utils/date";
+
 /**
  * Format a date string to Vietnamese locale format (DD/MM/YYYY)
  * Handles various input formats and returns a safe fallback if parsing fails
@@ -12,8 +14,8 @@ export function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "N/A";
   
   try {
-    // Try parsing as ISO date first
-    let date = new Date(dateStr);
+    // dd/MM/yyyy của BE đọc qua parseBackendDate: new Date("05/10/2026") hiểu là 10/05 kiểu Mỹ (T-8)
+    let date = parseBackendDate(dateStr) ?? new Date(NaN);
     
     // Check if date is valid
     if (isNaN(date.getTime())) {
@@ -50,7 +52,7 @@ export function formatDateLong(dateStr: string | null | undefined): string {
   if (!dateStr) return "N/A";
   
   try {
-    const date = new Date(dateStr);
+    const date = parseBackendDate(dateStr) ?? new Date(NaN);
     
     if (isNaN(date.getTime())) {
       return dateStr;
@@ -75,7 +77,7 @@ export function formatDateShort(dateStr: string | null | undefined): string {
   if (!dateStr) return "N/A";
   
   try {
-    const date = new Date(dateStr);
+    const date = parseBackendDate(dateStr) ?? new Date(NaN);
     
     if (isNaN(date.getTime())) {
       return dateStr;
@@ -99,13 +101,17 @@ export function formatDateISO(dateStr: string | null | undefined): string {
   if (!dateStr) return "";
   
   try {
-    const date = new Date(dateStr);
+    const date = parseBackendDate(dateStr) ?? new Date(NaN);
     
     if (isNaN(date.getTime())) {
       return "";
     }
     
-    return date.toISOString().split('T')[0];
+    // Lấy theo ngày lịch của chính giá trị đã đọc, không qua UTC (T-7)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   } catch (error) {
     console.error("Error formatting date to ISO:", dateStr, error);
     return "";
@@ -120,7 +126,7 @@ export function formatDateTime(dateStr: string | null | undefined): string {
   if (!dateStr) return "N/A";
   
   try {
-    const date = new Date(dateStr);
+    const date = parseBackendDate(dateStr) ?? new Date(NaN);
     
     if (isNaN(date.getTime())) {
       return dateStr;
@@ -151,7 +157,7 @@ export function isValidDate(dateStr: string | null | undefined): boolean {
   if (!dateStr) return false;
   
   try {
-    const date = new Date(dateStr);
+    const date = parseBackendDate(dateStr) ?? new Date(NaN);
     return !isNaN(date.getTime());
   } catch {
     return false;
@@ -165,7 +171,7 @@ export function getRelativeTime(dateStr: string | null | undefined): string {
   if (!dateStr) return "N/A";
   
   try {
-    const date = new Date(dateStr);
+    const date = parseBackendDate(dateStr) ?? new Date(NaN);
     
     if (isNaN(date.getTime())) {
       return dateStr;

@@ -1,5 +1,6 @@
 "use client";
 
+import { normalizeDateKey } from "@/src/shared/utils/date";
 import React, {
   createContext,
   useContext,
@@ -9,7 +10,6 @@ import React, {
   useCallback,
 } from "react";
 import { HubConnection } from "@microsoft/signalr";
-import { format } from "date-fns";
 import { createSignalRConnection } from "@/src/lib/signalr-client";
 import { getAccessToken } from "@/src/features/auth/session/sessionStore";
 import { HubConnectionState } from "@microsoft/signalr";
@@ -270,7 +270,7 @@ export function SignalRProvider({ children }: { children: React.ReactNode }) {
       if (!activeConnRef.current || connectionState !== "Connected") return () => { };
 
       // Normalize date to yyyy-MM-dd to ensure consistent group keys
-      const normalizedDate = format(new Date(date), "yyyy-MM-dd");
+      const normalizedDate = normalizeDateKey(date);
       const key = `timegrid:${branchId}:${courtTypeId}:${normalizedDate}`;
       const conn = activeConnRef.current;
 

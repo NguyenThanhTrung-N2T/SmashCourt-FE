@@ -9,9 +9,10 @@ npm run dev                         # http://localhost:3000
 npx tsc --noEmit -p .               # type-check nhanh (~25s)
 npx eslint <file...>                # lint file đã sửa
 npm run lint                        # = CI
+npm test                            # = CI, node:test (không thêm gói): unit test hàm thuần src/tests/**/*.test.ts, ngày giờ chạy dưới 4 múi giờ máy
 npm run build                       # = CI, kiểm chứng bundle production
 ```
-CI (`.github/workflows/ci.yml`, Node 20): `npm ci` → `npm run lint` → `npx tsc --noEmit -p .` → `npm run build`. Push `master` mà CI đạt ⇒ job `deploy-production` triển khai Vercel production (Vercel CLI ghim `65.9.0`, `vercel pull/build/deploy --prebuilt`; cần Environment `production` có `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`; tắt tự triển khai theo Git trong Vercel). `develop` chỉ chạy CI. Chưa có test tự động.
+CI (`.github/workflows/ci.yml`, Node 20): `npm ci` → `npm run lint` → `npx tsc --noEmit -p .` → `npm test` → `npm run build`. Push `master` mà CI đạt ⇒ job `deploy-production` triển khai Vercel production (Vercel CLI ghim `65.9.0`, `vercel pull/build/deploy --prebuilt`; cần Environment `production` có `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`; tắt tự triển khai theo Git trong Vercel). `develop` chỉ chạy CI. Test tự động: unit test `node:test` cho hàm thuần (bộ chạy `src/tests/run.mjs`, hook `src/tests/ts-hooks.mjs` dịch TS bằng `typescript` sẵn có, đọc alias `@/`) (FE-12, từ 21/11, thư mục riêng `src/tests/`, cây bên trong phản chiếu `src/`: `shared/utils/date*.test.ts`, `features/booking/customer/utils/bookingStatus.test.ts`); chưa có MSW, Playwright.
 
 ## Kiến trúc (chi tiết: skill `smashcourt-fe-architecture`)
 ```
@@ -28,6 +29,7 @@ src/shared/{hooks,utils,types}              → useToast, useDebounceSearch, cn(
 src/layouts/{role}/        → sidebar/topnav + navigation config theo role
 src/contexts/              → Theme, Toast, SignalR, Notification, RealtimeProviders
 src/lib/                   → signalr-client.ts, signalr-events.ts (khớp SignalREvents.cs của BE)
+src/tests/                 → unit test node:test, cây bên trong phản chiếu src/ (không đặt test cạnh mã nguồn); run.mjs + ts-hooks.mjs + clock.ts (đổi múi giờ máy, cố định "bây giờ")
 ```
 Role: `CUSTOMER` → `app/(customer)`, `OWNER` → `app/owner`, `BRANCH_MANAGER` → `app/manager`, `STAFF` → `app/staff`.
 
@@ -38,7 +40,7 @@ Role: `CUSTOMER` → `app/(customer)`, `OWNER` → `app/owner`, `BRANCH_MANAGER`
 - Tái sử dụng `src/shared/components` trước khi tạo UI mới. Icon: `@phosphor-icons/react`. Biểu đồ: `recharts`. Ngày giờ: `date-fns`.
 - Env: một biến duy nhất `NEXT_PUBLIC_API_BASE_URL` (địa chỉ gốc BE, không có `/api`), dùng cho REST và SignalR hub (`toUrl`); `NEXT_PUBLIC_API_URL` đã bỏ (31/10). Không đọc/sửa `.env` (được sửa `.env.example`).
 - Type phải khớp DTO của BE (camelCase); BE đổi contract thì sửa types + api tương ứng.
-- **Phase 6 (Epic 6B, chưa bắt đầu):** hiển thị cọc, trạng thái chờ duyệt, hàng chờ duyệt cho Manager, lý do hủy, thanh toán cọc/thanh toán lại. Thiết kế FE ở `../TADSS-Runtime/spec/PHASE6_DESIGN_SPEC.md` Mục 8; contract BE ↔ FE (route, DTO, mã lỗi, sự kiện SignalR mới) ở `../SmashCourt-BE/docs/api/DEPOSIT_APPROVAL_API.md`. BE đã chạy các thay đổi này phía server (cờ TADSS tắt thì luồng cũ vẫn chạy). "Hôm nay" lấy theo giờ VN, đọc chuỗi ngày giờ của BE chỉ qua `parseBackendDate` (P6-22, T-7, T-8).
+- **Phase 6 (Epic 6B, đang làm; trạng thái từng việc ở `PHASE6_FE_HANDOFF.md` Mục 4.3, rà soát 20/11):** hiển thị cọc, trạng thái chờ duyệt, hàng chờ duyệt cho Manager, lý do hủy, thanh toán cọc/thanh toán lại. Thiết kế FE ở `../TADSS-Runtime/spec/PHASE6_DESIGN_SPEC.md` Mục 8; contract BE ↔ FE (route, DTO, mã lỗi, sự kiện SignalR mới) ở `../SmashCourt-BE/docs/api/DEPOSIT_APPROVAL_API.md`. BE đã chạy các thay đổi này phía server (cờ TADSS tắt thì luồng cũ vẫn chạy). "Hôm nay" lấy theo giờ VN, đọc chuỗi ngày giờ của BE chỉ qua `parseBackendDate` / `parseBackendDateVN` (P6-22, T-7, T-8); "hôm nay" và cộng trừ ngày dùng `getTodayVN()`, `addDaysToDateKey()` ở `src/shared/utils/date.ts`, không dùng `toISOString().split("T")[0]`.
 
 ## Quy tắc làm việc
 - **Không tự ý `git commit` / `push` / `merge` / `rebase` / `reset`** — chỉ khi người dùng yêu cầu rõ ràng (xem `../.claude/rules/git-safety.md`).

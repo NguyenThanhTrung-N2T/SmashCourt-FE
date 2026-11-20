@@ -1,3 +1,4 @@
+import { getTodayVN } from '@/src/shared/utils/date';
 import { useState, useEffect } from 'react';
 import { CalendarBlank, CaretLeft, CaretRight, X, ArrowCounterClockwise } from '@phosphor-icons/react';
 import { Select, Button, Input } from '@/src/shared/components/ui';
@@ -378,7 +379,7 @@ export function BookingFilterToolbar({
                       courtId: undefined,
                       status: undefined,
                       paymentStatus: undefined,
-                      date: new Date().toISOString().split('T')[0],
+                      date: getTodayVN(),
                       fromDate: undefined,
                       toDate: undefined,
                       sortBy: 'bookingDate',

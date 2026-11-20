@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { toDateKeyVN, getMinutesOfDayVN } from "@/src/shared/utils/date";
+import { useEffect, useMemo, useState } from "react";
 import { Spinner } from "@/src/shared/components/feedback/Spinner";
 import { useTimeGrid } from "@/src/features/timeslot/hooks/useTimeGrid";
 import { TimeSlotStatus } from "@/src/features/timeslot/types";
@@ -44,16 +45,21 @@ export function CourtTrack({
     date: selectedDate,
   });
 
-  // ─── blockToSlotMap (unchanged) ───────────────────────────────────────────
+  // A20: "bây giờ" theo giờ VN, tính lại mỗi 30 giây để slot vừa tới giờ tự khóa khi trang mở lâu
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setNowTick(Date.now()), 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ─── blockToSlotMap ───────────────────────────────────────────────────────
   const blockToSlotMap = useMemo(() => {
     const map = new Map<number, TimeGridSlotDto>();
-    const now = new Date();
-    const [year, month, day] = selectedDate.split("-").map(Number);
-    const selectedDateObj = new Date(year, month - 1, day);
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const isToday = selectedDateObj.getTime() === today.getTime();
-    const isPastDate = selectedDateObj < today;
-    const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+    const now = new Date(nowTick);
+    const todayKey = toDateKeyVN(now);
+    const isToday = selectedDate === todayKey;
+    const isPastDate = selectedDate < todayKey; // khóa ngày "yyyy-MM-dd" so được bằng chuỗi
+    const currentTotalMinutes = getMinutesOfDayVN(now);
 
     slots.forEach((slot) => {
       const [startHours, startMinutes] = slot.startTime.split(":").map(Number);
@@ -64,7 +70,7 @@ export function CourtTrack({
 
       let effectiveStatus = slot.status;
       if (isPastDate) effectiveStatus = TimeSlotStatus.IN_USE;
-      else if (isToday && startTotalMinutes < currentTotalMinutes) effectiveStatus = TimeSlotStatus.IN_USE;
+      else if (isToday && startTotalMinutes <= currentTotalMinutes) effectiveStatus = TimeSlotStatus.IN_USE;
 
       const effectiveSlot = { ...slot, status: effectiveStatus };
       const numBlocks = (endTotalMinutes - startTotalMinutes) / SLOT_STEP_MINUTES;
@@ -75,7 +81,7 @@ export function CourtTrack({
       }
     });
     return map;
-  }, [slots, totalBlocks, selectedDate]);
+  }, [slots, totalBlocks, selectedDate, nowTick]);
 
   // ─── blockedSlotRanges (unchanged) ────────────────────────────────────────
   const blockedSlotRanges = useMemo(() => {

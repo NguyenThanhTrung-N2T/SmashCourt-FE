@@ -1,5 +1,6 @@
 "use client";
 
+import { getTodayVN } from "@/src/shared/utils/date";
 import { useState, useEffect } from "react";
 import { Plus } from "@phosphor-icons/react";
 import { PageHeader } from "@/src/shared/components/layout";
@@ -61,7 +62,7 @@ export function CourtManagementBase({ allowManagement, bookingPath }: CourtManag
 
     const { showToast } = useGlobalToast();
     // ── Now state (today only) ──────────────────────────────────────────
-    const today = new Date().toISOString().split("T")[0];
+    const today = getTodayVN();
     const isToday = date === today;
 
     const [now, setNow] = useState<Date | null>(isToday ? new Date() : null);

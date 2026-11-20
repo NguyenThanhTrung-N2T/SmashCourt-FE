@@ -6,6 +6,7 @@
 
 "use client";
 
+import { getTodayVN } from "@/src/shared/utils/date";
 import { Calendar } from "@phosphor-icons/react";
 import { Spinner } from "@/src/shared/components/feedback/Spinner";
 import { useCourts } from "@/src/features/court/shared/hooks/useCourts";
@@ -84,7 +85,7 @@ export function CourtAndTimeSelectionStep({
           type="date"
           value={selectedDate}
           onChange={(e) => onDateChange(e.target.value)}
-          min={new Date().toISOString().split("T")[0]}
+          min={getTodayVN()}
           className="w-full rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm text-foreground outline-none transition-colors hover:border-primary focus:border-primary focus:bg-surface-1 focus:ring-2 focus:ring-primary/20"
         />
       </div>
