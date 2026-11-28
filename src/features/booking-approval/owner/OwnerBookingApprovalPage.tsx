@@ -33,7 +33,7 @@ export function OwnerBookingApprovalPage() {
     let isMounted = true;
     const loadBranchList = async () => {
       try {
-        const res = await fetchBranches(1, 100);
+        const res = await fetchBranches(1, 50);
         if (isMounted) {
           setBranches(res.items || []);
         }

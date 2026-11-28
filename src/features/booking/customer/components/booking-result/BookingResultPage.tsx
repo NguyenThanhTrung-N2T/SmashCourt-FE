@@ -513,6 +513,7 @@ export function BookingResultPage() {
         message="Bạn có chắc chắn muốn hủy đơn đặt sân này? Slot sân sẽ được giải phóng cho khách hàng khác."
         confirmText={isCancelling ? "Đang hủy..." : "Hủy đơn ngay"}
         cancelText="Giữ lại đơn"
+        isLoading={isCancelling}
         onConfirm={handleConfirmCancel}
         onCancel={() => setShowCancelDialog(false)}
       />

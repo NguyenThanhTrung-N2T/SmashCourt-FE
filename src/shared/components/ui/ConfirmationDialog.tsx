@@ -16,6 +16,7 @@ interface ConfirmationDialogProps {
     onConfirm: (reason?: string) => void;
     onCancel: () => void;
     variant?: 'danger' | 'warning' | 'info';
+    isLoading?: boolean;
 }
 
 export function ConfirmationDialog({
@@ -30,13 +31,20 @@ export function ConfirmationDialog({
     onConfirm,
     onCancel,
     variant = 'warning',
+    isLoading = false,
 }: ConfirmationDialogProps) {
     const [reason, setReason] = useState('');
 
     if (!isOpen) return null;
 
     const handleConfirm = () => {
+        if (isLoading) return;
         onConfirm(showReasonInput ? reason : undefined);
+    };
+
+    const handleCancel = () => {
+        if (isLoading) return;
+        onCancel();
     };
 
     const variantStyles = {
@@ -82,8 +90,11 @@ export function ConfirmationDialog({
                             <h2 className="text-lg font-extrabold text-foreground">{title}</h2>
                         </div>
                         <button
-                            onClick={onCancel}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted hover:bg-surface-2 hover:text-foreground transition-colors"
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={isLoading}
+                            aria-disabled={isLoading}
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted hover:bg-surface-2 hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
                         >
                             <X className="h-5 w-5" />
                         </button>
@@ -112,14 +123,20 @@ export function ConfirmationDialog({
                     {/* Actions */}
                     <div className="flex items-center gap-3 p-6 border-t border-border">
                         <button
-                            onClick={onCancel}
-                            className="flex-1 rounded-full border border-border bg-surface-1 px-5 py-2.5 text-sm font-bold text-foreground shadow-sm hover:bg-surface-2 transition-colors"
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={isLoading}
+                            aria-disabled={isLoading}
+                            className="flex-1 rounded-full border border-border bg-surface-1 px-5 py-2.5 text-sm font-bold text-foreground shadow-sm hover:bg-surface-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
                         >
                             {cancelText}
                         </button>
                         <button
+                            type="button"
                             onClick={handleConfirm}
-                            className={`flex-1 rounded-full px-5 py-2.5 text-sm font-bold shadow-md transition-all active:scale-95 ${styles.button}`}
+                            disabled={isLoading}
+                            aria-disabled={isLoading}
+                            className={`flex-1 rounded-full px-5 py-2.5 text-sm font-bold shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none disabled:active:scale-100 ${styles.button}`}
                             style={styles.buttonStyle}
                         >
                             {confirmText}
