@@ -20,7 +20,7 @@ import {
   getCourtTotal,
   getCancelSourceText,
   getCancelReasonText,
-  getDepositSourceText
+  getStaffDepositSummary,
 } from '../../utils/bookingStatus';
 import { formatDate, formatDateTime } from '@/src/shared/utils/date';
 import { canAddService } from '@/src/features/booking/shared/utils/bookingRules';
@@ -309,29 +309,36 @@ export function BookingDetailDrawer({
                   </span>
                 </div>
                 
-                {booking.depositAmount !== null && booking.depositAmount !== undefined && booking.depositAmount > 0 && (
-                  <div className="border-t border-border/60 pt-2 space-y-1.5">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted">
-                        Tiền cọc ({booking.depositRate != null ? `${Math.round(booking.depositRate * 100)}%` : ''})
-                        {booking.depositSource && (
-                          <span className="text-xs text-muted/80 block">
-                            Nguồn: {getDepositSourceText(booking.depositSource)}
+                {(() => {
+                  const depositSummary = getStaffDepositSummary(booking);
+                  if (!depositSummary) return null;
+                  return (
+                    <div className="border-t border-border/60 pt-2 space-y-1.5">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted">
+                          {depositSummary.depositLabel}
+                          {depositSummary.rateLabel ? ` (${depositSummary.rateLabel})` : ''}
+                          {depositSummary.sourceLabel && (
+                            <span className="text-xs text-muted/80 block">
+                              Nguồn: {depositSummary.sourceLabel}
+                            </span>
+                          )}
+                        </span>
+                        <span className="font-bold text-foreground">
+                          {formatCurrency(depositSummary.depositAmount)}
+                        </span>
+                      </div>
+                      {depositSummary.remainingLabel && depositSummary.remainingAmount !== null && (
+                        <div className="flex justify-between text-sm">
+                          <span className="font-bold text-foreground">{depositSummary.remainingLabel}</span>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                            {formatCurrency(depositSummary.remainingAmount)}
                           </span>
-                        )}
-                      </span>
-                      <span className="font-bold text-foreground">
-                        {formatCurrency(booking.depositAmount)}
-                      </span>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="font-bold text-foreground">Còn lại cần thu tại quầy</span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                        {formatCurrency(booking.remainingAmount ?? Math.max(0, (booking.finalTotal ?? 0) - booking.depositAmount))}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Refund Amount - Show only for cancelled bookings with refund */}
                 {booking.refundAmount !== null && booking.refundAmount !== undefined && 
@@ -416,7 +423,7 @@ export function BookingDetailDrawer({
                 <div>
                   <span className="text-xs text-muted block mb-0.5">Nguồn hủy</span>
                   <span className="text-xs font-semibold text-foreground">
-                    {getCancelSourceText(booking.cancelSource)}
+                    {getCancelSourceText(booking.cancelSource, booking.cancelledByName)}
                   </span>
                 </div>
                 {booking.cancelledByName && (

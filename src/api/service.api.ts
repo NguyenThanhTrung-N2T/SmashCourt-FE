@@ -35,23 +35,6 @@ export async function fetchAllServices(page = 1, pageSize = 50): Promise<Paginat
 }
 
 /**
- * GET /api/services/:id
- * Lấy chi tiết 1 dịch vụ
- */
-export async function fetchServiceById(
-  id: string,
-): Promise<Service> {
-  const response = await authProtectedFetch<Service>(
-    `/api/services/${id}`,
-    { method: "GET" },
-  );
-  if (!response.data) {
-    throw new Error("Không tìm thấy dịch vụ");
-  }
-  return response.data;
-}
-
-/**
  * POST /api/services
  * Tạo dịch vụ mới
  */

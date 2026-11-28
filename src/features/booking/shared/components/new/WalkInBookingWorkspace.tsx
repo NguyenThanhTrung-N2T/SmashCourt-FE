@@ -5,6 +5,7 @@ import {
   CalendarBlank, CheckCircle, CourtBasketball, CreditCard, User, Spinner, Crown, // [NEW] Crown
 } from "@phosphor-icons/react";
 import { createWalkInBooking } from "@/src/api/booking.api";
+import { AuthApiError } from "@/src/api/core";
 import { fetchApplicablePromotions } from "@/src/api/promotion.api"; // [NEW]
 import { Button, Checkbox, Input, Select } from "@/src/shared/components/ui";
 import type { CourtDto } from "@/src/features/court/shared/types/court.types";
@@ -233,8 +234,16 @@ export function WalkInBookingWorkspace({
     if (form.courtIds.length === 0) errs.courtIds = "Vui lòng chọn sân";
     if (!form.startTime) errs.startTime = "Thời gian bắt đầu là bắt buộc";
     if (!form.endTime) errs.endTime = "Thời gian kết thúc là bắt buộc";
-    if (form.startTime && form.endTime && form.endTime <= form.startTime)
+    if (form.startTime && form.endTime && form.endTime <= form.startTime) {
       errs.endTime = "Thời gian kết thúc phải sau thời gian bắt đầu";
+    } else if (form.startTime && form.endTime) {
+      const [sH, sM] = form.startTime.split(":").map(Number);
+      const [eH, eM] = form.endTime.split(":").map(Number);
+      const durationMinutes = eH * 60 + eM - (sH * 60 + sM);
+      if (durationMinutes > 12 * 60) {
+        errs.endTime = "Mỗi lượt đặt sân tối đa 12 giờ";
+      }
+    }
 
     if (form.customerMode === "guest") {
       if (!form.guestName.trim()) errs.guestName = "Vui lòng nhập tên khách hàng";
@@ -290,6 +299,14 @@ export function WalkInBookingWorkspace({
       onDirtyChange(false);
       onCreated(booking);
     } catch (error: unknown) {
+      if (error instanceof AuthApiError && error.code === "VALIDATION_ERROR" && error.errors) {
+        const firstFieldError =
+          error.errors.Courts?.[0] ?? Object.values(error.errors).flat()[0];
+        if (firstFieldError) {
+          onError(firstFieldError);
+          return;
+        }
+      }
       onError(error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định");
     } finally {
       setSubmitting(false);

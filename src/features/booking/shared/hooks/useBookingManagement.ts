@@ -175,10 +175,20 @@ export function useBookingManagement(initialBranchId?: string, enabled = true) {
         await openBookingDetail(bookingId);
       }
     } catch (error) {
-      if (error instanceof AuthApiError && (error.code === 'BOOKING_ALREADY_NO_SHOW' || error.status === 409 || error.code === 'CONFLICT' || error.message?.includes('NO_SHOW'))) {
-        showToast('error', 'Đơn đặt sân đã bị đánh dấu Không đến (No-show) hoặc Đã hết hạn bởi hệ thống tự động. Vui lòng làm mới danh sách.');
+      if (error instanceof AuthApiError && (error.status === 409 || error.code === 'CONFLICT')) {
+        showToast('error', `${error.message || 'Đơn đặt sân đã được xử lý bởi người khác'}, vui lòng tải lại.`);
         await loadBookings();
         await loadSummary();
+        if (selectedBooking?.id === bookingId) {
+          await openBookingDetail(bookingId);
+        }
+      } else if (error instanceof AuthApiError && (error.status === 400 || error.code === 'BAD_REQUEST')) {
+        showToast('error', error.message || 'Không thể check-in đơn đặt sân này');
+        await loadBookings();
+        await loadSummary();
+        if (selectedBooking?.id === bookingId) {
+          await openBookingDetail(bookingId);
+        }
       } else {
         const message = error instanceof AuthApiError ? error.message : 'Check-in thất bại';
         showToast('error', message);

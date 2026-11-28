@@ -17,6 +17,7 @@ import {
   formatDate,
   formatTime,
   calculateRefundInfo,
+  getPaidAmountForRefund,
 } from "../../utils/bookingStatus";
 
 interface CancelBookingModalProps {
@@ -35,15 +36,15 @@ export function CancelBookingModal({
   isLoading = false,
 }: CancelBookingModalProps) {
   const { policies, isLoading: isPoliciesLoading } = useCancelPolicies();
-  const finalTotal = booking.finalTotal ?? booking.finalTotal ?? 0;
+  const paidAmount = getPaidAmountForRefund(booking);
   const firstCourt = booking.courts[0];
 
-  // Calculate refund info using dynamic policies
+  // Calculate refund info using dynamic policies on amount actually paid (V4, trap #14)
   const refundInfo = firstCourt
     ? calculateRefundInfo(
       booking.bookingDate,
       firstCourt.startTime,
-      finalTotal,
+      paidAmount,
       policies
     )
     : { refundPercent: 0, refundAmount: 0, canCancel: false };
@@ -128,12 +129,20 @@ export function CancelBookingModal({
               <h3 className="font-bold text-foreground">Thông tin hoàn tiền</h3>
             </div>
 
-            {refundInfo.refundAmount > 0 ? (
+            {paidAmount <= 0 ? (
+              <p className="text-sm text-muted">
+                Đơn đặt sân chưa thanh toán nên không phát sinh khoản hoàn tiền.
+              </p>
+            ) : policies.length === 0 ? (
+              <p className="text-sm text-muted">
+                Không thể tải chính sách hoàn tiền để xem trước. Số tiền hoàn thực tế sẽ được tính theo chính sách hiện hành của chi nhánh.
+              </p>
+            ) : refundInfo.refundAmount > 0 ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">Tổng tiền đã thanh toán</span>
+                  <span className="text-sm text-muted">Số tiền đã thanh toán</span>
                   <span className="font-semibold text-foreground">
-                    {formatCurrency(finalTotal)}
+                    {formatCurrency(paidAmount)}
                   </span>
                 </div>
 

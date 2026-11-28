@@ -36,6 +36,7 @@ async function _refreshToken(): Promise<string> {
   if (!_refreshPromise) {
     _refreshPromise = fetch(toUrl("/api/auth/refresh"), {
       method: "POST",
+      headers: { "ngrok-skip-browser-warning": "true" },
       credentials: "include",
     })
       .then(async (res) => {
@@ -64,7 +65,10 @@ async function _fetchWithToken<T>(
   const url = toUrl(path) + (query ? `?${query}` : "");
   const res = await fetch(url, {
     method,
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "ngrok-skip-browser-warning": "true",
+    },
     body,
     credentials: "include",
   });

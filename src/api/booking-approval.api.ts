@@ -41,8 +41,7 @@ export async function approveBooking(
     `/api/bookings/${bookingId}/approve`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body,
     }
   );
   if (!response.data) throw new Error("Failed to approve booking");
@@ -58,8 +57,7 @@ export async function rejectBooking(
     `/api/bookings/${bookingId}/reject`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body,
     }
   );
   if (!response.data) throw new Error("Failed to reject booking");

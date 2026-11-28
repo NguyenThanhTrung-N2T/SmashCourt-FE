@@ -329,8 +329,13 @@ export function InteractiveTimeGrid({
                 </span>
               </div>
               <p className="text-xs text-muted font-semibold">
-                Nhấp vào sân khác để đặt cùng khung giờ · Kéo lại để đổi giờ
+                Nhấp vào sân khác để đặt cùng khung giờ · Kéo lại để đổi giờ (tối đa 12 giờ/lượt)
               </p>
+              {selectedSlots.length >= 24 && (
+                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                  Đã chạm giới hạn tối đa 12 giờ cho một lượt đặt sân.
+                </p>
+              )}
             </div>
           </div>
         </div>

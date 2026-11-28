@@ -26,6 +26,7 @@ import { usePaymentConfirmation } from "../../hooks/usePaymentConfirmation";
 import { formatCurrency } from "@/src/shared/utils/date";
 import { fetchCustomerBookingById, cancelCustomerBooking } from "@/src/api/booking.api";
 import { retryBookingPayment } from "@/src/api/payment.api";
+import { resolveRetryPaymentError } from "../../hooks/useRetryPayment";
 import { useGlobalToast } from "@/src/shared/hooks/useGlobalToast";
 import type { PaymentConfirmationDto, VNPayCallbackParams } from "../../../shared/types/payment.types";
 
@@ -130,14 +131,17 @@ export function PaymentResult() {
     startRetryTransition(async () => {
       try {
         const fresh = await retryBookingPayment(result.bookingId!);
-        if (fresh.paymentUrl) {
+        if (fresh.status === "PENDING" && fresh.paymentUrl) {
           window.location.href = fresh.paymentUrl;
         } else {
-          showToast("error", "Không thể tạo liên kết thanh toán mới.");
+          router.push(`/bookings/result?bookingId=${fresh.bookingId}`);
         }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Lỗi khi tạo lại thanh toán";
-        showToast("error", msg);
+        const resolution = resolveRetryPaymentError(err);
+        showToast("error", resolution.message);
+        if (resolution.suggestRebook) {
+          router.push(`/bookings/result?bookingId=${result.bookingId}`);
+        }
       }
     });
   };

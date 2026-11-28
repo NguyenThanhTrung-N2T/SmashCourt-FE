@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { fetchPendingApprovals } from "@/src/api/booking-approval.api";
 import { useSignalRContext } from "@/src/contexts/SignalRContext";
 import { SignalREvents } from "@/src/lib/signalr-events";
+import type { ConnectionState } from "@/src/contexts/SignalRContext";
 import type { PaginatedData } from "@/src/shared/types/api.types";
 import type {
   PendingApprovalBookingDto,
@@ -31,7 +32,7 @@ export function usePendingApprovals(options: UsePendingApprovalsOptions = {}) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { connection } = useSignalRContext();
+  const { connection, connectionState } = useSignalRContext();
   const isMounted = useRef(true);
 
   // Sync initialBranchId prop changes (e.g. from branch selector)
@@ -86,6 +87,28 @@ export function usePendingApprovals(options: UsePendingApprovalsOptions = {}) {
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [loadApprovals]);
+
+  // SignalR reconnect reload (contract §6: reload after reconnection to catch missed events)
+  const prevConnectionStateRef = useRef<ConnectionState>(connectionState);
+  useEffect(() => {
+    const wasDisconnected = prevConnectionStateRef.current !== "Connected";
+    prevConnectionStateRef.current = connectionState;
+    if (connectionState === "Connected" && wasDisconnected) {
+      loadApprovals(false);
+    }
+  }, [connectionState, loadApprovals]);
+
+  // Periodic cleanup for expired approvals (contract §6: catch items that expired without SignalR event)
+  useEffect(() => {
+    const items = data?.items;
+    if (!items || items.length === 0) return;
+
+    const interval = setInterval(() => {
+      loadApprovals(false);
+    }, 60_000);
+
+    return () => clearInterval(interval);
+  }, [data?.items, loadApprovals]);
 
   // SignalR real-time event listeners
   useEffect(() => {

@@ -10,6 +10,7 @@ import type { TimeGridSlotDto } from "@/src/features/timeslot/types";
 
 const START_HOUR = 6;
 const SLOT_STEP_MINUTES = 30;
+const MAX_BOOKING_BLOCKS = 24; // P6-61: BE enforces max 12 hours (24 × 30-minute slots) per booking
 
 interface CourtTrackProps {
   court: CourtDto;
@@ -144,6 +145,7 @@ export function CourtTrack({
     const step = isForward ? 1 : -1;
     const slotSet = new Set<TimeGridSlotDto>();
     for (let idx = dragging.originIdx; isForward ? idx <= dragging.endIdx : idx >= dragging.endIdx; idx += step) {
+      if (slotSet.size >= MAX_BOOKING_BLOCKS) break;
       const slot = blockToSlotMap.get(idx);
       if (!slot || slot.status !== TimeSlotStatus.AVAILABLE) break;
       slotSet.add(slot);
@@ -172,6 +174,7 @@ export function CourtTrack({
       isForward ? idx <= dragging.endIdx : idx >= dragging.endIdx;
       idx += step
     ) {
+      if (slotSet.size >= MAX_BOOKING_BLOCKS) break;
       const slot = blockToSlotMap.get(idx);
       if (!slot || slot.status !== TimeSlotStatus.AVAILABLE) break;
       slotSet.add(slot);

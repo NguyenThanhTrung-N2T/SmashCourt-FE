@@ -1,7 +1,14 @@
 // Error handling utilities for branch management
 
 const ERROR_CODES: Record<string, string> = {
-  // Branch Management
+  // Generic BE ErrorCodes
+  NOT_FOUND: 'Không tìm thấy dữ liệu',
+  FORBIDDEN: 'Bạn không có quyền thực hiện thao tác này',
+  CONFLICT: 'Dữ liệu xung đột, vui lòng tải lại',
+  BAD_REQUEST: 'Yêu cầu không hợp lệ',
+  VALIDATION_ERROR: 'Dữ liệu không hợp lệ',
+
+  // Branch Management (ErrorCodes.cs)
   BRANCH_NOT_FOUND: 'Chi nhánh không tồn tại',
   MANAGER_NOT_FOUND: 'Chi nhánh hiện tại không có quản lý',
   MANAGER_ALREADY_EXISTS: 'Người dùng đã là quản lý của chi nhánh khác',
@@ -9,18 +16,11 @@ const ERROR_CODES: Record<string, string> = {
   STAFF_NOT_FOUND: 'Nhân viên không được tìm thấy trong chi nhánh này',
   STAFF_ALREADY_EXISTS: 'Người dùng đã được gán vào chi nhánh này',
   INVALID_STAFF_USER: 'Người dùng không đủ điều kiện làm nhân viên',
+  LAST_BRANCH_MANAGER: 'Không thể gỡ quản lý cuối cùng của chi nhánh',
 
   // User Management
   USER_NOT_FOUND: 'Người dùng không tồn tại',
-  USER_SEARCH_INVALID_CRITERIA: 'Tiêu chí tìm kiếm không hợp lệ',
-
-  // Validation
-  VALIDATION_ERROR: 'Dữ liệu không hợp lệ',
-  INSUFFICIENT_PERMISSIONS: 'Không đủ quyền thực hiện thao tác này',
-
-  // Business Rules
-  INVALID_BUSINESS_HOURS: 'Giờ đóng cửa phải sau giờ mở cửa',
-  BRANCH_HAS_DEPENDENCIES: 'Không thể xóa chi nhánh có booking hoặc nhân viên đang hoạt động'
+  USER_HAS_NO_BRANCH: 'Người dùng chưa được gán chi nhánh',
 };
 
 export function handleApiError(error: unknown): string {

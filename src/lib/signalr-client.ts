@@ -13,6 +13,7 @@ export function createSignalRConnection(): HubConnection {
   const connection = new HubConnectionBuilder()
     .withUrl(hubUrl, {
       accessTokenFactory: () => getAccessToken() || "",
+      headers: { "ngrok-skip-browser-warning": "true" },
     })
     .withAutomaticReconnect({
       nextRetryDelayInMilliseconds: (retryContext) => {

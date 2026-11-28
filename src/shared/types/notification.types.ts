@@ -3,6 +3,10 @@ import type {
     BookingNotificationDto,
     PaymentNotificationDto,
 } from "@/src/shared/types/signalr.types";
+import type {
+    BookingPendingApprovalEvent,
+    BookingApprovalResolvedEvent,
+} from "@/src/features/booking-approval/shared/types/booking-approval.types";
 
 /**
  * Unified notification item stored in the notification center.
@@ -13,7 +17,11 @@ export interface NotificationItem {
     category: "booking" | "payment";
     title: string;
     message: string;
-    payload: BookingNotificationDto | PaymentNotificationDto;
+    payload:
+        | BookingNotificationDto
+        | PaymentNotificationDto
+        | BookingPendingApprovalEvent
+        | BookingApprovalResolvedEvent;
     timestamp: string;
     read: boolean;
 }

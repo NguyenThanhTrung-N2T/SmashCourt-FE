@@ -310,7 +310,7 @@ function CancelBookingContent() {
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-2.5 pt-2">
-        {!isStarted && (
+        {!isStarted && (info.status === "CONFIRMED" || info.status === "PAID_ONLINE") && (
           <Button
             onClick={handleCancel}
             disabled={isCancelling}

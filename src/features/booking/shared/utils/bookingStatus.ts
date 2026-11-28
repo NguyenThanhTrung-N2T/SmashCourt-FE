@@ -2,8 +2,12 @@ import {
   BookingStatus,
   InvoicePaymentStatus,
   type BookingCourtDto,
+  type BookingDto,
   type BookingStatusKey,
   type BookingStatusValue,
+  type CancelReason,
+  type CancelSource,
+  type DepositSource,
   type InvoicePaymentStatusKey,
   type InvoicePaymentStatusValue,
 } from '@/src/features/booking/shared/types/booking.types';
@@ -193,71 +197,135 @@ export function getCourtDurationMinutes(court: BookingCourtDto): number | null {
   return duration >= 0 ? duration : duration + 24 * 60;
 }
 
-export function formatDate(date: string): string {
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
-
-export function formatDateTime(dateTime: string): string {
-  return new Date(dateTime).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-export function getCancelSourceText(source?: string | null): string {
+/**
+ * Staff-facing label for who cancelled the booking (contract §2.2, P6-31).
+ */
+export function getCancelSourceText(
+  source?: CancelSource | string | null,
+  cancelledByName?: string | null,
+): string {
   if (!source) return '—';
   switch (source.toUpperCase()) {
+    case 'SYSTEM':
+      return 'Hệ thống';
+    case 'STAFF':
+      return cancelledByName?.trim() || 'Nhân viên';
     case 'CUSTOMER':
       return 'Khách hàng';
-    case 'STAFF':
-      return 'Nhân viên';
-    case 'SYSTEM':
-      return 'Hệ thống tự động';
-    case 'ADMIN':
-      return 'Quản trị viên';
+    case 'LINK':
+      return 'Khách hàng (link email)';
     default:
       return source;
   }
 }
 
-export function getCancelReasonText(reason?: string | null): string {
-  if (!reason) return 'Không có lý do';
-  switch (reason) {
-    case 'CUSTOMER_REQUEST':
-      return 'Khách yêu cầu hủy';
-    case 'PAYMENT_TIMEOUT':
-      return 'Quá hạn thanh toán';
+/**
+ * Shared cancellation reason label mapped to BE BookingCancelReason enum (contract §2.2).
+ */
+export function getCancelReasonText(reason?: CancelReason | string | null): string | null {
+  if (!reason) return null;
+  switch (reason.toUpperCase()) {
+    case 'PAYMENT_EXPIRED':
+      return 'Hết hạn thanh toán';
+    case 'APPROVAL_EXPIRED':
+      return 'Chi nhánh chưa xác nhận kịp, bạn chưa bị trừ tiền';
+    case 'SYSTEM_CLEANUP':
+      return 'Đơn chưa hoàn tất, sân đã được trả lại';
+    case 'POLICY_REJECTED':
     case 'APPROVAL_REJECTED':
-      return 'Quản lý từ chối duyệt cọc';
-    case 'APPROVAL_TIMEOUT':
-      return 'Quá hạn chờ duyệt cọc (Hệ thống tự hủy)';
-    case 'FORCE_MAJEURE':
-      return 'Sự cố bất khả kháng (Thời tiết/Sân hỏng)';
-    case 'STAFF_CORRECTION':
-      return 'Nhân viên điều chỉnh';
+      return 'Không được nhận';
+    case 'CUSTOMER_CANCELLED':
+      return 'Bạn đã hủy';
+    case 'STAFF_CANCELLED':
+      return 'Chi nhánh đã hủy';
     default:
       return reason;
   }
 }
 
-export function getDepositSourceText(source?: string | null): string {
+/**
+ * Staff-facing deposit source label mapped to BE DepositSource enum (contract §2.2).
+ */
+export function getDepositSourceText(source?: DepositSource | string | null): string {
   if (!source) return '—';
   switch (source.toUpperCase()) {
     case 'TADSS':
-      return 'Hệ thống gợi ý';
-    case 'MANUAL':
-      return 'Chỉ định thủ công';
-    case 'POLICY':
-      return 'Chính sách chi nhánh';
+      return 'Hệ thống (TADSS)';
+    case 'MANAGER':
+      return 'Quản lý chỉ định';
+    case 'FULL_PAYMENT_FALLBACK':
+      return 'Dự phòng cọc 100%';
     default:
       return source;
   }
+}
+
+/**
+ * Format decimal deposit rate (0..1, up to 4 decimals) as percentage up to 2 decimals.
+ * Avoids rounding 0.0715 to "7%" (trap #21).
+ */
+export function formatDepositPercent(depositRate?: number | null): string {
+  if (depositRate == null || !Number.isFinite(depositRate)) return '';
+  const percent = Math.round(depositRate * 10000) / 100;
+  return `${Number(percent.toFixed(2))}%`;
+}
+
+export interface StaffDepositSummary {
+  isPaid: boolean;
+  depositLabel: string;
+  depositAmount: number;
+  rateLabel: string;
+  sourceLabel: string | null;
+  remainingLabel: string | null;
+  remainingAmount: number | null;
+}
+
+/**
+ * Build consistent deposit breakdown lines for staff views based on invoice paymentStatus (V3, trap #15).
+ */
+export function getStaffDepositSummary(
+  booking: Pick<
+    BookingDto,
+    'depositAmount' | 'depositRate' | 'depositSource' | 'remainingAmount' | 'finalTotal' | 'paymentStatus'
+  >,
+): StaffDepositSummary | null {
+  if (booking.depositAmount == null && booking.depositSource == null) {
+    return null;
+  }
+
+  const depositAmount = booking.depositAmount ?? 0;
+  if (depositAmount <= 0 && booking.depositSource == null) {
+    return null;
+  }
+
+  const paymentStatusValue = toInvoicePaymentStatusValue(booking.paymentStatus);
+  const isUnpaid = paymentStatusValue === InvoicePaymentStatus.UNPAID;
+  const rateLabel = formatDepositPercent(booking.depositRate);
+  const sourceLabel = booking.depositSource ? getDepositSourceText(booking.depositSource) : null;
+
+  if (isUnpaid) {
+    return {
+      isPaid: false,
+      depositLabel: 'Cọc phải trả',
+      depositAmount,
+      rateLabel,
+      sourceLabel,
+      remainingLabel: null,
+      remainingAmount: null,
+    };
+  }
+
+  const remainingAmount =
+    booking.remainingAmount ?? Math.max(0, (booking.finalTotal ?? 0) - depositAmount);
+
+  return {
+    isPaid: true,
+    depositLabel: 'Đã cọc',
+    depositAmount,
+    rateLabel,
+    sourceLabel,
+    remainingLabel: 'Còn phải thu khi check-out',
+    remainingAmount,
+  };
 }
 

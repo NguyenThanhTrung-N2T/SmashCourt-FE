@@ -21,9 +21,14 @@ import { useSignalRContext } from "@/src/contexts/SignalRContext";
 import { SignalREvents } from "@/src/lib/signalr-events";
 import { fetchCustomerBookingById, cancelCustomerBooking } from "@/src/api/booking.api";
 import { retryBookingPayment } from "@/src/api/payment.api";
+import { AuthApiError } from "@/src/api/core";
 import { formatCurrency, parseBackendDateVN } from "@/src/shared/utils/date";
+import {
+  getCancelSourceText,
+  getCancelReasonText,
+} from "@/src/features/booking/customer/utils/bookingStatus";
 import { useGlobalToast } from "@/src/shared/hooks/useGlobalToast";
-import type { BookingDto, OnlineBookingResponse, CancelReason, CancelSource } from "@/src/features/booking/shared/types/booking.types";
+import type { BookingDto, OnlineBookingResponse } from "@/src/features/booking/shared/types/booking.types";
 import type { BookingApprovalResolvedEvent } from "@/src/features/booking-approval/shared/types/booking-approval.types";
 
 /**
@@ -34,47 +39,6 @@ function formatCountdown(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-}
-
-/**
- * Get user-friendly text for who cancelled (contract §2.2, P6-31)
- */
-function getCancelSourceText(source: CancelSource | null): string {
-  switch (source) {
-    case "CUSTOMER":
-      return "Bạn đã hủy";
-    case "LINK":
-      return "Bạn đã hủy qua link trong email";
-    case "STAFF":
-      return "Chi nhánh đã hủy";
-    case "SYSTEM":
-      return "Hệ thống tự hủy";
-    default:
-      return "Đã hủy";
-  }
-}
-
-/**
- * Get user-friendly text for cancellation reason (contract §2.2, plan §4.5)
- */
-function getCancelReasonText(reason: CancelReason | null): string | null {
-  switch (reason) {
-    case "PAYMENT_EXPIRED":
-      return "Hết hạn thanh toán";
-    case "APPROVAL_EXPIRED":
-      return "Chi nhánh chưa xác nhận kịp, bạn chưa bị trừ tiền";
-    case "SYSTEM_CLEANUP":
-      return "Đơn chưa hoàn tất, sân đã được trả lại";
-    case "POLICY_REJECTED":
-    case "APPROVAL_REJECTED":
-      return "Không được nhận";
-    case "CUSTOMER_CANCELLED":
-      return "Bạn đã hủy";
-    case "STAFF_CANCELLED":
-      return "Chi nhánh đã hủy";
-    default:
-      return null;
-  }
 }
 
 export function BookingResultPage() {
@@ -269,8 +233,12 @@ export function BookingResultPage() {
       setShowCancelDialog(false);
       loadBooking(targetBookingId, true);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Không thể hủy đơn đặt sân";
-      showToast("error", msg);
+      if (err instanceof AuthApiError && err.code === "BOOKING_ALREADY_STARTED") {
+        showToast("error", "Đơn đã tới giờ chơi, không thể tự hủy. Vui lòng liên hệ chi nhánh.");
+      } else {
+        const msg = err instanceof Error ? err.message : "Không thể hủy đơn đặt sân";
+        showToast("error", msg);
+      }
     } finally {
       setIsCancelling(false);
     }

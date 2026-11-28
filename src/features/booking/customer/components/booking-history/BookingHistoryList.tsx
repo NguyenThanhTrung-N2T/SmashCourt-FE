@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { CalendarBlank } from "@phosphor-icons/react";
-import { Alert, Pagination } from "@/src/shared/components/ui";
+import { Alert, Button, Pagination } from "@/src/shared/components/ui";
 import { EmptyState } from "@/src/shared/components/layout";
 import { BookingCard } from "./BookingCard";
 import { BookingDetailModal } from "./BookingDetailModal";
@@ -49,7 +49,7 @@ export function BookingHistoryList() {
   });
 
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
-  const { retryPayment, isLoading: isRetryingPayment, error: paymentError, clearError } = useRetryPayment();
+  const { retryPayment, isLoading: isRetryingPayment, error: paymentError, errorMeta, clearError } = useRetryPayment();
 
   const {
     booking: selectedBooking,
@@ -91,10 +91,17 @@ export function BookingHistoryList() {
   const handlePayNow = async (bookingId: string) => {
     const result = await retryPayment(bookingId);
 
-    if (result?.paymentUrl) {
-      // TODO(6B-2): Handle status branching properly (C1 fix)
-      window.location.href = result.paymentUrl;
+    if (!result) {
+      await refetch();
+      return;
     }
+
+    if (result.status === "PENDING" && result.paymentUrl) {
+      window.location.href = result.paymentUrl;
+      return;
+    }
+
+    router.push(`/bookings/result?bookingId=${result.bookingId}`);
   };
 
   const handleCancelSuccess = useCallback(() => {
@@ -127,7 +134,14 @@ export function BookingHistoryList() {
         {/* Payment Error Alert */}
         {paymentError && (
           <Alert variant="error" title="Lỗi thanh toán">
-            {paymentError}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span>{paymentError}</span>
+              {errorMeta?.suggestRebook && (
+                <Button size="sm" variant="secondary" onClick={() => router.push("/bookings/new")}>
+                  Đặt sân mới
+                </Button>
+              )}
+            </div>
           </Alert>
         )}
 

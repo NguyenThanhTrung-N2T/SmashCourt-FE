@@ -150,7 +150,7 @@ export function PendingApprovalTable({
                       </div>
                       <div className="flex items-center gap-1.5 text-xs text-muted">
                         <Phone className="h-3 w-3" />
-                        <span>{b.customerPhone}</span>
+                        <span>{b.customerPhone || "Chưa cung cấp"}</span>
                       </div>
                     </div>
                   </td>

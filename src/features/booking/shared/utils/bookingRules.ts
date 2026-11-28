@@ -30,8 +30,10 @@ export function combineDateAndTime(bookingDate: string, timeStr: string): Date |
 
   if (isNaN(hours) || isNaN(minutes)) return null;
 
-  const combined = new Date(dateObj);
-  combined.setHours(hours, minutes, seconds, 0);
+  // Construct in VN timezone (UTC+7) so comparisons work regardless of browser locale
+  const combined = new Date(
+    Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), hours - 7, minutes, seconds, 0)
+  );
   return combined;
 }
 

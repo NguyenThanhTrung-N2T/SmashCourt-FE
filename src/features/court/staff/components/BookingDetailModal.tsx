@@ -19,7 +19,7 @@ import {
     getCourtTotal,
     getCancelSourceText,
     getCancelReasonText,
-    getDepositSourceText,
+    getStaffDepositSummary,
 } from "@/src/features/booking/shared/utils/bookingStatus";
 import { formatDate, formatDateTime } from "@/src/shared/utils/date";
 
@@ -227,23 +227,30 @@ export function BookingDetailModal({
                                         <span className="font-black text-foreground">Tổng cộng</span>
                                         <span className="text-base font-black text-primary">{formatCurrency(booking.finalTotal ?? 0)}</span>
                                     </div>
-                                    {booking.depositAmount !== null && booking.depositAmount !== undefined && booking.depositAmount > 0 && (
-                                        <div className="border-t border-border pt-2 space-y-1 text-xs">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-muted">
-                                                    Tiền cọc ({booking.depositRate != null ? `${Math.round(booking.depositRate * 100)}%` : ''})
-                                                    {booking.depositSource && ` • ${getDepositSourceText(booking.depositSource)}`}
-                                                </span>
-                                                <span className="font-semibold text-foreground">{formatCurrency(booking.depositAmount)}</span>
+                                    {(() => {
+                                        const depositSummary = getStaffDepositSummary(booking);
+                                        if (!depositSummary) return null;
+                                        return (
+                                            <div className="border-t border-border pt-2 space-y-1 text-xs">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-muted">
+                                                        {depositSummary.depositLabel}
+                                                        {depositSummary.rateLabel ? ` (${depositSummary.rateLabel})` : ""}
+                                                        {depositSummary.sourceLabel && ` • ${depositSummary.sourceLabel}`}
+                                                    </span>
+                                                    <span className="font-semibold text-foreground">{formatCurrency(depositSummary.depositAmount)}</span>
+                                                </div>
+                                                {depositSummary.remainingLabel && depositSummary.remainingAmount !== null && (
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="font-bold text-foreground">{depositSummary.remainingLabel}</span>
+                                                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                                            {formatCurrency(depositSummary.remainingAmount)}
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div className="flex items-center justify-between">
-                                                <span className="font-bold text-foreground">Còn lại cần thu tại quầy</span>
-                                                <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                                                    {formatCurrency(booking.remainingAmount ?? Math.max(0, (booking.finalTotal ?? 0) - booking.depositAmount))}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    )}
+                                        );
+                                    })()}
 
                                     {/* Refund */}
                                     {booking.refundAmount != null &&
@@ -306,7 +313,7 @@ export function BookingDetailModal({
                                     <div className="rounded-2xl border border-error/30 bg-error/5 px-4 py-3 space-y-1.5 text-xs">
                                         <div className="flex items-center justify-between">
                                             <span className="text-muted">Nguồn hủy</span>
-                                            <span className="font-bold text-foreground">{getCancelSourceText(booking.cancelSource)}</span>
+                                            <span className="font-bold text-foreground">{getCancelSourceText(booking.cancelSource, booking.cancelledByName)}</span>
                                         </div>
                                         {booking.cancelledByName && (
                                             <div className="flex items-center justify-between">

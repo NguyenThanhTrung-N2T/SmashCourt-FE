@@ -212,7 +212,7 @@ export function BookingForm({
       {/* Info Alert */}
       <Alert variant="info" title="Lưu ý">
         Sau khi đặt sân, bạn sẽ được chuyển đến trang thanh toán VNPay. Vui lòng
-        hoàn tất thanh toán trong vòng 10 phút.
+        hoàn tất thanh toán trong thời hạn được hiển thị sau khi đặt.
       </Alert>
 
       {/* Actions */}

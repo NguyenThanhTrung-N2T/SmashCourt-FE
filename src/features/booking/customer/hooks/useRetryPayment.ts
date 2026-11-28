@@ -2,66 +2,101 @@
  * useRetryPayment Hook
  * 
  * Hook for retrying payment on PENDING bookings.
+ * Handles error codes per contract §3.3 & §5 (V5).
  */
 
 import { useState, useCallback } from "react";
 import { retryBookingPayment } from "@/src/api/payment.api";
+import { AuthApiError } from "@/src/api/core";
 import type { RetryPaymentResponseDto } from "../../shared/types/payment.types";
 
+export interface RetryPaymentErrorResolution {
+  message: string;
+  shouldReload: boolean;
+  suggestRebook: boolean;
+}
+
 /**
- * Map backend error messages to user-friendly Vietnamese messages
+ * Pure error mapper for POST /api/me/bookings/{id}/retry-payment (V5, trap #8).
  */
-function getErrorMessage(error: unknown): string {
-  if (!(error instanceof Error)) {
-    return "Không thể tạo liên kết thanh toán";
+export function resolveRetryPaymentError(error: unknown): RetryPaymentErrorResolution {
+  if (error instanceof AuthApiError) {
+    switch (error.code) {
+      case "PAYMENT_HOLD_EXPIRED":
+        return {
+          message:
+            error.message ||
+            "Đã hết thời gian giữ chỗ hoặc không còn đủ thời gian thanh toán, vui lòng đặt lại.",
+          shouldReload: true,
+          suggestRebook: true,
+        };
+      case "BAD_REQUEST":
+        return {
+          message: "Đơn đã hết hạn thanh toán, vui lòng đặt lại.",
+          shouldReload: true,
+          suggestRebook: true,
+        };
+      case "CONFLICT":
+        return {
+          message:
+            error.message || "Trạng thái đơn vừa thay đổi, vui lòng tải lại thông tin.",
+          shouldReload: true,
+          suggestRebook: false,
+        };
+      case "NOT_FOUND":
+        return {
+          message: error.message || "Không tìm thấy đơn đặt sân.",
+          shouldReload: false,
+          suggestRebook: false,
+        };
+      case "FORBIDDEN":
+        return {
+          message: error.message || "Bạn không có quyền thực hiện thao tác này.",
+          shouldReload: false,
+          suggestRebook: false,
+        };
+      default:
+        return {
+          message: error.message || "Không thể tạo liên kết thanh toán",
+          shouldReload: false,
+          suggestRebook: false,
+        };
+    }
   }
 
-  const message = error.message.toLowerCase();
-
-  // Check for specific error patterns from backend
-  if (message.includes("không tìm thấy") || message.includes("not found")) {
-    return "Không tìm thấy đơn đặt sân";
+  if (error instanceof Error) {
+    return {
+      message: error.message || "Không thể tạo liên kết thanh toán",
+      shouldReload: false,
+      suggestRebook: false,
+    };
   }
 
-  if (message.includes("không có quyền") || message.includes("forbidden")) {
-    return "Bạn không có quyền thực hiện thao tác này";
-  }
-
-  if (message.includes("đã hết hạn") || message.includes("expired")) {
-    return "Đơn đặt sân đã hết hạn. Vui lòng tạo đơn mới.";
-  }
-
-  if (message.includes("đã được đặt") || message.includes("already booked")) {
-    return "Sân đã được đặt bởi người khác. Vui lòng tạo đơn mới.";
-  }
-
-  if (message.includes("đang trong quá trình thanh toán") || message.includes("locked")) {
-    return "Sân đang trong quá trình thanh toán. Vui lòng thử lại sau vài phút.";
-  }
-
-  if (message.includes("cancelled") || message.includes("đã hủy")) {
-    return "Không thể thanh toán lại đơn đã hủy. Vui lòng tạo đơn mới.";
-  }
-
-  // Return original message if no pattern matches
-  return error.message || "Không thể tạo liên kết thanh toán";
+  return {
+    message: "Không thể tạo liên kết thanh toán",
+    shouldReload: false,
+    suggestRebook: false,
+  };
 }
 
 export function useRetryPayment() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorMeta, setErrorMeta] = useState<RetryPaymentErrorResolution | null>(null);
 
   const retryPayment = useCallback(
     async (bookingId: string): Promise<RetryPaymentResponseDto | null> => {
       setIsLoading(true);
       setError(null);
+      setErrorMeta(null);
 
       try {
         const result = await retryBookingPayment(bookingId);
         return result;
       } catch (err) {
-        const errorMessage = getErrorMessage(err);
-        setError(errorMessage);
+        const resolution = resolveRetryPaymentError(err);
+        setError(resolution.message);
+        setErrorMeta(resolution);
         return null;
       } finally {
         setIsLoading(false);
@@ -72,12 +107,14 @@ export function useRetryPayment() {
 
   const clearError = useCallback(() => {
     setError(null);
+    setErrorMeta(null);
   }, []);
 
   return {
     retryPayment,
     isLoading,
     error,
+    errorMeta,
     clearError,
   };
 }

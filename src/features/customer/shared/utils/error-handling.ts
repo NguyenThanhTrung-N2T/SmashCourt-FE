@@ -1,28 +1,31 @@
 // Error handling utilities for customer management
 
 const ERROR_CODES: Record<string, string> = {
-  // Customer Management
-  CUSTOMER_NOT_FOUND: 'Khách hàng không tồn tại',
-  CUSTOMER_ALREADY_LOCKED: 'Khách hàng đã bị khóa',
-  CUSTOMER_NOT_LOCKED: 'Khách hàng không bị khóa',
-  CANNOT_LOCK_CUSTOMER: 'Không thể khóa khách hàng này',
-  
-  // Booking
-  BOOKING_NOT_FOUND: 'Booking không tồn tại',
-  NO_BOOKINGS_FOUND: 'Không tìm thấy booking nào',
-  
-  // Loyalty
-  LOYALTY_TRANSACTION_NOT_FOUND: 'Giao dịch điểm thưởng không tồn tại',
-  INSUFFICIENT_LOYALTY_POINTS: 'Không đủ điểm thưởng',
-  
-  // Branch
-  BRANCH_NOT_FOUND: 'Chi nhánh không tồn tại',
-  
-  // Validation
+  // Generic BE ErrorCodes
+  NOT_FOUND: 'Không tìm thấy dữ liệu',
+  FORBIDDEN: 'Bạn không có quyền thực hiện thao tác này',
+  UNAUTHORIZED: 'Phiên đăng nhập đã hết hạn',
+  CONFLICT: 'Dữ liệu vừa được cập nhật, vui lòng tải lại',
+  BAD_REQUEST: 'Yêu cầu không hợp lệ',
   VALIDATION_ERROR: 'Dữ liệu không hợp lệ',
-  INSUFFICIENT_PERMISSIONS: 'Không đủ quyền thực hiện thao tác này',
-  INVALID_DATE_RANGE: 'Khoảng thời gian không hợp lệ',
-  INVALID_STATUS: 'Trạng thái không hợp lệ',
+  ACCOUNT_LOCKED: 'Tài khoản đã bị khóa',
+
+  // User & Customer Management
+  USER_NOT_FOUND: 'Người dùng không tồn tại',
+  USER_ALREADY_LOCKED: 'Tài khoản đã bị khóa',
+  USER_NOT_LOCKED: 'Tài khoản không bị khóa',
+  CANNOT_LOCK_SELF: 'Không thể tự khóa tài khoản của mình',
+
+  // Deposit & Booking
+  BOOKING_REJECTED: 'Rất tiếc, đơn đặt sân này không được chấp nhận',
+  SLOT_UNAVAILABLE: 'Khung giờ đã có người đặt',
+  SLOT_UNAVAILABLE_NOTIFY_REGISTERED: 'Khung giờ đã có người đặt, đã đăng ký thông báo khi trống',
+  PAYMENT_HOLD_EXPIRED: 'Đã hết thời gian giữ chỗ hoặc không đủ thời gian thanh toán',
+  BOOKING_ALREADY_STARTED: 'Đơn đã tới giờ chơi, không thể tự hủy',
+  APPROVAL_EXPIRED: 'Đơn đã hết hạn duyệt',
+  APPROVAL_ALREADY_RESOLVED: 'Đơn đã được xử lý trước đó',
+  BOOKING_NOT_PENDING_APPROVAL: 'Đơn không còn ở trạng thái chờ duyệt',
+  TADSS_UNAVAILABLE: 'Hệ thống duyệt cọc tạm thời không phản hồi',
 };
 
 export function handleApiError(error: unknown): string {

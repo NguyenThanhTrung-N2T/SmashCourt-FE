@@ -29,6 +29,7 @@ import {
   calculateRefundInfo,
   getCancelSourceText,
   getCancelReasonText,
+  getPaidAmountForRefund,
 } from "../../utils/bookingStatus";
 
 interface BookingDetailModalProps {
@@ -65,12 +66,14 @@ export function BookingDetailModal({
     if (!booking?.id) return;
 
     const result = await retryPayment(booking.id || "");
+    if (!result) return;
 
-    if (result?.paymentUrl) {
-      // TODO(6B-2): Handle status branching properly (C1 fix)
+    if (result.status === "PENDING" && result.paymentUrl) {
       window.location.href = result.paymentUrl;
+      return;
     }
-    // Error is handled by the hook and displayed via paymentError state
+
+    onClose();
   };
 
   const handleCancelConfirm = async () => {
@@ -490,15 +493,10 @@ export function BookingDetailModal({
 
         {/* Cancel Confirmation View */}
         {booking && !isLoading && !error && showCancelConfirmation && (() => {
-          const finalTotal = booking.finalTotal ?? booking.finalTotal ?? 0;
           const firstCourt = booking.courts[0];
+          const paidAmount = getPaidAmountForRefund(booking);
 
-          // Determine already paid amount: PAID_ONLINE -> depositAmount (fallback finalTotal); PENDING/CONFIRMED -> 0
-          const paidAmount = booking.status === "PAID_ONLINE"
-            ? (booking.depositAmount ?? finalTotal)
-            : 0;
-
-          // Calculate refund info using dynamic policies on paidAmount (contract §3.4, R-1)
+          // Calculate refund info using dynamic policies on paidAmount (contract §3.4, R-1, V4)
           const refundInfo = firstCourt
             ? calculateRefundInfo(
               booking.bookingDate,
@@ -570,7 +568,15 @@ export function BookingDetailModal({
                 <div className="rounded-lg border-2 border-border bg-surface-2 p-4">
                   <h3 className="font-bold text-foreground mb-3">Thông tin hoàn tiền</h3>
 
-                  {refundInfo.refundAmount > 0 ? (
+                  {paidAmount <= 0 ? (
+                    <p className="text-sm text-muted">
+                      Đơn đặt sân chưa thanh toán nên không phát sinh khoản hoàn tiền.
+                    </p>
+                  ) : policies.length === 0 ? (
+                    <p className="text-sm text-muted">
+                      Không thể tải chính sách hoàn tiền để xem trước. Số tiền hoàn thực tế sẽ được tính theo chính sách hiện hành của chi nhánh.
+                    </p>
+                  ) : refundInfo.refundAmount > 0 ? (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted">Số tiền đã thanh toán</span>

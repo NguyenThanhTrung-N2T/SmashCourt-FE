@@ -69,8 +69,9 @@ export function ApproveBookingDialog({
 
   // Trap #18: Use integer math to prevent floating point inaccuracies
   // (e.g. 7.15 / 100 in JS gives 0.07150000000000001 which BE rejects)
-  const calculatedRate = Math.round(numPercent * 100) / 10000;
-  const calculatedDepositAmount = Math.round(finalTotal * calculatedRate);
+  const basisPoints = Math.round(numPercent * 100);
+  const calculatedRate = basisPoints / 10000;
+  const calculatedDepositAmount = Math.round((finalTotal * basisPoints) / 10000);
   const remainingAmount = Math.max(0, finalTotal - calculatedDepositAmount);
 
   // Trap #19: Code point count for reason validation
@@ -222,7 +223,7 @@ export function ApproveBookingDialog({
           <div className="flex justify-between">
             <span className="text-muted">Khách hàng:</span>
             <span className="font-semibold text-foreground">
-              {booking.customerName} ({booking.customerPhone})
+              {booking.customerName}{booking.customerPhone ? ` (${booking.customerPhone})` : ""}
             </span>
           </div>
           <div className="flex justify-between">

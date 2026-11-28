@@ -61,6 +61,9 @@ export async function authFetch<T>(
 ): Promise<AuthApiSuccess<T>> {
   const url = toUrl(path);
   const headers = new Headers(options.headers);
+  if (!headers.has("ngrok-skip-browser-warning")) {
+    headers.set("ngrok-skip-browser-warning", "true");
+  }
 
   if (options.method !== "GET" && options.body !== undefined) {
     headers.set("Content-Type", "application/json");

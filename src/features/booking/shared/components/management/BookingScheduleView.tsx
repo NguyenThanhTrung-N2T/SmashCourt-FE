@@ -192,6 +192,13 @@ export function BookingScheduleView({
       <div className="flex flex-wrap gap-4 justify-center bg-surface-1 border border-border rounded-xl p-4">
 
         <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-amber-600 border-2 border-amber-700" />
+          <span className="text-xs font-medium text-muted">
+            Chờ duyệt cọc
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-amber-500 border-2 border-amber-600" />
           <span className="text-xs font-medium text-muted">
             Chờ xác nhận

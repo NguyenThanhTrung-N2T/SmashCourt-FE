@@ -106,6 +106,31 @@ export function useBookingSubmit({
           return;
         }
 
+        if (err.status === 429 || err.code === "OTP_LIMIT_EXCEEDED") {
+          const message = "Bạn thao tác đặt sân quá nhanh, vui lòng đợi một lát rồi thử lại.";
+          setError(message);
+          showToast("warning", message);
+          return;
+        }
+
+        if (err.code === "SLOT_UNAVAILABLE_NOTIFY_REGISTERED") {
+          const message =
+            err.message ||
+            "Khung giờ này đã được đặt. Hệ thống đã đăng ký thông báo qua email nếu sân trống lại.";
+          setError(message);
+          showToast("info", message);
+          return;
+        }
+
+        if (err.code === "VALIDATION_ERROR" && err.errors) {
+          const firstFieldError =
+            err.errors.Courts?.[0] ?? Object.values(err.errors).flat()[0];
+          const message = firstFieldError || err.message || "Dữ liệu đầu vào không hợp lệ.";
+          setError(message);
+          showToast("error", message);
+          return;
+        }
+
         const message = err.message || "Yêu cầu không hợp lệ. Vui lòng thử lại.";
         setError(message);
         showToast("error", message);

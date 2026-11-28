@@ -7,13 +7,17 @@
 import {
   BookingStatus,
   InvoicePaymentStatus,
+  type BookingDto,
 } from "../../shared/types/booking.types";
 import {
+  getCancelReasonText,
   toBookingStatusValue,
   toInvoicePaymentStatusValue,
   type BookingStatusInput,
   type InvoicePaymentStatusInput,
 } from "../../shared/utils/bookingStatus";
+
+export { getCancelReasonText };
 
 export interface StatusConfig {
   label: string;
@@ -80,29 +84,6 @@ export function getCancelSourceText(source: string | null | undefined): string {
   }
 }
 
-/**
- * Customer-facing reason for cancellation (contract §2.2, plan §4.5).
- */
-export function getCancelReasonText(reason: string | null | undefined): string | null {
-  switch (reason) {
-    case "PAYMENT_EXPIRED":
-      return "Hết hạn thanh toán";
-    case "APPROVAL_EXPIRED":
-      return "Chi nhánh chưa xác nhận kịp, bạn chưa bị trừ tiền";
-    case "SYSTEM_CLEANUP":
-      return "Đơn chưa hoàn tất, sân đã được trả lại";
-    case "POLICY_REJECTED":
-    case "APPROVAL_REJECTED":
-      return "Không được nhận";
-    case "CUSTOMER_CANCELLED":
-      return "Bạn đã hủy";
-    case "STAFF_CANCELLED":
-      return "Chi nhánh đã hủy";
-    default:
-      return null;
-  }
-}
-
 export function getPaymentStatusConfig(status: InvoicePaymentStatusInput): StatusConfig {
   switch (toInvoicePaymentStatusValue(status)) {
     case InvoicePaymentStatus.UNPAID:
@@ -155,46 +136,49 @@ interface RefundInfo {
 }
 
 /**
- * Calculate refund information based on cancellation policies
+ * Return the amount actually paid online for refund preview calculation (contract §3.4, R-1, V4).
+ * Pre-Phase 6 PAID_ONLINE bookings with depositAmount=null paid 100% (finalTotal).
+ */
+export function getPaidAmountForRefund(
+  booking: Pick<BookingDto, "status" | "depositAmount" | "finalTotal">
+): number {
+  if (toBookingStatusValue(booking.status) !== BookingStatus.PAID_ONLINE) {
+    return 0;
+  }
+  return booking.depositAmount ?? booking.finalTotal ?? 0;
+}
+
+/**
+ * Calculate refund information based on cancellation policies (order-independent, no hardcoded fallback).
  * @param bookingDate - Booking date string
  * @param startTime - Start time string (HH:mm:ss)
- * @param totalAmount - Total amount already paid (contract §3.4, R-1)
- * @param cancelPolicies - Array of cancellation policies from API (sorted by hoursBefore DESC)
+ * @param paidAmount - Total amount already paid (contract §3.4, R-1)
+ * @param cancelPolicies - Array of cancellation policies from API (any order)
  */
 export function calculateRefundInfo(
   bookingDate: string,
   startTime: string,
-  totalAmount: number,
+  paidAmount: number,
   cancelPolicies: Array<{ hoursBefore: number; refundPercent: number }>
 ): RefundInfo {
   const hoursUntilStart = calculateHoursUntil(bookingDate, startTime);
+  const canCancel = hoursUntilStart > 0;
 
-  // Find the applicable policy based on hours until start
-  // Policies should be sorted by hoursBefore in descending order
-  let refundPercent = 0;
+  if (!canCancel || paidAmount <= 0 || !cancelPolicies || cancelPolicies.length === 0) {
+    return { refundPercent: 0, refundAmount: 0, canCancel };
+  }
 
-  if (cancelPolicies && cancelPolicies.length > 0) {
-    // Find the first policy where hoursUntilStart >= hoursBefore
-    const applicablePolicy = cancelPolicies.find(
-      policy => hoursUntilStart >= policy.hoursBefore
-    );
-
-    if (applicablePolicy) {
-      refundPercent = applicablePolicy.refundPercent;
-    }
-  } else {
-    // Fallback to hardcoded policy if API policies not available
-    if (hoursUntilStart >= 24) {
-      refundPercent = 100;
-    } else if (hoursUntilStart >= 12) {
-      refundPercent = 50;
-    } else if (hoursUntilStart >= 6) {
-      refundPercent = 25;
+  let bestPolicy: { hoursBefore: number; refundPercent: number } | null = null;
+  for (const policy of cancelPolicies) {
+    if (hoursUntilStart >= policy.hoursBefore) {
+      if (!bestPolicy || policy.hoursBefore > bestPolicy.hoursBefore) {
+        bestPolicy = policy;
+      }
     }
   }
 
-  const refundAmount = Math.round(totalAmount * refundPercent / 100);
-  const canCancel = hoursUntilStart > 0;
+  const refundPercent = bestPolicy ? bestPolicy.refundPercent : 0;
+  const refundAmount = Math.round((paidAmount * refundPercent) / 100);
 
   return { refundPercent, refundAmount, canCancel };
 }

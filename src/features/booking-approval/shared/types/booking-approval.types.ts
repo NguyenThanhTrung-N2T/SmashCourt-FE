@@ -11,7 +11,7 @@ export interface PendingApprovalBookingDto {
   branchName: string;
   customerId: string | null;
   customerName: string;
-  customerPhone: string;
+  customerPhone: string | null;
   isGuest: boolean;
   loyaltyTierName: string | null;
   bookingDate: string; // "yyyy-MM-dd" (DateOnly)
@@ -19,7 +19,7 @@ export interface PendingApprovalBookingDto {
   endTime: string; // "HH:mm:ss"
   courts: { courtId: string; courtName: string }[];
   finalTotal: number;
-  approvalReasonCode: string;
+  approvalReasonCode: string | null;
   approvalReasons: string[];
   approvalExpiresAt: string; // "dd/MM/yyyy HH:mm:ss" VN time
   createdAt: string; // "dd/MM/yyyy HH:mm:ss" VN time

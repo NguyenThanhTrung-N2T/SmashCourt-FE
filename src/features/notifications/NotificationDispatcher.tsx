@@ -11,6 +11,11 @@ import type {
     BookingNotificationDto,
     PaymentNotificationDto,
 } from "@/src/shared/types/signalr.types";
+import type {
+    BookingPendingApprovalEvent,
+    BookingApprovalResolvedEvent,
+    PendingApprovalQueueChangedEvent,
+} from "@/src/features/booking-approval/shared/types/booking-approval.types";
 import type { NotificationItem } from "@/src/shared/types/notification.types";
 import type { SignalREventName } from "@/src/lib/signalr-events";
 
@@ -148,6 +153,61 @@ export function NotificationDispatcher() {
                 publishRefresh("dashboard", dto);
             };
 
+        const handleBookingPendingApproval = (dto: BookingPendingApprovalEvent) => {
+            const currentUser = getAuthUser();
+            const role = currentUser?.role?.toUpperCase();
+            if (role !== "BRANCH_MANAGER" && role !== "OWNER") return;
+
+            const message = dto.message || `Có đơn chờ duyệt cọc (${dto.bookingCode})`;
+            addNotificationRef.current({
+                id: generateId(),
+                eventType: SignalREvents.BOOKING_PENDING_APPROVAL,
+                category: "booking",
+                title: "Đơn chờ duyệt cọc",
+                message,
+                payload: dto,
+                timestamp: dto.timestamp,
+                read: false,
+            });
+            showToastRef.current("warning", message);
+            publishRefresh("bookings", dto);
+            publishRefresh("dashboard", dto);
+        };
+
+        const handleBookingApprovalResolved = (dto: BookingApprovalResolvedEvent) => {
+            const currentUser = getAuthUser();
+            const role = currentUser?.role?.toUpperCase();
+            const isApproved = dto.approvalResult === "APPROVED";
+            const message =
+                dto.message ||
+                (isApproved
+                    ? `Đơn #${dto.bookingCode} đã được duyệt. Vui lòng thanh toán cọc để giữ chỗ.`
+                    : `Đơn #${dto.bookingCode} không được nhận.`);
+
+            if (role === "CUSTOMER") {
+                addNotificationRef.current({
+                    id: generateId(),
+                    eventType: SignalREvents.BOOKING_APPROVAL_RESOLVED,
+                    category: "booking",
+                    title: isApproved ? "Đơn đã được duyệt" : "Đơn không được nhận",
+                    message,
+                    payload: dto,
+                    timestamp: dto.timestamp,
+                    read: false,
+                });
+                showToastRef.current(isApproved ? "success" : "warning", message);
+            }
+
+            publishRefresh("bookings", dto);
+            publishRefresh("booking-detail", dto);
+            publishRefresh("dashboard", dto);
+        };
+
+        const handlePendingApprovalQueueChanged = (dto: PendingApprovalQueueChangedEvent) => {
+            publishRefresh("bookings", dto);
+            publishRefresh("dashboard", dto);
+        };
+
         // Create handlers once per connection, not per render
         const handlers = {
             [SignalREvents.BOOKING_CREATED]: makeBookingHandler(SignalREvents.BOOKING_CREATED),
@@ -160,6 +220,9 @@ export function NotificationDispatcher() {
             [SignalREvents.BOOKING_UPDATED]: makeBookingHandler(SignalREvents.BOOKING_UPDATED),
             [SignalREvents.BOOKING_PENDING_PAYMENT]: makeBookingHandler(SignalREvents.BOOKING_PENDING_PAYMENT),
             [SignalREvents.BOOKING_NO_SHOW]: makeBookingHandler(SignalREvents.BOOKING_NO_SHOW),
+            [SignalREvents.BOOKING_PENDING_APPROVAL]: handleBookingPendingApproval,
+            [SignalREvents.BOOKING_APPROVAL_RESOLVED]: handleBookingApprovalResolved,
+            [SignalREvents.PENDING_APPROVAL_QUEUE_CHANGED]: handlePendingApprovalQueueChanged,
             [SignalREvents.PAYMENT_SUCCESS]: makePaymentHandler(SignalREvents.PAYMENT_SUCCESS),
             [SignalREvents.PAYMENT_FAILED]: makePaymentHandler(SignalREvents.PAYMENT_FAILED),
         };
